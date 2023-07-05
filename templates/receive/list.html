@@ -1,0 +1,574 @@
+{% extends 'index.html' %} {% block content %} {% load staticfiles %}
+
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Item /</span> List</h4>
+
+        <!-- DataTable with Buttons -->
+        <div class="card">
+            <div class="card-datatable table-responsive pt-0">
+                <table id="tbl-items" class="table">
+                    <thead>
+                        <tr>
+                            
+                            <th>Employee Name</th>
+                            <th>Actual Amount</th>
+                            <th>Final Amount</th>
+                            <th>Status</th>
+                            <th>Date In</th>
+                            <th>Incoming Remarks</th>
+                            <th>Correctness Remarks</th>
+                            <th>Created By</th>
+                            <th>ID</th>
+                          
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Enable OTP Modal -->
+    <div class="modal fade" id="tevDetails" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+          <div class="modal-content p-3 p-md-5">
+            <div class="modal-body">
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <div class="text-center mb-4">
+                <h3 class="mb-2">TEV DETAILS</h3>
+                <p>Correctness of amount/Returned/and Approve</p>
+              </div>
+              <p>Please provide your final amount for the TEV, indicating whether it can be marked as approved or if it needs to be returned due to any issues.</p>
+              <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
+                <div class="col-12">
+                  <label class="form-label" for="modaltevDetails">Final Amount</label>
+                  <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input
+                      type="text"
+                      id="final_amount"
+                      name="FinalAmount"
+                      class="form-control phone-number-otp-mask"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <span id="amount_error" style="color: red;"></span>
+                </div>
+                <div class="col-12">
+                  <label class="form-label" for="modaltevDetails">Correctness Remarks</label>
+                  
+                  <div class="input-group">
+                    <textarea class="form-control" placeholder="Enter remarks (optional if approved)" rows="5" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
+                  </div>
+                  <span id="remarks_error" style="color: red;"></span>
+                </div>
+                <div class="col-12">
+                  <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
+                  <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
+                  <button
+                    type="reset"
+                    class="btn btn-label-secondary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--/ Enable OTP Modal -->
+      
+<!-- Modal to add new record -->
+<div class="offcanvas offcanvas-end" id="add-new-record">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="exampleModalLabel"><p class="title-name">Add Record</p></h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body flex-grow-1">
+        <form class="add-new-record pt-0 row g-2" id="item-form">
+            <input type="hidden" id="item-id" name="ItemID" />
+            <div class="col-sm-12">
+                <label class="form-label" for="employee-name">Employee Name</label>
+                <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
+                    <option></option>
+                    <option value="Reymark N. Valdehueza">Reymark N. Valdehueza</option>
+                    <option value="Marwen A. Valeroso">Marwen A. Valeroso</option>
+                    <option value="Hinata Shoto">Hinata Shoto</option>
+                    <option value="Jason Go">Jason Go</option>
+                   
+                </select>
+
+
+            </div>
+
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-label" for="original-amount">Amount</label>
+                    <input id="original-amount" name="OriginalAmount" class="form-control amount"type="number"placeholder="0.00"/>
+                </div>
+            </div>
+
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-label" for="incoming_remarks">Incoming Remarks</label>
+                    <div class="input-group input-group-merge">
+                        <textarea class="form-control dt-sales-remarks" placeholder="Enter remarks (optional)" rows="6" id="incoming_remarks" name="IncomingRemarks"></textarea>
+                        <span class="input-group-text">
+                          <i class="ti ti-microphone cursor-pointer text-to-speech-toggle"></i>
+                        </span>
+                       
+                      </div>
+
+                   
+                </div>
+            </div>
+            
+            <div class="col-sm-12 mt-4">
+                <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
+                <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %} {% block footer_scripts %}
+<script>
+    let clicked_id = 0;
+    $(document).ready(function () {
+        const table = $('#tbl-items')
+        const ItemFormValidation = document.getElementById('item-form'),
+            EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
+            OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
+            IncomingRemarks = jQuery(document.querySelector('[name="IncomingRemarks"]')),
+            offCanvasElement = document.querySelector('#add-new-record')
+        const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
+        const toast_options = (toastr.options = {
+            maxOpened: 1,
+            autoDismiss: true,
+            closeButton: true,
+            newestOnTop: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            rtl: isRtl,
+      });
+        let ItemID = $('#item-id')
+
+        let dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{% url 'item-load' %}",
+            columns: [
+                { data: 'employee_name' },
+                { data: 'original_amount' },
+                { data: 'final_amount' },
+                { data: 'status' },
+                { data: 'date_in' },
+                { data: 'incoming_remarks' },
+                { data: 'correctness_remarks' },
+                { data: 'user_id' },
+                { data: 'id' },
+                
+                
+            ],
+            columnDefs: [
+                {
+                    targets: 1,
+                    render: function (data) {
+                        return data
+                    },
+                },
+                {
+                  targets: 3,
+                  render: function (data) {
+                      if (data==0){
+                        return '<span class="badge bg-label-warning">Pending</span>'
+                      }
+                      else if(data==1){
+                        return '<span class="badge bg-label-success">Completed</span>'
+                      }
+                      else{
+                        return '<span class="badge bg-label-danger">Returned</span>'
+                      }
+
+                  },
+                },
+                {
+                    targets: -2,
+                    render: function (data) {
+                        return moment(data).format('LLL')
+                    },
+                },
+                {
+                  targets: -1,
+                  title: 'Actions',
+                  orderable: false,
+                  searchable: false,
+                  render: function (data) {
+                      return (
+                          //'<a class="btn btn-sm btn-icon item-details" id="'+data+'" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>'+
+                          '<a href="javascript:;" data-id="' + data + '" class="item-details text-body" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>'+
+                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'+
+                          '<a class="btn btn-sm btn-icon item-delete" id="'+data+'"><i class="text-primary ti ti-trash"></i></a>'
+                  
+                      )
+                  },
+              },
+            ],
+            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            buttons: [
+                {
+                    extend: 'collection',
+                    className: 'btn btn-label-primary dropdown-toggle me-2',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
+                    buttons: [
+                        {
+                            extend: 'print',
+                            text: '<i class="ti ti-printer me-1" ></i>Print',
+                            className: 'dropdown-item',
+                            exportOptions: {
+                                columns: [3, 4, 5, 6, 7],
+                                // prevent avatar to be display
+                                format: {
+                                    body: function (inner, coldex, rowdex) {
+                                        if (inner.length <= 0) return inner
+                                        var el = $.parseHTML(inner)
+                                        var result = ''
+                                        $.each(el, function (index, item) {
+                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                                result = result + item.lastChild.firstChild.textContent
+                                            } else if (item.innerText === undefined) {
+                                                result = result + item.textContent
+                                            } else result = result + item.innerText
+                                        })
+                                        return result
+                                    },
+                                },
+                            },
+                            customize: function (win) {
+                                //customize print view for dark
+                                $(win.document.body)
+                                    .css('color', config.colors.headingColor)
+                                    .css('border-color', config.colors.borderColor)
+                                    .css('background-color', config.colors.bodyBg)
+                                $(win.document.body)
+                                    .find('table')
+                                    .addClass('compact')
+                                    .css('color', 'inherit')
+                                    .css('border-color', 'inherit')
+                                    .css('background-color', 'inherit')
+                            },
+                        },
+                        {
+                            extend: 'csv',
+                            text: '<i class="ti ti-file-text me-1" ></i>Csv',
+                            className: 'dropdown-item',
+                            exportOptions: {
+                                columns: [3, 4, 5, 6, 7],
+                                // prevent avatar to be display
+                                format: {
+                                    body: function (inner, coldex, rowdex) {
+                                        if (inner.length <= 0) return inner
+                                        var el = $.parseHTML(inner)
+                                        var result = ''
+                                        $.each(el, function (index, item) {
+                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                                result = result + item.lastChild.firstChild.textContent
+                                            } else if (item.innerText === undefined) {
+                                                result = result + item.textContent
+                                            } else result = result + item.innerText
+                                        })
+                                        return result
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            extend: 'excel',
+                            text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel',
+                            className: 'dropdown-item',
+                            exportOptions: {
+                                columns: [3, 4, 5, 6, 7],
+                                // prevent avatar to be display
+                                format: {
+                                    body: function (inner, coldex, rowdex) {
+                                        if (inner.length <= 0) return inner
+                                        var el = $.parseHTML(inner)
+                                        var result = ''
+                                        $.each(el, function (index, item) {
+                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                                result = result + item.lastChild.firstChild.textContent
+                                            } else if (item.innerText === undefined) {
+                                                result = result + item.textContent
+                                            } else result = result + item.innerText
+                                        })
+                                        return result
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            extend: 'pdf',
+                            text: '<i class="ti ti-file-description me-1"></i>Pdf',
+                            className: 'dropdown-item',
+                            exportOptions: {
+                                columns: [3, 4, 5, 6, 7],
+                                // prevent avatar to be display
+                                format: {
+                                    body: function (inner, coldex, rowdex) {
+                                        if (inner.length <= 0) return inner
+                                        var el = $.parseHTML(inner)
+                                        var result = ''
+                                        $.each(el, function (index, item) {
+                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                                result = result + item.lastChild.firstChild.textContent
+                                            } else if (item.innerText === undefined) {
+                                                result = result + item.textContent
+                                            } else result = result + item.innerText
+                                        })
+                                        return result
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            extend: 'copy',
+                            text: '<i class="ti ti-copy me-1" ></i>Copy',
+                            className: 'dropdown-item',
+                            exportOptions: {
+                                columns: [3, 4, 5, 6, 7],
+                                // prevent avatar to be display
+                                format: {
+                                    body: function (inner, coldex, rowdex) {
+                                        if (inner.length <= 0) return inner
+                                        var el = $.parseHTML(inner)
+                                        var result = ''
+                                        $.each(el, function (index, item) {
+                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
+                                                result = result + item.lastChild.firstChild.textContent
+                                            } else if (item.innerText === undefined) {
+                                                result = result + item.textContent
+                                            } else result = result + item.innerText
+                                        })
+                                        return result
+                                    },
+                                },
+                            },
+                        },
+                    ],
+                },
+                {
+                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
+                    className: 'create-new btn btn-primary',
+                },
+            ],
+            drawCallback: function (settings) {
+                $('.item-edit').on('click', function () {
+                    let id = $(this).data('id')
+                    $('.title-name').text('Update TEV Record')
+                    $.ajax({
+                        type: 'GET',
+                        url: "{% url 'item-edit' %}?id=" + id,
+                        dataType: 'json',
+                    }).done(function (data) {
+                        if (data.length > 0) {
+                            let fields = data[0].fields
+                            let pk = data[0].pk
+                            let employee_name = $('#employee-name')
+        
+                            EmployeeName.val(fields.employee_name).trigger('change')
+                            OriginalAmount.val(fields.original_amount)
+                            IncomingRemarks.val(fields.incoming_remarks)
+                            
+                            ItemID.val(pk)
+
+                            offCanvasEl.show()
+                        }
+                    })
+                }),
+                $('.item-details').on('click', function () {
+                    clicked_id = $(this).data('id')
+                   // alert(id);
+
+                })
+
+
+            },
+        })
+        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+
+        const newRecord = document.querySelector('.create-new')
+
+        setTimeout(() => {
+            if (newRecord) {
+                newRecord.addEventListener('click', function () {
+                    ItemID.val(0)
+                    $('.title-name').text('Add Tev Record')
+                    EmployeeName.val('').trigger('change')
+                    $('.form-control').val('')
+         
+                    offCanvasEl.show()
+                })
+            }
+        }, 200)
+
+        // Form validation for Add new record
+        const fv = FormValidation.formValidation(ItemFormValidation, {
+            fields: {
+                EmployeeName: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Select Employee',
+                        },
+                    },
+                },
+                OriginalAmount: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Select Amount',
+                        },
+                    },
+                },
+  
+            },
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                submitButton: new FormValidation.plugins.SubmitButton(),
+                autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: (instance) => {
+                instance.on('plugins.message.placed', function (e) {
+                    if (e.element.parentElement.classList.contains('input-group')) {
+                        e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                    }
+                })
+            },
+        }).on('core.form.valid', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, save it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    var form_data = $('#item-form').serialize()
+
+                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
+       
+
+                    $.ajax({
+                        type: 'POST',
+                        url: post_url,
+                        data: form_data,
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Item has been added.',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+
+                            EmployeeName.val("").trigger('change')
+                            OriginalAmount.val("")
+                            IncomingRemarks.val("")
+                            dataTable.ajax.reload()
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            })
+        })
+
+        $('#approved').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 1; 
+              if (final_amount === "") {  
+                $("#amount_error").text("Please enter Amount");
+                $("#remarks_error").text("");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              } else {
+                $("#amount_error").text("");
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+              }
+          });
+          
+          $('#returned').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 2;
+              if (correctness_remarks === "") {
+                $("#amount_error").text("");
+                $("#remarks_error").text("Please enter Remarks for returned.");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              } else {
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+              }
+              
+            });
+
+        function tev_details(amount,remarks,status,emp_id){
+            $.ajax({
+                type: "POST",
+                url: "{% url 'add-tev-details' %}",
+                data:{
+                    final_amount: amount,
+                    correctness_remarks: remarks,
+                    status : status,
+                    transaction_id : emp_id
+                }
+                }).done(function(data){
+                if (data.data == 'success') {
+                    $('#tevDetails').modal('hide');
+                    
+                    toastr.success('Successfully save', 'Success', toast_options);
+
+                
+                    offCanvasEl.hide()
+                } else {
+                    toastr.danger('Data not saved', 'Danger', toast_options);
+                }
+            });
+            }
+
+        if (EmployeeName.length) {
+            EmployeeName.wrap('<div class="position-relative"></div>')
+            EmployeeName.select2({
+                placeholder: 'Choose employee',
+                dropdownParent: EmployeeName.parent(),
+                allowClear: true,
+            })
+        }
+    })
+</script>
+{% endblock footer_scripts %}
