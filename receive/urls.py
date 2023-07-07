@@ -14,5 +14,7 @@ urlpatterns = [
     path('item_update', views.item_update, name='item-update'),
     path('item_add', views.item_add, name='item-add'),
     
+    path('out_pending_tev', views.out_pending_tev, name='out-pending-tev'),
+    
     
 ]

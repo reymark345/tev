@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevList)
+from main.models import (AuthUser, TevIncoming)
 import json 
 from django.core import serializers
 import datetime
@@ -20,14 +20,14 @@ from django.core.serializers import serialize
 def list(request):
     print("testtt11")
     context = {
-		'employee_list' : TevList.objects.filter().order_by('employee_name'),
+		'employee_list' : TevIncoming.objects.filter().order_by('name'),
 	}
     return render(request, 'receive/list.html', context)
 
 
 def item_load(request):
     
-    item_data = TevList.objects.select_related().order_by('-date_in').reverse()
+    item_data = TevIncoming.objects.select_related().order_by('-incoming_in').reverse()
     total = item_data.count()
     
     print("giloadddddnahhh")
@@ -54,15 +54,16 @@ def item_load(request):
 
         item = {
             'id': item.id,
-            'employee_name': item.employee_name,
+            'code': item.code,
+            'name': item.name,
+            'id_no': item.id_no,
             'original_amount': item.original_amount,
             'final_amount': item.final_amount,
+            'incoming_in': item.incoming_in,
+            'incoming_out': item.incoming_out,
+            'slashed_out': item.incoming_out,
+            'remarks': item.remarks,
             'status': item.status,
-            'incoming_remarks': item.incoming_remarks,
-            'correctness_remarks': item.correctness_remarks,
-            'date_in': item.date_in,
-            'date_out': item.date_out,
-            'deleted_at': item.deleted_at,
             'user_id': full_name
         }
 
@@ -79,7 +80,7 @@ def item_load(request):
 
 def item_edit(request):
     id = request.GET.get('id')
-    items = TevList.objects.get(pk=id)
+    items = TevIncoming.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
@@ -90,7 +91,7 @@ def item_update(request):
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
     remarks = request.POST.get('IncomingRemarks')
-    tev_update = TevList.objects.filter(id=list_id).update(employee_name=emp_name,original_amount=amount,incoming_remarks=remarks)
+    tev_update = TevIncoming.objects.filter(id=list_id).update(employee_name=emp_name,original_amount=amount,incoming_remarks=remarks)
     
     return JsonResponse({'data': 'success'})
 
@@ -118,12 +119,10 @@ def item_update(request):
 def item_add(request):
     employeename = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
-    remarks = request.POST.get('IncomingRemarks')
+    remarks = request.POST.get('Remarks')
     user_id = request.session.get('user_id', 0)
-    
-    tev_add = TevList(employee_name=employeename,original_amount=amount,incoming_remarks=remarks,user_id=user_id)
+    tev_add = TevIncoming(name=employeename,original_amount=amount,remarks=remarks,user_id=user_id)
     tev_add.save()
-    
     return JsonResponse({'data': 'success'})
 
 
@@ -131,16 +130,22 @@ def item_add(request):
 @csrf_exempt
 def tracking(request):
     context = {
-		'employee_list' : TevList.objects.filter().order_by('employee_name'),
+		'employee_list' : TevIncoming.objects.filter().order_by('employee_name'),
 	}
     return render(request, 'receive/tracking.html', context)
+
+
+@csrf_exempt
+def out_pending_tev(request):
+
+    return JsonResponse({'data': 'success'})
 
 
 
 @csrf_exempt
 def tevemployee(request):
     tev_id = request.POST.get('tev_id')
-    qs_object = TevList.objects.filter(id=tev_id).first()
+    qs_object = TevIncoming.objects.filter(id=tev_id).first()
     if qs_object:
         data = serializers.serialize('json', [qs_object])
         return JsonResponse({'data': data})
@@ -155,7 +160,7 @@ def addtev(request):
     remarks = request.POST.get('remarks')
     user_id = request.session.get('user_id', 0)
     
-    tev_add = TevList(employee_name=employeename,original_amount=amount,incoming_remarks=remarks,user_id=user_id)
+    tev_add = TevIncoming(employee_name=employeename,original_amount=amount,incoming_remarks=remarks,user_id=user_id)
     tev_add.save()
 
     return JsonResponse({'data': 'success'})
@@ -176,6 +181,6 @@ def addtevdetails(request):
     print(status)
     print(transaction_id)
     
-    tev_update = TevList.objects.filter(id=transaction_id).update(final_amount=amount,correctness_remarks =remarks,status=status)
+    tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,correctness_remarks =remarks,status=status)
 
     return JsonResponse({'data': 'success'})

@@ -12,17 +12,15 @@
                 <table id="tbl-items" class="table">
                     <thead>
                         <tr>
-                            
+                            <th><input type="checkbox" id="check-all"></th>
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
                             <th>Final Amount</th>
                             <th>Status</th>
-                            <th>Date In</th>
-                            <th>Incoming Remarks</th>
-                            <th>Correctness Remarks</th>
+                            <th>Incoming In</th>
+                            <th>Remarks</th>
                             <th>Created By</th>
                             <th>ID</th>
-                          
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -115,18 +113,17 @@
                 </div>
             </div>
 
+
             <div class="col-sm-12">
                 <div class="form-group">
-                    <label class="form-label" for="incoming_remarks">Incoming Remarks</label>
+                    <label class="form-label" for="remarks">Remarks</label>
                     <div class="input-group input-group-merge">
-                        <textarea class="form-control dt-sales-remarks" placeholder="Enter remarks (optional)" rows="6" id="incoming_remarks" name="IncomingRemarks"></textarea>
+                        <textarea class="form-control dt-sales-remarks" placeholder="Enter remarks (optional)" rows="6" id="remarks" name="Remarks"></textarea>
                         <span class="input-group-text">
                           <i class="ti ti-microphone cursor-pointer text-to-speech-toggle"></i>
                         </span>
                        
                       </div>
-
-                   
                 </div>
             </div>
             
@@ -146,7 +143,7 @@
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
-            IncomingRemarks = jQuery(document.querySelector('[name="IncomingRemarks"]')),
+            Remarks = jQuery(document.querySelector('[name="Remarks"]')),
             offCanvasElement = document.querySelector('#add-new-record')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
@@ -165,27 +162,33 @@
             serverSide: true,
             ajax: "{% url 'item-load' %}",
             columns: [
-                { data: 'employee_name' },
-                { data: 'original_amount' },
-                { data: 'final_amount' },
+                {
+                    data: 'id',
+                    orderable: false,
+                    render: function (data) {
+                        // Render a checkbox for each row with the item ID as its value
+                        return '<input type="checkbox" value="' + data + '">';
+                    }
+                },
+                { data: 'name' },
+                { data: 'original_amount'},
+                { data: 'final_amount'},
                 { data: 'status' },
-                { data: 'date_in' },
-                { data: 'incoming_remarks' },
-                { data: 'correctness_remarks' },
+                { data: 'incoming_in' },
+                { data: 'remarks' },
                 { data: 'user_id' },
                 { data: 'id' },
-                
-                
+
             ],
             columnDefs: [
                 {
-                    targets: 1,
+                    targets: 2,
                     render: function (data) {
                         return data
                     },
                 },
                 {
-                  targets: 3,
+                  targets: 4,
                   render: function (data) {
                       if (data==0){
                         return '<span class="badge bg-label-warning">Pending</span>'
@@ -212,7 +215,6 @@
                   searchable: false,
                   render: function (data) {
                       return (
-                          //'<a class="btn btn-sm btn-icon item-details" id="'+data+'" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>'+
                           '<a href="javascript:;" data-id="' + data + '" class="item-details text-body" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>'+
                           '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'+
                           '<a class="btn btn-sm btn-icon item-delete" id="'+data+'"><i class="text-primary ti ti-trash"></i></a>'
@@ -224,145 +226,29 @@
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
                 {
-                    extend: 'collection',
-                    className: 'btn btn-label-primary dropdown-toggle me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
-                    buttons: [
-                        {
-                            extend: 'print',
-                            text: '<i class="ti ti-printer me-1" ></i>Print',
-                            className: 'dropdown-item',
-                            exportOptions: {
-                                columns: [3, 4, 5, 6, 7],
-                                // prevent avatar to be display
-                                format: {
-                                    body: function (inner, coldex, rowdex) {
-                                        if (inner.length <= 0) return inner
-                                        var el = $.parseHTML(inner)
-                                        var result = ''
-                                        $.each(el, function (index, item) {
-                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
-                                                result = result + item.lastChild.firstChild.textContent
-                                            } else if (item.innerText === undefined) {
-                                                result = result + item.textContent
-                                            } else result = result + item.innerText
-                                        })
-                                        return result
-                                    },
-                                },
-                            },
-                            customize: function (win) {
-                                //customize print view for dark
-                                $(win.document.body)
-                                    .css('color', config.colors.headingColor)
-                                    .css('border-color', config.colors.borderColor)
-                                    .css('background-color', config.colors.bodyBg)
-                                $(win.document.body)
-                                    .find('table')
-                                    .addClass('compact')
-                                    .css('color', 'inherit')
-                                    .css('border-color', 'inherit')
-                                    .css('background-color', 'inherit')
-                            },
-                        },
-                        {
-                            extend: 'csv',
-                            text: '<i class="ti ti-file-text me-1" ></i>Csv',
-                            className: 'dropdown-item',
-                            exportOptions: {
-                                columns: [3, 4, 5, 6, 7],
-                                // prevent avatar to be display
-                                format: {
-                                    body: function (inner, coldex, rowdex) {
-                                        if (inner.length <= 0) return inner
-                                        var el = $.parseHTML(inner)
-                                        var result = ''
-                                        $.each(el, function (index, item) {
-                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
-                                                result = result + item.lastChild.firstChild.textContent
-                                            } else if (item.innerText === undefined) {
-                                                result = result + item.textContent
-                                            } else result = result + item.innerText
-                                        })
-                                        return result
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            extend: 'excel',
-                            text: '<i class="ti ti-file-spreadsheet me-1"></i>Excel',
-                            className: 'dropdown-item',
-                            exportOptions: {
-                                columns: [3, 4, 5, 6, 7],
-                                // prevent avatar to be display
-                                format: {
-                                    body: function (inner, coldex, rowdex) {
-                                        if (inner.length <= 0) return inner
-                                        var el = $.parseHTML(inner)
-                                        var result = ''
-                                        $.each(el, function (index, item) {
-                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
-                                                result = result + item.lastChild.firstChild.textContent
-                                            } else if (item.innerText === undefined) {
-                                                result = result + item.textContent
-                                            } else result = result + item.innerText
-                                        })
-                                        return result
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            extend: 'pdf',
-                            text: '<i class="ti ti-file-description me-1"></i>Pdf',
-                            className: 'dropdown-item',
-                            exportOptions: {
-                                columns: [3, 4, 5, 6, 7],
-                                // prevent avatar to be display
-                                format: {
-                                    body: function (inner, coldex, rowdex) {
-                                        if (inner.length <= 0) return inner
-                                        var el = $.parseHTML(inner)
-                                        var result = ''
-                                        $.each(el, function (index, item) {
-                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
-                                                result = result + item.lastChild.firstChild.textContent
-                                            } else if (item.innerText === undefined) {
-                                                result = result + item.textContent
-                                            } else result = result + item.innerText
-                                        })
-                                        return result
-                                    },
-                                },
-                            },
-                        },
-                        {
-                            extend: 'copy',
-                            text: '<i class="ti ti-copy me-1" ></i>Copy',
-                            className: 'dropdown-item',
-                            exportOptions: {
-                                columns: [3, 4, 5, 6, 7],
-                                // prevent avatar to be display
-                                format: {
-                                    body: function (inner, coldex, rowdex) {
-                                        if (inner.length <= 0) return inner
-                                        var el = $.parseHTML(inner)
-                                        var result = ''
-                                        $.each(el, function (index, item) {
-                                            if (item.classList !== undefined && item.classList.contains('user-name')) {
-                                                result = result + item.lastChild.firstChild.textContent
-                                            } else if (item.innerText === undefined) {
-                                                result = result + item.textContent
-                                            } else result = result + item.innerText
-                                        })
-                                        return result
-                                    },
-                                },
-                            },
-                        },
-                    ],
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
+                    action: function () {
+                        // Get the IDs of checked items
+                        var selectedItems = [];
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+            
+                        if(selectedItems.length ===0){
+                            alert("Please select item first");
+                        }
+                        else{
+                            incoming_out(selectedItems);
+                        }
+                    }
                 },
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Filter</span>',
+                },
+
+            
                 {
                     text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
                     className: 'create-new btn btn-primary',
@@ -384,7 +270,7 @@
         
                             EmployeeName.val(fields.employee_name).trigger('change')
                             OriginalAmount.val(fields.original_amount)
-                            IncomingRemarks.val(fields.incoming_remarks)
+                            Remarks.val(fields.remarks)
                             
                             ItemID.val(pk)
 
@@ -392,11 +278,23 @@
                         }
                     })
                 }),
+                $('#tbl-items tbody input[type="checkbox"]').change(function () {
+                    // Do something when a checkbox in the table body is changed...
+                });
+
+                $('#check-all').change(function () {
+                    // Get the checked state of the "check-all" checkbox
+                    var isChecked = $(this).is(':checked');
+        
+                    // Set the checked state of all checkboxes in the table body
+                    $('#tbl-items tbody input[type="checkbox"]').prop('checked', isChecked);
+                });
+
                 $('.item-details').on('click', function () {
                     clicked_id = $(this).data('id')
                    // alert(id);
 
-                })
+                });
 
 
             },
@@ -435,7 +333,6 @@
                         },
                     },
                 },
-  
             },
             plugins: {
                 trigger: new FormValidation.plugins.Trigger(),
@@ -465,10 +362,8 @@
             }).then(function (result) {
                 if (result.value) {
                     var form_data = $('#item-form').serialize()
-
                     let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
        
-
                     $.ajax({
                         type: 'POST',
                         url: post_url,
@@ -486,7 +381,7 @@
 
                             EmployeeName.val("").trigger('change')
                             OriginalAmount.val("")
-                            IncomingRemarks.val("")
+                            Remarks.val("")
                             dataTable.ajax.reload()
                         } else {
                             Swal.fire({
@@ -501,7 +396,57 @@
                     })
                 }
             })
-        })
+        });
+        function incoming_out(selected_items){
+            Swal.fire({
+                title: 'Out Tev?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, mark as out!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
+       
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'out-pending-tev' %}",
+                        data:{
+                            out_list: selected_items
+                        }
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Item has been added.',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+
+                            dataTable.ajax.reload()
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            })
+
+        }
+
 
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();
