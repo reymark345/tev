@@ -15,6 +15,7 @@ urlpatterns = [
     path('item_add', views.item_add, name='item-add'),
     
     path('out_pending_tev', views.out_pending_tev, name='out-pending-tev'),
+    path('tev_details', views.tev_details, name='tev-details'),
     
     
 ]

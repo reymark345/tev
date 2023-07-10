@@ -13,6 +13,7 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="check-all"></th>
+                            <th>Transaction Code</th>
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
                             <th>Final Amount</th>
@@ -57,7 +58,7 @@
                   <span id="amount_error" style="color: red;"></span>
                 </div>
                 <div class="col-12">
-                  <label class="form-label" for="modaltevDetails">Correctness Remarks</label>
+                  <label class="form-label" for="modaltevDetails">Remarks</label>
                   
                   <div class="input-group">
                     <textarea class="form-control" placeholder="Enter remarks (optional if approved)" rows="5" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
@@ -170,6 +171,7 @@
                         return '<input type="checkbox" value="' + data + '">';
                     }
                 },
+                { data: 'code' },
                 { data: 'name' },
                 { data: 'original_amount'},
                 { data: 'final_amount'},
@@ -182,28 +184,31 @@
             ],
             columnDefs: [
                 {
-                    targets: 2,
+                    targets: 3,
                     render: function (data) {
                         return data
                     },
                 },
                 {
-                  targets: 4,
+                  targets: 5,
                   render: function (data) {
-                      if (data==0){
+                      if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
                       }
-                      else if(data==1){
-                        return '<span class="badge bg-label-success">Completed</span>'
+                      else if(data==2){
+                        return '<span class="badge bg-label-success">Ongoing</span>'
+                      }
+                      else if(data==3){
+                        return '<span class="badge bg-label-danger">Returned</span>'
                       }
                       else{
-                        return '<span class="badge bg-label-danger">Returned</span>'
+                        return '<span class="badge bg-label-success">For payroll</span>'
                       }
 
                   },
                 },
                 {
-                    targets: -2,
+                    targets: -4,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
@@ -236,7 +241,7 @@
                         });
             
                         if(selectedItems.length ===0){
-                            alert("Please select item first");
+                            toastr.error('Select item first', 'Invalid', toast_options);
                         }
                         else{
                             incoming_out(selectedItems);
@@ -248,7 +253,6 @@
                     text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Filter</span>',
                 },
 
-            
                 {
                     text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
                     className: 'create-new btn btn-primary',
@@ -268,12 +272,10 @@
                             let pk = data[0].pk
                             let employee_name = $('#employee-name')
         
-                            EmployeeName.val(fields.employee_name).trigger('change')
-                            OriginalAmount.val(fields.original_amount)
-                            Remarks.val(fields.remarks)
-                            
-                            ItemID.val(pk)
-
+                            EmployeeName.val(fields.name).trigger('change');
+                            OriginalAmount.val(fields.original_amount);
+                            Remarks.val(fields.remarks);
+                            ItemID.val(pk);
                             offCanvasEl.show()
                         }
                     })
@@ -291,9 +293,19 @@
                 });
 
                 $('.item-details').on('click', function () {
-                    clicked_id = $(this).data('id')
-                   // alert(id);
-
+                    clicked_id = $(this).data('id');
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'tev-details' %}",
+                        data:{
+                            tev_id: clicked_id
+                        }
+                    }).done(function (data) {
+                        let value = data.data.remarks;
+                        let final_amount = data.data.final_amount;
+                        $("#final_amount").val(final_amount);
+                        $("#correctness_remarks").val(value);
+                    })
                 });
 
 
@@ -371,18 +383,25 @@
                     }).done(function (data) {
                         if (data.data == 'success') {
                             Swal.fire({
-                                icon: 'success',
-                                title: 'Successfully save!',
-                                text: 'Item has been added.',
+                                title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                icon: 'info',
+                                html:
+                                  'Successfully <b>Save!</b>',
+                                showCloseButton: true,
+                                showCancelButton: false,
+                                focusConfirm: false,
+                                confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                confirmButtonAriaLabel: 'Thumbs up, great!',
                                 customClass: {
-                                    confirmButton: 'btn btn-success',
+                                  confirmButton: 'btn btn-primary me-3'
                                 },
-                            })
+                                buttonsStyling: false
+                              });
 
                             EmployeeName.val("").trigger('change')
                             OriginalAmount.val("")
                             Remarks.val("")
-                            dataTable.ajax.reload()
+                            dataTable.ajax.reload();
                         } else {
                             Swal.fire({
                                 icon: 'error',
@@ -451,7 +470,7 @@
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
-            let status = 1; 
+            let status = 4; 
               if (final_amount === "") {  
                 $("#amount_error").text("Please enter Amount");
                 $("#remarks_error").text("");
@@ -468,7 +487,7 @@
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
-            let status = 2;
+            let status = 3;
               if (correctness_remarks === "") {
                 $("#amount_error").text("");
                 $("#remarks_error").text("Please enter Remarks for returned.");
@@ -488,18 +507,16 @@
                 url: "{% url 'add-tev-details' %}",
                 data:{
                     final_amount: amount,
-                    correctness_remarks: remarks,
+                    remarks: remarks,
                     status : status,
                     transaction_id : emp_id
                 }
                 }).done(function(data){
                 if (data.data == 'success') {
                     $('#tevDetails').modal('hide');
-                    
                     toastr.success('Successfully save', 'Success', toast_options);
-
-                
                     offCanvasEl.hide()
+                    dataTable.ajax.reload()
                 } else {
                     toastr.danger('Data not saved', 'Danger', toast_options);
                 }
