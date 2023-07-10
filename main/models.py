@@ -113,27 +113,50 @@ class DjangoSession(models.Model):
         managed = False
         db_table = 'django_session'
         
-        
-
-class TevList(models.Model):
-    employee_name = models.CharField(max_length=128,blank=True, null=True)
-    original_amount = models.FloatField(null=True, blank=True, default=0)
-    final_amount = models.FloatField(null=True, blank=True, default=0)
-    status = models.IntegerField(default=0,blank=True, null=True)
-    incoming_remarks = models.CharField(max_length=255, blank=True, null=True)
-    correctness_remarks = models.CharField(max_length=255, blank=True, null=True)
-    date_in = models.DateTimeField(default=datetime.now,blank=True, null=True)
-    date_out = models.DateTimeField(blank=True, null=True)
-    deleted_at = models.DateTimeField(blank=True, null=True)
-    user_id = models.BigIntegerField(blank=True, null=True)
+class TevIncoming(models.Model):
+    code = models.CharField(max_length=128, blank=True, null=True)
+    name = models.CharField(max_length=128, blank=True, null=True)
+    id_no = models.CharField(max_length=128, blank=True, null=True)
+    original_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True)
+    final_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True)
+    incoming_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    incoming_out = models.DateTimeField(blank=True, null=True)
+    slashed_out = models.DateTimeField(blank=True, null=True)
+    remarks = models.CharField(max_length=128, blank=True, null=True)
+    purpose = models.CharField(max_length=255, blank=True, null=True)
+    status = models.IntegerField(max_length=128, blank=True, null=True,default=1)
+    user_id = models.CharField(max_length=128, blank=True, null=True)
     
     class Meta:
         managed = True
-        db_table = 'tev_list'
+        db_table = 'tev_incoming'
         
+class TevOutgoing(models.Model):
+    dv_no = models.CharField(max_length=128, blank=True, null=True)
+    cluster = models.CharField(max_length=128, blank=True, null=True)
+    responsibility_center = models.CharField(max_length=128, blank=True, null=True)
+    box_date_out = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    box_b_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    box_b_out = models.DateTimeField(blank=True, null=True)
+    box_c_out = models.DateTimeField(blank=True, null=True)
+    ard_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    ard_out = models.DateTimeField(blank=True, null=True)
+    user_id = models.CharField(max_length=128, blank=True, null=True)
+    
+    class Meta:
+        managed = True
+        db_table = 'tev_outgoing'
         
+class tev_bridge(models.Model):
+    tev_incoming_id = models.ForeignKey(TevIncoming, models.DO_NOTHING)
+    tev_outgoing_id = models.ForeignKey(TevOutgoing, models.DO_NOTHING)
+    charge = models.CharField(max_length=128, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'tev_bridge'
+       
 class StaffDetails(models.Model):
-    id = models.BigAutoField(primary_key=True)
     division = models.CharField(max_length=128, blank=True, null=True)
     section = models.CharField(max_length=128, blank=True, null=True)
     position = models.CharField(max_length=128, blank=True, null=True)
@@ -144,8 +167,27 @@ class StaffDetails(models.Model):
     user_id = models.BigIntegerField(unique=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'staff_details'
+        
+class Status(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'status'
+        
+class SystemConfiguration(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    transaction_code = models.CharField(max_length=128, blank=True, null=True)
+    year = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True, auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'system_configuration'
         
         
 
