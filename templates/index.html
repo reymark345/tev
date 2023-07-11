@@ -119,6 +119,12 @@
                                 <div data-i18n="List">List</div>
                             </a>
                         </li>
+                        <li class="menu-item {% if url_name == 'receive-checking' %}active{% endif %}">
+                            <a href="{% url 'receive-checking' %}" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-layout-sidebar"></i>
+                                <div data-i18n="Checking">Checking</div>
+                            </a>
+                        </li>
                         <li class="menu-item {% if url_name == 'receive-tracking' %}active{% endif %}">
                             <a href="{% url 'receive-tracking' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti ti-checkbox"></i>

@@ -18,4 +18,8 @@ urlpatterns = [
     path('tev_details', views.tev_details, name='tev-details'),
     
     
+    
+    path('checking', views.checking, name='receive-checking'),
+    
+    
 ]

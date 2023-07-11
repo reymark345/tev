@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails)
 import json 
 from django.core import serializers
 import datetime 
@@ -18,7 +18,8 @@ from django.core.serializers import serialize
 from django.forms.models import model_to_dict
 
 
-
+def get_user_details(request):
+    return StaffDetails.objects.filter(user_id=request.user.id).first()
 
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
@@ -34,26 +35,51 @@ def generate_code():
         series = int(last_code[2]) + 1
 
     code = year + '-' + month + '-' + f'{series:05d}'
-    
-    print("last_code")
-    print(last_code)
-    print("code")
-    print(code)
 
     return code
 
 
-@csrf_exempt
+
+@login_required(login_url='login')
 def list(request):
-    context = {
-		'employee_list' : TevIncoming.objects.filter().order_by('name'),
-	}
-    return render(request, 'receive/list.html', context)
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'receive/list.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def checking(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'receive/checking.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
 
 
 def item_load(request):
     
-    item_data = TevIncoming.objects.select_related().order_by('-incoming_in').reverse()
+    idn = request.GET.get('identifier')
+    if idn =="1":
+        retrieve =[1,3]
+    elif idn =="2":
+        retrieve =[2,3]
+    else:
+        retrieve =[1,2,3]
+       
+    item_data = TevIncoming.objects.filter(status__in=retrieve).select_related().order_by('-incoming_in').reverse()
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -107,11 +133,16 @@ def item_edit(request):
 
 @csrf_exempt
 def item_update(request):
-    list_id = request.GET.get('id')
+    id = request.POST.get('ItemID')
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
-    remarks = request.POST.get('IncomingRemarks')
-    tev_update = TevIncoming.objects.filter(id=list_id).update(employee_name=emp_name,original_amount=amount,incoming_remarks=remarks)
+    remarks = request.POST.get('Remarks')
+    print("Testtttdada")
+    print(id)
+    print(emp_name)
+    print(amount)
+    print(remarks)
+    tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
     
@@ -146,7 +177,7 @@ def out_pending_tev(request):
     out_list = request.POST.getlist('out_list[]')
     
     for item_id  in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).update(status=1,incoming_out=datetime.datetime.now())
+        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=datetime.datetime.now())
     
     return JsonResponse({'data': 'success'})
 
@@ -192,12 +223,6 @@ def addtevdetails(request):
     remarks = request.POST.get('remarks')
     status = request.POST.get('status')
     transaction_id = request.POST.get('transaction_id')
-    
-    print("amountsss")
-    print(amount)
-    print(remarks)
-    print(status)
-    print(transaction_id)
     
     if amount =='':
         amount = 0
