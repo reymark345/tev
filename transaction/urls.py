@@ -9,7 +9,7 @@ urlpatterns = [
     path('tevemployee', views.tevemployee, name='tev-employee'),
     path('tracking', views.tracking, name='receive-tracking'),
     
-    path('item_load', views.item_load, name='item-load'),
+    path('payroll_load', views.payroll_load, name='payroll-load'),
     path('item_edit', views.item_edit, name='item-edit'),
     path('item_update', views.item_update, name='item-update'),
     path('item_add', views.item_add, name='item-add'),
@@ -18,7 +18,7 @@ urlpatterns = [
     path('out_pending_tev', views.out_pending_tev, name='out-pending-tev'),
     path('tev_details', views.tev_details, name='tev-details'),
 
-    path('checking', views.checking, name='receive-checking'),
+    path('transaction_payroll', views.transaction_payroll, name='transaction-payroll'),
     
     
 ]

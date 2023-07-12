@@ -39,8 +39,6 @@ def generate_code():
 
     return code
 
-
-
 @login_required(login_url='login')
 def list(request):
     user_details = get_user_details(request)
@@ -52,6 +50,21 @@ def list(request):
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/list.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+    
+@login_required(login_url='login')
+def transaction_payroll(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'transaction/list.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
@@ -70,7 +83,7 @@ def checking(request):
         return render(request, 'pages/unauthorized.html')
 
 
-def item_load(request):
+def payroll_load(request):
     
     idn = request.GET.get('identifier')
     if idn =="1":
@@ -80,12 +93,7 @@ def item_load(request):
     else:
         retrieve =[1,2,3,4]
        
-       
-    
-    # item_data = TevIncoming.objects.filter(status__in=retrieve).select_related().values_list('code', flat=True).order_by('-incoming_in').reverse()
-    
-    
-    item_data = (TevIncoming.objects.filter(status__in=retrieve).select_related().distinct().order_by('-id').reverse())
+    item_data = (TevIncoming.objects.filter(status=4).select_related().distinct().order_by('-id').reverse())
     
 
     

@@ -19,6 +19,7 @@
                             <th>Final Amount</th>
                             <th>Status</th>
                             <th>Incoming In</th>
+                            <th>Slashed Out</th>
                             <th>Remarks</th>
                             <th>Created By</th>
                             <th>ID</th>
@@ -170,11 +171,18 @@
             },
             columns: [
                 {
-                    data: 'id',
+                    data: 'id', status: 'status',
                     orderable: false, 
-                    render: function (data) {
-                        // Render a checkbox for each row with the item ID as its value
-                        return '<input type="checkbox" value="' + data + '">';
+                    render: function (data, type, row) {
+                        var status = row.status; // Access the 'status' value from the 'row' object
+
+                        if (status == 2) {
+                            return '<input type="checkbox" disabled="disabled">';
+                        } else {
+                            // Render a checkbox for each row with the item ID as its value
+                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
+                        }
+
                     }
                 },
                 { data: 'code' },
@@ -183,6 +191,7 @@
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'incoming_in' },
+                { data: 'slashed_out' },
                 { data: 'remarks' },
                 { data: 'user_id' },
                 { data: 'id' },
@@ -232,9 +241,15 @@
                   },
                 },
                 {
-                    targets: -4,
+                    targets: -5,
                     render: function (data) {
                         return moment(data).format('LLL')
+                    },
+                },
+                {
+                    targets: -4,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
                 {
@@ -293,7 +308,7 @@
                     var isChecked = $(this).is(':checked');
         
                     // Set the checked state of all checkboxes in the table body
-                    $('#tbl-items tbody input[type="checkbox"]').prop('checked', isChecked);
+                    $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
                 });
 
                 $('.item-details').on('click', function () {
