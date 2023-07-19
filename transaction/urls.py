@@ -3,7 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('list', views.list, name='receive-list'),
+    path('list', views.list, name='transaction-list'),
     path('addtev', views.addtev, name='add-tev'),
     path('addtevdetails', views.addtevdetails, name='add-tev-details'),
     path('tevemployee', views.tevemployee, name='tev-employee'),
@@ -18,7 +18,7 @@ urlpatterns = [
     path('out_pending_tev', views.out_pending_tev, name='out-pending-tev'),
     path('tev_details', views.tev_details, name='tev-details'),
 
-    path('transaction_payroll', views.transaction_payroll, name='transaction-payroll'),
+    path('payroll', views.list_payroll, name='transaction-payroll'),
     
     
 ]

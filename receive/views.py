@@ -16,6 +16,7 @@ from django.db import IntegrityError
 import math
 from django.core.serializers import serialize
 from django.forms.models import model_to_dict
+import requests
 
 
 
@@ -51,9 +52,23 @@ def list(request):
             'employee_list' : TevIncoming.objects.filter().order_by('name'),
             'role_permission' : role.role_name,
         }
-        return render(request, 'receive/list.html', context)
+        return render(request, 'receive/list.html' , context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+    
+    
+@csrf_exempt
+def api(request):
+    url = "https://caraga-portal.dswd.gov.ph/api/employee/list/search/?q="
+    headers = {
+        "Authorization": "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
+    }
+    response = requests.get(url, headers=headers)
+    data = response.json()
+    print(data)
+    print("testdawa")
+    return JsonResponse({'data': data})
     
 @login_required(login_url='login')
 def checking(request):
@@ -86,12 +101,6 @@ def item_load(request):
     
     
     item_data = (TevIncoming.objects.filter(status__in=retrieve).select_related().distinct().order_by('-id').reverse())
-    
-
-    
-    
-    print("testing")
-
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -106,14 +115,7 @@ def item_load(request):
     data = []
 
     for item in item_data:
-        
-        print(item.code)
-        
-        
-        
-        
         userData = AuthUser.objects.filter(id=item.user_id)
-        
         full_name = userData[0].first_name + ' ' + userData[0].last_name
 
         item = {

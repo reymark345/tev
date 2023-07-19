@@ -46,14 +46,7 @@
                 <label class="form-label" for="employee-name">Employee Name</label>
                 <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
                     <option></option>
-                    <option value="Reymark N. Valdehueza">Reymark N. Valdehueza</option>
-                    <option value="Marwen A. Valeroso">Marwen A. Valeroso</option>
-                    <option value="Hinata Shoto">Hinata Shoto</option>
-                    <option value="Jason Go">Jason Go</option>
-                   
                 </select>
-
-
             </div>
 
             <div class="col-sm-12">
@@ -90,6 +83,7 @@
     let clicked_id = 0;
     let status_val =0;
     $(document).ready(function () {
+        employeelist();
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
@@ -285,6 +279,7 @@
                         }
                     })
                 }),
+
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
                     // Do something when a checkbox in the table body is changed...
                 });
@@ -326,7 +321,7 @@
                 newRecord.addEventListener('click', function () {
                     ItemID.val(0)
                     $('.title-name').text('Add Tev Record')
-                    EmployeeName.val('').trigger('change')
+                    EmployeeName.val('').trigger('change').prop("disabled", false);
                     $('.form-control').val('')
          
                     offCanvasEl.show()
@@ -450,6 +445,29 @@
                 }
             })
         });
+
+        function employeelist(){
+            console.log("pumasok");
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'receive-api' %}",
+                dataType: 'json',
+            }).done(function (data) {
+                let fields = data.data; // Access the 'data' array
+                var $selectElement = $('#employee-name'); // Select the element using its ID
+                $selectElement.empty();
+                
+                // Iterate over the 'fields' array
+                $.each(fields, function (index, employee) {
+                    let firstName = employee.first_name;
+                    let middleName = employee.middle_name;
+                    let middleInitial = middleName.charAt(0);
+                    let lastName = employee.last_name;
+                    let $option = $('<option></option>').val(firstName + " " + middleInitial +" "+ lastName).text(firstName +" "+ middleInitial+"." +" "+ lastName);
+                    $selectElement.append($option);
+                });  
+            })
+        }
         function incoming_out(selected_items){
             Swal.fire({
                 title: 'Mark as Out?',
@@ -565,6 +583,9 @@
                 allowClear: true,
             })
         }
+        
+
+
     })
 </script>
 {% endblock footer_scripts %}

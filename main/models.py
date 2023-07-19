@@ -147,14 +147,26 @@ class TevOutgoing(models.Model):
         managed = True
         db_table = 'tev_outgoing'
         
+class Charges(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'charges'
+        
 class tev_bridge(models.Model):
-    tev_incoming_id = models.ForeignKey(TevIncoming, models.DO_NOTHING)
-    tev_outgoing_id = models.ForeignKey(TevOutgoing, models.DO_NOTHING)
-    charge = models.CharField(max_length=128, blank=True, null=True)
+    tev_incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)
+    tev_outgoing = models.ForeignKey(TevOutgoing, models.DO_NOTHING)
+    charges = models.ForeignKey(Charges, models.DO_NOTHING)
+    purpose = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = True
         db_table = 'tev_bridge'
+        
+
         
 class RoleDetails(models.Model):
     role_name =  models.CharField(max_length=128, blank=True, null=True)
@@ -199,6 +211,14 @@ class SystemConfiguration(models.Model):
     class Meta:
         managed = True
         db_table = 'system_configuration'
+        
+class Cluster(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'cluster'
         
         
 

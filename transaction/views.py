@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges)
 import json 
 from django.core import serializers
 import datetime 
@@ -46,22 +46,26 @@ def list(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
             'role_permission' : role.role_name,
+            'cluster' : Cluster.objects.filter().order_by('name'),
         }
+        
+        print("clusterdaw")
+        print(Cluster.objects.filter().order_by('name'))
         return render(request, 'receive/list.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
     
 @login_required(login_url='login')
-def transaction_payroll(request):
+def list_payroll(request):
     user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'charges' : Charges.objects.filter().order_by('name'),
+            'cluster' : Cluster.objects.filter().order_by('name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'transaction/list.html', context)
@@ -113,13 +117,7 @@ def payroll_load(request):
 
     data = []
 
-    for item in item_data:
-        
-        print(item.code)
-        
-        
-        
-        
+    for item in item_data: 
         userData = AuthUser.objects.filter(id=item.user_id)
         
         full_name = userData[0].first_name + ' ' + userData[0].last_name

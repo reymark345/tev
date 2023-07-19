@@ -18,8 +18,8 @@
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Incoming In</th>
-                            <th>Created By</th>
-                            <th>ID</th>
+                            <th>Charges</th>
+                            <th>Purpose</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -28,6 +28,65 @@
         </div>
     </div>
 </div>
+
+
+
+<!-- Add New Credit Card Modal -->
+<div class="modal fade" id="saveModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered1 modal-simple modal-add-new-cc">
+    <div class="modal-content p-3 p-md-5">
+    <div class="modal-body">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="text-center mb-4">
+        <h3 class="mb-2">Assign Details</h3>
+        <p class="text-muted">Update data to complete payroll detail</p>
+        </div>
+        <form id="addNewCCForm" class="row g-3" onsubmit="return false">
+        <div class="col-12">
+            <label class="form-label w-100" for="modalAddCard">DV Number</label>
+            <div class="input-group input-group-merge">
+            <input
+                id="modalAddCard"
+                name="modalAddCard"
+                class="form-control"
+                type="text"
+                placeholder="23-07-0000"
+               
+            />
+            <span class="input-group-text cursor-pointer p-1" id="modalAddCard2"
+                ><span class="card-type"></span
+            ></span>
+            </div>
+        </div>
+
+        <div class="col-sm-12">
+            <label class="form-label" for="employee-name">Cluster</label>
+            <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
+                <option></option>
+                {% for row in cluster %}
+                <option value="{{ row.id }}">{{ row.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+       
+
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+            <button
+            type="reset"
+            class="btn btn-label-secondary btn-reset"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            >
+            Cancel
+            </button>
+        </div>
+        </form>
+    </div>
+    </div>
+</div>
+</div>
+<!--/ Add New Credit Card Modal -->
 
       
 <!-- Modal to add new record -->
@@ -136,8 +195,32 @@
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'incoming_in' },
-                { data: 'user_id' },
-                { data: 'id' },
+                {
+                    render: function(data, type, row) {
+                      if (type === 'display') {
+
+                        return '<select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">'+
+                                    '<option></option>'+
+                                    '{% for row in charges %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endfor %}'+
+                                '</select>';
+                      }
+                    }
+                },
+                {
+                    render: function(data, type, row) {
+                      if (type === 'display') {
+                        let currentDate = new Date();
+                        let month = currentDate.getMonth();
+                        let monthDate = new Date(currentDate.getFullYear(), month);
+                        let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
+                        let year = currentDate.getFullYear();
+                        return '<input type="text" class="form-control" id="basic-default-name" placeholder="" value ="TE for '+monthName+ " "+ year +'" />';
+                      }
+                      return data;
+                    }
+                },
 
             ],
             columnDefs: [
@@ -172,29 +255,11 @@
                   },
                 },
                 {
-                    targets: -3,
+                    targets: -4,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
-                {
-                    targets: -2,
-                    render: function (data) {
-                        return data
-                    },
-                },
-                {
-                  targets: -1,
-                  title: 'Actions',
-                  orderable: false,
-                  searchable: false,
-                  render: function (data) {
-                      return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'+
-                          '<a class="btn btn-sm btn-icon item-delete" id="'+data+'"><i class="text-primary ti ti-trash"></i></a>'
-                      )
-                  },
-              },
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
@@ -221,11 +286,26 @@
                     }
                 },
 
-
                 {
-                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                    className: 'create-new btn btn-primary',
+                    className: 'btn btn-primary',
+                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Save</span>',
+                    action: function () {
+                        // Get the IDs of checked items
+                        var selectedItems = [];
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+                        if(selectedItems.length ===0){
+                            toastr.error('Select item first', 'Invalid', toast_options);
+                        }
+                        else{
+                            savepayroll(selectedItems);
+                        }
+                    }
                 },
+
+
+     
             ],
             drawCallback: function (settings) {
                 $('.item-edit').on('click', function () {
@@ -473,6 +553,12 @@
                     })
                 }
             })
+
+        }
+
+        function savepayroll(selected_items){
+            $('#saveModal').modal('show');
+
 
         }
 
