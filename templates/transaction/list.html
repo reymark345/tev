@@ -146,6 +146,7 @@
     let clicked_id = 0;
     let status_val =0;
     $(document).ready(function () {
+        let selected_tev = [];
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
@@ -185,7 +186,7 @@
                             return '<input type="checkbox" disabled="disabled">';
                         } else {
                             // Render a checkbox for each row with the item ID as its value
-                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
+                            return '<input type="checkbox" id="checkbox_data" class="checkbox-items checkbox_data" name = "checkboxtype" value="' + data + '">';
                         }
 
                     }
@@ -199,12 +200,12 @@
                     render: function(data, type, row) {
                       if (type === 'display') {
 
-                        return '<select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">'+
-                                    '<option></option>'+
-                                    '{% for row in charges %}'+
-                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                    '{% endfor %}'+
-                                '</select>';
+                        return '<select id="charges" name="Charges" class="form-select employee" data-allow-clear="true" disabled>'+
+                            '<option></option>'+
+                            '{% for row in charges %}'+
+                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                            '{% endfor %}'+
+                        '</select>';
                       }
                     }
                 },
@@ -216,7 +217,7 @@
                         let monthDate = new Date(currentDate.getFullYear(), month);
                         let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
                         let year = currentDate.getFullYear();
-                        return '<input type="text" class="form-control" id="basic-default-name" placeholder="" value ="TE for '+monthName+ " "+ year +'" />';
+                        return '<input type="text" class="form-control" id="basic-default-name" placeholder="" value ="TE for '+monthName+ " "+ year +' disabled" />';
                       }
                       return data;
                     }
@@ -255,7 +256,7 @@
                   },
                 },
                 {
-                    targets: -4,
+                    targets: -3,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
@@ -346,11 +347,13 @@
                 });
 
                 $('#check-all').change(function () {
+
                     // Get the checked state of the "check-all" checkbox
                     var isChecked = $(this).is(':checked');
         
                     // Set the checked state of all checkboxes in the table body
-                    $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+
+                    $('#tbl-items tbody input[type="checkbox"][id="checkbox_data"]').prop('checked', isChecked);
                 });
 
                 $('.item-details').on('click', function () {
@@ -558,9 +561,56 @@
 
         function savepayroll(selected_items){
             $('#saveModal').modal('show');
-
-
         }
+
+
+        $(document).on('click', '.checkbox_data', function(event) {
+   
+            var grid = document.getElementById("tbl-items");
+  
+            var checkBoxes = $(`input[name=checkboxtype]`);
+            var str = '';
+            var clickedCheckbox = $(event.target);
+            if (clickedCheckbox.prop('checked')) {
+           
+                for (var i = 0; i < checkBoxes.length; i++) {
+                  if (checkBoxes[i].checked) {
+                        var row = checkBoxes[i].parentNode.parentNode;
+                        var stck_id = checkBoxes[i].id.slice(2);
+          
+                        var array_id = {
+                          id: stck_id,
+                          code: row.cells[1].innerHTML,
+                          name: row.cells[2].innerHTML,
+                          amount: row.cells[3].innerHTML,
+                          status: row.cells[4].innerHTML,
+                          charges: $(row.cells[6]).find('select').val(),
+                          purpose: $(row.cells[7]).find('input').val()
+                        }
+                        selected_tev.push(array_id);
+                        console.log(array_id);
+
+                        $(row).find('select[name="Charges"]').prop('disabled', false);
+                      }
+                }
+              }
+              else{
+                var uncheckedId = clickedCheckbox.attr('id').slice(2);
+                selected_tev = selected_tev.filter(function(item) {
+                    return item.id !== uncheckedId;
+                });
+          
+                console.log(selected_tev);
+            }
+          
+            unique_items = selected_tev.filter(function(item, index, self) {
+                return index === self.findIndex(function(i) {
+                  return i.id === item.id;
+                });
+            });
+          });
+
+
 
 
         $('#approved').click(function() {
