@@ -212,12 +212,7 @@
                 {
                     render: function(data, type, row) {
                       if (type === 'display') {
-                        let currentDate = new Date();
-                        let month = currentDate.getMonth();
-                        let monthDate = new Date(currentDate.getFullYear(), month);
-                        let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
-                        let year = currentDate.getFullYear();
-                        return '<input type="text" class="form-control" id="basic-default-name" placeholder="" value ="TE for '+monthName+ " "+ year +' disabled" />';
+                        return '<input type="text" class="form-control" id="basic-default-name" name="Purpose" disabled />';
                       }
                       return data;
                     }
@@ -571,19 +566,26 @@
             var checkBoxes = $(`input[name=checkboxtype]`);
             var str = '';
             var clickedCheckbox = $(event.target);
+
+            let currentDate = new Date();
+            let month = currentDate.getMonth();
+            let monthDate = new Date(currentDate.getFullYear(), month);
+            let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
+            let year = currentDate.getFullYear();
+
             if (clickedCheckbox.prop('checked')) {
            
                 for (var i = 0; i < checkBoxes.length; i++) {
                   if (checkBoxes[i].checked) {
                         var row = checkBoxes[i].parentNode.parentNode;
-                        var stck_id = checkBoxes[i].id.slice(2);
+                        var stck_id = checkBoxes[i].defaultValue;
           
                         var array_id = {
                           id: stck_id,
                           code: row.cells[1].innerHTML,
                           name: row.cells[2].innerHTML,
                           amount: row.cells[3].innerHTML,
-                          status: row.cells[4].innerHTML,
+                          status: row.cells[4].innerText,
                           charges: $(row.cells[6]).find('select').val(),
                           purpose: $(row.cells[7]).find('input').val()
                         }
@@ -591,16 +593,19 @@
                         console.log(array_id);
 
                         $(row).find('select[name="Charges"]').prop('disabled', false);
+                        $(row).find('input[name="Purpose"]').prop('disabled', false).val("TE for" + monthName + " " + year);
                       }
                 }
               }
-              else{
-                var uncheckedId = clickedCheckbox.attr('id').slice(2);
-                selected_tev = selected_tev.filter(function(item) {
-                    return item.id !== uncheckedId;
-                });
-          
-                console.log(selected_tev);
+            else{
+                for (var i = 0; i < checkBoxes.length; i++) {
+                    if (!checkBoxes[i].checked) {
+                          var row = checkBoxes[i].parentNode.parentNode;
+                          var stck_id = checkBoxes[i].id.slice(2);
+                          $(row).find('select[name="Charges"]').prop('disabled', true).val('');;
+                          $(row).find('input[name="Purpose"]').prop('disabled', true).val('');
+                        }
+                  }
             }
           
             unique_items = selected_tev.filter(function(item, index, self) {
@@ -610,26 +615,6 @@
             });
           });
 
-
-
-
-        $('#approved').click(function() {
-            let final_amount = $("#final_amount").val().trim();
-            let correctness_remarks = $("#correctness_remarks").val().trim();
-            let status = 4; 
-              if (final_amount === "") {  
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-              } else {
-                $("#amount_error").text("");
-                $("#remarks_error").text("");
-                $(".input-group").removeClass("has-error");
-                tev_details(final_amount,correctness_remarks,status,clicked_id);
-              }
-          });
-          
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
