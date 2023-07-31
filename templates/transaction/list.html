@@ -41,13 +41,13 @@
         <h3 class="mb-2">Assign Details</h3>
         <p class="text-muted">Update data to complete payroll detail</p>
         </div>
-        <form id="addNewCCForm" class="row g-3" onsubmit="return false">
+        <form id="assign-form" class="row g-3" onsubmit="return false">
         <div class="col-12">
             <label class="form-label w-100" for="modalAddCard">DV Number</label>
             <div class="input-group input-group-merge">
             <input
-                id="modalAddCard"
-                name="modalAddCard"
+                id="dvnumber"
+                name="DvNumber"
                 class="form-control"
                 type="text"
                 placeholder="23-07-0000"
@@ -61,7 +61,7 @@
 
         <div class="col-sm-12">
             <label class="form-label" for="employee-name">Cluster</label>
-            <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
+            <select id="cluster" name="Cluster" class="form-select employee" data-allow-clear="true">
                 <option></option>
                 {% for row in cluster %}
                 <option value="{{ row.id }}">{{ row.name }}</option>
@@ -152,7 +152,12 @@
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
-            offCanvasElement = document.querySelector('#add-new-record')
+            offCanvasElement = document.querySelector('#add-new-record');
+
+        const ItemFormAssignValidation = document.getElementById('assign-form'),
+            DvNumber = jQuery(document.querySelector('[name="DvNumber"]')),
+            Cluster = jQuery(document.querySelector('[name="Cluster"]'));
+
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
             maxOpened: 1,
@@ -388,6 +393,124 @@
             }
         }, 200)
 
+        //form assign record
+            const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
+                fields: {
+                    DvNumber: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Please Select Dv number',
+                            },
+                        },
+                    },
+                    Cluster: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Please Select Cluster',
+                            },
+                        },
+                    },
+                },
+                plugins: {
+                    trigger: new FormValidation.plugins.Trigger(),
+                    bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                    submitButton: new FormValidation.plugins.SubmitButton(),
+                    autoFocus: new FormValidation.plugins.AutoFocus(),
+                },
+                init: (instance) => {
+                    instance.on('plugins.message.placed', function (e) {
+                        if (e.element.parentElement.classList.contains('input-group')) {
+                            e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                        }
+                    })
+                },
+            }).on('core.form.valid', function () {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, save it!',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-3',
+                        cancelButton: 'btn btn-label-secondary',
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (result.value) {
+                        var form_data = $('#assign-form').serialize()
+    
+                        //post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
+    
+                        //if (status_val ==3){
+                            //  post_url = "{% url 'item-update' %}";
+                        // }
+                        // else if (ItemID.val() !== '0') {
+                        //     post_url = "{% url 'item-update' %}";
+                        // } 
+                        // else {
+                        //     post_url = "{% url 'item-add' %}";
+                        // }
+    
+                        //let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
+                        
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'assign-payroll' %}",
+                            data: form_data,
+                        }).done(function (data) {
+                            if (data.data == 'success') {
+    
+                                let code = data.g_code;
+                                if (code){
+                                    Swal.fire({
+                                        title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                        icon: 'info',
+                                        html:
+                                            'Successfully <b>Save!</b>',
+                                        showCloseButton: true,
+                                        showCancelButton: false,
+                                        focusConfirm: false,
+                                        confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!',
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary me-3'
+                                        },
+                                        buttonsStyling: false
+                                        });
+                                }
+                                else{
+                                    offCanvasEl.hide()
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Update Successfully!',
+                                        html:
+                                        'Successfully <b>Save!</b>',
+                                        customClass: {
+                                            confirmButton: 'btn btn-success',
+                                        },
+                                    })
+                                }
+                                EmployeeName.val("").trigger('change')
+                                OriginalAmount.val("")
+                                Remarks.val("")
+                                dataTable.ajax.reload();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error saving!',
+                                    text: data.message,
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                            }
+                        })
+                    }
+                })
+            });
+    
+
         // Form validation for Add new record
         const fv = FormValidation.formValidation(ItemFormValidation, {
             fields: {
@@ -504,6 +627,8 @@
                 }
             })
         });
+
+
         function incoming_out(selected_items){
             Swal.fire({
                 title: 'Mark as Out?',

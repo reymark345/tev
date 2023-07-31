@@ -156,7 +156,7 @@ class Charges(models.Model):
         managed = True
         db_table = 'charges'
         
-class tev_bridge(models.Model):
+class TevBridge(models.Model):
     tev_incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)
     tev_outgoing = models.ForeignKey(TevOutgoing, models.DO_NOTHING)
     charges = models.ForeignKey(Charges, models.DO_NOTHING)

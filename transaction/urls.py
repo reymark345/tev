@@ -19,6 +19,10 @@ urlpatterns = [
     path('tev_details', views.tev_details, name='tev-details'),
 
     path('payroll', views.list_payroll, name='transaction-payroll'),
+    path('assign_payroll', views.assign_payroll, name='assign-payroll'),
+
+
+    
     
     
 ]

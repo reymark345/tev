@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing)
 import json 
 from django.core import serializers
 import datetime 
@@ -72,10 +72,38 @@ def list_payroll(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
+
+@login_required(login_url='login')
+@csrf_exempt
+def assign_payroll(request):
+    if role.role_name in allowed_roles:
+        user_details = get_user_details(request)
+        allowed_roles = ["Admin", "Payroll staff"] 
+
+        dvnumber = request.POST.get('DvNumber')
+        cluster = request.POST.get('Cluster')
+        user_id = request.session.get('user_id', 0)
+
+        role = RoleDetails.objects.filter(id=user_details.role_id).first()
+
+        payroll = TevOutgoing(dv_no=dvnumber,cluster=cluster,user_id=user_id)
+        payroll.save()
+
+        context = {
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'transaction/list.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')    
+
+
+
+    
 @login_required(login_url='login')
 def checking(request):
     user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
