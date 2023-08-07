@@ -76,6 +76,9 @@ def list_payroll(request):
 @login_required(login_url='login')
 @csrf_exempt
 def assign_payroll(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         user_details = get_user_details(request)
         allowed_roles = ["Admin", "Payroll staff"] 
@@ -83,6 +86,16 @@ def assign_payroll(request):
         dvnumber = request.POST.get('DvNumber')
         cluster = request.POST.get('Cluster')
         user_id = request.session.get('user_id', 0)
+        
+        data = json.loads(request.body.decode('utf-8'))
+        form_data = data['form_data']
+        selected_tev = data['selected_tev']
+        
+        form_data = data['form_data']
+        print("selected_tev")
+        print(selected_tev)
+        
+        print("form_data")
 
         role = RoleDetails.objects.filter(id=user_details.role_id).first()
 
