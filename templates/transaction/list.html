@@ -681,10 +681,14 @@
 
         }
 
-        function savepayroll(selected_items){
+        function savepayroll(selected_items) {
+
+        
             console.log(selected_tev);
             $('#saveModal').modal('show');
         }
+        
+        
 
 
         $(document).on("change", ".purpose", function() {
@@ -737,12 +741,14 @@
               var purposeInput = $(row.cells[7]).find("input");
               var purposeValue = purposeInput.val().trim();
               var stck_id = checkBoxes[i].defaultValue;
+              var purposeval = $(row.cells[7]).find("input").val();
           
               if (checkBox.checked) {
                 var existingItem = selected_tev.find(function(item) {
                   return item.id === checkboxId;
                 });
-          
+                
+             
                 if (!existingItem) {
                   var array_id = {
                     id: stck_id,
@@ -751,10 +757,11 @@
                     amount: row.cells[3].innerHTML,
                     status: row.cells[4].innerText,
                     charges: $(row.cells[6]).find("select").val(),
-                    purpose: purposeValue || defaultPurposeValue, // Use custom value or default value if purposeValue is empty
+                    purpose: purposeval,
+                   // purpose: purposeValue || defaultPurposeValue, // Use custom value or default value if purposeValue is empty
                   };
                   selected_tev.push(array_id);
-                  console.log(array_id);
+                  
                 } else {
                   existingItem.purpose = purposeValue;
                 }
