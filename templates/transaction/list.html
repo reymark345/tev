@@ -440,26 +440,15 @@
                     buttonsStyling: false,
                 }).then(function (result) {
                     if (result.value) {
-                        var form_data = $('#assign-form').serialize()
-    
-                        //post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-    
-                        //if (status_val ==3){
-                            //  post_url = "{% url 'item-update' %}";
-                        // }
-                        // else if (ItemID.val() !== '0') {
-                        //     post_url = "{% url 'item-update' %}";
-                        // } 
-                        // else {
-                        //     post_url = "{% url 'item-add' %}";
-                        // }
-    
-                        //let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
-                        
+                        var form_data = $('#assign-form').serialize();
+                        var requestData = {
+                            form_data: form_data,
+                            selected_tev: selected_tev
+                        };
                         $.ajax({
                             type: 'POST',
                             url: "{% url 'assign-payroll' %}",
-                            data: form_data,
+                            data: JSON.stringify(requestData),
                         }).done(function (data) {
                             if (data.data == 'success') {
     
@@ -702,25 +691,29 @@
         $(document).on("change", ".charges", function() {
             var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
             var chargesValue = $(this).val();
+
+
             
             var existingItem = selected_tev.find(function(item) {
                 return item.id === checkboxId;
             });
             
             if (existingItem) {
-                existingItem.type = chargesValue;
+                existingItem.charges = chargesValue;
                 console.log("Updated type for item with ID:", checkboxId, "New type:", chargesValue);
             } else {
                 console.log("Item not found in the selected_tev array.");
             }
         });
 
-
         $(document).on('click', '.checkbox_data', function(event) {
-            var grid = document.getElementById("tbl-items");
-            var checkBoxes = $(`input[name=checkboxtype]`);
-            var str = '';
             var clickedCheckbox = $(event.target);
+            var row = clickedCheckbox.closest('tr'); // Get the parent row of the clicked checkbox
+            var checkboxId = clickedCheckbox.attr('id');
+            var purposeInput = row.find('input[name="Purpose"]');
+            var purposeValue = purposeInput.val().trim();
+            var stck_id = clickedCheckbox.val();
+           
           
             let currentDate = new Date();
             let month = currentDate.getMonth();
@@ -728,61 +721,58 @@
             let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
             let year = currentDate.getFullYear();
           
-            let defaultPurposeValue = "TE for" + monthName + " " + year;
+            let defaultPurposeValue = "TE for " + monthName + " " + year;
           
-            for (var i = 0; i < checkBoxes.length; i++) {
-              var checkBox = checkBoxes[i];
-              var row = checkBox.parentNode.parentNode;
-              var checkboxId = checkBox.id;
-              var purposeInput = $(row.cells[7]).find("input");
-              var purposeValue = purposeInput.val().trim();
-              var stck_id = checkBoxes[i].defaultValue;
-          
-              if (checkBox.checked) {
+            if (clickedCheckbox.prop('checked')) {
                 var existingItem = selected_tev.find(function(item) {
-                  return item.id === checkboxId;
+                    return item.id === checkboxId;
                 });
           
                 if (!existingItem) {
-                  var array_id = {
-                    id: stck_id,
-                    code: row.cells[1].innerHTML,
-                    name: row.cells[2].innerHTML,
-                    amount: row.cells[3].innerHTML,
-                    status: row.cells[4].innerText,
-                    charges: $(row.cells[6]).find("select").val(),
-                    purpose: purposeValue || defaultPurposeValue, // Use custom value or default value if purposeValue is empty
-                  };
-                  selected_tev.push(array_id);
-                  console.log(array_id);
+                    var array_id = {
+                        id: stck_id,
+                        code: row.find('td:eq(1)').text(),
+                        name: row.find('td:eq(2)').text(),
+                        amount: row.find('td:eq(3)').text(),
+                        status: row.find('td:eq(4)').text(),
+                        charges: row.find('select[name="Charges"]').val(),
+                        purpose: purposeValue || defaultPurposeValue,
+                    };
+                    selected_tev.push(array_id);
+                    console.log(array_id);
                 } else {
-                  existingItem.purpose = purposeValue;
+                    existingItem.purpose = purposeValue;
+                    console.log(existingItem);
                 }
           
-                $(row).find('select[name="Charges"]').prop("disabled", false);
+                row.find('select[name="Charges"]').prop("disabled", false);
                 purposeInput.prop("disabled", false);
           
-                // Set default value only if purpose input is empty
                 if (!purposeValue) {
-                  purposeInput.val(defaultPurposeValue);
+                    purposeInput.val(defaultPurposeValue);
                 }
-              } else {
-                $(row).find('select[name="Charges"]').prop("disabled", true).val("");
+            } else {
+                var index = selected_tev.findIndex(function(item) {
+                    return item.id === checkboxId;
+                });
+                if (index !== -1) {
+                    selected_tev.splice(index, 1);
+                }
+          
+                row.find('select[name="Charges"]').prop("disabled", true).val("");
                 purposeInput.prop("disabled", true).val("");
-              }
             }
           
             unique_items = selected_tev.filter(function(item, index, self) {
-              return (
-                index ===
-                self.findIndex(function(i) {
-                  return i.id === item.id;
-                })
-              );
+                return (
+                    index ===
+                    self.findIndex(function(i) {
+                        return i.id === item.id;
+                    })
+                );
             });
-          });
-          
-
+        });
+        
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
