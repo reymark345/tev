@@ -670,14 +670,10 @@
 
         }
 
-        function savepayroll(selected_items) {
-
-        
+        function savepayroll(selected_items){
             console.log(selected_tev);
             $('#saveModal').modal('show');
         }
-        
-        
 
 
         $(document).on("change", ".purpose", function() {
@@ -727,27 +723,12 @@
           
             let defaultPurposeValue = "TE for " + monthName + " " + year;
           
-<<<<<<< HEAD
             if (clickedCheckbox.prop('checked')) {
-=======
-            for (var i = 0; i < checkBoxes.length; i++) {
-              var checkBox = checkBoxes[i];
-              var row = checkBox.parentNode.parentNode;
-              var checkboxId = checkBox.id;
-              var purposeInput = $(row.cells[7]).find("input");
-              var purposeValue = purposeInput.val().trim();
-              var stck_id = checkBoxes[i].defaultValue;
-              var purposeval = $(row.cells[7]).find("input").val();
-          
-              if (checkBox.checked) {
->>>>>>> 43c8babe37e4d8206c7a77204972afb2d0754cac
                 var existingItem = selected_tev.find(function(item) {
                     return item.id === checkboxId;
                 });
-                
-             
+          
                 if (!existingItem) {
-<<<<<<< HEAD
                     var array_id = {
                         id: stck_id,
                         code: row.find('td:eq(1)').text(),
@@ -759,20 +740,6 @@
                     };
                     selected_tev.push(array_id);
                     console.log(array_id);
-=======
-                  var array_id = {
-                    id: stck_id,
-                    code: row.cells[1].innerHTML,
-                    name: row.cells[2].innerHTML,
-                    amount: row.cells[3].innerHTML,
-                    status: row.cells[4].innerText,
-                    charges: $(row.cells[6]).find("select").val(),
-                    purpose: purposeval,
-                   // purpose: purposeValue || defaultPurposeValue, // Use custom value or default value if purposeValue is empty
-                  };
-                  selected_tev.push(array_id);
-                  
->>>>>>> 43c8babe37e4d8206c7a77204972afb2d0754cac
                 } else {
                     existingItem.purpose = purposeValue;
                     console.log(existingItem);
