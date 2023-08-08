@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge)
 import json 
 from django.core import serializers
 import datetime 
@@ -16,6 +16,7 @@ from django.db import IntegrityError
 import math
 from django.core.serializers import serialize
 from django.forms.models import model_to_dict
+from urllib.parse import parse_qs
 
 
 
@@ -82,30 +83,41 @@ def assign_payroll(request):
     if role.role_name in allowed_roles:
         user_details = get_user_details(request)
         allowed_roles = ["Admin", "Payroll staff"] 
-
-        dvnumber = request.POST.get('DvNumber')
-        cluster = request.POST.get('Cluster')
-        user_id = request.session.get('user_id', 0)
-        
-        data = json.loads(request.body.decode('utf-8'))
-        form_data = data['form_data']
-        selected_tev = data['selected_tev']
-        
-        form_data = data['form_data']
-        print("selected_tev")
-        print(selected_tev)
-        
-        print("form_data")
-
-        role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
-        payroll = TevOutgoing(dv_no=dvnumber,cluster=cluster,user_id=user_id)
-        payroll.save()
-
         context = {
             'role_permission' : role.role_name,
         }
         return render(request, 'transaction/list.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')    
+    
+    
+@login_required(login_url='login')
+@csrf_exempt
+def save_payroll(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        user_details = get_user_details(request)
+        allowed_roles = ["Admin", "Payroll staff"] 
+        user_id = request.session.get('user_id', 0)
+        formdata = request.POST.get('form_data')
+        formdata_dict = parse_qs(formdata)
+        cluster_name = formdata_dict.get('Cluster', [None])[0]
+        dv_number = formdata_dict.get('DvNumber', [None])[0]
+        selected_tev = json.loads(request.POST.get('selected_item'))
+        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_name,box_b_in=datetime.datetime.now(),user_id=user_id)
+        outgoing.save()
+        latest_outgoing = TevOutgoing.objects.latest('id')
+        for item in selected_tev:
+            obj, was_created_bool = TevBridge.objects.get_or_create(
+                tev_incoming_id=item['id'],
+                tev_outgoing_id=latest_outgoing.id,
+                purpose=item['purpose'],
+                charges_id=item['charges']
+            )
+                
+        return JsonResponse({'data': 'success'})
     else:
         return render(request, 'pages/unauthorized.html')    
 

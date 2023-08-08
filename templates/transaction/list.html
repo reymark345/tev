@@ -441,14 +441,17 @@
                 }).then(function (result) {
                     if (result.value) {
                         var form_data = $('#assign-form').serialize();
+
                         var requestData = {
                             form_data: form_data,
                             selected_tev: selected_tev
                         };
                         $.ajax({
                             type: 'POST',
-                            url: "{% url 'assign-payroll' %}",
-                            data: JSON.stringify(requestData),
+                            url: "{% url 'save-payroll' %}",
+                            data:{
+                                selected_item : JSON.stringify(selected_tev),form_data
+                              }
                         }).done(function (data) {
                             if (data.data == 'success') {
     
