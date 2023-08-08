@@ -3,13 +3,13 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('list', views.list, name='receive-list'),
+    path('list', views.list, name='transaction-list'),
     path('addtev', views.addtev, name='add-tev'),
     path('addtevdetails', views.addtevdetails, name='add-tev-details'),
     path('tevemployee', views.tevemployee, name='tev-employee'),
     path('tracking', views.tracking, name='receive-tracking'),
     
-    path('item_load', views.item_load, name='item-load'),
+    path('payroll_load', views.payroll_load, name='payroll-load'),
     path('item_edit', views.item_edit, name='item-edit'),
     path('item_update', views.item_update, name='item-update'),
     path('item_add', views.item_add, name='item-add'),
@@ -18,8 +18,12 @@ urlpatterns = [
     path('out_pending_tev', views.out_pending_tev, name='out-pending-tev'),
     path('tev_details', views.tev_details, name='tev-details'),
 
-    path('checking', views.checking, name='receive-checking'),
-    path('api', views.api, name='receive-api'),
+    path('payroll', views.list_payroll, name='transaction-payroll'),
+    path('assign_payroll', views.assign_payroll, name='assign-payroll'),
+    path('save_payroll', views.save_payroll, name='save-payroll'),
+
+
+    
     
     
 ]

@@ -15,14 +15,11 @@
                             <th><input type="checkbox" id="check-all"></th>
                             <th>Transaction Code</th>
                             <th>Employee Name</th>
-                            <th>Actual Amount</th>
-                            <th>Final Amount</th>
+                            <th>Amount</th>
                             <th>Status</th>
                             <th>Incoming In</th>
-                            <th>Slashed Out</th>
-                            <th>Remarks</th>
-                            <th>Created By</th>
-                            <th>ID</th>
+                            <th>Charges</th>
+                            <th>Purpose</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -31,6 +28,65 @@
         </div>
     </div>
 </div>
+
+
+
+<!-- Add New Credit Card Modal -->
+<div class="modal fade" id="saveModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered1 modal-simple modal-add-new-cc">
+    <div class="modal-content p-3 p-md-5">
+    <div class="modal-body">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="text-center mb-4">
+        <h3 class="mb-2">Assign Details</h3>
+        <p class="text-muted">Update data to complete payroll detail</p>
+        </div>
+        <form id="assign-form" class="row g-3" onsubmit="return false">
+        <div class="col-12">
+            <label class="form-label w-100" for="modalAddCard">DV Number</label>
+            <div class="input-group input-group-merge">
+            <input
+                id="dvnumber"
+                name="DvNumber"
+                class="form-control"
+                type="text"
+                placeholder="23-07-0000"
+               
+            />
+            <span class="input-group-text cursor-pointer p-1" id="modalAddCard2"
+                ><span class="card-type"></span
+            ></span>
+            </div>
+        </div>
+
+        <div class="col-sm-12">
+            <label class="form-label" for="employee-name">Cluster</label>
+            <select id="cluster" name="Cluster" class="form-select employee" data-allow-clear="true">
+                <option></option>
+                {% for row in cluster %}
+                <option value="{{ row.id }}">{{ row.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+       
+
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+            <button
+            type="reset"
+            class="btn btn-label-secondary btn-reset"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            >
+            Cancel
+            </button>
+        </div>
+        </form>
+    </div>
+    </div>
+</div>
+</div>
+<!--/ Add New Credit Card Modal -->
 
       
 <!-- Modal to add new record -->
@@ -46,10 +102,14 @@
                 <label class="form-label" for="employee-name">Employee Name</label>
                 <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
                     <option></option>
-                    <option>Reymark N. Valdehueza</option>
-                    <option>Saton Goru</option>
-                    <option>Monkey D luffy</option>
+                    <option value="Reymark N. Valdehueza">Reymark N. Valdehueza</option>
+                    <option value="Marwen A. Valeroso">Marwen A. Valeroso</option>
+                    <option value="Hinata Shoto">Hinata Shoto</option>
+                    <option value="Jason Go">Jason Go</option>
+                   
                 </select>
+
+
             </div>
 
             <div class="col-sm-12">
@@ -86,13 +146,18 @@
     let clicked_id = 0;
     let status_val =0;
     $(document).ready(function () {
-        employeelist();
+        let selected_tev = [];
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
-            offCanvasElement = document.querySelector('#add-new-record')
+            offCanvasElement = document.querySelector('#add-new-record');
+
+        const ItemFormAssignValidation = document.getElementById('assign-form'),
+            DvNumber = jQuery(document.querySelector('[name="DvNumber"]')),
+            Cluster = jQuery(document.querySelector('[name="Cluster"]'));
+
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
             maxOpened: 1,
@@ -109,7 +174,7 @@
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{% url 'item-load' %}",
+                url: "{% url 'payroll-load' %}",
                 type: "GET",
                 data: {
                     identifier: 1
@@ -121,26 +186,44 @@
                     orderable: false, 
                     render: function (data, type, row) {
                         var status = row.status; // Access the 'status' value from the 'row' object
+                        var checkboxId = row.id;
 
                         if (status == 3) {
                             return '<input type="checkbox" disabled="disabled">';
                         } else {
                             // Render a checkbox for each row with the item ID as its value
-                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
+                            return '<input type="checkbox" id="checkbox_data" class="checkbox-items checkbox_data" name = "checkboxtype" value="' + data + '">';
+                            
                         }
 
                     }
                 },
                 { data: 'code' },
                 { data: 'name' },
-                { data: 'original_amount'},
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'incoming_in' },
-                { data: 'slashed_out' },
-                { data: 'remarks' },
-                { data: 'user_id' },
-                { data: 'id' },
+                {
+                    render: function(data, type, row) {
+                      if (type === 'display') {
+
+                        return '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" disabled>'+
+                            '<option></option>'+
+                            '{% for row in charges %}'+
+                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                            '{% endfor %}'+
+                        '</select>';
+                      }
+                    }
+                },
+                {
+                    render: function(data, type, row) {
+                      if (type === 'display') {
+                        return '<input type="text" class="form-control purpose" id="basic-default-name" name="Purpose" disabled />';
+                      }
+                      return data;
+                    }
+                },
 
             ],
             columnDefs: [
@@ -157,19 +240,7 @@
                     },
                 },
                 {
-                    targets: 4,
-                    render: function(data) {
-                        var floatValue = parseFloat(data);
-                        if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
-                        } else {
-                            return "";
-                        }
-                    },
-                },
-                {
-                  targets: 5,
+                  targets: 4,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
@@ -187,35 +258,11 @@
                   },
                 },
                 {
-                    targets: -5,
-                    render: function (data) {
-                        return moment(data).format('LLL')
-                    },
-                },
-                {
-                    targets: -4,
+                    targets: -3,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
-                {
-                    targets: -2,
-                    render: function (data) {
-                        return data
-                    },
-                },
-                {
-                  targets: -1,
-                  title: 'Actions',
-                  orderable: false,
-                  searchable: false,
-                  render: function (data) {
-                      return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'+
-                          '<a class="btn btn-sm btn-icon item-delete" id="'+data+'"><i class="text-primary ti ti-trash"></i></a>'
-                      )
-                  },
-              },
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
@@ -242,11 +289,26 @@
                     }
                 },
 
-
                 {
-                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                    className: 'create-new btn btn-primary',
+                    className: 'btn btn-primary',
+                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Save</span>',
+                    action: function () {
+                        // Get the IDs of checked items
+                        var selectedItems = [];
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+                        if(selectedItems.length ===0){
+                            toastr.error('Select item first', 'Invalid', toast_options);
+                        }
+                        else{
+                            savepayroll(selectedItems);
+                        }
+                    }
                 },
+
+
+     
             ],
             drawCallback: function (settings) {
                 $('.item-edit').on('click', function () {
@@ -282,17 +344,18 @@
                         }
                     })
                 }),
-
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
                     // Do something when a checkbox in the table body is changed...
                 });
 
                 $('#check-all').change(function () {
+
                     // Get the checked state of the "check-all" checkbox
                     var isChecked = $(this).is(':checked');
         
                     // Set the checked state of all checkboxes in the table body
-                    $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+
+                    $('#tbl-items tbody input[type="checkbox"][id="checkbox_data"]').prop('checked', isChecked);
                 });
 
                 $('.item-details').on('click', function () {
@@ -324,13 +387,123 @@
                 newRecord.addEventListener('click', function () {
                     ItemID.val(0)
                     $('.title-name').text('Add Tev Record')
-                    EmployeeName.val('').trigger('change').prop("disabled", false);
+                    EmployeeName.val('').trigger('change')
                     $('.form-control').val('')
          
                     offCanvasEl.show()
                 })
             }
         }, 200)
+
+        //form assign record
+            const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
+                fields: {
+                    DvNumber: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Please Select Dv number',
+                            },
+                        },
+                    },
+                    Cluster: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Please Select Cluster',
+                            },
+                        },
+                    },
+                },
+                plugins: {
+                    trigger: new FormValidation.plugins.Trigger(),
+                    bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                    submitButton: new FormValidation.plugins.SubmitButton(),
+                    autoFocus: new FormValidation.plugins.AutoFocus(),
+                },
+                init: (instance) => {
+                    instance.on('plugins.message.placed', function (e) {
+                        if (e.element.parentElement.classList.contains('input-group')) {
+                            e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                        }
+                    })
+                },
+            }).on('core.form.valid', function () {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, save it!',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-3',
+                        cancelButton: 'btn btn-label-secondary',
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (result.value) {
+                        var form_data = $('#assign-form').serialize();
+
+                        var requestData = {
+                            form_data: form_data,
+                            selected_tev: selected_tev
+                        };
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'save-payroll' %}",
+                            data:{
+                                selected_item : JSON.stringify(selected_tev),form_data
+                              }
+                        }).done(function (data) {
+                            if (data.data == 'success') {
+    
+                                let code = data.g_code;
+                                if (code){
+                                    Swal.fire({
+                                        title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                        icon: 'info',
+                                        html:
+                                            'Successfully <b>Save!</b>',
+                                        showCloseButton: true,
+                                        showCancelButton: false,
+                                        focusConfirm: false,
+                                        confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!',
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary me-3'
+                                        },
+                                        buttonsStyling: false
+                                        });
+                                }
+                                else{
+                                    offCanvasEl.hide()
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Update Successfully!',
+                                        html:
+                                        'Successfully <b>Save!</b>',
+                                        customClass: {
+                                            confirmButton: 'btn btn-success',
+                                        },
+                                    })
+                                }
+                                EmployeeName.val("").trigger('change')
+                                OriginalAmount.val("")
+                                Remarks.val("")
+                                dataTable.ajax.reload();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error saving!',
+                                    text: data.message,
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                            }
+                        })
+                    }
+                })
+            });
+    
 
         // Form validation for Add new record
         const fv = FormValidation.formValidation(ItemFormValidation, {
@@ -449,28 +622,7 @@
             })
         });
 
-        function employeelist(){
-            console.log("pumasok");
-            $.ajax({
-                type: 'GET',
-                url: "{% url 'receive-api' %}",
-                dataType: 'json',
-            }).done(function (data) {
-                let fields = data.data; // Access the 'data' array
-                var $selectElement = $('#employee-name'); // Select the element using its ID
-                $selectElement.empty();
-                
-                // Iterate over the 'fields' array
-                $.each(fields, function (index, employee) {
-                    let firstName = employee.first_name;
-                    let middleName = employee.middle_name;
-                    let middleInitial = middleName.charAt(0);
-                    let lastName = employee.last_name;
-                    let $option = $('<option></option>').val(firstName + " " + middleInitial +" "+ lastName).text(firstName +" "+ middleInitial+"." +" "+ lastName);
-                    $selectElement.append($option);
-                });  
-            })
-        }
+
         function incoming_out(selected_items){
             Swal.fire({
                 title: 'Mark as Out?',
@@ -521,24 +673,109 @@
 
         }
 
+        function savepayroll(selected_items){
+            console.log(selected_tev);
+            $('#saveModal').modal('show');
+        }
 
-        $('#approved').click(function() {
-            let final_amount = $("#final_amount").val().trim();
-            let correctness_remarks = $("#correctness_remarks").val().trim();
-            let status = 4; 
-              if (final_amount === "") {  
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-              } else {
-                $("#amount_error").text("");
-                $("#remarks_error").text("");
-                $(".input-group").removeClass("has-error");
-                tev_details(final_amount,correctness_remarks,status,clicked_id);
-              }
-          });
+
+        $(document).on("change", ".purpose", function() {
+            var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
+            var purposeValue = $(this).val();
+            var existingItem = selected_tev.find(function(item) {
+              return item.id === checkboxId;
+            });
+            if (existingItem) {
+              existingItem.purpose = purposeValue;
+            }
+        });
           
+
+        $(document).on("change", ".charges", function() {
+            var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
+            var chargesValue = $(this).val();
+
+
+            
+            var existingItem = selected_tev.find(function(item) {
+                return item.id === checkboxId;
+            });
+            
+            if (existingItem) {
+                existingItem.charges = chargesValue;
+                console.log("Updated type for item with ID:", checkboxId, "New type:", chargesValue);
+            } else {
+                console.log("Item not found in the selected_tev array.");
+            }
+        });
+
+        $(document).on('click', '.checkbox_data', function(event) {
+            var clickedCheckbox = $(event.target);
+            var row = clickedCheckbox.closest('tr'); // Get the parent row of the clicked checkbox
+            var checkboxId = clickedCheckbox.attr('id');
+            var purposeInput = row.find('input[name="Purpose"]');
+            var purposeValue = purposeInput.val().trim();
+            var stck_id = clickedCheckbox.val();
+           
+          
+            let currentDate = new Date();
+            let month = currentDate.getMonth();
+            let monthDate = new Date(currentDate.getFullYear(), month);
+            let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
+            let year = currentDate.getFullYear();
+          
+            let defaultPurposeValue = "TE for " + monthName + " " + year;
+          
+            if (clickedCheckbox.prop('checked')) {
+                var existingItem = selected_tev.find(function(item) {
+                    return item.id === checkboxId;
+                });
+          
+                if (!existingItem) {
+                    var array_id = {
+                        id: stck_id,
+                        code: row.find('td:eq(1)').text(),
+                        name: row.find('td:eq(2)').text(),
+                        amount: row.find('td:eq(3)').text(),
+                        status: row.find('td:eq(4)').text(),
+                        charges: row.find('select[name="Charges"]').val(),
+                        purpose: purposeValue || defaultPurposeValue,
+                    };
+                    selected_tev.push(array_id);
+                    console.log(array_id);
+                } else {
+                    existingItem.purpose = purposeValue;
+                    console.log(existingItem);
+                }
+          
+                row.find('select[name="Charges"]').prop("disabled", false);
+                purposeInput.prop("disabled", false);
+          
+                if (!purposeValue) {
+                    purposeInput.val(defaultPurposeValue);
+                }
+            } else {
+                var index = selected_tev.findIndex(function(item) {
+                    return item.id === checkboxId;
+                });
+                if (index !== -1) {
+                    selected_tev.splice(index, 1);
+                }
+          
+                row.find('select[name="Charges"]').prop("disabled", true).val("");
+                purposeInput.prop("disabled", true).val("");
+            }
+          
+            unique_items = selected_tev.filter(function(item, index, self) {
+                return (
+                    index ===
+                    self.findIndex(function(i) {
+                        return i.id === item.id;
+                    })
+                );
+            });
+        });
+        
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
@@ -586,9 +823,6 @@
                 allowClear: true,
             })
         }
-        
-
-
     })
 </script>
 {% endblock footer_scripts %}

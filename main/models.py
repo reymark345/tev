@@ -118,7 +118,7 @@ class TevIncoming(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
     id_no = models.CharField(max_length=128, blank=True, null=True)
     original_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True)
-    final_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True)
+    final_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
     incoming_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     incoming_out = models.DateTimeField(blank=True, null=True)
     slashed_out = models.DateTimeField(blank=True, null=True)
@@ -147,16 +147,38 @@ class TevOutgoing(models.Model):
         managed = True
         db_table = 'tev_outgoing'
         
-class tev_bridge(models.Model):
-    tev_incoming_id = models.ForeignKey(TevIncoming, models.DO_NOTHING)
-    tev_outgoing_id = models.ForeignKey(TevOutgoing, models.DO_NOTHING)
-    charge = models.CharField(max_length=128, blank=True, null=True)
+class Charges(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'charges'
+        
+class TevBridge(models.Model):
+    tev_incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)
+    tev_outgoing = models.ForeignKey(TevOutgoing, models.DO_NOTHING)
+    charges = models.ForeignKey(Charges, models.DO_NOTHING)
+    purpose = models.CharField(max_length=255, blank=True, null=True)
 
     class Meta:
         managed = True
         db_table = 'tev_bridge'
+        
+
+        
+class RoleDetails(models.Model):
+    role_name =  models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True, auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'role_details'
        
 class StaffDetails(models.Model):
+    role = models.ForeignKey(RoleDetails, models.DO_NOTHING)
     division = models.CharField(max_length=128, blank=True, null=True)
     section = models.CharField(max_length=128, blank=True, null=True)
     position = models.CharField(max_length=128, blank=True, null=True)
@@ -178,6 +200,7 @@ class Status(models.Model):
         managed = True
         db_table = 'status'
         
+        
 class SystemConfiguration(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
     transaction_code = models.CharField(max_length=128, blank=True, null=True)
@@ -188,6 +211,17 @@ class SystemConfiguration(models.Model):
     class Meta:
         managed = True
         db_table = 'system_configuration'
+        
+class Cluster(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'cluster'
+        
+        
+
         
         
 

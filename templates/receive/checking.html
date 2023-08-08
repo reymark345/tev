@@ -19,6 +19,7 @@
                             <th>Final Amount</th>
                             <th>Status</th>
                             <th>Incoming In</th>
+                            <th>Slashed Out</th>
                             <th>Remarks</th>
                             <th>Created By</th>
                             <th>ID</th>
@@ -161,14 +162,27 @@
         let dataTable = table.DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{% url 'item-load' %}",
+            ajax: {
+                url: "{% url 'item-load' %}",
+                type: "GET",
+                data: {
+                    identifier: 2
+                }
+            },
             columns: [
                 {
-                    data: 'id',
-                    orderable: false,
-                    render: function (data) {
-                        // Render a checkbox for each row with the item ID as its value
-                        return '<input type="checkbox" value="' + data + '">';
+                    data: 'id', status: 'status',
+                    orderable: false, 
+                    render: function (data, type, row) {
+                        var status = row.status; // Access the 'status' value from the 'row' object
+
+                        if (status == 2) {
+                            return '<input type="checkbox" disabled="disabled">';
+                        } else {
+                            // Render a checkbox for each row with the item ID as its value
+                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
+                        }
+
                     }
                 },
                 { data: 'code' },
@@ -177,6 +191,7 @@
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'incoming_in' },
+                { data: 'slashed_out' },
                 { data: 'remarks' },
                 { data: 'user_id' },
                 { data: 'id' },
@@ -226,9 +241,15 @@
                   },
                 },
                 {
-                    targets: -4,
+                    targets: -5,
                     render: function (data) {
                         return moment(data).format('LLL')
+                    },
+                },
+                {
+                    targets: -4,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
                 {
@@ -238,16 +259,17 @@
                   searchable: false,
                   render: function (data) {
                       return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-details text-body" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>'+
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'+
-                          '<a class="btn btn-sm btn-icon item-delete" id="'+data+'"><i class="text-primary ti ti-trash"></i></a>'
-                  
+                          '<a href="javascript:;" data-id="' + data + '" class="item-details text-body" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>'
                       )
                   },
               },
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                },
                 {
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
@@ -268,10 +290,7 @@
                         }
                     }
                 },
-                {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Filter</span>',
-                },
+
 
                 {
                     text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
@@ -279,28 +298,7 @@
                 },
             ],
             drawCallback: function (settings) {
-                $('.item-edit').on('click', function () {
-                    let id = $(this).data('id')
-                    $('.title-name').text('Update TEV Record')
-                    $.ajax({
-                        type: 'GET',
-                        url: "{% url 'item-edit' %}?id=" + id,
-                        dataType: 'json',
-                    }).done(function (data) {
-                        if (data.length > 0) {
-                            let fields = data[0].fields
-                            let pk = data[0].pk
-                            let employee_name = $('#employee-name')
-                            let floatvalue = parseFloat(fields.original_amount);
-                            let convertedAmount = floatvalue.toFixed(2);
-                            EmployeeName.val(fields.name).trigger('change');
-                            OriginalAmount.val(convertedAmount);
-                            Remarks.val(fields.remarks);
-                            ItemID.val(pk);
-                            offCanvasEl.show()
-                        }
-                    })
-                }),
+
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
                     // Do something when a checkbox in the table body is changed...
                 });
@@ -310,7 +308,7 @@
                     var isChecked = $(this).is(':checked');
         
                     // Set the checked state of all checkboxes in the table body
-                    $('#tbl-items tbody input[type="checkbox"]').prop('checked', isChecked);
+                    $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
                 });
 
                 $('.item-details').on('click', function () {

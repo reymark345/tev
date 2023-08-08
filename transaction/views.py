@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge)
 import json 
 from django.core import serializers
 import datetime 
@@ -16,7 +16,7 @@ from django.db import IntegrityError
 import math
 from django.core.serializers import serialize
 from django.forms.models import model_to_dict
-import requests
+from urllib.parse import parse_qs
 
 
 
@@ -40,8 +40,6 @@ def generate_code():
 
     return code
 
-
-
 @login_required(login_url='login')
 def list(request):
     user_details = get_user_details(request)
@@ -49,31 +47,88 @@ def list(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
             'role_permission' : role.role_name,
+            'cluster' : Cluster.objects.filter().order_by('name'),
         }
-        return render(request, 'receive/list.html' , context)
+        
+        print("clusterdaw")
+        print(Cluster.objects.filter().order_by('name'))
+        return render(request, 'receive/list.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
     
+@login_required(login_url='login')
+def list_payroll(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        context = {
+            'charges' : Charges.objects.filter().order_by('name'),
+            'cluster' : Cluster.objects.filter().order_by('name'),
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'transaction/list.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
     
+
+@login_required(login_url='login')
 @csrf_exempt
-def api(request):
-    url = "https://caraga-portal.dswd.gov.ph/api/employee/list/search/?q="
-    headers = {
-        "Authorization": "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
-    }
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    print(data)
-    print("testdawa")
-    return JsonResponse({'data': data})
+def assign_payroll(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        user_details = get_user_details(request)
+        allowed_roles = ["Admin", "Payroll staff"] 
+        context = {
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'transaction/list.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')    
+    
+    
+@login_required(login_url='login')
+@csrf_exempt
+def save_payroll(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        user_details = get_user_details(request)
+        allowed_roles = ["Admin", "Payroll staff"] 
+        user_id = request.session.get('user_id', 0)
+        formdata = request.POST.get('form_data')
+        formdata_dict = parse_qs(formdata)
+        cluster_name = formdata_dict.get('Cluster', [None])[0]
+        dv_number = formdata_dict.get('DvNumber', [None])[0]
+        selected_tev = json.loads(request.POST.get('selected_item'))
+        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_name,box_b_in=datetime.datetime.now(),user_id=user_id)
+        outgoing.save()
+        latest_outgoing = TevOutgoing.objects.latest('id')
+        for item in selected_tev:
+            obj, was_created_bool = TevBridge.objects.get_or_create(
+                tev_incoming_id=item['id'],
+                tev_outgoing_id=latest_outgoing.id,
+                purpose=item['purpose'],
+                charges_id=item['charges']
+            )
+                
+        return JsonResponse({'data': 'success'})
+    else:
+        return render(request, 'pages/unauthorized.html')    
+
+
+
     
 @login_required(login_url='login')
 def checking(request):
     user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
@@ -85,7 +140,7 @@ def checking(request):
         return render(request, 'pages/unauthorized.html')
 
 
-def item_load(request):
+def payroll_load(request):
     
     idn = request.GET.get('identifier')
     if idn =="1":
@@ -95,12 +150,13 @@ def item_load(request):
     else:
         retrieve =[1,2,3,4]
        
-       
+    item_data = (TevIncoming.objects.filter(status=4).select_related().distinct().order_by('-id').reverse())
     
-    # item_data = TevIncoming.objects.filter(status__in=retrieve).select_related().values_list('code', flat=True).order_by('-incoming_in').reverse()
+
     
     
-    item_data = (TevIncoming.objects.filter(status__in=retrieve).select_related().distinct().order_by('-id').reverse())
+    print("testing")
+
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -114,8 +170,9 @@ def item_load(request):
 
     data = []
 
-    for item in item_data:
+    for item in item_data: 
         userData = AuthUser.objects.filter(id=item.user_id)
+        
         full_name = userData[0].first_name + ' ' + userData[0].last_name
 
         item = {
