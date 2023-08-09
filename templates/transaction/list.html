@@ -355,7 +355,9 @@
         
                     // Set the checked state of all checkboxes in the table body
 
-                    $('#tbl-items tbody input[type="checkbox"][id="checkbox_data"]').prop('checked', isChecked);
+                    //$('#tbl-items tbody input[type="checkbox"][id="checkbox_data"]').prop('checked', isChecked);
+
+                    $('.checkbox_data').prop('checked', isChecked).trigger('change');
                 });
 
                 $('.item-details').on('click', function () {
@@ -551,19 +553,6 @@
             }).then(function (result) {
                 if (result.value) {
                     var form_data = $('#item-form').serialize()
-
-                    //post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-
-                    //if (status_val ==3){
-                      //  post_url = "{% url 'item-update' %}";
-                   // }
-                   // else if (ItemID.val() !== '0') {
-                   //     post_url = "{% url 'item-update' %}";
-                   // } 
-                   // else {
-                   //     post_url = "{% url 'item-add' %}";
-                   // }
-
                     let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
                     var form_data = $('#item-form').serialize()
                     $.ajax({
@@ -709,7 +698,7 @@
             }
         });
 
-        $(document).on('click', '.checkbox_data', function(event) {
+        $(document).on('change', '.checkbox_data', function(event) {
             var clickedCheckbox = $(event.target);
             var row = clickedCheckbox.closest('tr'); // Get the parent row of the clicked checkbox
             var checkboxId = clickedCheckbox.attr('id');
