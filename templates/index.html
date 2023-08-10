@@ -193,13 +193,22 @@
                             </a>
                         </li>
 
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
+
+                        <li class="menu-item {% if url_name == 'charges' %}active{% endif %}">
+                            <a href="{% url 'charges' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti fa-list-check"></i>
+                              
                                 <div data-i18n="Charges">Charges</div>
                             </a>
                         </li>
 
+                        <li class="menu-item {% if url_name == 'division' %}active{% endif %}">
+                            <a href="{% url 'division' %}" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-color-swatch"></i>
+                              
+                                <div data-i18n="Division">Division</div>
+                            </a>
+                        </li>
                         
 
                         <!-- Admin -->
