@@ -21,6 +21,7 @@ urlpatterns = [
     path('payroll', views.list_payroll, name='transaction-payroll'),
     path('assign_payroll', views.assign_payroll, name='assign-payroll'),
     path('save_payroll', views.save_payroll, name='save-payroll'),
+    path('box_a', views.box_a, name='box-a'),
 
 
     

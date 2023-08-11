@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division)
 import json 
 from django.core import serializers
 import datetime 
@@ -49,10 +49,8 @@ def list(request):
         context = {
             'role_permission' : role.role_name,
             'cluster' : Cluster.objects.filter().order_by('name'),
+            'division' : Division.objects.filter().order_by('name'),
         }
-        
-        print("clusterdaw")
-        print(Cluster.objects.filter().order_by('name'))
         return render(request, 'receive/list.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
@@ -67,6 +65,7 @@ def list_payroll(request):
         context = {
             'charges' : Charges.objects.filter().order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
+            'division' : Division.objects.filter().order_by('name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'transaction/list.html', context)
@@ -105,8 +104,9 @@ def save_payroll(request):
         formdata_dict = parse_qs(formdata)
         cluster_name = formdata_dict.get('Cluster', [None])[0]
         dv_number = formdata_dict.get('DvNumber', [None])[0]
+        div_id = formdata_dict.get('Division', [None])[0]
         selected_tev = json.loads(request.POST.get('selected_item'))
-        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_name,box_b_in=datetime.datetime.now(),user_id=user_id)
+        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_name,box_b_in=datetime.datetime.now(),user_id=user_id, division_id = div_id)
         outgoing.save()
         latest_outgoing = TevOutgoing.objects.latest('id')
         for item in selected_tev:
@@ -120,6 +120,21 @@ def save_payroll(request):
         return JsonResponse({'data': 'success'})
     else:
         return render(request, 'pages/unauthorized.html')    
+    
+    
+@login_required(login_url='login')
+def box_a(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'transaction/box_a.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
 
 
 

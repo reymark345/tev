@@ -131,10 +131,21 @@ class TevIncoming(models.Model):
         managed = True
         db_table = 'tev_incoming'
         
+class Division(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    chief = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'division'
+        
 class TevOutgoing(models.Model):
     dv_no = models.CharField(max_length=128, blank=True, null=True)
     cluster = models.CharField(max_length=128, blank=True, null=True)
-    responsibility_center = models.CharField(max_length=128, blank=True, null=True)
+    division = models.ForeignKey(Division, models.DO_NOTHING)
     box_date_out = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     box_b_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     box_b_out = models.DateTimeField(blank=True, null=True)
@@ -149,12 +160,15 @@ class TevOutgoing(models.Model):
         
 class Charges(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.IntegerField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = True
         db_table = 'charges'
+        
+
         
 class TevBridge(models.Model):
     tev_incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)

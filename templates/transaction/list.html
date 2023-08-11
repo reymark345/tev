@@ -73,12 +73,9 @@
             <label class="form-label" for="division-name">Division</label>
             <select id="division" name="Division" class="form-select division" data-allow-clear="true">
                 <option></option>
-                <option>Finance Manangement Division</option>
-                <option>Kalahi</option>
-                <option>Pantawid</option>
-                <!-- {% for row in cluster %}
-                <option value="{{ row.id }}">{{ row.name }}</option>
-                {% endfor %} -->
+                {% for row in division %}
+                <option value="{{ row.id }}">{{ row.name }} : {{ row.chief }}</option>
+                {% endfor %}
             </select>
         </div>
        
@@ -169,7 +166,8 @@
 
         const ItemFormAssignValidation = document.getElementById('assign-form'),
             DvNumber = jQuery(document.querySelector('[name="DvNumber"]')),
-            Cluster = jQuery(document.querySelector('[name="Cluster"]'));
+            Cluster = jQuery(document.querySelector('[name="Cluster"]')),
+            Division = jQuery(document.querySelector('[name="Division"]'));
 
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
@@ -289,25 +287,6 @@
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
                 },
                 {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
-                    action: function () {
-                        // Get the IDs of checked items
-                        var selectedItems = [];
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-
-                        if(selectedItems.length ===0){
-                            toastr.error('Select item first', 'Invalid', toast_options);
-                        }
-                        else{
-                            incoming_out(selectedItems);
-                        }
-                    }
-                },
-
-                {
                     className: 'btn btn-primary',
                     text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Save</span>',
                     action: function () {
@@ -315,6 +294,7 @@
                         var selectedItems = [];
                         DvNumber.val("");
                         Cluster.val("").trigger('change');
+                        Division.val("").trigger('change');
                         $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
                             selectedItems.push($(this).val());
                         });
@@ -431,6 +411,13 @@
                         validators: {
                             notEmpty: {
                                 message: 'Please Select Cluster',
+                            },
+                        },
+                    },
+                    Division: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Please Select Division',
                             },
                         },
                     },
@@ -652,62 +639,10 @@
             return data;
         }
 
-
-        function incoming_out(selected_items){
-            Swal.fire({
-                title: 'Mark as Out?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, mark as out!',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-3',
-                    cancelButton: 'btn btn-label-secondary',
-                },
-                buttonsStyling: false,
-            }).then(function (result) {
-                if (result.value) {
-                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-       
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'out-pending-tev' %}",
-                        data:{
-                            out_list: selected_items
-                        }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Successfully save!',
-                                text: 'Item has been added.',
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-
-                            dataTable.ajax.reload()
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                }
-            })
-
-        }
-
         function savepayroll(selected_items){
             console.log(selected_tev);
             $('#saveModal').modal('show');
         }
-
 
         $(document).on("change", ".purpose", function() {
             var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
