@@ -13,14 +13,11 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="check-all"></th>
-                            <th>Transaction Code</th>
-                            <th>Employee Name</th>
-                            <th>Actual Amount</th>
-                            <th>Final Amount</th>
+                            <th>Dv Number</th>
+                            <th>Cluster</th>
+                            <th>Division</th>
                             <th>Status</th>
-                            <th>Incoming In</th>
-                            <th>Slashed Out</th>
-                            <th>Remarks</th>
+                            <th>Date In</th>
                             <th>Created By</th>
                             <th>ID</th>
                         </tr>
@@ -163,7 +160,7 @@
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{% url 'item-load' %}",
+                url: "{% url 'box-load' %}",
                 type: "GET",
                 data: {
                     identifier: 2
@@ -185,17 +182,13 @@
 
                     }
                 },
-                { data: 'code' },
-                { data: 'name' },
-                { data: 'original_amount'},
-                { data: 'final_amount'},
+                { data: 'dv_no' },
+                { data: 'cluster' },
+                { data: 'box_b_in' },
+                { data: 'division_id' },
                 { data: 'status' },
-                { data: 'incoming_in' },
-                { data: 'slashed_out' },
-                { data: 'remarks' },
                 { data: 'user_id' },
                 { data: 'id' },
-
             ],
             columnDefs: [
                 {
@@ -241,17 +234,12 @@
                   },
                 },
                 {
-                    targets: -5,
+                    targets: -3,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
                 },
-                {
-                    targets: -4,
-                    render: function (data) {
-                        return (data == null) ? '' : moment(data).format('LLL');
-                    },
-                },
+            
                 {
                   targets: -1,
                   title: 'Actions',
@@ -331,7 +319,7 @@
                 });
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
 
         const newRecord = document.querySelector('.create-new')
 

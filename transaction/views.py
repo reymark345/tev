@@ -110,6 +110,7 @@ def save_payroll(request):
         outgoing.save()
         latest_outgoing = TevOutgoing.objects.latest('id')
         for item in selected_tev:
+            tev_update = TevIncoming.objects.filter(id=item['id']).update(status=5)
             obj, was_created_bool = TevBridge.objects.get_or_create(
                 tev_incoming_id=item['id'],
                 tev_outgoing_id=latest_outgoing.id,
@@ -155,23 +156,8 @@ def checking(request):
         return render(request, 'pages/unauthorized.html')
 
 
-def payroll_load(request):
-    
-    idn = request.GET.get('identifier')
-    if idn =="1":
-        retrieve =[1,3]
-    elif idn =="2":
-        retrieve =[2,3,4]
-    else:
-        retrieve =[1,2,3,4]
-       
+def payroll_load(request):       
     item_data = (TevIncoming.objects.filter(status=4).select_related().distinct().order_by('-id').reverse())
-    
-
-    
-    
-    print("testing")
-
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -215,6 +201,50 @@ def payroll_load(request):
         'recordsFiltered': total,
     }
     return JsonResponse(response)
+
+
+
+def box_load(request):       
+    item_data = (TevOutgoing.objects.filter(status=5).select_related().distinct().order_by('-id').reverse())
+    total = item_data.count()
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        item_data = item_data[start:start + length]
+
+    data = []
+
+    for item in item_data: 
+        userData = AuthUser.objects.filter(id=item.user_id)
+        
+        full_name = userData[0].first_name + ' ' + userData[0].last_name
+
+        item = {
+            'id': item.id,
+            'dv_no': item.dv_no,
+            'cluster': item.cluster,
+            'box_b_in': item.box_b_in,
+            'division_id': item.division_id,
+            'status':4,
+            'user_id': full_name
+        }
+
+        data.append(item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
 
 def item_edit(request):
     id = request.GET.get('id')

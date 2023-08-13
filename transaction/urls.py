@@ -10,6 +10,7 @@ urlpatterns = [
     path('tracking', views.tracking, name='receive-tracking'),
     
     path('payroll_load', views.payroll_load, name='payroll-load'),
+    path('box_load', views.box_load, name='box-load'),
     path('item_edit', views.item_edit, name='item-edit'),
     path('item_update', views.item_update, name='item-update'),
     path('item_add', views.item_add, name='item-add'),
