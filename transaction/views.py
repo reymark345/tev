@@ -126,6 +126,7 @@ def save_payroll(request):
 @login_required(login_url='login')
 def box_a(request):
     user_details = get_user_details(request)
+
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
@@ -136,6 +137,22 @@ def box_a(request):
         return render(request, 'transaction/box_a.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+
+
+@login_required(login_url='login')
+@csrf_exempt
+def preview_box_a(request):
+    outgoing_id = request.POST.get('box_id')
+    tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
+    selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
+    
+    serialized_data = serializers.serialize('json', selected_tev_incoming_data)
+    parsed_data = json.loads(serialized_data)
+    
+    return JsonResponse({'incoming_data': parsed_data})
+    
+
 
 
 
@@ -205,7 +222,7 @@ def payroll_load(request):
 
 
 def box_load(request):       
-    item_data = (TevOutgoing.objects.filter(status=5).select_related().distinct().order_by('-id').reverse())
+    item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -228,9 +245,10 @@ def box_load(request):
             'id': item.id,
             'dv_no': item.dv_no,
             'cluster': item.cluster,
+            'division_name': item.division.name,
+            'division_chief': item.division.chief,
+            'status':5,
             'box_b_in': item.box_b_in,
-            'division_id': item.division_id,
-            'status':4,
             'user_id': full_name
         }
 

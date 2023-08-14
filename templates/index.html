@@ -178,22 +178,11 @@
                                 <div data-i18n="Certified">Certified</div>
                             </a>
                         </li>
-                        
-
-                        
 
                         <!-- Libraries -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Libraries</span>
                         </li>
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons ti ti-color-swatch"></i>
-                                <div data-i18n="Items">Items</div>
-                            </a>
-                        </li>
-
-
                         <li class="menu-item {% if url_name == 'charges' %}active{% endif %}">
                             <a href="{% url 'charges' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti fa-list-check"></i>
@@ -214,6 +203,13 @@
                         <!-- Admin -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Admin</span>
+                        </li>
+
+                        <li class="menu-item">
+                            <a href="app-email.html" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-settings"></i>
+                                <div data-i18n="Users">Users</div>
+                            </a>
                         </li>
                         
                         <li class="menu-item">

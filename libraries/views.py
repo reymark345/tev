@@ -50,9 +50,10 @@ def charges(request):
 @csrf_exempt
 def division_add(request):
     division = request.POST.get('Division')
+    acrym = request.POST.get('Acronym')
     divchief = request.POST.get('Chief')
     user_id = request.session.get('user_id', 0)
-    division_add = Division(name=division, chief = divchief, created_by = user_id)
+    division_add = Division(name=division,acronym = acrym, chief = divchief, created_by = user_id)
     try:
         division_add.save()
         return JsonResponse({'data': 'success'})
@@ -63,12 +64,13 @@ def division_add(request):
 def division_update(request):
     id = request.POST.get('ItemID')
     division = request.POST.get('Division')
+    acrym = request.POST.get('Acronym')
     divchief = request.POST.get('Chief')
 
     if Division.objects.filter(name=division).exclude(id=id):
         return JsonResponse({'data': 'error', 'message': 'Duplicate Division'})
     else:
-        Division.objects.filter(id=id).update(name=division, chief = divchief)
+        Division.objects.filter(id=id).update(name=division, acronym = acrym, chief = divchief)
         return JsonResponse({'data': 'success'})
     
     
@@ -101,6 +103,7 @@ def division_load(request):
         item = {
             'id': item.id,
             'name': item.name,
+            'acronym': item.acronym,
             'chief': item.chief,
             'created_by': full_name,
             'created_at': item.created_at

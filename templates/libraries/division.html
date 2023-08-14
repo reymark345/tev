@@ -13,6 +13,7 @@
                     <thead>
                         <tr>
                             <th>Division</th>
+                            <th>Acronym</th>
                             <th>Division Chief</th>
                             <th>Created by</th>
                             <th>Date added</th>
@@ -49,6 +50,19 @@
             </div>
 
             <div class="col-sm-12">
+                <label class="form-label">Acronym</label>
+                
+                <input
+                  type="text"
+                  id="acronym"
+                  class="form-control dt-lib-acronym"
+                  name="Acronym"
+                  placeholder="Enter Acronym"
+                  aria-describedby="acronym2"
+                />
+            </div>
+
+            <div class="col-sm-12">
                 <label class="form-label">Division Chief </label>
                 
                 <input
@@ -75,9 +89,11 @@
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             Division = jQuery(document.querySelector('[name="Division"]')),
+            Acronym = jQuery(document.querySelector('[name="Acronym"]')),
             DivisionChief = jQuery(document.querySelector('[name="Chief"]')),
             Status = jQuery(document.querySelector('[name="Status"]')),
             offCanvasElement = document.querySelector('#add-new-record');
+            
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
         const toast_options = (toastr.options = {
             maxOpened: 1,
@@ -96,6 +112,7 @@
             ajax: "{% url 'division-load' %}",
             columns: [
                 { data: 'name' },
+                { data: 'acronym' },
                 { data: 'chief' },
                 { data: 'created_by' },
                 { data: 'created_at' },
@@ -109,7 +126,7 @@
                     },
                 },
                 {
-                    targets: 3,
+                    targets: 4,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
@@ -148,6 +165,7 @@
                             let pk = data[0].pk
                             let division = $('#division')
                             Division.val(fields.name);
+                            Acronym.val(fields.acronym);
                             DivisionChief.val(fields.chief);
                             ItemID.val(pk)
                             offCanvasEl.show()
@@ -172,6 +190,7 @@
                  
                     $('.title-name').text('Add Record');
                     Division.val('');
+                    Acronym.val('');
                     DivisionChief.val('');
                     $('.form-control').val('');
          
@@ -187,6 +206,13 @@
                     validators: {
                         notEmpty: {
                             message: 'Please Enter Division',
+                        },
+                    },
+                },
+                Acronym: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Acronym',
                         },
                     },
                 },

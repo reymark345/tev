@@ -9,6 +9,7 @@ role_details = ['Admin','Incoming staff','Validating staff','Payroll staff', 'Ce
 cluster = ['Cluster 01','Cluster 02','Cluster 03','Cluster 04', 'Cluster 05', 'Cluster 06', 'Cluster 07']
 charges = ['AICS','Socpen','Disaster','CCAM', '4PS']
 division = ['Finance Management Division','Pantawid','DRMD','HRRMD', 'PSD', 'PPD','ORD']
+acronym = ['FMD','PTW','DRMD','HRRMD', 'PSD', 'PPD','ORD']
 status = ['Pending','Ongoing','Returned','For payroll', 'Outgoing']
 
 
@@ -25,9 +26,11 @@ for charge in charges:
     ch = Charges(name=charge,created_by=1)
     ch.save()
     
-for div in division:
-    div = Division(name=div,chief=fake.name(),created_by=1)
-    div.save()
+    
+for i in range(len(division)):
+    div_val = Division(name=division[i],acronym = acronym[i],chief = fake.name(),created_by=1)
+    div_val.save()
+    
     
 for stat in status:
     stat = Status(name=stat)

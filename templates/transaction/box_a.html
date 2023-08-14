@@ -4,7 +4,7 @@
 <div class="content-wrapper">
     <!-- Content -->
     <div class="container-fluid flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Item /</span> List</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Transaction /</span> Box A</h4>
 
         <!-- DataTable with Buttons -->
         <div class="card">
@@ -16,6 +16,7 @@
                             <th>Dv Number</th>
                             <th>Cluster</th>
                             <th>Division</th>
+                            <th>Division Chief</th>
                             <th>Status</th>
                             <th>Date In</th>
                             <th>Created By</th>
@@ -29,59 +30,6 @@
     </div>
 </div>
 
-    <!-- Enable OTP Modal -->
-    <div class="modal fade" id="tevDetails" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
-          <div class="modal-content p-3 p-md-5">
-            <div class="modal-body">
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              <div class="text-center mb-4">
-                <h3 class="mb-2">TEV DETAILS</h3>
-                <p>Correctness of amount/Returned/and Approve</p>
-              </div>
-              <p>Please provide your final amount for the TEV, indicating whether it can be marked as approved or if it needs to be returned due to any issues.</p>
-              <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
-                <div class="col-12">
-                  <label class="form-label" for="modaltevDetails">Final Amount</label>
-                  <div class="input-group">
-                    <span class="input-group-text">₱</span>
-                    <input
-                      type="text"
-                      id="final_amount"
-                      name="FinalAmount"
-                      class="form-control phone-number-otp-mask"
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <span id="amount_error" style="color: red;"></span>
-                </div>
-                <div class="col-12">
-                  <label class="form-label" for="modaltevDetails">Remarks</label>
-                  
-                  <div class="input-group">
-                    <textarea class="form-control" placeholder="Enter remarks (optional if approved)" rows="5" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
-                  </div>
-                  <span id="remarks_error" style="color: red;"></span>
-                </div>
-                <div class="col-12">
-                  <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
-                  <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
-                  <button
-                    type="reset"
-                    class="btn btn-label-secondary"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!--/ Enable OTP Modal -->
-      
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
     <div class="offcanvas-header border-bottom">
@@ -184,37 +132,17 @@
                 },
                 { data: 'dv_no' },
                 { data: 'cluster' },
-                { data: 'box_b_in' },
-                { data: 'division_id' },
+                { data: 'division_name' },
+                { data: 'division_chief' },
+
                 { data: 'status' },
+                { data: 'box_b_in' },
                 { data: 'user_id' },
                 { data: 'id' },
             ],
             columnDefs: [
-                {
-                    targets: 3,
-                    render: function(data) {
-                        var floatValue = parseFloat(data);
-                        if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
-                        } else {
-                            return "";
-                        }
-                    },
-                },
-                {
-                    targets: 4,
-                    render: function(data) {
-                        var floatValue = parseFloat(data);
-                        if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
-                        } else {
-                            return "";
-                        }
-                    },
-                },
+             
+              
                 {
                   targets: 5,
                   render: function (data) {
@@ -228,7 +156,7 @@
                         return '<span class="badge bg-label-danger">Returned</span>'
                       }
                       else{
-                        return '<span class="badge bg-label-success">For payroll</span>'
+                        return '<span class="badge bg-label-success">Outgoing</span>'
                       }
 
                   },
@@ -239,15 +167,14 @@
                         return moment(data).format('LLL')
                     },
                 },
-            
                 {
                   targets: -1,
-                  title: 'Actions',
+                  title: 'Action',
                   orderable: false,
                   searchable: false,
                   render: function (data) {
                       return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-details text-body" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>'
+                          '<a href="javascript:;" data-id="' + data + '" class="preview-details text-body"><i class="text-primary fa fa-print"></i></a>'
                       )
                   },
               },
@@ -299,22 +226,17 @@
                     $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
                 });
 
-                $('.item-details').on('click', function () {
-                    clicked_id = $(this).data('id');
+                $('.preview-details').on('click', function () {
+                    bx_id = $(this).data('id');
+
                     $.ajax({
                         type: 'POST',
-                        url: "{% url 'tev-details' %}",
+                        url: "{% url 'preview-box-a' %}",
                         data:{
-                            tev_id: clicked_id
+                            box_id: bx_id
                         }
                     }).done(function (data) {
-                        let value = data.data.remarks;
-                        let final_amount = data.data.final_amount;
-                        let floatvalue = parseFloat(final_amount);
-                        let convertedAmount = floatvalue.toFixed(2);
-                        if (convertedAmount === "0.00") {convertedAmount =""} 
-                        $("#final_amount").val(convertedAmount);
-                        $("#correctness_remarks").val(value);
+                        console.log(data.incoming_data);
                     })
                 });
             },
@@ -491,7 +413,7 @@
                 tev_details(final_amount,correctness_remarks,status,clicked_id);
               }
           });
-          
+
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
@@ -521,7 +443,6 @@
                 }
                 }).done(function(data){
                 if (data.data == 'success') {
-                    $('#tevDetails').modal('hide');
                     toastr.success('Successfully save', 'Success', toast_options);
                     offCanvasEl.hide()
                     dataTable.ajax.reload()
