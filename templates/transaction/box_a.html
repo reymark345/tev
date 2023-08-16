@@ -168,16 +168,17 @@
                     },
                 },
                 {
-                  targets: -1,
-                  title: 'Action',
-                  orderable: false,
-                  searchable: false,
-                  render: function (data) {
-                      return (
-                          '<a href="javascript:;" data-id="' + data + '" class="preview-details text-body"><i class="text-primary fa fa-print"></i></a>'
-                      )
-                  },
-              },
+                    targets: -1,
+                    title: 'Action',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data) {
+                        var itemId = data; // Assuming data contains the ID you want to pass
+                        return (
+                            '<a href="{% url "preview-box-a" %}?id=' + itemId + '" class="preview-details text-body"><i class="text-primary fa fa-print"></i></a>'
+                        );
+                    },
+                },
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
@@ -236,7 +237,13 @@
                             box_id: bx_id
                         }
                     }).done(function (data) {
-                        console.log(data.incoming_data);
+
+                        var newTab = window.open('print_box_a.html', '_blank');
+
+                       // newTab.document.write(data.incoming_data);
+                        //newTab.document.close();
+
+                        //console.log(data.incoming_data);
                     })
                 });
             },

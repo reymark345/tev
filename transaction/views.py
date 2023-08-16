@@ -138,19 +138,34 @@ def box_a(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
+    
 
 
 @login_required(login_url='login')
-@csrf_exempt
 def preview_box_a(request):
-    outgoing_id = request.POST.get('box_id')
-    tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
-    selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
+    outgoing_id = request.GET.get('id')
     
-    serialized_data = serializers.serialize('json', selected_tev_incoming_data)
-    parsed_data = json.loads(serialized_data)
+    if outgoing_id:
+        tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
+        selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
+        
+        return render(request, 'transaction/print_box_a.html', {'selected_tev_incoming_data': selected_tev_incoming_data})
+    else:
+        return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
     
-    return JsonResponse({'incoming_data': parsed_data})
+
+
+# @login_required(login_url='login')
+# @csrf_exempt
+# def preview_box_a(request):
+#     outgoing_id = request.POST.get('box_id')
+#     tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
+#     selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
+    
+#     serialized_data = serializers.serialize('json', selected_tev_incoming_data)
+#     parsed_data = json.loads(serialized_data)
+    
+#     return JsonResponse({'incoming_data': parsed_data})
     
 
 
