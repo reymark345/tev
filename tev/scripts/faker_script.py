@@ -10,7 +10,7 @@ cluster = ['Cluster 01','Cluster 02','Cluster 03','Cluster 04', 'Cluster 05', 'C
 charges = ['AICS','Socpen','Disaster','CCAM', '4PS']
 division = ['Finance Management Division','Pantawid','DRMD','HRRMD', 'PSD', 'PPD','ORD']
 acronym = ['FMD','PTW','DRMD','HRRMD', 'PSD', 'PPD','ORD']
-status = ['Pending','Ongoing','Returned','For payroll', 'Outgoing']
+status = ['Pending','For checking','Returned','For payroll', 'Outgoing','Ongoing']
 
 
 

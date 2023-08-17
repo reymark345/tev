@@ -19,6 +19,7 @@
                             <th>Division Chief</th>
                             <th>Status</th>
                             <th>Date In</th>
+                            <th>Date Out</th>
                             <th>Created By</th>
                             <th>ID</th>
                         </tr>
@@ -134,9 +135,9 @@
                 { data: 'cluster' },
                 { data: 'division_name' },
                 { data: 'division_chief' },
-
                 { data: 'status' },
                 { data: 'box_b_in' },
+                { data: 'box_b_out' },
                 { data: 'user_id' },
                 { data: 'id' },
             ],
@@ -150,13 +151,19 @@
                         return '<span class="badge bg-label-warning">Pending</span>'
                       }
                       else if(data==2){
-                        return '<span class="badge bg-label-success">Ongoing</span>'
+                        return '<span class="badge bg-label-warning">For checking</span>'
                       }
                       else if(data==3){
                         return '<span class="badge bg-label-danger">Returned</span>'
                       }
+                      else if(data==4){
+                        return '<span class="badge bg-label-primary">For payroll</span>'
+                      }
+                      else if(data==5){
+                        return '<span class="badge bg-label-warning">Outgoing</span>'
+                      }
                       else{
-                        return '<span class="badge bg-label-success">Outgoing</span>'
+                        return '<span class="badge bg-label-success">Ongoing</span>'
                       }
 
                   },
@@ -164,7 +171,13 @@
                 {
                     targets: -3,
                     render: function (data) {
-                        return moment(data).format('LLL')
+                        return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+                {
+                    targets: -4,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
                 {
@@ -355,7 +368,7 @@
         });
         function incoming_out(selected_items){
             Swal.fire({
-                title: 'Out Tev?',
+                title: 'Date out, Are you sure?',
                 text: "You won't be able to revert this!",
                 icon: 'warning',
                 showCancelButton: true,
@@ -371,7 +384,7 @@
        
                     $.ajax({
                         type: 'POST',
-                        url: "{% url 'out-pending-tev' %}",
+                        url: "{% url 'out-box-a' %}",
                         data:{
                             out_list: selected_items
                         }

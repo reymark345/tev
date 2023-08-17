@@ -262,8 +262,9 @@ def box_load(request):
             'cluster': item.cluster,
             'division_name': item.division.name,
             'division_chief': item.division.chief,
-            'status':5,
+            'status':item.status,
             'box_b_in': item.box_b_in,
+            'box_b_out': item.box_b_out,
             'user_id': full_name
         }
 
@@ -333,21 +334,35 @@ def item_add(request):
 
 
 @csrf_exempt
-def tracking(request):
-    context = {
-		'employee_list' : TevIncoming.objects.filter().order_by('employee_name'),
-	}
-    return render(request, 'receive/tracking.html', context)
-
-
-@csrf_exempt
-def out_pending_tev(request):
+def out_box_a(request):
     out_list = request.POST.getlist('out_list[]')
     
+    # Convert the out_list items to integers
+    out_list_int = [int(item) for item in out_list]
+
+    
+    # Update the tev_incoming table
+    ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+    
+    TevIncoming.objects.filter(id__in=ids).update(status=6)
+    
     for item_id  in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=datetime.datetime.now())
+        box_b = TevOutgoing.objects.filter(id=item_id).update(status=6,box_b_out=datetime.datetime.now())
+
     
     return JsonResponse({'data': 'success'})
+
+
+
+# @csrf_exempt
+# def out_box_a(request):
+#     out_list = request.POST.getlist('out_list[]')
+    
+#     for item_id  in out_list:
+#         box_b = TevOutgoing.objects.filter(id=item_id).update(box_b_out=datetime.datetime.now())
+    
+#     return JsonResponse({'data': 'success'})
+
 
 @csrf_exempt
 def tev_details(request):
