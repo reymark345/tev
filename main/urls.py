@@ -10,5 +10,6 @@ urlpatterns = [
     path('admin/', include('admin.urls')),
     path('receive/', include('receive.urls')),
     path('transaction/', include('transaction.urls')),
+    path('libraries/', include('libraries.urls')),
 
 ]

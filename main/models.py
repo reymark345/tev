@@ -117,6 +117,7 @@ class TevIncoming(models.Model):
     code = models.CharField(max_length=128, blank=True, null=True)
     name = models.CharField(max_length=128, blank=True, null=True)
     id_no = models.CharField(max_length=128, blank=True, null=True)
+    account_no = models.CharField(max_length=128, blank=True, null=True)
     original_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True)
     final_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
     incoming_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
@@ -131,16 +132,29 @@ class TevIncoming(models.Model):
         managed = True
         db_table = 'tev_incoming'
         
+class Division(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    acronym = models.CharField(max_length=128, blank=True, null=True)
+    chief = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'division'
+        
 class TevOutgoing(models.Model):
     dv_no = models.CharField(max_length=128, blank=True, null=True)
     cluster = models.CharField(max_length=128, blank=True, null=True)
-    responsibility_center = models.CharField(max_length=128, blank=True, null=True)
+    division = models.ForeignKey(Division, models.DO_NOTHING)
     box_date_out = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     box_b_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     box_b_out = models.DateTimeField(blank=True, null=True)
     box_c_out = models.DateTimeField(blank=True, null=True)
     ard_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     ard_out = models.DateTimeField(blank=True, null=True)
+    status = models.IntegerField(max_length=128, blank=True, null=True,default=5)
     user_id = models.CharField(max_length=128, blank=True, null=True)
     
     class Meta:
@@ -149,12 +163,15 @@ class TevOutgoing(models.Model):
         
 class Charges(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.IntegerField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)
 
     class Meta:
         managed = True
         db_table = 'charges'
+        
+
         
 class TevBridge(models.Model):
     tev_incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)

@@ -12,12 +12,12 @@ from django.core import serializers
 import datetime 
 from datetime import date
 from django.contrib.auth.hashers import make_password
-from django.db import IntegrityError
+from django.db import IntegrityError, connection
 import math
 from django.core.serializers import serialize
 from django.forms.models import model_to_dict
 import requests
-
+from django.db.models import Q, F, Exists, OuterRef
 
 
 def get_user_details(request):
@@ -83,25 +83,40 @@ def checking(request):
         return render(request, 'receive/checking.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
-
+    
+    
 
 def item_load(request):
-    
     idn = request.GET.get('identifier')
-    if idn =="1":
-        retrieve =[1,3]
-    elif idn =="2":
-        retrieve =[2,3,4]
+    if idn == "1":
+        retrieve = [1, 3]
+    elif idn == "2":
+        retrieve = [2, 3, 4]
     else:
-        retrieve =[1,2,3,4]
-       
-       
-    
-    # item_data = TevIncoming.objects.filter(status__in=retrieve).select_related().values_list('code', flat=True).order_by('-incoming_in').reverse()
-    
-    
-    item_data = (TevIncoming.objects.filter(status__in=retrieve).select_related().distinct().order_by('-id').reverse())
-    total = item_data.count()
+        retrieve = [1, 2, 3, 4]
+
+    query = """
+    SELECT t.*
+    FROM tev_incoming t
+    WHERE (
+        t.status = 1
+        OR (
+            t.status = 3 AND NOT EXISTS (
+                SELECT 1
+                FROM tev_incoming t2
+                WHERE t2.code = t.code
+                AND t2.status IN (1, 2)
+            )
+        )
+    );
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        columns = [col[0] for col in cursor.description]
+        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    total = len(results)
 
     _start = request.GET.get('start')
     _length = request.GET.get('length')
@@ -110,29 +125,102 @@ def item_load(request):
         length = int(_length)
         page = math.ceil(start / length) + 1
         per_page = length
-        item_data = item_data[start:start + length]
+        results = results[start:start + length]
 
     data = []
 
-    for item in item_data:
-        userData = AuthUser.objects.filter(id=item.user_id)
+    for item in results:
+        userData = AuthUser.objects.filter(id=item['user_id'])
         full_name = userData[0].first_name + ' ' + userData[0].last_name
 
-        item = {
-            'id': item.id,
-            'code': item.code,
-            'name': item.name,
-            'id_no': item.id_no,
-            'original_amount': item.original_amount,
-            'final_amount': item.final_amount,
-            'incoming_in': item.incoming_in,
-            'incoming_out': item.incoming_out,
-            'slashed_out': item.incoming_out,
-            'remarks': item.remarks,
-            'status': item.status,
+        item_entry = {
+            'id': item['id'],
+            'code': item['code'],
+            'name': item['name'],
+            'id_no': item['id_no'],
+            'original_amount': item['original_amount'],
+            'final_amount': item['final_amount'],
+            'incoming_in': item['incoming_in'],
+            'incoming_out': item['incoming_out'],
+            'slashed_out': item['incoming_out'],
+            'remarks': item['remarks'],
+            'status': item['status'],
             'user_id': full_name
         }
 
+        data.append(item_entry)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+
+from django.db import connection
+from django.http import JsonResponse
+import math
+
+def checking_load(request):
+    idn = request.GET.get('identifier')
+    retrieve = [2, 3, 4]
+
+    query = """
+        SELECT t.*
+        FROM tev_incoming t
+        WHERE t.status = 2
+           OR t.status = 4
+           OR (t.status = 3 AND (
+               SELECT COUNT(*)
+               FROM tev_incoming
+               WHERE code = t.code
+               ) = 1
+           );
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+    total = len(results)
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        results = results[start:start + length]
+
+    data = []
+
+    print("datataaaaaaall")
+    print(results)
+
+    for row in results:
+
+        userData = AuthUser.objects.filter(id=row[13])
+        full_name = userData[0].first_name + ' ' + userData[0].last_name
+
+        item = {
+            'id': row[0],
+            'code': row[1],
+            'name': row[2],
+            'id_no': row[3],
+            'original_amount': row[5],
+            'final_amount': row[6],
+            'incoming_in': row[7],
+            'incoming_out': row[8],
+            'slashed_out': row[9],
+            'remarks': row[10],
+            'status': row[12],
+            'user_id': full_name
+        }
         data.append(item)
 
     response = {
@@ -143,6 +231,58 @@ def item_load(request):
         'recordsFiltered': total,
     }
     return JsonResponse(response)
+
+
+
+# def checking_load(request):
+    
+#     idn = request.GET.get('identifier')
+#     retrieve =[2,3,4]
+
+       
+#     item_data = (TevIncoming.objects.filter(status__in=retrieve).select_related().distinct().order_by('-id').reverse())
+#     total = item_data.count()
+
+#     _start = request.GET.get('start')
+#     _length = request.GET.get('length')
+#     if _start and _length:
+#         start = int(_start)
+#         length = int(_length)
+#         page = math.ceil(start / length) + 1
+#         per_page = length
+#         item_data = item_data[start:start + length]
+
+#     data = []
+
+#     for item in item_data:
+#         userData = AuthUser.objects.filter(id=item.user_id)
+#         full_name = userData[0].first_name + ' ' + userData[0].last_name
+
+#         item = {
+#             'id': item.id,
+#             'code': item.code,
+#             'name': item.name,
+#             'id_no': item.id_no,
+#             'original_amount': item.original_amount,
+#             'final_amount': item.final_amount,
+#             'incoming_in': item.incoming_in,
+#             'incoming_out': item.incoming_out,
+#             'slashed_out': item.incoming_out,
+#             'remarks': item.remarks,
+#             'status': item.status,
+#             'user_id': full_name
+#         }
+
+#         data.append(item)
+
+#     response = {
+#         'data': data,
+#         'page': page,
+#         'per_page': per_page,
+#         'recordsTotal': total,
+#         'recordsFiltered': total,
+#     }
+#     return JsonResponse(response)
 
 def item_edit(request):
     id = request.GET.get('id')
@@ -203,6 +343,7 @@ def tracking(request):
 		'employee_list' : TevIncoming.objects.filter().order_by('employee_name'),
 	}
     return render(request, 'receive/tracking.html', context)
+
 
 
 @csrf_exempt

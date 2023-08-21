@@ -60,11 +60,21 @@
         </div>
 
         <div class="col-sm-12">
-            <label class="form-label" for="employee-name">Cluster</label>
-            <select id="cluster" name="Cluster" class="form-select employee" data-allow-clear="true">
+            <label class="form-label" for="cluster-name">Cluster</label>
+            <select id="cluster" name="Cluster" class="form-select cluster" data-allow-clear="true">
                 <option></option>
                 {% for row in cluster %}
                 <option value="{{ row.id }}">{{ row.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-sm-12">
+            <label class="form-label" for="division-name">Division</label>
+            <select id="division" name="Division" class="form-select division" data-allow-clear="true">
+                <option></option>
+                {% for row in division %}
+                <option value="{{ row.id }}">{{ row.name }} : {{ row.chief }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -156,7 +166,8 @@
 
         const ItemFormAssignValidation = document.getElementById('assign-form'),
             DvNumber = jQuery(document.querySelector('[name="DvNumber"]')),
-            Cluster = jQuery(document.querySelector('[name="Cluster"]'));
+            Cluster = jQuery(document.querySelector('[name="Cluster"]')),
+            Division = jQuery(document.querySelector('[name="Division"]'));
 
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
@@ -203,28 +214,9 @@
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'incoming_in' },
-                {
-                    render: function(data, type, row) {
-                      if (type === 'display') {
-
-                        return '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" disabled>'+
-                            '<option></option>'+
-                            '{% for row in charges %}'+
-                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                            '{% endfor %}'+
-                        '</select>';
-                      }
-                    }
-                },
-                {
-                    render: function(data, type, row) {
-                      if (type === 'display') {
-                        return '<input type="text" class="form-control purpose" id="basic-default-name" name="Purpose" disabled />';
-                      }
-                      return data;
-                    }
-                },
-
+                { data: null, orderable: false }, // Placeholder for charges column
+                { data: null, orderable: false }
+             
             ],
             columnDefs: [
                 {
@@ -246,13 +238,13 @@
                         return '<span class="badge bg-label-warning">Pending</span>'
                       }
                       else if(data==2){
-                        return '<span class="badge bg-label-success">Ongoing</span>'
+                        return '<span class="badge bg-label-warning">For checking</span>'
                       }
                       else if(data==3){
                         return '<span class="badge bg-label-danger">Returned</span>'
                       }
                       else{
-                        return '<span class="badge bg-label-success">For payroll</span>'
+                        return '<span class="badge bg-label-primary">For payroll</span>'
                       }
 
                   },
@@ -263,6 +255,30 @@
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
+
+                {
+                    targets: -2,
+                    render: function(data, type, row) {
+                        if (type === 'display') {
+                            return '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" disabled>' +
+                                '<option></option>' +
+                                '{% for row in charges %}'+
+                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                '{% endfor %}'+
+                                '</select>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    targets: -1,
+                    render: function(data, type, row) {
+                        if (type === 'display') {
+                            return '<input type="text" class="form-control purpose" id="basic-default-name" name="Purpose" disabled />';
+                        }
+                        return data;
+                    }
+                },
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
@@ -271,30 +287,14 @@
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
                 },
                 {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
-                    action: function () {
-                        // Get the IDs of checked items
-                        var selectedItems = [];
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-
-                        if(selectedItems.length ===0){
-                            toastr.error('Select item first', 'Invalid', toast_options);
-                        }
-                        else{
-                            incoming_out(selectedItems);
-                        }
-                    }
-                },
-
-                {
                     className: 'btn btn-primary',
                     text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Save</span>',
                     action: function () {
                         // Get the IDs of checked items
                         var selectedItems = [];
+                        DvNumber.val("");
+                        Cluster.val("").trigger('change');
+                        Division.val("").trigger('change');
                         $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
                             selectedItems.push($(this).val());
                         });
@@ -355,7 +355,9 @@
         
                     // Set the checked state of all checkboxes in the table body
 
-                    $('#tbl-items tbody input[type="checkbox"][id="checkbox_data"]').prop('checked', isChecked);
+                    //$('#tbl-items tbody input[type="checkbox"][id="checkbox_data"]').prop('checked', isChecked);
+
+                    $('.checkbox_data').prop('checked', isChecked).trigger('change');
                 });
 
                 $('.item-details').on('click', function () {
@@ -412,6 +414,13 @@
                             },
                         },
                     },
+                    Division: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Please Select Division',
+                            },
+                        },
+                    },
                 },
                 plugins: {
                     trigger: new FormValidation.plugins.Trigger(),
@@ -427,8 +436,10 @@
                     })
                 },
             }).on('core.form.valid', function () {
+
+                $('#saveModal').modal('hide');
                 Swal.fire({
-                    title: 'Are you sure?',
+                    title: '<strong>DV number <u>'+DvNumber.val()+'</u> <br> Cluster : 0'+Cluster.val()+' </strong>',
                     text: "You won't be able to revert this!",
                     icon: 'warning',
                     showCancelButton: true,
@@ -551,19 +562,6 @@
             }).then(function (result) {
                 if (result.value) {
                     var form_data = $('#item-form').serialize()
-
-                    //post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-
-                    //if (status_val ==3){
-                      //  post_url = "{% url 'item-update' %}";
-                   // }
-                   // else if (ItemID.val() !== '0') {
-                   //     post_url = "{% url 'item-update' %}";
-                   // } 
-                   // else {
-                   //     post_url = "{% url 'item-add' %}";
-                   // }
-
                     let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
                     var form_data = $('#item-form').serialize()
                     $.ajax({
@@ -622,62 +620,33 @@
             })
         });
 
-
-        function incoming_out(selected_items){
-            Swal.fire({
-                title: 'Mark as Out?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, mark as out!',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-3',
-                    cancelButton: 'btn btn-label-secondary',
-                },
-                buttonsStyling: false,
-            }).then(function (result) {
-                if (result.value) {
-                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-       
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'out-pending-tev' %}",
-                        data:{
-                            out_list: selected_items
-                        }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Successfully save!',
-                                text: 'Item has been added.',
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-
-                            dataTable.ajax.reload()
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                }
-            })
-
+        function renderCharges(data, type, row) {
+            if (type === 'display') {
+                return '<select class="form-select charges" data-allow-clear="true" disabled>' +
+                    '<option></option>' +
+                    '{% for row in charges %}' +
+                        '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                    '{% endfor %}' +
+                '</select>';
+            }
+            return data;
+        }
+        
+        function renderPurpose(data, type, row) {
+            if (type === 'display') {
+                return '<input type="text" class="form-control purpose" name="Purpose" disabled />';
+            }
+            return data;
         }
 
         function savepayroll(selected_items){
             console.log(selected_tev);
             $('#saveModal').modal('show');
+            const currentDate = new Date();
+            const year = currentDate.getFullYear().toString().slice(-2); // Last two digits of the year
+            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month with leading zero if needed
+            DvNumber.val(`${year}-${month}-`);
         }
-
 
         $(document).on("change", ".purpose", function() {
             var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
@@ -694,9 +663,6 @@
         $(document).on("change", ".charges", function() {
             var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
             var chargesValue = $(this).val();
-
-
-            
             var existingItem = selected_tev.find(function(item) {
                 return item.id === checkboxId;
             });
@@ -709,15 +675,14 @@
             }
         });
 
-        $(document).on('click', '.checkbox_data', function(event) {
+        $(document).on('change', '.checkbox_data', function(event) {
             var clickedCheckbox = $(event.target);
             var row = clickedCheckbox.closest('tr'); // Get the parent row of the clicked checkbox
-            var checkboxId = clickedCheckbox.attr('id');
+            var checkboxId = clickedCheckbox.attr('value');
             var purposeInput = row.find('input[name="Purpose"]');
             var purposeValue = purposeInput.val().trim();
             var stck_id = clickedCheckbox.val();
            
-          
             let currentDate = new Date();
             let month = currentDate.getMonth();
             let monthDate = new Date(currentDate.getFullYear(), month);
@@ -725,12 +690,11 @@
             let year = currentDate.getFullYear();
           
             let defaultPurposeValue = "TE for " + monthName + " " + year;
-          
             if (clickedCheckbox.prop('checked')) {
                 var existingItem = selected_tev.find(function(item) {
                     return item.id === checkboxId;
                 });
-          
+              
                 if (!existingItem) {
                     var array_id = {
                         id: stck_id,
@@ -745,12 +709,12 @@
                     console.log(array_id);
                 } else {
                     existingItem.purpose = purposeValue;
-                    console.log(existingItem);
+
                 }
-          
+              
                 row.find('select[name="Charges"]').prop("disabled", false);
                 purposeInput.prop("disabled", false);
-          
+              
                 if (!purposeValue) {
                     purposeInput.val(defaultPurposeValue);
                 }
@@ -761,7 +725,7 @@
                 if (index !== -1) {
                     selected_tev.splice(index, 1);
                 }
-          
+              
                 row.find('select[name="Charges"]').prop("disabled", true).val("");
                 purposeInput.prop("disabled", true).val("");
             }
@@ -775,6 +739,7 @@
                 );
             });
         });
+        
         
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();

@@ -151,60 +151,51 @@
                                 <div data-i18n="Payroll">Payroll</div>
                             </a>
                         </li>
-                        <li class="menu-item">
-                            <a href="app-email.html" class="menu-link">
+                        <li class="menu-item {% if url_name == 'box-a' %}active{% endif %}">
+                            <a href="{% url 'box-a' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti-solid fa-inbox"></i>
                                 <div data-i18n="Box A">Box A</div>
                             </a>
                         </li>
-                        <li class="menu-item">
-                            <a href="app-email.html" class="menu-link">
-                                <i class="menu-icon tf-icons ti ti-color-swatch"></i>
-                                <div data-i18n="Budget">Budget</div>
-                            </a>
-                        </li>
-                        <li class="menu-item">
-                            <a href="app-email.html" class="menu-link">
-                        
-
-                               
-                                <i class="menu-icon tf-icons ti ti-file-description"></i>
-                                <div data-i18n="JEV">JEV</div>
-                            </a>
-                        </li>
+                      
                         <li class="menu-item">
                             <a href="app-email.html" class="menu-link">
                                 <i class="menu-icon tf-icons ti ti-text-wrap-disabled"></i>
                                 <div data-i18n="Certified">Certified</div>
                             </a>
                         </li>
-                        
-
-                        
 
                         <!-- Libraries -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Libraries</span>
                         </li>
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
-                                <i class="menu-icon tf-icons ti ti-color-swatch"></i>
-                                <div data-i18n="Items">Items</div>
-                            </a>
-                        </li>
-
-                        <li class="menu-item">
-                            <a href="#" class="menu-link">
+                        <li class="menu-item {% if url_name == 'charges' %}active{% endif %}">
+                            <a href="{% url 'charges' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti fa-list-check"></i>
+                              
                                 <div data-i18n="Charges">Charges</div>
                             </a>
                         </li>
 
+                        <li class="menu-item {% if url_name == 'division' %}active{% endif %}">
+                            <a href="{% url 'division' %}" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-color-swatch"></i>
+                              
+                                <div data-i18n="Division">Division</div>
+                            </a>
+                        </li>
                         
 
                         <!-- Admin -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Admin</span>
+                        </li>
+
+                        <li class="menu-item">
+                            <a href="app-email.html" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-settings"></i>
+                                <div data-i18n="Users">Users</div>
+                            </a>
                         </li>
                         
                         <li class="menu-item">

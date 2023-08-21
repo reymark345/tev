@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'main',
     'receive',
     'transaction',
+    'libraries',
 ]
 
 MIDDLEWARE = [
