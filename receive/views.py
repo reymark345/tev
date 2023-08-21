@@ -85,6 +85,56 @@ def checking(request):
         return render(request, 'pages/unauthorized.html')
     
     
+def tracking_load(request):
+    
+    idn = request.GET.get('identifier')
+    retrieve =[2,3,4]
+
+       
+    item_data = (TevIncoming.objects.filter().select_related().distinct().order_by('-id').reverse())
+    total = item_data.count()
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        item_data = item_data[start:start + length]
+
+    data = []
+
+    for item in item_data:
+        userData = AuthUser.objects.filter(id=item.user_id)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name
+
+        item = {
+            'id': item.id,
+            'code': item.code,
+            'name': item.name,
+            'id_no': item.id_no,
+            'original_amount': item.original_amount,
+            'final_amount': item.final_amount,
+            'incoming_in': item.incoming_in,
+            'incoming_out': item.incoming_out,
+            'slashed_out': item.incoming_out,
+            'remarks': item.remarks,
+            'status': item.status,
+            'user_id': full_name
+        }
+
+        data.append(item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
 
 def item_load(request):
     idn = request.GET.get('identifier')
@@ -198,9 +248,6 @@ def checking_load(request):
         results = results[start:start + length]
 
     data = []
-
-    print("datataaaaaaall")
-    print(results)
 
     for row in results:
 
@@ -340,7 +387,7 @@ def item_add(request):
 @csrf_exempt
 def tracking(request):
     context = {
-		'employee_list' : TevIncoming.objects.filter().order_by('employee_name'),
+		'employee_list' : TevIncoming.objects.filter().order_by('name'),
 	}
     return render(request, 'receive/tracking.html', context)
 
