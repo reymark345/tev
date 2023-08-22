@@ -59,6 +59,16 @@
                 </div>
             </div>
 
+            <div class="col-sm-12">
+                <!-- Multiple Dates Picker-->
+                <div class="col-md-12 mb-2">
+                  <label for="flatpickr-multi" class="form-label">Date Travel</label>
+                  <input type="text" class="form-control" name="DateTravel" placeholder="YYYY-MM-DD HH:MM" id="flatpickr-multi"/>
+                </div>
+                <!-- /Multiple Dates Picker-->
+
+            </div>
+
 
             <div class="col-sm-12">
                 <div class="form-group">
@@ -91,6 +101,7 @@
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
+            DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
             offCanvasElement = document.querySelector('#add-new-record')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
@@ -349,6 +360,13 @@
                         },
                     },
                 },
+                DateTravel: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Select Travel Date',
+                        },
+                    },
+                },
             },
             plugins: {
                 trigger: new FormValidation.plugins.Trigger(),
@@ -430,9 +448,10 @@
                                     },
                                 })
                             }
-                            EmployeeName.val("").trigger('change')
-                            OriginalAmount.val("")
-                            Remarks.val("")
+                            EmployeeName.val("").trigger('change');
+                            OriginalAmount.val("");
+                            DateTravel.val("")
+                            Remarks.val("");
                             dataTable.ajax.reload();
                         } else {
                             Swal.fire({
