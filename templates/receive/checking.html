@@ -234,6 +234,9 @@
                       else if(data==3){
                         return '<span class="badge bg-label-danger">Returned</span>'
                       }
+                      else if(data==7){
+                        return '<span class="badge bg-label-success">Approved</span>'
+                      }
                       else{
                         return '<span class="badge bg-label-success">For payroll</span>'
                       }
@@ -454,7 +457,7 @@
        
                     $.ajax({
                         type: 'POST',
-                        url: "{% url 'out-pending-tev' %}",
+                        url: "{% url 'out-checking-tev' %}",
                         data:{
                             out_list: selected_items
                         }
@@ -490,7 +493,7 @@
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
-            let status = 4; 
+            let status = 7; 
               if (final_amount === "") {  
                 $("#amount_error").text("Please enter Amount");
                 $("#remarks_error").text("");

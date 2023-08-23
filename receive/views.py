@@ -90,29 +90,29 @@ def checking(request):
 
 
 def tracking_load(request):
-    finance_database_alias = 'finance'
-    dv_no_list = TevOutgoing.objects.order_by('id').values_list('dv_no', flat=True)
+    # finance_database_alias = 'finance'
+    # dv_no_list = TevOutgoing.objects.order_by('id').values_list('dv_no', flat=True)
 
-    query = """
-        SELECT dv_no, amt_certified, amt_journal, amt_budget 
-        FROM transactions 
-        WHERE dv_no IN %s
-    """
-    params = [tuple(dv_no_list)]
+    # query = """
+    #     SELECT dv_no, amt_certified, amt_journal, amt_budget 
+    #     FROM transactions 
+    #     WHERE dv_no IN %s
+    # """
+    # params = [tuple(dv_no_list)]
 
-    with connections[finance_database_alias].cursor() as cursor:
-        cursor.execute(query, params)
-        results = cursor.fetchall()
+    # with connections[finance_database_alias].cursor() as cursor:
+    #     cursor.execute(query, params)
+    #     results = cursor.fetchall()
 
-    print("testdatabase1")
-    print(results)
+    # print("testdatabase1")
+    # print(results)
     
     
     
     query = """
         SELECT t.*
         FROM tev_incoming t
-        WHERE t.status IN (1, 2, 4)
+        WHERE t.status IN (1, 2, 4, 5 , 7)
            OR (t.status = 3 AND (
                SELECT COUNT(*)
                FROM tev_incoming
@@ -327,7 +327,7 @@ def checking_load(request):
         SELECT t.*
         FROM tev_incoming t
         WHERE t.status = 2
-           OR t.status = 4
+           OR t.status = 7
            OR (t.status = 3 AND (
                SELECT COUNT(*)
                FROM tev_incoming
@@ -507,6 +507,15 @@ def out_pending_tev(request):
     
     for item_id  in out_list:
         tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=datetime.datetime.now())
+    
+    return JsonResponse({'data': 'success'})
+
+@csrf_exempt
+def out_checking_tev(request):
+    out_list = request.POST.getlist('out_list[]')
+    
+    for item_id  in out_list:
+        tev_update = TevIncoming.objects.filter(id=item_id).update(status=4,slashed_out=datetime.datetime.now())
     
     return JsonResponse({'data': 'success'})
 

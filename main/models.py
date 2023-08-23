@@ -212,7 +212,7 @@ class StaffDetails(models.Model):
         
 class Status(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     class Meta:
         managed = True
