@@ -1,201 +1,1118 @@
-{% load staticfiles %}
+<html>
 
-<html
-  lang="en"
-  class="light-style customizer-hide"
-  dir="ltr"
-  data-theme="theme-default"
-  data-assets-path="{% static 'assets/' %}"
-  data-template="vertical-menu-template"
->
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-    />
+<head>
+<style>
+ 
 
-    <title>BCDH POS | Login</title>
+    .container-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        height: auto;
+        padding-bottom: 50px;
+        background-color: #cccccc;
+      }
+     
+      .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        height: 5%;
+        background-color: #f0f0f0;
+        border-radius: 8px;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 20px;
+        padding: 0 10px;
+      }
+     
+      .print-button {
+        background-color: #b2c2ce;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 8px 12px;
+        cursor: pointer;
+        margin-right: 500px;
+      }
+     
+      .container-body, .container-body2,.container-body3,.container-body4  {
+        width: 210mm;
+        height:auto;
+        background-color: #ffffff;
+        box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        position: relative;
+        padding: 50px;
+      }
+      .appendix {
+        position: absolute;
+        top: 65px;
+        right: 50px;
+        font-size: 14px;
+        font-style: italic;
+      }
+     
+      table {
+        border: 3px solid;
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 40px;
+      }
+     
+      th,
+      td {
+        border: 1px solid #000000;
+        text-align: left;
+        padding: 8px;
+      }
+     
+      th {
+        background-color: #f2f2f2;
+      }
+     
+      .center-text {
+        text-align: center;
+        vertical-align: top;
+      }
+      .dvnumber {
+        background-color:#c6e0b4;
+        border:1.8px solid;
+        font-size: 10px;
+      }
+      .align-u-left {
+      text-align: left;
+      vertical-align: top;
+    }
+     
+      @media print {
+        .container {
+          display: none;
+        }
+     
+        .container-body, .container-body2,.container-body3,.container-body4{
+          background-color: #f0f0f0;
+          box-shadow: none;
+          width: 210mm;
+          height: 297mm;
+          margin-top: -30px;
+        }
+     
+        .container h3 {
+          color: transparent;
+        }
+     
+        .container-wrapper {
+          align-items: flex-start;
+        }
+     
+        table {
+          margin-top: 15px;
+          border: 3px solid;
+        }
+     
+        .appendix {
+          top: 45px;
+        }
+     
+        /* Adjust font size for Disbursement Voucher in print */
+        .center-text b {
+          font-size: 14px;
+        }
+        .dvnumber {
+          background-color: #c6e0b4 !important; /* Use !important to ensure it's applied */
+          color: black; /* Make sure text remains readable */
+          border: 1.8px solid;
+          font-size: 10px;
+        }
 
-    <meta name="description" content="" />
+        .container-body2,.container-body3,.container-body4 {
+          page-break-before: always;
+        }
+      }
+     .innerTable{
+       margin:0px;
+       border-color:white;  
+     }
+     .lastRow{
+       padding:0px;
+     }
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{% static 'assets/img/logos/bcdh_logo.png' %}" />
+     .align-text-right{
+      text-align: right;
+     }
+     .align-text-right{
+      text-align: right;
+     }
+     .no-border{
+      border: 0;
+     }
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap"
-      rel="stylesheet"
-    />
+     .footer {
+      margin-top: 95%;
+      
+    }
 
-    <!-- Icons -->
-    <link rel="stylesheet" href="{% static 'assets/vendor/fonts/fontawesome.css' %}" />
-    <link rel="stylesheet" href="{% static 'assets/vendor/fonts/tabler-icons.css' %}" />
-    <link rel="stylesheet" href="{% static 'assets/vendor/fonts/flag-icons.css' %}" />
 
-    <!-- Core CSS -->
-    <link rel="stylesheet" href="{% static 'assets/vendor/css/rtl/core.css' %}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{% static 'assets/vendor/css/rtl/theme-default.css' %}" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="{% static 'assets/css/demo.css' %}" />
 
-    <!-- Vendors CSS -->
-    <link rel="stylesheet" href="{% static 'assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css' %}" />
-    <link rel="stylesheet" href="{% static 'assets/vendor/libs/node-waves/node-waves.css' %}" />
-    <link rel="stylesheet" href="{% static 'assets/vendor/libs/typeahead-js/typeahead.css' %}" />
-    <!-- Vendor -->
-    <link rel="stylesheet" href="{% static 'assets/vendor/libs/formvalidation/dist/css/formValidation.min.css' %}" />
 
-    <!-- Page CSS -->
-    <!-- Page -->
-    <link rel="stylesheet" href="{% static 'assets/vendor/css/pages/page-auth.css' %}" />
-    <!-- Helpers -->
-    <script src="{% static 'assets/vendor/js/helpers.js' %}"></script>
-
-    <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
-    <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
-    <script src="{% static 'assets/vendor/js/template-customizer.js' %}"></script>
-    <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-    <script src="{% static 'assets/js/config.js' %}"></script>
-  </head>
-
-  <body>
-    <!-- Layout wrapper -->
-    <div class="layout-wrapper layout-content-navbar layout-without-menu">
-        <div class="layout-container">
-          <!-- Layout container -->
-          <div class="layout-page">
-            <!-- Navbar -->
-  
-            <nav
-              class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items bg-navbar-theme"
-              id="layout-navbar"
-            >
-              <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-                <!-- Search -->
-                <div class="navbar-nav align-items-center">
-                  <div class="nav-item navbar-search-wrapper mb-0">
-                   
-                  </div>
-                </div>
-                <!-- /Search -->
-  
-              </div>
-  
-              <!-- Search Small Screens -->
-              <div class="navbar-search-wrapper search-input-wrapper d-none">
-                <input
-                  type="text"
-                  class="form-control search-input container-xxl border-0"
-                  placeholder="Search..."
-                  aria-label="Search..."
-                />
-                <i class="ti ti-x ti-sm search-toggler cursor-pointer"></i>
-              </div>
-            </nav>
-  
-            <!-- / Navbar -->
-  
-            <!-- Content wrapper -->
-            <div class="content-wrapper">
-              <!-- Content -->
-  
-              <div class="container-xxl flex-grow-1 container-p-y">
-                <!-- Layout Demo -->
-                <div class="layout-demo-wrapper">
-                  <div class="layout-demo-placeholder">
-                    <img
-                      src="../../assets/img/layouts/layout-without-menu-light.png"
-                      class="img-fluid"
-                      alt="Layout without menu"
-                      data-app-light-img="layouts/layout-without-menu-light.png"
-                      data-app-dark-img="layouts/layout-without-menu-dark.png"
-                    />
-                  </div>
-                  <div class="layout-demo-info">
-                    <h4>Layout without Menu (Navigation)</h4>
-                    <button class="btn btn-primary" type="button" onclick="history.back()">Go Back</button>
-                  </div>
-                </div>
-                <!--/ Layout Demo -->
-              </div>
-              <!-- / Content -->
-  
-              <!-- Footer -->
-              <footer class="content-footer footer bg-footer-theme">
-                <div class="container-xxl">
-                  <div
-                    class="footer-container d-flex align-items-center justify-content-between py-2 flex-md-row flex-column"
-                  >
-                    <div>
-                      ©
-                      <script>
-                        document.write(new Date().getFullYear());
-                      </script>
-                      , made with ❤️ by <a href="https://pixinvent.com" target="_blank" class="fw-semibold">Pixinvent</a>
-                    </div>
-                    <div>
-                      <a href="https://themeforest.net/licenses/standard" class="footer-link me-4" target="_blank"
-                        >License</a
-                      >
-                      <a href="https://1.envato.market/pixinvent_portfolio" target="_blank" class="footer-link me-4"
-                        >More Themes</a
-                      >
-  
-                      <a
-                        href="https://pixinvent.com/demo/vuexy-html-bootstrap-admin-template/documentation/"
-                        target="_blank"
-                        class="footer-link me-4"
-                        >Documentation</a
-                      >
-  
-                      <a href="https://pixinvent.ticksy.com/" target="_blank" class="footer-link d-none d-sm-inline-block"
-                        >Support</a
-                      >
-                    </div>
-                  </div>
-                </div>
-              </footer>
-              <!-- / Footer -->
-  
-              <div class="content-backdrop fade"></div>
-            </div>
-            <!-- Content wrapper -->
-          </div>
-          <!-- / Layout page -->
+</style>
+</head>
+<body>
+    <div class="container-wrapper">
+        <div class="container">
+          <h3></h3>
+          <button class="print-button" onclick="window.print()">Print</button>
         </div>
-  
-        <!-- Drag Target Area To SlideIn Menu On Small Screens -->
-        <div class="drag-target"></div>
+        <div class="container-body">
+          <span class="appendix">Appendix 32</span>
+          <table>
+            <thead></thead>
+            <tbody>
+              <tr>
+                <td colspan="5" rowspan="4" class="center-text">Department of Social Welfare and Development <br> Capitol Site, Butuan City <br>
+                  <br>
+                  <br>
+                  <br>
+                  <b>DISBURSEMENT VOUCHER</b>
+                </td>
+                <td style="font-size: 12px;">
+                  <b> Fund Cluster : <br>Cluster O1 </b>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 12px;">
+                  <b>Date : </b>
+                </td>
+              </tr>
+              <tr>
+                <td class="dvnumber">
+                  <b> DV No. : </b>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+              </tr>
+              <tr>
+                <td style="font-size: 12px;">
+                  <b>Mode of <br> Payment </b>
+                </td>
+                <td colspan="5">
+                  <span style="margin-right: 20px;"></span>
+                  <input type="checkbox" style="width: 20px; height: 20px;"> MDS Check <span style="margin-right: 20px;"></span>
+                  <input type="checkbox" style="width: 20px; height: 20px;"> Commercial Check <span style="margin-right: 20px;"></span>
+                  <input type="checkbox" style="width: 20px; height: 20px;"> ADA <span style="margin-right: 20px;"></span>
+                  <input type="checkbox" style="width: 20px; height: 20px;"> Others (Please specify) <br> <span style="margin-left:500px;">_____________________</span>            
+                </td>
+              </tr>
+      
+              <tr>
+                <td width="50" height="30" style="font-size: 12px;">
+                  <b>Payee</b>
+                </td>
+                <td width="150" colspan="3" style="font-size: 12px;">
+                  <b>LBP</b>
+                </td>
+                <td colspan="1" style="font-size: 12px;">TIN/Employee No.:</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td width="50" rowspan="2" height="30" colspan="1" style="font-size: 12px;">
+                  <b>Address</b>
+                </td>
+                <td colspan="3" rowspan="2" style="font-size: 12px;">
+                  <b>DSWD, CAPITOL SITE, BUTUAN CITY</b>
+                </td>
+                <td colspan="2" class="lastRow" style="font-size: 12px;">
+                  <b>Initiator:</b>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                </td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td colspan="3"><center> Particulars</center></td>
+                <td colspan="1"><center> Responsibility <br>Center</center></td>
+                <td colspan="1"><center> MFO/PAP</center></td>
+                <td><center> Amount</center></td>
+              </tr>
+              <tr>
+                <td colspan="3" style="font-size: 15px;">
+                  <center><b>Travel Reimbursement for FMD</b>
+                  <br/>
+                  <b>Regular / Contractual / MOA</b>
+                  <br/>
+                  <b>for February 8, 2023 </b></center><br>
+                </td>
+                <td rowspan="2">
+                </td>
+                <td rowspan="2">
+                </td>
+                <td>
+                    <span style="font-size: 11px;" > <b>Php  ₱75,236.80</span></b></span>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" style="font-size: 12px;">
+                  <center><b>Amount Due</b></center>
+                </td>
+                <td>
+                    <span style="font-size: 12px;" > <b>Php  ₱75,236.80</span></b></span>
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="6"  style="font-size: 12px;" >
+                    <span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;">A.</span> Certified:  Expenses/Cash Advance necessary,  lawful and  incurred under my direct supervision.<br><br><br><br>
+                    <center><u><b><span  style="font-size: 12px;">MARY ANN M. MANLA</span></b></u></center><br>
+                    <center><span  style="font-size: 12px;">Finance Management Division Chief</span></center><br>
+
+                </td>
+
+              </tr> 
+              <tr>
+                <td colspan="6"  style="font-size: 12px; padding: 0;" > 
+                    <span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;"><b>B.</b></span> Accounting Entry:
+                </td>
+              </tr>
+
+              <tr style="font-size: 12px;">
+                <td colspan="3" style="padding: 0px;">
+                    <center>Account Title</center>
+                </td>
+                <td colspan="1"  style="padding: 0px;">
+                    <center>UACS Code</center>
+                </td>
+                <td colspan="1"  style="padding: 0px;">
+                    <center>Debit</center>
+                </td>
+                <td colspan="1"  style="padding: 0px;">
+                    <center>Credit</center>
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="3"  style="font-size: 12px;" ><br><br>
+                    <span style="margin-left:15px"><b>TE - Local</b></span><br><br><br>
+                    <span style="margin-left:30px"><b>Cash MDS</b></span><br><br><br>
+
+                    
+                </td>
+                <td colspan="1"  style="font-size: 12px;" >
+                    <center></center>
+                </td>
+                <td colspan="1"  style="font-size: 12px;" >
+                    <span style="margin-left:30px"><b>75,236.80</b></span><br><br><br>
+                </td>
+                <td colspan="1"  style="font-size: 12px;" ><br><br><br>
+                    <span style="margin-left:30px"><b>75,236.80</b></span><br><br><br>
+                </td>
+              </tr>
+
+              <tr>
+               
+                    <td colspan="4"  style="font-size: 12px;" >
+                      <b><span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;">C.</span> Certified</b>
+                    </td>
+                    <td colspan="2" style="font-size: 12px;">
+                      <b><span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;">D.</span> Approved for Payment</b>
+                    
+                    </td>     
+              </tr>
+              <tr height="100px;">
+               
+                <td colspan="4"  style="font-size: 12px;" >
+                    <input type="checkbox"> Cash available <br>
+                    <input type="checkbox">  Subject to Authority to Debit Account (when applicable) <br>
+                    <input type="checkbox"> Supporting documents complete and amount claimed proper  <br>
+                    
+                </td>
+                <td colspan="2" style="font-size: 12px;"></td>     
+              </tr>
+              <tr height="65px;" style="font-size: 12px;">
+                <td><center>Signature</center></td>
+                <td colspan="2"></td>
+                <td><center>Signature</center></td>
+                <td colspan="2"></td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td style=" padding: 1;"><center>Printed Name</center></td>
+                <td style=" padding: 1;" colspan="2"><center><b>GRETCHEN F. ESCALA</b></center></td>
+                <td style=" padding: 1;"><center>Printed Name</center></td>
+                <td style=" padding: 1;" colspan="2"><center><b>ATTY. FAIZAL A. PADATE</b></center></td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td width="50" rowspan="2" height="30" colspan="1">
+                  <center>Position </center>
+                </td>
+               
+                <td colspan="2" class="lastRow" style="font-size: 12px;">
+                  <center><b>Accountatnt III</b></center>
+                </td>
+                
+                <td rowspan="2" class="lastRow"><center>Position</center></td>
+                <td colspan="2" style="font-size: 12px;"><center><b>ARDA</b></center></td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td colspan="2"><center>Head, Accounting Unit/Authorized Representative</center></td>
+                </td>
+                <td colspan="2" >
+                    <center><b>Agency Head/Authorized Representative</b></center>
+                  </td>
+              </tr>
+
+              <tr style="font-size: 12px;">
+                <td><center>Date</center></td>
+                <td></td>
+                <td colspan="2"><center>Date</center></td>
+                <td colspan="2"></td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td colspan="5" style="font-size: 12px; padding: 0;">
+                  <b><span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;">E.</span> Receipt of Payment</b>          
+                </td>
+                <td rowspan="2" class="align-u-left">JEV No.</td>
+              </tr>
+
+              <tr style="font-size: 12px;">
+                <td>Check/<br>ADA No.:</td>
+                <td colspan="2"></td>
+                <td class="align-u-left">Date :</td>
+                <td class="align-u-left">Bank Name & Account Number:</td>
+              </tr>
+              <tr style="font-size: 12px; height: 40px;">
+                <td>Signature:</td>
+                <td colspan="2"></td>
+                <td class="align-u-left">Date :</td>
+                <td class="align-u-left">Printed Name:</td>
+                <td rowspan="2" class="align-u-left">Date</td>
+              </tr>
+              <tr  style="font-size: 12px;">
+                <td colspan="5">Official Receipt No. & Date/Other Documents
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+        <br>
+        <div class="container-body2">
+          <span class="appendix">Appendix 11</span>
+          <table>
+            <thead></thead>
+            <tbody>
+              <tr>
+                <td colspan="7" rowspan="3" class="center-text" ><b><span style="font-size: 17px;">OBLIGATION REQUESTS AND STATUS</span></b>
+                  <br>
+                  <br>
+                  <br>
+                  <b>Department of Social Welfare and Development  <br> Entity Name</b>
+                </td>
+                <td style="font-size: 15px;border-bottom: 0;" colspan="4">
+                  Serial No. : _______________ 
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 15px; border-top: 0;border-bottom: 0;" colspan="4">
+                  Date : 
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 15px;border-top: 0;" colspan="4">
+                  Fund Cluster : ____________________ 
+                </td>
+              </tr>
+
+              <tr>
+                <td height="30" style="font-size: 13px;text-align: center;">
+                  Payee
+                </td>
+                <td width="150" colspan="10" style="font-size: 15px;">
+                  <b>LBP</b>
+                </td>
+              </tr> 
+              <tr>
+                <td width="50" height="30" style="font-size: 13px;text-align: center;">
+                  Office
+                </td>
+                <td width="150" colspan="10" style="font-size: 15px;">
+                  <b>DSWD, CAPITOL SITE, BUTUAN CITY</b>
+                </td>
+              </tr> 
+              <tr>
+                <td style="font-size: 13px;text-align: center;">
+                  Address
+                </td>
+                <td width="130" colspan="10" style="font-size: 15px;">
+                  <b>DSWD, CAPITOL SITE, BUTUAN CITY</b>
+                </td>
+              </tr> 
+      
+              <tr>
+                <td colspan="1" height="30" style="font-size: 13px;text-align: center;">
+                  Responsibility Center
+                </td>
+                <td width="150" colspan="5" style="font-size: 13px;text-align: center;">
+                  <b>Particulars</b>
+                </td>
+
+                <td width="150"  style="font-size: 13px;text-align: center;">
+                  <b>MFO/PAP</b>
+                </td>
+                <td width="150"  style="font-size: 13px;text-align: center;">
+                  <b>UACS Object Code</b>
+                </td>
+                <td width="150" colspan="3" style="font-size: 13px;text-align: center;">
+                  <b>Amount</b>
+                </td>
+              </tr>
+
+              <tr >
+                <td style="border-bottom: 0;"></td>
+                <td style="font-size: 15px;border-bottom: 0;" colspan="5"><center><b>Travel Reimbursement for FMD <br><br>Regular / Contractual / MOA <br><br> for February 8, 2023</b></center><br><br></td>
+                <td style="border-bottom: 0;"></td>
+                <td style="border-bottom: 0;"></td>
+                <td style="font-size: 15px;border-right: 0;text-align:left;"><b>Php</b></td>
+                <td style="font-size: 15px;border-left: 0;text-align:right;" colspan="2"><b>75,236.80</b></td>
+                
+              </tr>
+
+              <tr >
+                <td style="border-top: 0;"></td>
+                <td style="font-size: 15px;text-align:right !important; border-top: 0;padding-top: 0;padding-bottom: 0;" colspan="5"><b>Total</b></td>
+                <td style="border-top: 0;"></td>
+                <td style="border-top: 0;"></td>
+                <td style="font-size: 15px;border-top: 0; text-align:left;padding-top: 0;padding-bottom: 0;border-right: 0;"><b>Php</span></b></td>
+                <td style="font-size: 15px;border-top: 0; text-align:right;padding-top: 0;padding-bottom: 0;border-left: 0;" colspan="2"><b><span> 75,236.80</span></b></td>
+              </tr>
+
+              <tr style="font-size: 15px;">
+                <td colspan="6" style="border-bottom: 0;padding: 1px;">A. <b>Certified:</b> Charges to appropriation/alloment are <br> necessary, lawful and under my direct supervision;and supporting documents valid, proper and legal
+                  <br><br><br>
+
+                Signature :  <br><br>
+                </td>
+                
+                <td colspan="6" style="border-bottom: 0;padding: 1px;">B. <b>Certified:</b> Alloment available and obligated for the purpose/adjustment 
+                   necessary as indicated above<br><br><br><br>
+
+                Signature : <br><br> 
+               
+                  </td>
+              </tr>
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
+                  Printed Name 
+                </td>
+                <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
+                  <center><b>MARY ANN M. MANLA</b></center>
+                </td>
+
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">Printed Name  
+                  
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
+                  <center><b>RYAN V. PIAMONTE</b></center>
+                </td>
+
+              </tr>
+
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
+                  Position :
+                </td>
+                <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
+                  <center>Finance Management Division Chief</center>
+                </td>
+
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
+                  Position :
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
+                  <center>Administrative Office V</center>
+                </td>
+
+              </tr>
+
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;">
+                
+                </td>
+                <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
+                  <center>Head, Requesting Office/Authorized Representative</center>
+                </td>
+
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;">
+              
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
+                  <center>BUDGET SECTION</center>
+                </td>
+
+              </tr>
+
+
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;">
+                  Date
+                </td>
+                <td style="border-top: 0;border-left: 0;" colspan="5">
+                  : _______________________________________
+                </td>
+
+                <td style="border-top: 0;border-right: 0;">
+                  Date
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;" colspan="4">
+                  : ________________________________
+                </td>
+
+              </tr>
+              <tr style="font-size: 15px;">
+                <td style="font-size: 13px; padding:0">
+                  <b>C.</b>
+                </td>
+                <td colspan="10" style="font-size: 13px; padding:0"><b><center>STATUS OF OBLIGATION</center></b></td>
+
+
+
+              </tr>
+              <tr>
+                <td colspan="5" style="font-size: 13px;text-align: center;padding:0" ><b>Reference</b></td>
+                <td colspan="5" style="font-size: 13px;text-align: center;padding:0"><b>Amount</b></td>
+              </tr>
+            
+              <tr>
+                <td width="140" height="30" style="font-size: 13px; text-align:center;" rowspan="3">
+                  Date
+                </td>
+                <td width="150" colspan="2" style="font-size: 13px; padding:25px" rowspan="3">
+                  Particulars
+                </td>
+
+                <td width="150" colspan="2" style="font-size: 13px;" rowspan="3">
+                  ORS/JEV/Check/<br>ADA/TRA No.
+                </td>
+                <td width="150"  style="font-size: 13px; text-align:center;" rowspan="2">
+                  Obligation
+                </td>
+                <td width="150"  style="font-size: 13px; text-align:center;" rowspan="2">
+                  Payable
+                </td>
+
+                <td width="150"  style="font-size: 13px; text-align:center;" rowspan="2">
+                  Payment
+                </td>
+                <td width="150"  style="font-size: 13px; text-align:center;" colspan="3" class="lastRow">
+                  <center>Balance</center>
+                </td>
+               
+              </tr>
+              <tr>
+                <td  width="60" style="font-size: 13px; text-align:center;">Not Yet Due
+                </td>
+                <td style="font-size: 13px; text-align:center;">Due and Demandable</td>
+              </tr>
+              <tr>
+                <td style="font-size: 13px; text-align:center; padding:0">(a)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(b)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(c)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(a-b)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(b-c)</td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+             
+            </tbody>
+          </table>
+      
+        </div><br>
+
+        <div class="container-body3">
+          <span ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# 23-02-0848 <br> for February 8, 2023</center></span>
+          <table >
+            <thead></thead>
+            <tbody>
+              <tr >
+                <td><b>CODE</b></td>
+                <td><b>Account Number</b></td>
+                <td><b>ID NUMBER</b></td>
+                <td><b><center>NAME</center></b></td>
+                <td><b>AMOUNT</b></td>
+                <td><b>CHARGE</b></td>
+                <td><b><center>PURPOSE</center></b></td>
+              
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr >
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"><b>TOTAL</b></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"><center><b>75,236.80</b></center></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"><center><b>4</b></center></td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <table style="border: 0;">
+            <tbody>
+              <tr >
+                <td style="width: 50px;border:0;"></td>
+                <td style="width: 125px;border:0;"></td>
+                <td style="width: 100px;border:0;"></td>
+                <td style="width: 140px;border:0;"></td>
+                <td style="width:80px;border:0;"></td>
+                <td style="width:72px;border:0;"></td>
+                <td style="border:0;"></td>
+              
+              </tr>
+              <tr>
+                <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
+                <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" colspan="2" class="no-border"><b><center>Sum of AMOUNT</center></b></td>
+              </tr>
+
+              <tr >
+                <td class="no-border"></td>
+                <td class="no-border"></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">AICS</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+             
+              </tr>
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"> <u><b><center>Janice R. Lamorin</center></b></u></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">GASS</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+              </tr>
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b>AO - II</b></center></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">PANTAWID</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+              </tr>
+
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">SFP</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+              </tr>
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">TARA</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+              </tr>
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
+                <td style="padding: 0;background-color:rgb(158, 198, 255);"  class="no-border" colspan="2"><center><b>75,236,80</b></center></td>
+              </tr>
+            </tbody>
+          </table>
+
+          
+          <div class="footer">
+            Cash Unit's Copy
+          </div>
+        </div>
+        <br>
+
+        
+        <div class="container-body4">
+          <span ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# 23-02-0848 <br> for February 8, 2023</center></span>
+          <table >
+            <thead></thead>
+            <tbody>
+              <tr >
+                <td><b>CODE</b></td>
+                <td><b>Account Number</b></td>
+                <td><b>ID NUMBER</b></td>
+                <td><b><center>NAME</center></b></td>
+                <td><b>AMOUNT</b></td>
+                <td><b>CHARGE</b></td>
+                <td><b><center>PURPOSE</center></b></td>
+              
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr>
+                <td class="align-text-right" style="padding: 4;">85</td>
+                <td class="align-text-right" style="padding: 4;">367</td>
+                <td class="align-text-left" style="padding: 4;">16-11810</td>
+                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
+                <td style="padding: 4;"><center>23,275.40</center></td>
+                <td class="align-text-left" style="padding: 4;">TARA</td>
+                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+              </tr>
+              <tr >
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"><b>TOTAL</b></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"><center><b>75,236.80</b></center></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"><center><b>4</b></center></td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <table style="border: 0;">
+            <tbody>
+              <tr >
+                <td style="width: 50px;border:0;"></td>
+                <td style="width: 125px;border:0;"></td>
+                <td style="width: 100px;border:0;"></td>
+                <td style="width: 140px;border:0;"></td>
+                <td style="width:80px;border:0;"></td>
+                <td style="width:72px;border:0;"></td>
+                <td style="border:0;"></td>
+              
+              </tr>
+              <tr>
+                <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
+                <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" colspan="2" class="no-border"><b><center>Sum of AMOUNT</center></b></td>
+              </tr>
+
+              <tr >
+                <td class="no-border"></td>
+                <td class="no-border"></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">AICS</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+             
+              </tr>
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"> <u><b><center>Janice R. Lamorin</center></b></u></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">GASS</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+              </tr>
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b>AO - II</b></center></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">PANTAWID</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+              </tr>
+
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">SFP</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+              </tr>
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;" class="no-border">TARA</td>
+                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
+              </tr>
+              <tr>
+                <td class="no-border"></td>
+                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
+                <td class="no-border"></td>
+                <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
+                <td style="padding: 0;background-color:rgb(158, 198, 255);"  class="no-border" colspan="2"><center><b>75,236,80</b></center></td>
+              </tr>
+            </tbody>
+          </table>
+
+          
+          <div class="footer">
+            COA's Copy
+          </div>
+        </div>
+
+        
+    
       </div>
-      <!-- / Layout wrapper -->
-  
 
-    <!-- Core JS -->
-    <!-- build:js assets/vendor/js/core.js -->
-    <script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
-    <script src="{% static 'assets/vendor/libs/popper/popper.js' %}"></script>
-    <script src="{% static 'assets/vendor/js/bootstrap.js' %}"></script>
-    <script src="{% static 'assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
-    <script src="{% static 'assets/vendor/libs/node-waves/node-waves.js' %}"></script>
 
-    <script src="{% static 'assets/vendor/libs/hammer/hammer.js' %}"></script>
-    <script src="{% static 'assets/vendor/libs/i18n/i18n.js' %}"></script>
-    <script src="{% static 'assets/vendor/libs/typeahead-js/typeahead.js' %}"></script>
+      
 
-    <script src="{% static 'assets/vendor/js/menu.js' %}"></script>
-    <!-- endbuild -->
+        </div>
+      </div>
 
-    <!-- Vendors JS -->
-    <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
-    <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
-    <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
 
-    <!-- Main JS -->
-    <script src="{% static 'assets/js/main.js' %}"></script>
 
-    <!-- Page JS -->
-    <script src="{% static 'assets/js/pages-auth.js' %}"></script>
-  </body>
+</body>   
+
+
+
 </html>

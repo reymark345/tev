@@ -1,0 +1,587 @@
+{% extends 'index.html' %} {% block content %} {% load staticfiles %}
+
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Received /</span> Tracking</h4>
+
+        <!-- DataTable with Buttons -->
+        <div class="card">
+            <div class="card-datatable table-responsive pt-0">
+                <table id="tbl-items" class="table">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Employee Name</th>
+                            <th>Date Travel</th>
+                            <th>Purpose</th>
+                            <th>Incoming</th>
+                            <th>Checking</th>
+                            <th>Payroll</th>
+                            <th>Box A</th>
+                            <th>Obligate</th>
+                            <th>Journal</th>
+                            <th>Certified</th>
+                            <th>Check Issued</th>
+                            <th>ID</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+      
+<!-- Modal to add new record -->
+<div class="offcanvas offcanvas-end" id="add-new-record">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="exampleModalLabel"><p class="title-name">Add Record</p></h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body flex-grow-1">
+        <form class="add-new-record pt-0 row g-2" id="item-form">
+            <input type="hidden" id="item-id" name="ItemID" />
+            <div class="col-sm-12">
+                <label class="form-label" for="employee-name">Employee Name</label>
+                <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
+                    <option></option>
+                    <option>Reymark N. Valdehueza</option>
+                    <option>Saton Goru</option>
+                    <option>Monkey D luffy</option>
+                </select>
+            </div>
+
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-label" for="original-amount">Amount</label>
+                    <input id="original-amount" name="OriginalAmount" class="form-control amount"type="number"placeholder="0.00"/>
+                </div>
+            </div>
+
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-label" for="remarks">Remarks</label>
+                    <div class="input-group input-group-merge">
+                        <textarea class="form-control dt-sales-remarks" placeholder="Enter remarks (optional)" rows="6" id="remarks" name="Remarks"></textarea>
+                        <span class="input-group-text">
+                          <i class="ti ti-microphone cursor-pointer text-to-speech-toggle"></i>
+                        </span>
+                       
+                      </div>
+                </div>
+            </div>
+            
+            <div class="col-sm-12 mt-4">
+                <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
+                <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %} {% block footer_scripts %}
+<script>
+    let clicked_id = 0;
+    let status_val =0;
+    $(document).ready(function () {
+        const table = $('#tbl-items')
+        const ItemFormValidation = document.getElementById('item-form'),
+            EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
+            OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
+            Remarks = jQuery(document.querySelector('[name="Remarks"]')),
+            offCanvasElement = document.querySelector('#add-new-record')
+        const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
+        const toast_options = (toastr.options = {
+            maxOpened: 1,
+            autoDismiss: true,
+            closeButton: true,
+            newestOnTop: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            rtl: isRtl,
+      });
+        let ItemID = $('#item-id')
+
+        let dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'tracking-load' %}",
+                type: "GET",
+                data: {
+                    identifier: 1
+                }
+            },
+            columns: [
+                { data: 'code' },
+                { data: 'name' },
+                { data: 'date_travel'},
+                { data: 'purpose'},
+                { data: 'status'},
+                { data: 'status'},
+                { data: 'status' },
+                { data: 'status' },
+                { data: 'status' },
+                { data: 'status' },
+                { data: 'status' },
+                { data: 'status' },
+                { data: 'id' },
+
+            ],
+            columnDefs: [
+            {
+                targets: 0,
+                render: function (data) {
+                    return '<span class="badge bg-label-primary">' + data + '</span>'
+                },
+            },
+            {
+                targets: 2,
+                render: function (data) {
+                    return data
+                },
+            },
+
+            {
+                targets: 3,
+                render: function (data) {
+                    return data
+                },
+            },
+            {
+                targets: 4,
+                render: function (data) {
+                    data = parseInt(data); 
+                    if (data >= 1){
+                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                    }
+                    else{
+                        return ''
+                        
+                    }
+
+                },
+            },
+            {
+                targets: 5,
+                render: function (data) {
+                    data = parseInt(data); 
+                    if (data >= 2){
+                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                    }
+                    else{
+                        return ''
+                        
+                    }
+
+                },
+            },
+            {
+                targets: 6,
+                render: function (data) {
+                    data = parseInt(data); 
+                    if (data>=3){
+                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                    }
+                    else{
+                        return ''
+                        
+                    }
+
+                },
+            },
+            {
+                targets: 7,
+                render: function (data) {
+                    data = parseInt(data); 
+                    if (data>=4){
+                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                    }
+                    else{
+                        return ''
+                        
+                    }
+
+                },
+            },
+
+            {
+                targets: 8,
+                render: function (data) {
+                    data = parseInt(data); 
+                    //if (data>=5){
+                        //return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                    //}
+                    //else{
+                        return ''
+                        
+                    //}
+
+                },
+            },
+
+            {
+                targets: 9,
+                render: function (data) {
+                    data = parseInt(data); 
+                    //if (data>=6){
+                        //return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                    //}
+                    //else{
+                        return ''
+                        
+                    //}
+
+                },
+            },
+            {
+                targets: 10,
+                render: function (data) {
+                    data = parseInt(data); 
+                    //if (data>=7){
+                        //return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                    //}
+                    //else{
+                        return ''
+                        
+                    //}
+
+                },
+            },
+            {
+                targets: 11,
+                render: function (data) {
+                    data = parseInt(data); 
+                    if (data>=8){
+                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                    }
+                    else{
+                        return ''
+                        
+                    }
+
+                },
+            },
+
+           
+            {
+                targets: -1,
+                title: 'Action',
+                orderable: false,
+                searchable: false,
+                render: function (data) {
+                    return (
+                        '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-eye"></i></a>'
+                    )
+                },
+            },
+            
+            ],
+            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            buttons: [
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                },
+                {
+                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
+                    className: 'create-new btn btn-primary',
+                },
+            ],
+            drawCallback: function (settings) {
+                $('.item-edit').on('click', function () {
+                    let id = $(this).data('id')
+                    $('.title-name').text('Update TEV Record')
+                    $.ajax({
+                        type: 'GET',
+                        url: "{% url 'item-edit' %}?id=" + id,
+                        dataType: 'json',
+                    }).done(function (data) {
+                        if (data.length > 0) {
+                            let fields = data[0].fields
+                            let pk = data[0].pk
+                            let employee_name = $('#employee-name')
+                            let floatvalue = parseFloat(fields.original_amount);
+                            let convertedAmount = floatvalue.toFixed(2);
+                            status_val = fields.status;
+
+                            if(status_val ===3){
+                                EmployeeName.val(fields.name).trigger('change').prop("disabled", true);
+                                OriginalAmount.val(convertedAmount);
+                                Remarks.val(fields.remarks);
+                                ItemID.val(pk);
+                                offCanvasEl.show()
+                            }
+                            else{
+                                EmployeeName.val(fields.name).trigger('change').prop("disabled", false);
+                                OriginalAmount.val(convertedAmount);
+                                Remarks.val(fields.remarks);
+                                ItemID.val(pk);
+                                offCanvasEl.show()
+                            }
+                        }
+                    })
+                }),
+
+                $('#tbl-items tbody input[type="checkbox"]').change(function () {
+                    // Do something when a checkbox in the table body is changed...
+                });
+
+                $('#check-all').change(function () {
+                    // Get the checked state of the "check-all" checkbox
+                    var isChecked = $(this).is(':checked');
+        
+                    // Set the checked state of all checkboxes in the table body
+                    $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+                });
+
+                $('.item-details').on('click', function () {
+                    clicked_id = $(this).data('id');
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'tev-details' %}",
+                        data:{
+                            tev_id: clicked_id
+                        }
+                    }).done(function (data) {
+                        let value = data.data.remarks;
+                        let final_amount = data.data.final_amount;
+                        let floatvalue = parseFloat(final_amount);
+                        let convertedAmount = floatvalue.toFixed(2);
+                        if (convertedAmount === "0.00") {convertedAmount =""} 
+                        $("#final_amount").val(convertedAmount);
+                        $("#correctness_remarks").val(value);
+                    })
+                });
+            },
+        })
+        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+
+        const newRecord = document.querySelector('.create-new')
+
+        setTimeout(() => {
+            if (newRecord) {
+                newRecord.addEventListener('click', function () {
+                    ItemID.val(0)
+                    $('.title-name').text('Add Tev Record')
+                    EmployeeName.val('').trigger('change').prop("disabled", false);
+                    $('.form-control').val('')
+         
+                    offCanvasEl.show()
+                })
+            }
+        }, 200)
+
+        // Form validation for Add new record
+        const fv = FormValidation.formValidation(ItemFormValidation, {
+            fields: {
+                EmployeeName: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Select Employee',
+                        },
+                    },
+                },
+                OriginalAmount: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Select Amount',
+                        },
+                    },
+                },
+            },
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                submitButton: new FormValidation.plugins.SubmitButton(),
+                autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: (instance) => {
+                instance.on('plugins.message.placed', function (e) {
+                    if (e.element.parentElement.classList.contains('input-group')) {
+                        e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                    }
+                })
+            },
+        }).on('core.form.valid', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, save it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    var form_data = $('#item-form').serialize()
+
+                    //post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
+
+                    //if (status_val ==3){
+                      //  post_url = "{% url 'item-update' %}";
+                   // }
+                   // else if (ItemID.val() !== '0') {
+                   //     post_url = "{% url 'item-update' %}";
+                   // } 
+                   // else {
+                   //     post_url = "{% url 'item-add' %}";
+                   // }
+
+                    let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
+                    var form_data = $('#item-form').serialize()
+                    $.ajax({
+                        type: 'POST',
+                        url: post_url,
+                        data: form_data,
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+
+                            let code = data.g_code;
+                            if (code){
+                                Swal.fire({
+                                    title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                    icon: 'info',
+                                    html:
+                                      'Successfully <b>Save!</b>',
+                                    showCloseButton: true,
+                                    showCancelButton: false,
+                                    focusConfirm: false,
+                                    confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                    confirmButtonAriaLabel: 'Thumbs up, great!',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary me-3'
+                                    },
+                                    buttonsStyling: false
+                                  });
+                            }
+                            else{
+                                offCanvasEl.hide()
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Update Successfully!',
+                                    html:
+                                    'Successfully <b>Save!</b>',
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                            }
+                            EmployeeName.val("").trigger('change')
+                            OriginalAmount.val("")
+                            Remarks.val("")
+                            dataTable.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            })
+        });
+
+        function employeelist(){
+            console.log("pumasok");
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'receive-api' %}",
+                dataType: 'json',
+            }).done(function (data) {
+                let fields = data.data; // Access the 'data' array
+                var $selectElement = $('#employee-name'); // Select the element using its ID
+                $selectElement.empty();
+                
+                // Iterate over the 'fields' array
+                $.each(fields, function (index, employee) {
+                    let firstName = employee.first_name;
+                    let middleName = employee.middle_name;
+                    let middleInitial = middleName.charAt(0);
+                    let lastName = employee.last_name;
+                    let $option = $('<option></option>').val(firstName + " " + middleInitial +" "+ lastName).text(firstName +" "+ middleInitial+"." +" "+ lastName);
+                    $selectElement.append($option);
+                });  
+            })
+        }
+
+        $('#approved').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 4; 
+              if (final_amount === "") {  
+                $("#amount_error").text("Please enter Amount");
+                $("#remarks_error").text("");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              } else {
+                $("#amount_error").text("");
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+              }
+          });
+          
+          $('#returned').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 3;
+              if (correctness_remarks === "") {
+                $("#amount_error").text("");
+                $("#remarks_error").text("Please enter Remarks for returned.");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              } else {
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+              }
+              
+            });
+
+        function tev_details(amount,remarks,status,emp_id){
+            $.ajax({
+                type: "POST",
+                url: "{% url 'add-tev-details' %}",
+                data:{
+                    final_amount: amount,
+                    remarks: remarks,
+                    status : status,
+                    transaction_id : emp_id
+                }
+                }).done(function(data){
+                if (data.data == 'success') {
+                    $('#tevDetails').modal('hide');
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    offCanvasEl.hide()
+                    dataTable.ajax.reload()
+                } else {
+                    toastr.danger('Data not saved', 'Danger', toast_options);
+                }
+            });
+            }
+
+        if (EmployeeName.length) {
+            EmployeeName.wrap('<div class="position-relative"></div>')
+            EmployeeName.select2({
+                placeholder: 'Choose employee',
+                dropdownParent: EmployeeName.parent(),
+                allowClear: true,
+            })
+        }
+        
+
+
+    })
+</script>
+{% endblock footer_scripts %}

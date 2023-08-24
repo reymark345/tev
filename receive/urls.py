@@ -10,6 +10,7 @@ urlpatterns = [
     path('tracking', views.tracking, name='receive-tracking'),
     
     path('item_load', views.item_load, name='item-load'),
+    path('tracking_load', views.tracking_load, name='tracking-load'),
     path('checking_load', views.checking_load, name='checking-load'),
     path('item_edit', views.item_edit, name='item-edit'),
     path('item_update', views.item_update, name='item-update'),
@@ -17,6 +18,7 @@ urlpatterns = [
     path('item_returned', views.item_returned, name='item-returned'),
     
     path('out_pending_tev', views.out_pending_tev, name='out-pending-tev'),
+    path('out_checking_tev', views.out_checking_tev, name='out-checking-tev'),
     path('tev_details', views.tev_details, name='tev-details'),
 
     path('checking', views.checking, name='receive-checking'),

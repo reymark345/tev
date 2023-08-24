@@ -118,6 +118,7 @@ class TevIncoming(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
     id_no = models.CharField(max_length=128, blank=True, null=True)
     account_no = models.CharField(max_length=128, blank=True, null=True)
+    date_travel = models.CharField(max_length=255, blank=True, null=True)
     original_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True)
     final_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
     incoming_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
@@ -211,7 +212,7 @@ class StaffDetails(models.Model):
         
 class Status(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
     class Meta:
         managed = True

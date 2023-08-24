@@ -253,8 +253,11 @@
 
                         var newTab = window.open('print_box_a.html', '_blank');
 
-                       // newTab.document.write(data.incoming_data);
-                        //newTab.document.close();
+                        newTab.onload = function() {
+                            // Write the data to the new tab's document
+                            newTab.document.write(data.incoming_data);
+                            newTab.document.close();
+                        };
 
                         //console.log(data.incoming_data);
                     })
