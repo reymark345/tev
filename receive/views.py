@@ -297,7 +297,7 @@ def item_load(request):
             'final_amount': item['final_amount'],
             'incoming_in': item['incoming_in'],
             'incoming_out': item['incoming_out'],
-            'slashed_out': item['incoming_out'],
+            'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
             'status': item['status'],
             'user_id': full_name
