@@ -478,8 +478,6 @@ def item_add(request):
     travel_date = request.POST.get('DateTravel')
     remarks = request.POST.get('Remarks')
     user_id = request.session.get('user_id', 0)
-    print("whyyyyyyyyyyyyyyyyyyy")
-    print(travel_date)
     g_code = generate_code()
     tev_add = TevIncoming(code=g_code,name=employeename,original_amount=amount,remarks=remarks,date_travel = travel_date,user_id=user_id)
     tev_add.save()
