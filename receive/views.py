@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge)
 import json 
 from django.core import serializers
 import datetime 
@@ -90,22 +90,59 @@ def checking(request):
 
 
 def tracking_load(request):
-    # finance_database_alias = 'finance'
-    # dv_no_list = TevOutgoing.objects.order_by('id').values_list('dv_no', flat=True)
+    finance_database_alias = 'finance'
+    dv_no_list = TevOutgoing.objects.order_by('id').values_list('dv_no', flat=True)
 
-    # query = """
-    #     SELECT dv_no, amt_certified, amt_journal, amt_budget 
-    #     FROM transactions 
-    #     WHERE dv_no IN %s
-    # """
-    # params = [tuple(dv_no_list)]
+    query = """
+        SELECT dv_no, amt_certified, amt_journal, amt_budget 
+        FROM transactions 
+        WHERE dv_no IN %s
+    """
+    params = [tuple(dv_no_list)]
 
-    # with connections[finance_database_alias].cursor() as cursor:
-    #     cursor.execute(query, params)
-    #     results = cursor.fetchall()
+    with connections[finance_database_alias].cursor() as cursor:
+        cursor.execute(query, params)
+        results = cursor.fetchall()
 
-    # print("testdatabase1")
-    # print(results)
+
+    dv_no_values = [result[0] for result in results]
+    
+    
+    dv_no_to_result = {result[0]: result for result in results}
+    
+    
+# Format the dv_no_values list
+    formatted_values = []
+    for dv_no in dv_no_values:
+        result = dv_no_to_result.get(dv_no)
+        if result:
+            amt_certified = result[1]
+            amt_journal = result[2]
+            amt_budget = result[3]
+            formatted_values.append([dv_no, amt_certified, amt_journal, amt_budget])
+        else:
+            formatted_values.append([dv_no])
+
+    print("Formatted dv_no_values:")
+    print(formatted_values)
+
+    tev_outgoing_ids = TevOutgoing.objects.filter(dv_no__in=dv_no_values).order_by('id').values_list('id', flat=True)
+
+
+    result_data = []
+    for i, tev_outgoing_id in enumerate(tev_outgoing_ids):
+        result_data.append((formatted_values[i], tev_outgoing_id))
+
+    print("Combined data:")
+    for formatted_value, tev_outgoing_id in result_data:
+        print(f"Formatted: {formatted_value}, tev_outgoing_id: {tev_outgoing_id}") 
+        
+    
+                
+    
+    
+    tev_outgoing_ids = TevOutgoing.objects.filter(dv_no__in=dv_no_values).order_by('id').values_list('id', flat=True)
+    print(tev_outgoing_ids)
     
     
     
@@ -249,14 +286,14 @@ def item_load(request):
         retrieve = [2, 3, 4]
     else:
         retrieve = [1, 2, 3, 4]
-
+    
     query = """
     SELECT t.*
     FROM tev_incoming t
     WHERE (
         t.status = 1
         OR (
-            t.status = 3 AND NOT EXISTS (
+            t.status = 3 AND t.slashed_out IS NOT NULL AND NOT EXISTS (
                 SELECT 1
                 FROM tev_incoming t2
                 WHERE t2.code = t.code
@@ -320,20 +357,17 @@ from django.http import JsonResponse
 import math
 
 def checking_load(request):
-    idn = request.GET.get('identifier')
-    retrieve = [2, 3, 4]
-
     query = """
         SELECT t.*
         FROM tev_incoming t
         WHERE t.status = 2
-           OR t.status = 7
-           OR (t.status = 3 AND (
-               SELECT COUNT(*)
-               FROM tev_incoming
-               WHERE code = t.code
-               ) = 1
-           );
+            OR t.status = 7
+            OR (t.status = 3 AND t.slashed_out IS NULL AND (
+                SELECT COUNT(*)
+                FROM tev_incoming
+                WHERE code = t.code
+            ) = 1
+        );
     """
 
     with connection.cursor() as cursor:
@@ -510,12 +544,21 @@ def out_pending_tev(request):
 
 @csrf_exempt
 def out_checking_tev(request):
-    out_list = request.POST.getlist('out_list[]')
-    
-    for item_id  in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).update(status=4,slashed_out=datetime.datetime.now())
-    
+    out_list = request.POST.getlist('out_list[]')   
+    for item_id in out_list:
+        tev_update = TevIncoming.objects.filter(id=item_id).first()  
+
+        if tev_update:
+            if tev_update.status == 3:
+                tev_update.slashed_out = datetime.datetime.now()
+            else:
+                tev_update.status = 4
+            tev_update.save()
+        else:
+            pass 
+
     return JsonResponse({'data': 'success'})
+# tev_update = TevIncoming.objects.filter(id=item_id).update(status=4,slashed_out=datetime.datetime.now())
 
 @csrf_exempt
 def tev_details(request):

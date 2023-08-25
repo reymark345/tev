@@ -137,6 +137,7 @@ class Division(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
     acronym = models.CharField(max_length=128, blank=True, null=True)
     chief = models.CharField(max_length=128, blank=True, null=True)
+    approval = models.CharField(max_length=128, blank=True, null=True)
     created_by = models.IntegerField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)
