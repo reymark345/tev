@@ -20,7 +20,6 @@ import requests
 from django.db.models import Q, F, Exists, OuterRef
 from django.db import connections
 
-
 def get_user_details(request):
     return StaffDetails.objects.filter(user_id=request.user.id).first()
 
@@ -67,8 +66,8 @@ def api(request):
     }
     response = requests.get(url, headers=headers)
     data = response.json()
-    print(data)
-    print("testdawa")
+    # print(data)
+    # print("testdawa")
     return JsonResponse({'data': data})
     
 @login_required(login_url='login')
@@ -352,9 +351,6 @@ def item_load(request):
     return JsonResponse(response)
 
 
-from django.db import connection
-from django.http import JsonResponse
-import math
 
 def checking_load(request):
     query = """
@@ -495,7 +491,6 @@ def item_returned(request):
     
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
-
     
     tev_add = TevIncoming(code=data.code,name=data.name,original_amount=amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
@@ -504,7 +499,75 @@ def item_returned(request):
     #tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
-    
+
+# @csrf_exempt
+# def item_add(request):
+#     employeename = request.POST.get('EmployeeName')
+#     amount = request.POST.get('OriginalAmount')
+#     travel_date = request.POST.get('DateTravel')
+#     remarks = request.POST.get('Remarks')
+#     user_id = request.session.get('user_id', 0)
+#     g_code = generate_code()
+
+
+#     if travel_date:
+#         # Split the comma-separated date list into individual date strings
+#         date_list = travel_date.split(', ')
+
+#         # Convert date strings to datetime objects
+#         date_objects = [datetime.datetime.strptime(date_str, "%d-%m-%Y") for date_str in date_list]
+
+#         # Build a Q object to handle multiple date conditions
+#         date_conditions = Q()
+#         for date in date_objects:
+#             date_conditions |= Q(date_travel=date)
+
+#         # Check if the query exists based on the provided criteria
+        
+        
+        
+#         query_exists = TevIncoming.objects.filter(Q(name=employeename) & date_conditions).exists()
+        
+#         print(date_conditions)
+#         print("aweee")
+        
+#         if query_exists:
+#             return JsonResponse({'data': 'error', 'message': 'Duplicate Travel'})
+#         else:
+#             return JsonResponse({'data': 'success', 'g_code': g_code})
+
+#     else:
+#         return JsonResponse({'data': 'error', 'message': 'sasasaas'})
+
+# @csrf_exempt
+# def item_add(request):
+#     employeename = request.POST.get('EmployeeName')
+#     amount = request.POST.get('OriginalAmount')
+#     travel_date = request.POST.get('DateTravel')
+#     remarks = request.POST.get('Remarks')
+#     user_id = request.session.get('user_id', 0)
+#     g_code = generate_code()
+
+#     # Split the date string into individual dates
+#     individual_dates = travel_date.split(',')
+
+#     # Remove spaces from each individual date and rejoin them with a comma
+#     cleaned_dates = ','.join(date.strip() for date in individual_dates)
+
+#     if TevIncoming.objects.filter(name=employeename, date_travel=cleaned_dates):
+#         return JsonResponse({'data': 'error', 'message': 'Duplicate Travel'})
+
+#     else:
+#         tev_add = TevIncoming(code=g_code, name=employeename, date_travel=cleaned_dates, original_amount=amount, remarks=remarks, user_id=user_id)
+#         tev_add.save()
+
+#         if tev_add.id:
+#             system_config = SystemConfiguration.objects.first()
+#             system_config.transaction_code = g_code
+#             system_config.save()
+
+#         return JsonResponse({'data': 'success', 'g_code': g_code})
+
 @csrf_exempt
 def item_add(request):
     employeename = request.POST.get('EmployeeName')
@@ -513,15 +576,158 @@ def item_add(request):
     remarks = request.POST.get('Remarks')
     user_id = request.session.get('user_id', 0)
     g_code = generate_code()
-    tev_add = TevIncoming(code=g_code,name=employeename,original_amount=amount,remarks=remarks,date_travel = travel_date,user_id=user_id)
-    tev_add.save()
+
+    # Split the date string into individual dates
+    individual_dates = travel_date.split(',')
+
+    # Remove spaces from each individual date and rejoin them with a comma
+    cleaned_dates = ','.join(date.strip() for date in individual_dates)
     
-    if tev_add.id:
-        system_config = SystemConfiguration.objects.first()
-        system_config.transaction_code = g_code
-        system_config.save()
+ 
+
+    for date in individual_dates:
+        cleaned_date = date.strip()
+ 
         
-    return JsonResponse({'data': 'success', 'g_code': g_code})
+        query = """
+            SELECT date_travel FROM tev_incoming
+            WHERE name = %s
+            AND date_travel LIKE %s;
+        """
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, [employeename, cleaned_date])
+            results = cursor.fetchall()
+            
+            print("testtt")
+            print(employeename)
+            print(cleaned_date)
+            print(results)
+            
+            
+        
+        if results:
+            return JsonResponse({'data': 'error', 'message':results})
+        
+        else:
+            tev_add = TevIncoming(code=g_code, name=employeename, date_travel=cleaned_dates, original_amount=amount, remarks=remarks, user_id=user_id)
+            tev_add.save()
+
+            if tev_add.id:
+                system_config = SystemConfiguration.objects.first()
+                system_config.transaction_code = g_code
+                system_config.save()
+
+            return JsonResponse({'data': 'success', 'g_code': g_code})
+        
+        
+        
+        
+        
+        
+    #     if TevIncoming.objects.filter(name=employeename, date_travel=cleaned_date):
+    #         duplicate_dates.append(cleaned_date)
+
+    # if duplicate_dates:
+    #     print(duplicate_dates)
+    #     return JsonResponse({'data': 'error', 'message':duplicate_dates})
+    
+
+
+
+
+
+
+
+# #mogana
+# @csrf_exempt
+# def item_addaa(request):
+#     employeename = request.POST.get('EmployeeName')
+#     amount = request.POST.get('OriginalAmount')
+#     travel_date = request.POST.get('DateTravel')
+#     remarks = request.POST.get('Remarks')
+#     user_id = request.session.get('user_id', 0)
+#     g_code = generate_code()
+
+#     # Split the date string into individual dates
+#     individual_dates = travel_date.split(',')
+
+#     # Remove spaces from each individual date and rejoin them with a comma
+#     cleaned_dates = ','.join(date.strip() for date in individual_dates)
+
+#     if TevIncoming.objects.filter(name=employeename, date_travel=cleaned_dates):
+#         return JsonResponse({'data': 'error', 'message': 'Duplicate Travel'})
+
+#     else:
+#         tev_add = TevIncoming(code=g_code, name=employeename, date_travel=cleaned_dates, original_amount=amount, remarks=remarks, user_id=user_id)
+#         tev_add.save()
+
+#         if tev_add.id:
+#             system_config = SystemConfiguration.objects.first()
+#             system_config.transaction_code = g_code
+#             system_config.save()
+
+#         return JsonResponse({'data': 'success', 'g_code': g_code})
+
+    
+# @csrf_exempt
+# def item_add(request):
+#     employeename = request.POST.get('EmployeeName')
+#     amount = request.POST.get('OriginalAmount')
+#     travel_date = request.POST.get('DateTravel')
+#     remarks = request.POST.get('Remarks')
+#     user_id = request.session.get('user_id', 0)
+#     g_code = generate_code()
+
+#     # Split the date string into individual dates
+#     individual_dates = travel_date.split(',')
+
+#     # Remove spaces from each individual date and rejoin them with a comma
+#     cleaned_dates = ','.join(date.strip() for date in individual_dates)
+    
+#     print("Test")
+#     print(cleaned_dates)
+
+#     if TevIncoming.objects.filter(name=employeename, date_travel=cleaned_dates):
+#         return JsonResponse({'data': 'error', 'message': 'Duplicate Travel'})
+
+#     else:
+#         tev_add = TevIncoming(code=g_code, name=employeename, date_travel=cleaned_dates, original_amount=amount, remarks=remarks, user_id=user_id)
+#         tev_add.save()
+
+#         if tev_add.id:
+#             system_config = SystemConfiguration.objects.first()
+#             system_config.transaction_code = g_code
+#             system_config.save()
+
+#         return JsonResponse({'data': 'success', 'g_code': g_code})
+
+    
+
+# @csrf_exempt
+# def item_add(request):
+#     employeename = request.POST.get('EmployeeName')
+#     amount = request.POST.get('OriginalAmount')
+#     travel_date = request.POST.get('DateTravel')
+#     remarks = request.POST.get('Remarks')
+#     user_id = request.session.get('user_id', 0)
+#     g_code = generate_code()
+    
+#     travel_date = "29-08-2023, 28-08-2023"
+    
+#     if TevIncoming.objects.filter(name=employeename,date_travel = travel_date):
+#         return JsonResponse({'data': 'error', 'message': 'Duplicate Travel'})
+    
+#     else:
+#         tev_add = TevIncoming(code=g_code,name=employeename,date_travel = travel_date,original_amount=amount,remarks=remarks,user_id=user_id)
+#         tev_add.save()
+        
+#         if tev_add.id:
+#             system_config = SystemConfiguration.objects.first()
+#             system_config.transaction_code = g_code
+#             system_config.save()
+            
+#         return JsonResponse({'data': 'success', 'g_code': g_code})
 
 
 @csrf_exempt

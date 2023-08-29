@@ -63,7 +63,7 @@
                 <!-- Multiple Dates Picker-->
                 <div class="col-md-12 mb-2">
                   <label for="flatpickr-multi" class="form-label">Date Travel</label>
-                  <input type="text" class="form-control" name="DateTravel" placeholder="YYYY-MM-DD HH:MM" id="flatpickr-multi"/>
+                  <input type="text" class="form-control" name="DateTravel" placeholder="DD-MM-YYYY" id="dateField"/>
                 </div>
                 <!-- /Multiple Dates Picker-->
 
@@ -97,6 +97,17 @@
     let status_val =0;
     $(document).ready(function () {
         employeelist();
+        var dateField = $('#dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+        });
+
+
+
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
@@ -396,19 +407,6 @@
             }).then(function (result) {
                 if (result.value) {
                     var form_data = $('#item-form').serialize()
-
-                    //post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-
-                    //if (status_val ==3){
-                      //  post_url = "{% url 'item-update' %}";
-                   // }
-                   // else if (ItemID.val() !== '0') {
-                   //     post_url = "{% url 'item-update' %}";
-                   // } 
-                   // else {
-                   //     post_url = "{% url 'item-add' %}";
-                   // }
-
                     let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
                     var form_data = $('#item-form').serialize()
                     $.ajax({
@@ -435,6 +433,7 @@
                                     },
                                     buttonsStyling: false
                                   });
+
                             }
                             else{
                                 offCanvasEl.hide()
@@ -457,7 +456,7 @@
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error saving!',
-                                text: data.message,
+                                html:"Duplicate Travel <br><b>"+data.message+"</b>",
                                 customClass: {
                                     confirmButton: 'btn btn-success',
                                 },
@@ -490,6 +489,15 @@
                 });  
             })
         }
+
+        $('#dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+        });
         function incoming_out(selected_items){
             Swal.fire({
                 title: 'Mark as Out?',

@@ -314,23 +314,6 @@ def item_returned(request):
     #tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
-    
-@csrf_exempt
-def item_add(request):
-    employeename = request.POST.get('EmployeeName')
-    amount = request.POST.get('OriginalAmount')
-    remarks = request.POST.get('Remarks')
-    user_id = request.session.get('user_id', 0)
-    g_code = generate_code()
-    tev_add = TevIncoming(code=g_code,name=employeename,original_amount=amount,remarks=remarks,user_id=user_id)
-    tev_add.save()
-    
-    if tev_add.id:
-        system_config = SystemConfiguration.objects.first()
-        system_config.transaction_code = g_code
-        system_config.save()
-        
-    return JsonResponse({'data': 'success', 'g_code': g_code})
 
 
 @csrf_exempt
