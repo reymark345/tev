@@ -86,115 +86,93 @@ def checking(request):
     
     
     
-
-
+    
 def tracking_load(request):
     finance_database_alias = 'finance'
-    dv_no_list = TevOutgoing.objects.order_by('id').values_list('dv_no', flat=True)
 
     query = """
-        SELECT dv_no, amt_certified, amt_journal, amt_budget 
-        FROM transactions 
-        WHERE dv_no IN %s
-    """
-    params = [tuple(dv_no_list)]
-
-    with connections[finance_database_alias].cursor() as cursor:
-        cursor.execute(query, params)
-        results = cursor.fetchall()
-
-
-    dv_no_values = [result[0] for result in results]
-    
-    
-    dv_no_to_result = {result[0]: result for result in results}
-    
-    
-# Format the dv_no_values list
-    formatted_values = []
-    for dv_no in dv_no_values:
-        result = dv_no_to_result.get(dv_no)
-        if result:
-            amt_certified = result[1]
-            amt_journal = result[2]
-            amt_budget = result[3]
-            formatted_values.append([dv_no, amt_certified, amt_journal, amt_budget])
-        else:
-            formatted_values.append([dv_no])
-
-    print("Formatted dv_no_values:")
-    print(formatted_values)
-
-    tev_outgoing_ids = TevOutgoing.objects.filter(dv_no__in=dv_no_values).order_by('id').values_list('id', flat=True)
-
-
-    result_data = []
-    for i, tev_outgoing_id in enumerate(tev_outgoing_ids):
-        result_data.append((formatted_values[i], tev_outgoing_id))
-
-    print("Combined data:")
-    for formatted_value, tev_outgoing_id in result_data:
-        print(f"Formatted: {formatted_value}, tev_outgoing_id: {tev_outgoing_id}") 
-        
-    
-                
-    
-    
-    tev_outgoing_ids = TevOutgoing.objects.filter(dv_no__in=dv_no_values).order_by('id').values_list('id', flat=True)
-    print(tev_outgoing_ids)
-    
-    
-    
-    query = """
-        SELECT t.*
-        FROM tev_incoming t
-        WHERE t.status IN (1, 2, 4, 5 , 7)
-           OR (t.status = 3 AND (
-               SELECT COUNT(*)
-               FROM tev_incoming
-               WHERE code = t.code
-               ) = 1
-           );
-    """
+        SELECT code,name,date_travel,ti.status,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no FROM tev_incoming AS ti 
+        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        WHERE ti.status IN (1, 2, 4, 5 , 7)
+        OR (ti.status = 3 AND 
+            (
+                SELECT COUNT(*)
+                FROM tev_incoming
+                WHERE code = ti.code
+            ) = 1
+        );
+        """
 
     with connection.cursor() as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
+        
+    column_names = ['code', 'name', 'date_travel','status','original_amount', 'final_amount', 'incoming_in', 'incoming_out', 'purpose','dv_no']
+    finance_data = []
 
-    total = len(results)
-
-    _start = request.GET.get('start')
-    _length = request.GET.get('length')
-
+    for finance_row in results:
+        finance_dict = dict(zip(column_names, finance_row))
+        finance_data.append(finance_dict)
+    
+    data = []
+    for row in finance_data:
+        amt_certified = ''
+        amt_journal = ''
+        amt_budget = ''
+        if row['dv_no']:
+            
+            finance_query = """
+                SELECT dv_no, amt_certified, amt_journal, amt_budget 
+                FROM transactions 
+                WHERE dv_no = %s
+            """
+            with connections[finance_database_alias].cursor() as cursor2:
+                cursor2.execute(finance_query, (row['dv_no'],))
+                finance_results = cursor2.fetchall()
+                
+            if finance_results:
+                
+                amt_certified = finance_results[0][1]
+                amt_journal = finance_results[0][2]
+                amt_budget = finance_results[0][3]
+                
+        
+   
+    
+        item = {
+            'code': row['code'],
+            'name': row['name'],
+            'date_travel': row['date_travel'],
+            'status': row['status'],
+            'original_amount': row['original_amount'],
+            'final_amount': row['final_amount'],
+            'incoming_in': row['incoming_in'],
+            'incoming_out': row['incoming_out'],
+            'purpose': row['purpose'],
+            'dv_no': row['dv_no'],
+            'amt_certified': amt_certified,
+            'amt_journal': amt_journal,
+            'amt_budget': amt_budget
+        }
+        data.append(item)
+        
+        _start = request.GET.get('start')
+        _length = request.GET.get('length')
+        
     if _start and _length:
         start = int(_start)
         length = int(_length)
         page = math.ceil(start / length) + 1
         per_page = length
         results = results[start:start + length]
-
-    data = []
-    
-    for row in results:
-        item = {
-            'id': row[0],
-            'code': row[1],
-            'name': row[2],
-            'id_no': row[3],
-            'original_amount': row[5],
-            'final_amount': row[6],
-            'incoming_in': row[7],
-            'incoming_out': row[8],
-            'slashed_out': row[9],
-            'remarks': row[10],
-            'purpose': row[12],
-            'status': row[13],
-            'user_id': row[13],
-            'date_travel': row[14]
-      
-        }
-        data.append(item)
-
+                
+        
+        print("finance_data11")
+        print(row['code'])
+        
+    total = len(finance_results)    
+          
     response = {
         'data': data,
         'page': page,
@@ -204,67 +182,196 @@ def tracking_load(request):
     }
     return JsonResponse(response)
 
+
     
+ 
+    
+    
+    
+            
+
+
+        
+        
+        
+        
+        
+
+        
+        
+    # for row in te_dict:
+        
+                    
+    #     print(te_dict)
+    #     print("te_dict1")
+    #     print(row)
+        
+    #     finance_query = """
+    #         SELECT dv_no, amt_certified, amt_journal, amt_budget 
+    #         FROM transactions 
+    #         WHERE dv_no = %s
+    #     """
+    #     with connections[finance_database_alias].cursor() as cursor2:
+    #         cursor2.execute(finance_query, (row[8],))
+    #         finance_results = cursor2.fetchall()
+            
+            
+    #     print(finance_results)
+        
+
+    #     total = len(results)
+
+    #     _start = request.GET.get('start')
+    #     _length = request.GET.get('length')
+
+    #     if _start and _length:
+    #         start = int(_start)
+    #         length = int(_length)
+    #         page = math.ceil(start / length) + 1
+    #         per_page = length
+    #         results = results[start:start + length]
+
+    #     data = []
+        
+    #     for row in results:
+    #         item = {
+    #             'id': row[0],
+    #             'code': row[1],
+    #             'name': row[2],
+    #             'id_no': row[3],
+    #             'account_no': row[4],
+    #             'date_travel': row[5],
+    #             'original_amount': row[6],
+    #             'final_amount': row[7],
+    #             'incoming_in': row[8],
+    #             'incoming_out': row[9],
+    #             'slashed_out': row[10],
+    #             'remarks': row[11],
+    #             'purpose': row[12],
+    #             'status': row[13],
+    #             'user_id': row[14]
+        
+    #         }
+    #         data.append(item)
+
+    #     response = {
+    #         'data': data,
+    #         'page': page,
+    #         'per_page': per_page,
+    #         'recordsTotal': total,
+    #         'recordsFiltered': total,
+    #     }
+    #     return JsonResponse(response)
+    
+    
+    
+
+
 # def tracking_load(request):
 #     finance_database_alias = 'finance'
+#     dv_no_list = TevOutgoing.objects.order_by('id').values_list('dv_no', flat=True)
     
+
+#     query = """
+#         SELECT dv_no, amt_certified, amt_journal, amt_budget 
+#         FROM transactions 
+#         WHERE dv_no IN %s
+#     """
+#     params = [tuple(dv_no_list)]
     
-#     query = "SELECT dv_no,amt_certified,amt_journal, amt_budget FROM transactions"
 
 #     with connections[finance_database_alias].cursor() as cursor:
-#         cursor.execute(query)
+#         cursor.execute(query, params)
 #         results = cursor.fetchall()
         
-#     print("newdatabase")
-#     print(results)
-    
-    
-    
-#     # query = "SELECT dv_no,amt_certified,amt_journal, amt_budget FROM transactions WHERE dv_no = %s"
-#     # params = ['23-01-0001']
-
-#     # with connections[finance_database_alias].cursor() as cursor:
-#     #     cursor.execute(query, params)
-#     #     results = cursor.fetchall()
         
-#     print("testdatabase")
+#     print("results")
 #     print(results)
 
-       
-#     item_data = (TevIncoming.objects.filter().select_related().distinct().order_by('-id').reverse())
-#     total = item_data.count()
+
+#     dv_no_values = [result[0] for result in results]
+#     dv_no_to_result = {result[0]: result for result in results}
+    
+    
+# # Format the dv_no_values list
+#     formatted_values = []
+#     for dv_no in dv_no_values:
+#         result = dv_no_to_result.get(dv_no)
+#         if result:
+#             amt_certified = result[1]
+#             amt_journal = result[2]
+#             amt_budget = result[3]
+#             formatted_values.append([dv_no, amt_certified, amt_journal, amt_budget])
+#         else:
+#             formatted_values.append([dv_no])
+
+#     print("Formatted dv_no_values:")
+#     print(formatted_values)
+
+#     tev_outgoing_ids = TevOutgoing.objects.filter(dv_no__in=dv_no_values).order_by('id').values_list('id', flat=True)
+
+
+#     result_data = []
+#     for i, tev_outgoing_id in enumerate(tev_outgoing_ids):
+#         result_data.append((formatted_values[i], tev_outgoing_id))
+
+#     print("Combined data:")
+#     for formatted_value, tev_outgoing_id in result_data:
+#         print(f"Formatted: {formatted_value}, tev_outgoing_id: {tev_outgoing_id}") 
+
+#     tev_outgoing_ids = TevOutgoing.objects.filter(dv_no__in=dv_no_values).order_by('id').values_list('id', flat=True)
+#     print(tev_outgoing_ids)
+    
+    
+#     query = """
+#         SELECT t.*
+#         FROM tev_incoming t
+#         WHERE t.status IN (1, 2, 4, 5 , 7)
+#            OR (t.status = 3 AND (
+#                SELECT COUNT(*)
+#                FROM tev_incoming
+#                WHERE code = t.code
+#                ) = 1
+#            );
+#     """
+
+#     with connection.cursor() as cursor:
+#         cursor.execute(query)
+#         results = cursor.fetchall()
+
+#     total = len(results)
 
 #     _start = request.GET.get('start')
 #     _length = request.GET.get('length')
+
 #     if _start and _length:
 #         start = int(_start)
 #         length = int(_length)
 #         page = math.ceil(start / length) + 1
 #         per_page = length
-#         item_data = item_data[start:start + length]
+#         results = results[start:start + length]
 
 #     data = []
-
-#     for item in item_data:
-#         userData = AuthUser.objects.filter(id=item.user_id)
-#         full_name = userData[0].first_name + ' ' + userData[0].last_name
-
+    
+#     for row in results:
 #         item = {
-#             'id': item.id,
-#             'code': item.code,
-#             'name': item.name,
-#             'id_no': item.id_no,
-#             'original_amount': item.original_amount,
-#             'final_amount': item.final_amount,
-#             'incoming_in': item.incoming_in,
-#             'incoming_out': item.incoming_out,
-#             'slashed_out': item.incoming_out,
-#             'remarks': item.remarks,
-#             'purpose': item.purpose,
-#             'status': item.status,
-#             'user_id': full_name
+#             'id': row[0],
+#             'code': row[1],
+#             'name': row[2],
+#             'id_no': row[3],
+#             'account_no': row[4],
+#             'date_travel': row[5],
+#             'original_amount': row[6],
+#             'final_amount': row[7],
+#             'incoming_in': row[8],
+#             'incoming_out': row[9],
+#             'slashed_out': row[10],
+#             'remarks': row[11],
+#             'purpose': row[12],
+#             'status': row[13],
+#             'user_id': row[14]
+      
 #         }
-
 #         data.append(item)
 
 #     response = {
@@ -275,6 +382,9 @@ def tracking_load(request):
 #         'recordsFiltered': total,
 #     }
 #     return JsonResponse(response)
+
+    
+
 
 
 def item_load(request):
@@ -329,6 +439,8 @@ def item_load(request):
             'code': item['code'],
             'name': item['name'],
             'id_no': item['id_no'],
+            'account_no': item['account_no'],
+            'date_travel': item['date_travel'],
             'original_amount': item['original_amount'],
             'final_amount': item['final_amount'],
             'incoming_in': item['incoming_in'],
@@ -394,6 +506,8 @@ def checking_load(request):
             'code': row[1],
             'name': row[2],
             'id_no': row[3],
+            'account_no': row[4],
+            'date_travel': row[5],
             'original_amount': row[6],
             'final_amount': row[7],
             'incoming_in': row[8],
@@ -489,10 +603,14 @@ def item_returned(request):
     amount = request.POST.get('OriginalAmount')
     remarks = request.POST.get('Remarks')
     
+    travel_date = request.POST.get('DateTravel')
+    travel_date_stripped = travel_date.strip()
+    travel_date_spaces = travel_date_stripped.replace(' ', '')
+    
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
     
-    tev_add = TevIncoming(code=data.code,name=data.name,original_amount=amount,remarks=remarks,user_id=data.user_id)
+    tev_add = TevIncoming(code=data.code,name=data.name,date_travel = travel_date_spaces,original_amount=amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
     
     
@@ -576,19 +694,14 @@ def item_add(request):
     remarks = request.POST.get('Remarks')
     user_id = request.session.get('user_id', 0)
     g_code = generate_code()
-
-    # Split the date string into individual dates
+    
+    duplicate_travel = []
     individual_dates = travel_date.split(',')
-
-    # Remove spaces from each individual date and rejoin them with a comma
     cleaned_dates = ','.join(date.strip() for date in individual_dates)
     
- 
-
     for date in individual_dates:
         cleaned_date = date.strip()
- 
-        
+
         query = """
             SELECT date_travel FROM tev_incoming
             WHERE name = %s
@@ -596,29 +709,28 @@ def item_add(request):
         """
 
         with connection.cursor() as cursor:
-            cursor.execute(query, [employeename, cleaned_date])
+            cursor.execute(query, [employeename, f"%{cleaned_date}%"])
             results = cursor.fetchall()
-            
-            print("testtt")
-            print(employeename)
-            print(cleaned_date)
-            print(results)
-            
-            
-        
         if results:
-            return JsonResponse({'data': 'error', 'message':results})
+            duplicate_travel.append(cleaned_date)
         
-        else:
-            tev_add = TevIncoming(code=g_code, name=employeename, date_travel=cleaned_dates, original_amount=amount, remarks=remarks, user_id=user_id)
-            tev_add.save()
+    if duplicate_travel:
+        return JsonResponse({'data': 'error', 'message':duplicate_travel})
+        
+    else:
+        tev_add = TevIncoming(code=g_code, name=employeename, date_travel=cleaned_dates, original_amount=amount, remarks=remarks, user_id=user_id)
+        tev_add.save()
 
-            if tev_add.id:
-                system_config = SystemConfiguration.objects.first()
-                system_config.transaction_code = g_code
-                system_config.save()
+        if tev_add.id:
+            system_config = SystemConfiguration.objects.first()
+            system_config.transaction_code = g_code
+            system_config.save()
 
-            return JsonResponse({'data': 'success', 'g_code': g_code})
+        return JsonResponse({'data': 'success', 'g_code': g_code})
+
+            
+        
+
         
         
         

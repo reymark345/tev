@@ -12,7 +12,6 @@ urlpatterns = [
     path('box_load', views.box_load, name='box-load'),
     path('item_edit', views.item_edit, name='item-edit'),
     path('item_update', views.item_update, name='item-update'),
-    path('item_returned', views.item_returned, name='item-returned'),
 
     path('out_box_a', views.out_box_a, name='out-box-a'),
     path('tev_details', views.tev_details, name='tev-details'),

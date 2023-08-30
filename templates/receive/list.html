@@ -17,6 +17,7 @@
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
                             <th>Final Amount</th>
+                            <th>Travel Date</th>
                             <th>Status</th>
                             <th>Incoming In</th>
                             <th>Slashed Out</th>
@@ -63,7 +64,7 @@
                 <!-- Multiple Dates Picker-->
                 <div class="col-md-12 mb-2">
                   <label for="flatpickr-multi" class="form-label">Date Travel</label>
-                  <input type="text" class="form-control" name="DateTravel" placeholder="DD-MM-YYYY" id="dateField"/>
+                  <input type="text" class="form-control" name="DateTravel" placeholder="DD-MM-YYYY" id="dateField" autocomplete="off"/>
                 </div>
                 <!-- /Multiple Dates Picker-->
 
@@ -157,6 +158,7 @@
                 { data: 'name' },
                 { data: 'original_amount'},
                 { data: 'final_amount'},
+                { data: 'date_travel'},
                 { data: 'status' },
                 { data: 'incoming_in' },
                 { data: 'slashed_out' },
@@ -166,6 +168,13 @@
 
             ],
             columnDefs: [
+                {
+                    targets: 1,
+                    render: function(data) {
+                        return '<span class="badge bg-label-primary">' + data + '</span>';
+                     
+                    },
+                },
                 {
                     targets: 3,
                     render: function(data) {
@@ -191,7 +200,28 @@
                     },
                 },
                 {
-                  targets: 5,
+                    targets: 5,
+                    render: function(data) {
+                        var splitValues = data.split(',');  // Split data by comma
+                        var result = '';
+                        
+                        splitValues.forEach(function(value, index) {
+                            if (index !== 0) {
+                                result += '  '; // Add a space before adding subsequent values
+                            }
+                            var dateParts = value.split('-');
+                            var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                            var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
+                            
+                            result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
+                        });
+                        
+                        return result;
+                    },
+                },
+                
+                {
+                  targets: 6,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
@@ -408,6 +438,7 @@
                 if (result.value) {
                     var form_data = $('#item-form').serialize()
                     let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
+                   
                     var form_data = $('#item-form').serialize()
                     $.ajax({
                         type: 'POST',

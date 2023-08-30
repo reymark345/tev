@@ -17,6 +17,7 @@
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
                             <th>Final Amount</th>
+                            <th>Travel Date</th>
                             <th>Status</th>
                             <th>Incoming In</th>
                             <th>Slashed Out</th>
@@ -189,6 +190,7 @@
                 { data: 'name' },
                 { data: 'original_amount'},
                 { data: 'final_amount'},
+                { data: 'date_travel'},
                 { data: 'status' },
                 { data: 'incoming_in' },
                 { data: 'slashed_out' },
@@ -223,7 +225,27 @@
                     },
                 },
                 {
-                  targets: 5,
+                    targets: 5,
+                    render: function(data) {
+                        var splitValues = data.split(',');  // Split data by comma
+                        var result = '';
+                        
+                        splitValues.forEach(function(value, index) {
+                            if (index !== 0) {
+                                result += '  '; // Add a space before adding subsequent values
+                            }
+                            var dateParts = value.split('-');
+                            var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                            var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
+                            
+                            result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
+                        });
+                        
+                        return result;
+                    },
+                },
+                {
+                  targets: 6,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'

@@ -124,7 +124,7 @@ class TevIncoming(models.Model):
     incoming_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     incoming_out = models.DateTimeField(blank=True, null=True)
     slashed_out = models.DateTimeField(blank=True, null=True)
-    remarks = models.CharField(max_length=128, blank=True, null=True)
+    remarks = models.TextField(blank=True, null=True)
     purpose = models.CharField(max_length=255, blank=True, null=True)
     status = models.IntegerField(max_length=128, blank=True, null=True,default=1)
     user_id = models.CharField(max_length=128, blank=True, null=True)
