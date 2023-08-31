@@ -14,6 +14,7 @@
                         <tr>
                             <th><input type="checkbox" id="check-all"></th>
                             <th>Transaction Code</th>
+                            <th>Id Number</th>
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
                             <th>Final Amount</th>
@@ -47,9 +48,6 @@
                 <label class="form-label" for="employee-name">Employee Name</label>
                 <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
                     <option></option>
-                    <option>Reymark N. Valdehueza</option>
-                    <option>Saton Goru</option>
-                    <option>Monkey D luffy</option>
                 </select>
             </div>
 
@@ -61,15 +59,11 @@
             </div>
 
             <div class="col-sm-12">
-                <!-- Multiple Dates Picker-->
                 <div class="col-md-12 mb-2">
                   <label for="flatpickr-multi" class="form-label">Date Travel</label>
                   <input type="text" class="form-control" name="DateTravel" placeholder="DD-MM-YYYY" id="dateField" autocomplete="off"/>
                 </div>
-                <!-- /Multiple Dates Picker-->
-
             </div>
-
 
             <div class="col-sm-12">
                 <div class="form-group">
@@ -88,6 +82,8 @@
                 <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
                 <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
             </div>
+            <input id="id-number" name="IdNumber" class="form-control idn" type="hidden" placeholder="16-0000"/>
+            <input id="acct-number" name="AccountNumber" class="form-control accn" type="hidden" placeholder="000000"/>
         </form>
     </div>
 </div>
@@ -96,6 +92,8 @@
 <script>
     let clicked_id = 0;
     let status_val =0;
+    
+
     $(document).ready(function () {
         employeelist();
         var dateField = $('#dateField').flatpickr({
@@ -107,13 +105,13 @@
             },
         });
 
-
-
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
+            IdNumber = jQuery(document.querySelector('[name="IdNumber"]')),
+            AccountNumber = jQuery(document.querySelector('[name="AccountNumber"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
             offCanvasElement = document.querySelector('#add-new-record')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
@@ -155,6 +153,7 @@
                     }
                 },
                 { data: 'code' },
+                { data: 'id_no' },
                 { data: 'name' },
                 { data: 'original_amount'},
                 { data: 'final_amount'},
@@ -172,18 +171,17 @@
                     targets: 1,
                     render: function(data) {
                         return '<span class="badge bg-label-primary">' + data + '</span>';
-                     
+                    
                     },
                 },
                 {
-                    targets: 3,
+                    targets: 2,
                     render: function(data) {
-                        var floatValue = parseFloat(data);
-                        if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
-                        } else {
-                            return "";
+                        if (data){
+                            return '<span class="badge bg-label-primary">' + data + '</span>';
+                        }
+                        else {
+                            return ''
                         }
                     },
                 },
@@ -201,6 +199,18 @@
                 },
                 {
                     targets: 5,
+                    render: function(data) {
+                        var floatValue = parseFloat(data);
+                        if (floatValue !== 0) {
+                            var convertedValue = floatValue.toFixed(2);
+                            return convertedValue;
+                        } else {
+                            return "";
+                        }
+                    },
+                },
+                {
+                    targets: 6,
                     render: function(data) {
                         var splitValues = data.split(',');  // Split data by comma
                         var result = '';
@@ -221,7 +231,7 @@
                 },
                 
                 {
-                  targets: 6,
+                  targets: 7,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
@@ -310,6 +320,7 @@
                         dataType: 'json',
                     }).done(function (data) {
                         if (data.length > 0) {
+                            fetchEmployee();
                             let fields = data[0].fields
                             let pk = data[0].pk
                             let employee_name = $('#employee-name')
@@ -370,19 +381,17 @@
         $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
 
         const newRecord = document.querySelector('.create-new')
-
-        setTimeout(() => {
             if (newRecord) {
                 newRecord.addEventListener('click', function () {
+                    fetchEmployee();
                     ItemID.val(0)
                     $('.title-name').text('Add Tev Record')
                     EmployeeName.val('').trigger('change').prop("disabled", false);
                     $('.form-control').val('')
-         
+            
                     offCanvasEl.show()
                 })
             }
-        }, 200)
 
         // Form validation for Add new record
         const fv = FormValidation.formValidation(ItemFormValidation, {
@@ -482,6 +491,7 @@
                             OriginalAmount.val("");
                             DateTravel.val("")
                             Remarks.val("");
+
                             dataTable.ajax.reload();
                         } else {
                             Swal.fire({
@@ -497,30 +507,57 @@
                 }
             })
         });
+        
+
+        function fetchEmployee(){
+            const employees = JSON.parse(localStorage.getItem('employees'));
+            if (employees) {
+                const $selectElement = $('#employee-name');
+                $.each(employees, function (index, employee) {
+                    const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                    const $option = $('<option>', {
+                        value: optionText, 
+                        text: optionText,
+                        id: employee.idNumber
+                    });
+                    $selectElement.append($option);
+                });
+            } else {
+                console.log("No employee data found in local storage.");
+            }
+        }
 
         function employeelist(){
-            console.log("pumasok");
             $.ajax({
                 type: 'GET',
                 url: "{% url 'receive-api' %}",
                 dataType: 'json',
             }).done(function (data) {
-                let fields = data.data; // Access the 'data' array
-                var $selectElement = $('#employee-name'); // Select the element using its ID
-                $selectElement.empty();
-                
-                // Iterate over the 'fields' array
+                let fields = data.data;
+            
+                let employees = [];
+            
                 $.each(fields, function (index, employee) {
                     let firstName = employee.first_name;
                     let middleName = employee.middle_name;
                     let middleInitial = middleName.charAt(0);
                     let lastName = employee.last_name;
-                    let $option = $('<option></option>').val(firstName + " " + middleInitial +" "+ lastName).text(firstName +" "+ middleInitial+"." +" "+ lastName);
-                    $selectElement.append($option);
-                });  
-            })
+                    let idNumber = employee.id_number;
+                    let accNumber = employee.account_number;
+            
+                    let employeeObj = {
+                        firstName: firstName,
+                        middleInitial: middleInitial,
+                        lastName: lastName,
+                        idNumber: idNumber,
+                        accNumber: accNumber
+                    };
+                    employees.push(employeeObj);
+                });
+                localStorage.setItem('employees', JSON.stringify(employees));
+            });
+            
         }
-
         $('#dateField').flatpickr({
             mode: 'multiple',
             allowInput: true,
@@ -596,6 +633,37 @@
                 tev_details(final_amount,correctness_remarks,status,clicked_id);
               }
           });
+
+
+
+          $('#employee-name').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var optionText = selectedOption.attr('id');
+
+
+
+
+            
+        
+            if (optionText) {
+                const employees = JSON.parse(localStorage.getItem('employees'));
+                if (employees) {
+                    const selectedEmployeeId = selectedOption.attr('id');
+                    const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
+      
+                    
+                    if (selectedEmployee) {
+                        $('#id-number').val(selectedEmployee.idNumber);
+                        $('#acct-number').val(selectedEmployee.accNumber);
+                    }
+                } else {
+                    console.log("No employee data found in local storage.");
+                }
+            }
+        });
+        
+
+
           
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();

@@ -129,7 +129,7 @@
                 { data: 'amt_budget' },
                 { data: 'amt_journal' },
                 { data: 'amt_certified' },
-                { data: 'status' },
+                { data: 'amt_check' },
                 { data: 'id' },
 
             ],
@@ -197,7 +197,10 @@
                 targets: 6,
                 render: function (data) {
                     data = parseInt(data); 
-                    if (data >= 2){
+                    if(data==3){
+                        return '<span class="badge badge-center rounded-pill bg-danger"><i class="ti ti-x"></i></span>'
+                    }
+                    else if (data >= 2){
                         return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
                     }
                     else{
@@ -283,12 +286,11 @@
                 targets: 12,
                 render: function (data) {
                     data = parseInt(data); 
-                    if (data>=8){
+                    if (data){
                         return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
                     }
                     else{
                         return ''
-                        
                     }
 
                 },
