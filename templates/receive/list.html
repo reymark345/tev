@@ -48,6 +48,12 @@
                 <label class="form-label" for="employee-name">Employee Name</label>
                 <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
                     <option></option>
+                    <option>Reymark N. Valdehueza</option>
+                    <option>Satoru Gojou</option>
+                    <option>11Satoru Gojou</option>
+                    <option>22Satoru Gojou</option>
+                    <option>33Satoru Gojou</option>
+                    <option>44Satoru Gojou</option>
                 </select>
             </div>
 
@@ -92,7 +98,7 @@
 <script>
     let clicked_id = 0;
     let status_val =0;
-    
+    let formattedDates = ''
 
     $(document).ready(function () {
         employeelist();
@@ -326,22 +332,25 @@
                             let employee_name = $('#employee-name')
                             let floatvalue = parseFloat(fields.original_amount);
                             let convertedAmount = floatvalue.toFixed(2);
+                            let date_travel = fields.date_travel;
+                            formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
                             status_val = fields.status;
 
                             if(status_val ===3){
                                 EmployeeName.val(fields.name).trigger('change').prop("disabled", true);
-                                OriginalAmount.val(convertedAmount);
-                                Remarks.val(fields.remarks);
-                                ItemID.val(pk);
-                                offCanvasEl.show()
                             }
                             else{
                                 EmployeeName.val(fields.name).trigger('change').prop("disabled", false);
-                                OriginalAmount.val(convertedAmount);
-                                Remarks.val(fields.remarks);
-                                ItemID.val(pk);
-                                offCanvasEl.show()
+
                             }
+                            OriginalAmount.val(convertedAmount);
+                            Remarks.val(fields.remarks);
+                            DateTravel.val(formattedDates);
+
+
+                            
+                            ItemID.val(pk);
+                            offCanvasEl.show()
                         }
                     })
                 }),
@@ -615,6 +624,10 @@
             })
 
         }
+
+        $("#dateField").on("click", function() {
+            DateTravel.val(formattedDates);
+          });
 
 
         $('#approved').click(function() {
