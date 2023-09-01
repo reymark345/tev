@@ -190,7 +190,7 @@
               </tr>
               <tr>
                 <td class="dvnumber">
-                  <b> DV No. : </b>
+                  <b> DV No. : {{ finance.0.dv_no }}</b>
                 </td>
               </tr>
               <tr>
@@ -241,12 +241,8 @@
                 <td><center> Amount</center></td>
               </tr>
               <tr>
-                <td colspan="3" style="font-size: 15px;">
-                  <center><b>Travel Reimbursement for FMD</b>
-                  <br/>
-                  <b>Regular / Contractual / MOA</b>
-                  <br/>
-                  <b>for February 8, 2023 </b></center><br>
+                <td colspan="3" style="font-size: 15px; height:80px;width:300px;">
+                  <center><b>{{ finance.0.modepayment }}</b></center><br>
                 </td>
                 <td rowspan="2">
                 </td>
@@ -473,7 +469,9 @@
 
               <tr >
                 <td style="border-bottom: 0;"></td>
-                <td style="font-size: 15px;border-bottom: 0;" colspan="5"><center><b>Travel Reimbursement for FMD <br><br>Regular / Contractual / MOA <br><br> for February 8, 2023</b></center><br><br></td>
+                <td style="font-size: 15px;border-bottom: 0; height:150px;" colspan="5">
+                  <center><b>{{ finance.0.modepayment }}</b></center>
+                  <br><br></td>
                 <td style="border-bottom: 0;"></td>
                 <td style="border-bottom: 0;"></td>
                 <td style="font-size: 15px;border-right: 0;text-align:left;"><b>Php</b></td>

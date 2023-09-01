@@ -31,6 +31,54 @@
     </div>
 </div>
 
+
+
+<div class="modal fade" id="update-transaction" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel4">Update Transaction</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="card-datatable table-responsive pt-0">
+                    <table id="tbl-box-a" class="table display compact">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Code #</th>
+                                <th>Accnt. No.</th>
+                                <th>ID Number</th>
+                                <th>Name</th>
+                                <th>Purpose</th>
+                                <th>Amount</th>
+                                <th>Charge</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td>fafasfasf</td>
+                                <td>fafasfasf</td>
+                                <td>fafasfasf</td>
+                                <td>fafasfasf</td>
+                                <td>fafasfasf</td>
+                                <td>fafasfasf</td>
+                                <td>fafasfasf</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="add-data">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
     <div class="offcanvas-header border-bottom">
@@ -86,7 +134,10 @@
 {% endblock %} {% block footer_scripts %}
 <script>
     let clicked_id = 0;
+    let dv_no_id =0;
     $(document).ready(function () {
+
+        const table_box_a = $('#tbl-box-a')
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
@@ -142,6 +193,13 @@
                 { data: 'id' },
             ],
             columnDefs: [
+                {
+                    targets: 1,
+                    render: function(data) {
+                        return '<span class="badge bg-label-primary">' + data + '</span>';
+                    
+                    },
+                },
              
               
                 {
@@ -188,7 +246,9 @@
                     render: function (data) {
                         var itemId = data; // Assuming data contains the ID you want to pass
                         return (
-                            '<a href="{% url "preview-box-a" %}?id=' + itemId + '" class="preview-details text-body"><i class="text-primary fa fa-print"></i></a>'
+                            '<a href="{% url "preview-box-a" %}?id=' + itemId + '" onclick="window.open(this.href); return false" class="text-body"><i class="text-primary fa fa-print"></i></a>' +
+                            '<a class="btn btn-sm btn-icon view-data" id="'+itemId+'"><i class="text-primary fa fa-eye"></i></a>'
+                        
                         );
                     },
                 },
@@ -227,6 +287,25 @@
                 },
             ],
             drawCallback: function (settings) {
+                $('.view-data').on('click', function () {
+                    let id = $(this).attr('id');
+                    dv_no_id = id
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'employee-dv' %}",
+                        data:{
+                            dv_id: id
+                        }
+                    }).done(function (data) {
+
+                        $('#update-transaction').modal('show');
+                        console.log("data");
+                        console.log(data);
+                    })
+                });
+
+
 
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
                     // Do something when a checkbox in the table body is changed...
@@ -251,13 +330,13 @@
                         }
                     }).done(function (data) {
 
-                        var newTab = window.open('print_box_a.html', '_blank');
+                       // var newTab = window.open('print_box_a.html', '_blank');
 
-                        newTab.onload = function() {
+                       // newTab.onload = function() {
                             // Write the data to the new tab's document
-                            newTab.document.write(data.incoming_data);
-                            newTab.document.close();
-                        };
+                         //   newTab.document.write(data.incoming_data);
+                          //  newTab.document.close();
+                       // };
 
                         //console.log(data.incoming_data);
                     })
@@ -265,6 +344,203 @@
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
+
+
+
+
+        //newbox_a
+
+        let dataTableboxa = table_box_a.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'box-load' %}",
+                type: "POST",
+                data: {
+                    dv_id: dv_no_id
+                }
+               
+            },
+            columns: [
+                {
+                    data: 'id', status: 'status',
+                    orderable: false, 
+                    render: function (data, type, row) {
+                        var status = row.status; // Access the 'status' value from the 'row' object
+
+                        if (status == 2) {
+                            return '<input type="checkbox" disabled="disabled">';
+                        } else {
+                            // Render a checkbox for each row with the item ID as its value
+                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
+                        }
+
+                    }
+                },
+                { data: 'code' },
+                { data: 'account_no' },
+                { data: 'id_no' },
+                { data: 'name' },
+                { data: 'final_amount' },
+                { data: 'purpose' },
+                { data: 'box_b_out' },
+                { data: 'user_id' },
+                { data: 'id' },
+            ],
+            columnDefs: [
+                {
+                    targets: 0,
+                    render: function(data) {
+                        return '<span class="badge bg-label-primary">' + data + '</span>';
+                    
+                    },
+                },
+             
+              
+                {
+                  targets: 5,
+                  render: function (data) {
+                      if (data==1){
+                        return '<span class="badge bg-label-warning">Pending</span>'
+                      }
+                      else if(data==2){
+                        return '<span class="badge bg-label-warning">For checking</span>'
+                      }
+                      else if(data==3){
+                        return '<span class="badge bg-label-danger">Returned</span>'
+                      }
+                      else if(data==4){
+                        return '<span class="badge bg-label-primary">For payroll</span>'
+                      }
+                      else if(data==5){
+                        return '<span class="badge bg-label-warning">Outgoing</span>'
+                      }
+                      else{
+                        return '<span class="badge bg-label-success">Ongoing</span>'
+                      }
+
+                  },
+                },
+                {
+                    targets: -3,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+                {
+                    targets: -4,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+                {
+                    targets: -1,
+                    title: 'Action',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data) {
+                        var itemId = data; // Assuming data contains the ID you want to pass
+                        return (
+                            '<a href="{% url "preview-box-a" %}?id=' + itemId + '" onclick="window.open(this.href); return false" class="text-body"><i class="text-primary fa fa-print"></i></a>' +
+                            '<a class="btn btn-sm btn-icon view-data" id="'+itemId+'"><i class="text-primary fa fa-eye"></i></a>'
+                        
+                        );
+                    },
+                },
+            ],
+            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            buttons: [
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                },
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
+                    action: function () {
+                        // Get the IDs of checked items
+                        var selectedItems = [];
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+
+                        console.log(selectedItems);
+            
+                        if(selectedItems.length ===0){
+                            toastr.error('Select item first', 'Invalid', toast_options);
+                        }
+                        else{
+                            incoming_out(selectedItems);
+                        }
+                    }
+                },
+
+
+                {
+                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
+                    className: 'create-new btn btn-primary',
+                },
+            ],
+            drawCallback: function (settings) {
+                $('.view-data').on('click', function () {
+                    let id = $(this).attr('id');
+                    dv_no_id = id
+                    
+                    // $.ajax({
+                    //     type: 'POST',
+                    //     url: "{% url 'employee-dv' %}",
+                    //     data:{
+                    //         dv_id: id
+                    //     }
+                    // }).done(function (data) {
+
+                    //     $('#update-transaction').modal('show');
+                    //     console.log("data");
+                    //     console.log(data);
+                    // })
+                });
+
+
+
+                $('#tbl-items tbody input[type="checkbox"]').change(function () {
+                    // Do something when a checkbox in the table body is changed...
+                });
+
+                $('#check-all').change(function () {
+                    // Get the checked state of the "check-all" checkbox
+                    var isChecked = $(this).is(':checked');
+        
+                    // Set the checked state of all checkboxes in the table body
+                    $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+                });
+
+                $('.preview-details').on('click', function () {
+                    bx_id = $(this).data('id');
+
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'preview-box-a' %}",
+                        data:{
+                            box_id: bx_id
+                        }
+                    }).done(function (data) {
+
+                       // var newTab = window.open('print_box_a.html', '_blank');
+
+                       // newTab.onload = function() {
+                            // Write the data to the new tab's document
+                         //   newTab.document.write(data.incoming_data);
+                          //  newTab.document.close();
+                       // };
+
+                        //console.log(data.incoming_data);
+                    })
+                });
+            },
+        });
+
+ 
+
 
         const newRecord = document.querySelector('.create-new')
 
@@ -354,7 +630,7 @@
                             EmployeeName.val("").trigger('change')
                             OriginalAmount.val("")
                             Remarks.val("")
-                            dataTable.ajax.reload();
+                            dataTablebox.ajax.reload();
                         } else {
                             Swal.fire({
                                 icon: 'error',
@@ -418,25 +694,6 @@
             })
 
         }
-
-
-        $('#approved').click(function() {
-            let final_amount = $("#final_amount").val().trim();
-            let correctness_remarks = $("#correctness_remarks").val().trim();
-            let status = 4; 
-              if (final_amount === "") {  
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-              } else {
-                $("#amount_error").text("");
-                $("#remarks_error").text("");
-                $(".input-group").removeClass("has-error");
-                tev_details(final_amount,correctness_remarks,status,clicked_id);
-              }
-          });
-
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
@@ -454,35 +711,13 @@
               
             });
 
-        function tev_details(amount,remarks,status,emp_id){
-            $.ajax({
-                type: "POST",
-                url: "{% url 'add-tev-details' %}",
-                data:{
-                    final_amount: amount,
-                    remarks: remarks,
-                    status : status,
-                    transaction_id : emp_id
-                }
-                }).done(function(data){
-                if (data.data == 'success') {
-                    toastr.success('Successfully save', 'Success', toast_options);
-                    offCanvasEl.hide()
-                    dataTable.ajax.reload()
-                } else {
-                    toastr.danger('Data not saved', 'Danger', toast_options);
-                }
-            });
-            }
 
-        if (EmployeeName.length) {
-            EmployeeName.wrap('<div class="position-relative"></div>')
-            EmployeeName.select2({
-                placeholder: 'Choose employee',
-                dropdownParent: EmployeeName.parent(),
-                allowClear: true,
-            })
-        }
+
+
+            
+
+
+            
     })
 </script>
 {% endblock footer_scripts %}
