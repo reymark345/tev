@@ -1,3 +1,4 @@
+{% load humanize %} 
 <html>
 
 <head>
@@ -81,7 +82,7 @@
       .dvnumber {
         background-color:#c6e0b4;
         border:1.8px solid;
-        font-size: 10px;
+        font-size: 12px;
       }
       .align-u-left {
       text-align: left;
@@ -249,7 +250,7 @@
                 <td rowspan="2">
                 </td>
                 <td>
-                    <span style="font-size: 11px;" > <b>Php  ₱75,236.80</span></b></span>
+                    <span style="font-size: 11px; " > <b>Php  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ total_amount|floatformat:2|intcomma }}</span></b></span>
                 </td>
               </tr>
               <tr>
@@ -257,15 +258,15 @@
                   <center><b>Amount Due</b></center>
                 </td>
                 <td>
-                    <span style="font-size: 12px;" > <b>Php  ₱75,236.80</span></b></span>
+                    <span style="font-size: 12px;" > <b>Php  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ total_amount|floatformat:2|intcomma }}</span></b></span>
                 </td>
               </tr>
 
               <tr>
                 <td colspan="6"  style="font-size: 12px;" >
                     <span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;">A.</span> Certified:  Expenses/Cash Advance necessary,  lawful and  incurred under my direct supervision.<br><br><br><br>
-                    <center><u><b><span  style="font-size: 12px;">MARY ANN M. MANLA</span></b></u></center><br>
-                    <center><span  style="font-size: 12px;">Finance Management Division Chief</span></center><br>
+                    <center><u><b><span  style="font-size: 12px;">{{ details.chief|upper }}</span></b></u></center><br>
+                    <center><span  style="font-size: 12px;">{{ details.c_designation}}</span></center><br>
 
                 </td>
 
@@ -302,10 +303,10 @@
                     <center></center>
                 </td>
                 <td colspan="1"  style="font-size: 12px;" >
-                    <span style="margin-left:30px"><b>75,236.80</b></span><br><br><br>
+                    <span style="margin-left:30px"><b>{{ total_amount|floatformat:2|intcomma }}</b></span><br><br><br>
                 </td>
                 <td colspan="1"  style="font-size: 12px;" ><br><br><br>
-                    <span style="margin-left:30px"><b>75,236.80</b></span><br><br><br>
+                    <span style="margin-left:30px"><b>{{ total_amount|floatformat:2|intcomma }}</b></span><br><br><br>
                 </td>
               </tr>
 
@@ -339,7 +340,7 @@
                 <td style=" padding: 1;"><center>Printed Name</center></td>
                 <td style=" padding: 1;" colspan="2"><center><b>GRETCHEN F. ESCALA</b></center></td>
                 <td style=" padding: 1;"><center>Printed Name</center></td>
-                <td style=" padding: 1;" colspan="2"><center><b>ATTY. FAIZAL A. PADATE</b></center></td>
+                <td style=" padding: 1;" colspan="2"><center><b>{{ details.approval|upper }}</b></center></td>
               </tr>
               <tr style="font-size: 12px;">
                 <td width="50" rowspan="2" height="30" colspan="1">
@@ -351,7 +352,7 @@
                 </td>
                 
                 <td rowspan="2" class="lastRow"><center>Position</center></td>
-                <td colspan="2" style="font-size: 12px;"><center><b>ARDA</b></center></td>
+                <td colspan="2" style="font-size: 12px;"><center><b>{{ details.ap_designation }}</b></center></td>
               </tr>
               <tr style="font-size: 12px;">
                 <td colspan="2"><center>Head, Accounting Unit/Authorized Representative</center></td>
@@ -475,7 +476,7 @@
                 <td style="border-bottom: 0;"></td>
                 <td style="border-bottom: 0;"></td>
                 <td style="font-size: 15px;border-right: 0;text-align:left;"><b>Php</b></td>
-                <td style="font-size: 15px;border-left: 0;text-align:right;" colspan="2"><b>75,236.80</b></td>
+                <td style="font-size: 15px;border-left: 0;text-align:right;" colspan="2"><b>{{ total_amount|floatformat:2|intcomma }}</b></td>
                 
               </tr>
 
@@ -485,7 +486,7 @@
                 <td style="border-top: 0;"></td>
                 <td style="border-top: 0;"></td>
                 <td style="font-size: 15px;border-top: 0; text-align:left;padding-top: 0;padding-bottom: 0;border-right: 0;"><b>Php</span></b></td>
-                <td style="font-size: 15px;border-top: 0; text-align:right;padding-top: 0;padding-bottom: 0;border-left: 0;" colspan="2"><b><span> 75,236.80</span></b></td>
+                <td style="font-size: 15px;border-top: 0; text-align:right;padding-top: 0;padding-bottom: 0;border-left: 0;" colspan="2"><b><span>{{ total_amount|floatformat:2|intcomma }}</span></b></td>
               </tr>
 
               <tr style="font-size: 15px;">
@@ -507,7 +508,9 @@
                   Printed Name 
                 </td>
                 <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
-                  <center><b>MARY ANN M. MANLA</b></center>
+                  <center><b>{{ details.chief|upper }} </b></center>
+
+                
                 </td>
 
                 <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">Printed Name  
@@ -524,14 +527,14 @@
                   Position :
                 </td>
                 <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
-                  <center>Finance Management Division Chief</center>
+                  <center>{{ details.c_designation}}</center>
                 </td>
 
                 <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
                   Position :
                 </td>
                 <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
-                  <center>Administrative Office V</center>
+                  <center>Administrative Officer V</center>
                 </td>
 
               </tr>
@@ -790,7 +793,7 @@
         </div><br>
 
         <div class="container-body3">
-          <span ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# 23-02-0848 <br> for February 8, 2023</center></span>
+          <span ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ finance.0.dv_no }} <br> for February 8, 2023</center></span>
           <table >
             <thead></thead>
             <tbody>
@@ -804,68 +807,27 @@
                 <td><b><center>PURPOSE</center></b></td>
               
               </tr>
+
+              {% for emp in emp_list %}
               <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+                <td class="align-text-right" style="padding: 2;">{{ emp.code }}</td>
+                <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
+                <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>
+                <td style="padding: 4;"><center>{{ emp.final_amount|floatformat:2|intcomma }}</center></td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.charges }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.purpose }}</td>
               </tr>
-              <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
-              <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
-              <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
-              <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
-              <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
+              {% endfor %}
+             
               <tr >
                 <td style="padding: 0;"></td>
                 <td style="padding: 0;"><b>TOTAL</b></td>
                 <td style="padding: 0;"></td>
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"><center><b>75,236.80</b></center></td>
+                <td style="padding: 0;"><center><b>{{ total_amount|floatformat:2 }}</b></center></td>
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"><center><b>4</b></center></td>
+                <td style="padding: 0;"><center><b>{{ total_count }}</b></center></td>
               </tr>
             </tbody>
           </table>
@@ -889,49 +851,22 @@
                 <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" colspan="2" class="no-border"><b><center>Sum of AMOUNT</center></b></td>
               </tr>
 
-              <tr >
-                <td class="no-border"></td>
-                <td class="no-border"></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">AICS</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-             
-              </tr>
-              <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"> <u><b><center>Janice R. Lamorin</center></b></u></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">GASS</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-              </tr>
-              <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b>AO - II</b></center></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">PANTAWID</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-              </tr>
-
-              <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">SFP</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-              </tr>
-              <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">TARA</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-              </tr>
+              {% for emp in emp_list %}
+                <tr >
+                  <td class="no-border"></td>
+                  <td class="no-border"></td>
+                  <td class="no-border"></td>
+                  <td style="padding: 0;" class="no-border">{{ emp.charges|upper }}</td>
+                  <td style="padding: 0;"  class="no-border" colspan="2"><center>{{ emp.final_amount|floatformat:2|intcomma }}</center></td>
+              
+                </tr>
+              {% endfor %}
               <tr>
                 <td class="no-border"></td>
                 <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
                 <td class="no-border"></td>
                 <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
-                <td style="padding: 0;background-color:rgb(158, 198, 255);"  class="no-border" colspan="2"><center><b>75,236,80</b></center></td>
+                <td style="padding: 0;background-color:rgb(158, 198, 255);"  class="no-border" colspan="2"><center><b>{{ total_amount|floatformat:2 }}</b></center></td>
               </tr>
             </tbody>
           </table>
@@ -945,7 +880,7 @@
 
         
         <div class="container-body4">
-          <span ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# 23-02-0848 <br> for February 8, 2023</center></span>
+          <span ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ finance.0.dv_no }} <br> for February 8, 2023</center></span>
           <table >
             <thead></thead>
             <tbody>
@@ -959,7 +894,7 @@
                 <td><b><center>PURPOSE</center></b></td>
               
               </tr>
-              <tr>
+              <!-- <tr>
                 <td class="align-text-right" style="padding: 4;">85</td>
                 <td class="align-text-right" style="padding: 4;">367</td>
                 <td class="align-text-left" style="padding: 4;">16-11810</td>
@@ -967,60 +902,28 @@
                 <td style="padding: 4;"><center>23,275.40</center></td>
                 <td class="align-text-left" style="padding: 4;">TARA</td>
                 <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
+              </tr> -->
+
+              
+              {% for emp in emp_list %}
               <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
+                <td class="align-text-right" style="padding: 2;">{{ emp.code }}</td>
+                <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
+                <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>
+                <td style="padding: 4;"><center>{{ emp.final_amount|floatformat:2|intcomma }}</center></td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.charges }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.purpose }}</td>
               </tr>
-              <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
-              <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
-              <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
-              <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr>
+              {% endfor %}
               <tr >
                 <td style="padding: 0;"></td>
                 <td style="padding: 0;"><b>TOTAL</b></td>
                 <td style="padding: 0;"></td>
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"><center><b>75,236.80</b></center></td>
+                <td style="padding: 0;"><center><b>{{ emp.final_amount|floatformat:2|intcomma }}</b></center></td>
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"><center><b>4</b></center></td>
+                <td style="padding: 0;"><center><b>{{ total_count }}</b></center></td>
               </tr>
             </tbody>
           </table>
@@ -1035,8 +938,8 @@
                 <td style="width:80px;border:0;"></td>
                 <td style="width:72px;border:0;"></td>
                 <td style="border:0;"></td>
-              
               </tr>
+
               <tr>
                 <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
                 <td class="no-border"></td>
@@ -1044,50 +947,24 @@
                 <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" colspan="2" class="no-border"><b><center>Sum of AMOUNT</center></b></td>
               </tr>
 
-              <tr >
-                <td class="no-border"></td>
-                <td class="no-border"></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">AICS</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-             
-              </tr>
-              <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"> <u><b><center>Janice R. Lamorin</center></b></u></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">GASS</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-              </tr>
-              <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b>AO - II</b></center></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">PANTAWID</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-              </tr>
+              {% for emp in emp_list %}
+                <tr >
+                  <td class="no-border"></td>
+                  <td class="no-border"></td>
+                  <td class="no-border"></td>
+                  <td style="padding: 0;" class="no-border">{{ emp.charges|upper }}</td>
+                  <td style="padding: 0;"  class="no-border" colspan="2"><center>{{ emp.final_amount|floatformat:2|intcomma }}</center></td>
+              
+                </tr>
+              {% endfor %}
 
               <tr>
                 <td class="no-border"></td>
                 <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
                 <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">SFP</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-              </tr>
-              <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;" class="no-border">TARA</td>
-                <td style="padding: 0;"  class="no-border" colspan="2"><center>5580</center></td>
-              </tr>
-              <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
-                <td class="no-border"></td>
                 <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
-                <td style="padding: 0;background-color:rgb(158, 198, 255);"  class="no-border" colspan="2"><center><b>75,236,80</b></center></td>
-              </tr>
+                <td style="padding: 0;background-color:rgb(158, 198, 255);"  class="no-border" colspan="2"><center><b>{{ total_amount|floatformat:2 }}</b></center></td>
+              </tr> 
             </tbody>
           </table>
 

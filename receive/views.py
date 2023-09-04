@@ -49,7 +49,7 @@ def list(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/list.html' , context)
@@ -77,7 +77,7 @@ def checking(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/checking.html', context)
@@ -231,7 +231,7 @@ def item_load(request):
         item_entry = {
             'id': item['id'],
             'code': item['code'],
-            'name': item['name'],
+            'name': item['first_name'],
             'id_no': item['id_no'],
             'account_no': item['account_no'],
             'date_travel': item['date_travel'],
@@ -335,7 +335,7 @@ def item_update(request):
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
     remarks = request.POST.get('Remarks')
-    tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
+    tev_update = TevIncoming.objects.filter(id=id).update(first_name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
 @csrf_exempt
@@ -352,7 +352,7 @@ def item_returned(request):
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
     
-    tev_add = TevIncoming(code=data.code,name=data.name,date_travel = travel_date_spaces,original_amount=amount,remarks=remarks,user_id=data.user_id)
+    tev_add = TevIncoming(code=data.code,first_name=data.name,date_travel = travel_date_spaces,original_amount=amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
     
     
@@ -409,7 +409,7 @@ def item_add(request):
 @csrf_exempt
 def tracking(request):
     context = {
-		'employee_list' : TevIncoming.objects.filter().order_by('name'),
+		'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
 	}
     return render(request, 'receive/tracking.html', context)
 

@@ -133,7 +133,7 @@ def box_a(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'transaction/box_a.html', context)
@@ -149,15 +149,48 @@ def preview_box_a(request):
     outgoing_id = request.GET.get('id')
     
     results = []
+    total_final_amount = 0
+    emp_list = []
     
     if outgoing_id:
         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
-        selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
         
-        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no').first()
-        dvno = outgoing['dv_no']
+        print("tev_incoming_ids")
+        print(tev_incoming_ids)
         
+        # selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
+        
+        
+        selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
+                'code',
+                'first_name',
+                'id_no',
+                'account_no',
+                'final_amount',
+                'tevbridge__purpose',
+                'tevbridge__tev_outgoing__dv_no', 
+                'tevbridge__charges__name'  
+            )
     
+        result_count = len(selected_tev_incoming_data)
+        for item in selected_tev_incoming_data:
+            total_final_amount += item['final_amount']
+           
+            list = {
+                    "code": item['code'],
+                    "name": item['first_name'],
+                    "id_no": item['id_no'],
+                    "account_no": item['account_no'],
+                    "final_amount": item['final_amount'],
+                    "purpose": item['tevbridge__purpose'],
+                    "dv_no": item['tevbridge__tev_outgoing__dv_no'],
+                    "charges": item['tevbridge__charges__name'],
+                }
+            emp_list.append(list)
+            
+        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','division__chief','division__c_designation','division__approval','division__ap_designation').first()
+        dvno = outgoing['dv_no']
+
         query = """
             SELECT dv_no,dv_date,payee, modepayment
             FROM transactions
@@ -167,7 +200,6 @@ def preview_box_a(request):
         with connections[finance_database_alias].cursor() as cursor:
             cursor.execute(query, (dvno,))
             rows = cursor.fetchall()
-
             for row in rows:
                 result_dict = {
                     "dv_no": row[0],
@@ -176,10 +208,19 @@ def preview_box_a(request):
                     "modepayment": row[3]
                 }
                 results.append(result_dict)
-    
+                
+        designation_result = {
+            "chief":outgoing['division__chief'],
+            "c_designation":outgoing['division__c_designation'],
+            "approval":outgoing['division__approval'],
+            "ap_designation":outgoing['division__ap_designation']
+        }
         context = {
-            'selected_tev_incoming_data':selected_tev_incoming_data,
-            'finance':results
+            'total_amount':total_final_amount,
+            'total_count':result_count,
+            'finance':results,
+            'details':designation_result,
+            'emp_list':emp_list
         }
         
         return render(request, 'transaction/print_box_a.html', context)
@@ -194,7 +235,7 @@ def checking(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/checking.html', context)

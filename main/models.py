@@ -115,7 +115,9 @@ class DjangoSession(models.Model):
         
 class TevIncoming(models.Model):
     code = models.CharField(max_length=128, blank=True, null=True)
-    name = models.CharField(max_length=128, blank=True, null=True)
+    first_name = models.CharField(max_length=128, blank=True, null=True)
+    middle_name = models.CharField(max_length=128, blank=True, null=True)
+    last_name = models.CharField(max_length=128, blank=True, null=True)
     id_no = models.CharField(max_length=128, blank=True, null=True)
     account_no = models.CharField(max_length=128, blank=True, null=True)
     date_travel = models.CharField(max_length=255, blank=True, null=True)
@@ -137,7 +139,9 @@ class Division(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
     acronym = models.CharField(max_length=128, blank=True, null=True)
     chief = models.CharField(max_length=128, blank=True, null=True)
+    c_designation = models.CharField(max_length=128, blank=True, null=True)
     approval = models.CharField(max_length=128, blank=True, null=True)
+    ap_designation = models.CharField(max_length=128, blank=True, null=True)
     created_by = models.IntegerField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)
