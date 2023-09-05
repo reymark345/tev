@@ -90,6 +90,9 @@
             </div>
             <input id="id-number" name="IdNumber" class="form-control idn" type="hidden" placeholder="16-0000"/>
             <input id="acct-number" name="AccountNumber" class="form-control accn" type="hidden" placeholder="000000"/>
+            <input id="emp-name" name="EmpName" class="form-control accn" type="hidden" placeholder="nane"/>
+            <input id="emp-middle" name="EmpMiddle" class="form-control accn" type="hidden" placeholder="middle"/>
+            <input id="emp-lastname" name="EmpLastname" class="form-control accn" type="hidden" placeholder="lastname"/>
         </form>
     </div>
 </div>
@@ -118,6 +121,9 @@
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
             IdNumber = jQuery(document.querySelector('[name="IdNumber"]')),
             AccountNumber = jQuery(document.querySelector('[name="AccountNumber"]')),
+            EmpName = jQuery(document.querySelector('[name="EmpName"]')),
+            EmpMiddle = jQuery(document.querySelector('[name="EmpMiddle"]')),
+            EmpLastname = jQuery(document.querySelector('[name="EmpLastname"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
             offCanvasElement = document.querySelector('#add-new-record')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
@@ -668,6 +674,9 @@
                     if (selectedEmployee) {
                         $('#id-number').val(selectedEmployee.idNumber);
                         $('#acct-number').val(selectedEmployee.accNumber);
+                        $('#emp-name').val(selectedEmployee.firstName);
+                        $('#emp-middle').val(selectedEmployee.middleInitial);
+                        $('#emp-lastname').val(selectedEmployee.lastName);
                     }
                 } else {
                     console.log("No employee data found in local storage.");

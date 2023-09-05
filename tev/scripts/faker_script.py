@@ -28,7 +28,7 @@ for charge in charges:
     
     
 for i in range(len(division)):
-    div_val = Division(name=division[i],acronym = acronym[i],chief = fake.name(),created_by=1)
+    div_val = Division(name=division[i],acronym = acronym[i],chief = fake.name(),c_designation = fake.name(),approval = fake.name(),ap_designation = fake.name(),created_by=1)
     div_val.save()
     
     

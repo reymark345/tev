@@ -151,19 +151,17 @@ def preview_box_a(request):
     results = []
     total_final_amount = 0
     emp_list = []
+    charges_list = []
     
     if outgoing_id:
         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
-        
-        print("tev_incoming_ids")
-        print(tev_incoming_ids)
-        
-        # selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
         
         
         selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
                 'code',
                 'first_name',
+                'last_name',
+                'middle_name',
                 'id_no',
                 'account_no',
                 'final_amount',
@@ -175,10 +173,24 @@ def preview_box_a(request):
         result_count = len(selected_tev_incoming_data)
         for item in selected_tev_incoming_data:
             total_final_amount += item['final_amount']
+            fullname = item['last_name'] + ', '+ item['first_name']
+            
+            # charges_name =  item['tevbridge__charges__name']
+            
+            # if charges_name:
+            
+            # else:
+            #     ch_list = {
+            #         "charges":  charges_name,
+            #         "amount":
+                    
+            #     }
+            #     charges_list.append(ch_list)
+                
            
             list = {
                     "code": item['code'],
-                    "name": item['first_name'],
+                    "name": fullname,
                     "id_no": item['id_no'],
                     "account_no": item['account_no'],
                     "final_amount": item['final_amount'],
@@ -259,7 +271,7 @@ def employee_dv(request):
     print(dvno)
 
     query = """
-        SELECT code, name,id_no,account_no, final_amount, tb.purpose, dv_no FROM tev_incoming AS ti 
+        SELECT code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no FROM tev_incoming AS ti 
         LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
         LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
         WHERE ti.status IN (1, 2, 4, 5, 7) AND dv_no = %s
@@ -269,7 +281,7 @@ def employee_dv(request):
         cursor.execute(query, (dvno,))
         results = cursor.fetchall()
         
-    column_names = ['code', 'name','id_no','account_no', 'final_amount','purpose','dv_no']
+    column_names = ['code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no']
     data_result = []
 
     for finance_row in results:
@@ -277,10 +289,17 @@ def employee_dv(request):
         data_result.append(finance_dict)
 
     data = []  
+    
+  
     for row in data_result:
+        first_name = row['first_name'] if row['first_name'] else ''
+        middle_name = row['middle_name'] if row['middle_name'] else ''
+        last_name = row['last_name'] if row['last_name'] else ''
+        
+        emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
         item = {
             'code': row['code'],
-            'name': row['name'],
+            'name': emp_fullname,
             'id_no': row['id_no'],
             'account_no': row['account_no'],
             'final_amount': row['final_amount'],
@@ -289,19 +308,16 @@ def employee_dv(request):
         }
         data.append(item)
 
-        _start = request.GET.get('start')
-        _length = request.GET.get('length')
+    #     _start = request.GET.get('start') if request.GET.get('start') else 0
+    #     _length = request.GET.get('length') if request.GET.get('length') else 0
         
-    if _start and _length:
-        start = int(_start)
-        length = int(_length)
-        page = math.ceil(start / length) + 1
-        per_page = length
-        results = results[start:start + length]
-                
-    print("damnnn")
-    print(data)
-        
+    # if _start and _length:
+    #     start = int(_start)
+    #     length = int(_length)
+    #     page = math.ceil(start / length) + 1
+    #     per_page = length
+    #     results = results[start:start + length]
+                    
     total = len(data)    
           
     response = {
