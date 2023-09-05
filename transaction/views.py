@@ -335,7 +335,9 @@ def payroll_load(request):
         item = {
             'id': item.id,
             'code': item.code,
-            'name': item.name,
+            'name': item.first_name,
+            'middle_name': item.middle_name,
+            'last_name': item.last_name,
             'id_no': item.id_no,
             'original_amount': item.original_amount,
             'final_amount': item.final_amount,
