@@ -52,8 +52,11 @@ def division_add(request):
     division = request.POST.get('Division')
     acrym = request.POST.get('Acronym')
     divchief = request.POST.get('Chief')
+    ap_designation = request.POST.get('APDesignation')
+    approval = request.POST.get('Approval')
+    c_designation = request.POST.get('CDesignation')
     user_id = request.session.get('user_id', 0)
-    division_add = Division(name=division,acronym = acrym, chief = divchief, created_by = user_id)
+    division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation,created_by = user_id)
     try:
         division_add.save()
         return JsonResponse({'data': 'success'})
@@ -105,6 +108,9 @@ def division_load(request):
             'name': item.name,
             'acronym': item.acronym,
             'chief': item.chief,
+            'c_designation': item.c_designation,
+            'approval': item.approval,
+            'ap_designation': item.ap_designation,
             'created_by': full_name,
             'created_at': item.created_at
         }

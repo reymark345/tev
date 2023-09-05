@@ -12,9 +12,7 @@ urlpatterns = [
     path('box_load', views.box_load, name='box-load'),
     path('item_edit', views.item_edit, name='item-edit'),
     path('item_update', views.item_update, name='item-update'),
-    path('item_add', views.item_add, name='item-add'),
-    path('item_returned', views.item_returned, name='item-returned'),
-    
+
     path('out_box_a', views.out_box_a, name='out-box-a'),
     path('tev_details', views.tev_details, name='tev-details'),
 
@@ -23,6 +21,8 @@ urlpatterns = [
     path('save_payroll', views.save_payroll, name='save-payroll'),
     path('box_a', views.box_a, name='box-a'),
     path('preview', views.preview_box_a, name='preview-box-a'),
+    
+    path('employee_dv', views.employee_dv, name='employee-dv'),
 
 
     

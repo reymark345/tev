@@ -17,6 +17,8 @@ import math
 from django.core.serializers import serialize
 from django.forms.models import model_to_dict
 from urllib.parse import parse_qs
+from django.db import connections
+from django.db import IntegrityError, connection
 
 
 
@@ -131,7 +133,7 @@ def box_a(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'transaction/box_a.html', context)
@@ -143,34 +145,87 @@ def box_a(request):
 
 @login_required(login_url='login')
 def preview_box_a(request):
+    finance_database_alias = 'finance'    
     outgoing_id = request.GET.get('id')
+    
+    results = []
+    total_final_amount = 0
+    emp_list = []
     
     if outgoing_id:
         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
-        selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
         
-        return render(request, 'transaction/print_box_a.html', {'selected_tev_incoming_data': selected_tev_incoming_data})
+        print("tev_incoming_ids")
+        print(tev_incoming_ids)
+        
+        # selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
+        
+        
+        selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
+                'code',
+                'first_name',
+                'id_no',
+                'account_no',
+                'final_amount',
+                'tevbridge__purpose',
+                'tevbridge__tev_outgoing__dv_no', 
+                'tevbridge__charges__name'  
+            )
+    
+        result_count = len(selected_tev_incoming_data)
+        for item in selected_tev_incoming_data:
+            total_final_amount += item['final_amount']
+           
+            list = {
+                    "code": item['code'],
+                    "name": item['first_name'],
+                    "id_no": item['id_no'],
+                    "account_no": item['account_no'],
+                    "final_amount": item['final_amount'],
+                    "purpose": item['tevbridge__purpose'],
+                    "dv_no": item['tevbridge__tev_outgoing__dv_no'],
+                    "charges": item['tevbridge__charges__name'],
+                }
+            emp_list.append(list)
+            
+        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','division__chief','division__c_designation','division__approval','division__ap_designation').first()
+        dvno = outgoing['dv_no']
+
+        query = """
+            SELECT dv_no,dv_date,payee, modepayment
+            FROM transactions
+            WHERE dv_no = %s
+        """
+
+        with connections[finance_database_alias].cursor() as cursor:
+            cursor.execute(query, (dvno,))
+            rows = cursor.fetchall()
+            for row in rows:
+                result_dict = {
+                    "dv_no": row[0],
+                    "dv_date": row[1],
+                    "payee": row[2],
+                    "modepayment": row[3]
+                }
+                results.append(result_dict)
+                
+        designation_result = {
+            "chief":outgoing['division__chief'],
+            "c_designation":outgoing['division__c_designation'],
+            "approval":outgoing['division__approval'],
+            "ap_designation":outgoing['division__ap_designation']
+        }
+        context = {
+            'total_amount':total_final_amount,
+            'total_count':result_count,
+            'finance':results,
+            'details':designation_result,
+            'emp_list':emp_list
+        }
+        
+        return render(request, 'transaction/print_box_a.html', context)
     else:
         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
-    
-
-
-# @login_required(login_url='login')
-# @csrf_exempt
-# def preview_box_a(request):
-#     outgoing_id = request.POST.get('box_id')
-#     tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
-#     selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids)
-    
-#     serialized_data = serializers.serialize('json', selected_tev_incoming_data)
-#     parsed_data = json.loads(serialized_data)
-    
-#     return JsonResponse({'incoming_data': parsed_data})
-    
-
-
-
-
     
 @login_required(login_url='login')
 def checking(request):
@@ -180,12 +235,81 @@ def checking(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/checking.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+@csrf_exempt
+def employee_dv(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    dvno = ''
+    
+    idd = request.POST.get('dv_id')
+    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no').first()
+    
+    if dv_no is not None:
+        dvno = dv_no['dv_no']
+
+    print("dvno")
+    print(dvno)
+
+    query = """
+        SELECT code, name,id_no,account_no, final_amount, tb.purpose, dv_no FROM tev_incoming AS ti 
+        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        WHERE ti.status IN (1, 2, 4, 5, 7) AND dv_no = %s
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, (dvno,))
+        results = cursor.fetchall()
+        
+    column_names = ['code', 'name','id_no','account_no', 'final_amount','purpose','dv_no']
+    data_result = []
+
+    for finance_row in results:
+        finance_dict = dict(zip(column_names, finance_row))
+        data_result.append(finance_dict)
+
+    data = []  
+    for row in data_result:
+        item = {
+            'code': row['code'],
+            'name': row['name'],
+            'id_no': row['id_no'],
+            'account_no': row['account_no'],
+            'final_amount': row['final_amount'],
+            'purpose': row['purpose'],
+            'dv_no': row['dv_no']
+        }
+        data.append(item)
+
+        _start = request.GET.get('start')
+        _length = request.GET.get('length')
+        
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        results = results[start:start + length]
+                
+    print("damnnn")
+    print(data)
+        
+    total = len(data)    
+          
+    response = {
+        'data': data,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
 
 
 def payroll_load(request):       
@@ -211,7 +335,9 @@ def payroll_load(request):
         item = {
             'id': item.id,
             'code': item.code,
-            'name': item.name,
+            'name': item.first_name,
+            'middle_name': item.middle_name,
+            'last_name': item.last_name,
             'id_no': item.id_no,
             'original_amount': item.original_amount,
             'final_amount': item.final_amount,
@@ -296,41 +422,6 @@ def item_update(request):
     tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
-@csrf_exempt
-def item_returned(request):
-    id = request.POST.get('ItemID')
-    emp_name = request.POST.get('EmployeeName')
-    amount = request.POST.get('OriginalAmount')
-    remarks = request.POST.get('Remarks')
-    
-    id = request.POST.get('ItemID')
-    data = TevIncoming.objects.filter(id=id).first()
-
-    
-    tev_add = TevIncoming(code=data.code,name=data.name,original_amount=amount,remarks=remarks,user_id=data.user_id)
-    tev_add.save()
-    
-    
-    #tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
-    return JsonResponse({'data': 'success'})
-
-    
-@csrf_exempt
-def item_add(request):
-    employeename = request.POST.get('EmployeeName')
-    amount = request.POST.get('OriginalAmount')
-    remarks = request.POST.get('Remarks')
-    user_id = request.session.get('user_id', 0)
-    g_code = generate_code()
-    tev_add = TevIncoming(code=g_code,name=employeename,original_amount=amount,remarks=remarks,user_id=user_id)
-    tev_add.save()
-    
-    if tev_add.id:
-        system_config = SystemConfiguration.objects.first()
-        system_config.transaction_code = g_code
-        system_config.save()
-        
-    return JsonResponse({'data': 'success', 'g_code': g_code})
 
 
 @csrf_exempt

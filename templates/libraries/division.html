@@ -15,6 +15,9 @@
                             <th>Division</th>
                             <th>Acronym</th>
                             <th>Division Chief</th>
+                            <th>Chief Designation</th>
+                            <th>Approval</th>
+                            <th>Approval Designation</th>
                             <th>Created by</th>
                             <th>Date added</th>
                             <th>Actions</th>
@@ -74,6 +77,42 @@
                   aria-describedby="chief2"
                 />
             </div>
+            <div class="col-sm-12">
+                <label class="form-label">Chief Designation </label>
+                
+                <input
+                  type="text"
+                  id="c_approval"
+                  class="form-control dt-lib-chief"
+                  name="CDesignation"
+                  placeholder="Designation"
+                  aria-describedby="chief2"
+                />
+            </div>
+            <div class="col-sm-12">
+                <label class="form-label">Approval </label>
+                
+                <input
+                  type="text"
+                  id="approval"
+                  class="form-control dt-lib-chief"
+                  name="Approval"
+                  placeholder="Approval"
+                  aria-describedby="chief2"
+                />
+            </div>
+            <div class="col-sm-12">
+                <label class="form-label">Approval Designation </label>
+                
+                <input
+                  type="text"
+                  id="ap_designation"
+                  class="form-control dt-lib-chief"
+                  name="APDesignation"
+                  placeholder="Designation"
+                  aria-describedby="chief2"
+                />
+            </div>
             <div class="col-sm-12 mt-4">
                 <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
                 <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
@@ -91,6 +130,9 @@
             Division = jQuery(document.querySelector('[name="Division"]')),
             Acronym = jQuery(document.querySelector('[name="Acronym"]')),
             DivisionChief = jQuery(document.querySelector('[name="Chief"]')),
+            CDesignation = jQuery(document.querySelector('[name="CDesignation"]')),
+            Approval = jQuery(document.querySelector('[name="Approval"]')),
+            APDesignation = jQuery(document.querySelector('[name="APDesignation"]')),
             Status = jQuery(document.querySelector('[name="Status"]')),
             offCanvasElement = document.querySelector('#add-new-record');
             
@@ -114,8 +156,11 @@
                 { data: 'name' },
                 { data: 'acronym' },
                 { data: 'chief' },
+                { data: 'c_designation' },
+                { data: 'approval' },
+                { data: 'ap_designation' },
                 { data: 'created_by' },
-                { data: 'created_at' },
+                { data: 'updated_at' },
                 { data: 'id' },
             ],
             columnDefs: [
@@ -126,7 +171,7 @@
                     },
                 },
                 {
-                    targets: 4,
+                    targets: 7,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
@@ -220,6 +265,27 @@
                     validators: {
                         notEmpty: {
                             message: 'Please Enter DC Name',
+                        },
+                    },
+                },
+                CDesignation: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Designation',
+                        },
+                    },
+                },
+                Approval: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Approval Name',
+                        },
+                    },
+                },
+                APDesignation: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Designation',
                         },
                     },
                 },

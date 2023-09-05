@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge)
 import json 
 from django.core import serializers
 import datetime 
@@ -19,7 +19,6 @@ from django.forms.models import model_to_dict
 import requests
 from django.db.models import Q, F, Exists, OuterRef
 from django.db import connections
-
 
 def get_user_details(request):
     return StaffDetails.objects.filter(user_id=request.user.id).first()
@@ -50,7 +49,7 @@ def list(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/list.html' , context)
@@ -67,8 +66,8 @@ def api(request):
     }
     response = requests.get(url, headers=headers)
     data = response.json()
-    print(data)
-    print("testdawa")
+    # print(data)
+    # print("testdawa")
     return JsonResponse({'data': data})
     
 @login_required(login_url='login')
@@ -78,7 +77,7 @@ def checking(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('name'),
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/checking.html', context)
@@ -87,78 +86,92 @@ def checking(request):
     
     
     
-
-
+    
 def tracking_load(request):
-    # finance_database_alias = 'finance'
-    # dv_no_list = TevOutgoing.objects.order_by('id').values_list('dv_no', flat=True)
+    finance_database_alias = 'finance'
 
-    # query = """
-    #     SELECT dv_no, amt_certified, amt_journal, amt_budget 
-    #     FROM transactions 
-    #     WHERE dv_no IN %s
-    # """
-    # params = [tuple(dv_no_list)]
-
-    # with connections[finance_database_alias].cursor() as cursor:
-    #     cursor.execute(query, params)
-    #     results = cursor.fetchall()
-
-    # print("testdatabase1")
-    # print(results)
-    
-    
-    
     query = """
-        SELECT t.*
-        FROM tev_incoming t
-        WHERE t.status IN (1, 2, 4, 5 , 7)
-           OR (t.status = 3 AND (
-               SELECT COUNT(*)
-               FROM tev_incoming
-               WHERE code = t.code
-               ) = 1
-           );
-    """
+        SELECT code,name,date_travel,ti.status,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no FROM tev_incoming AS ti 
+        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        WHERE ti.status IN (1, 2, 4, 5 , 7)
+        OR (ti.status = 3 AND 
+            (
+                SELECT COUNT(*)
+                FROM tev_incoming
+                WHERE code = ti.code
+            ) = 1
+        );
+        """
 
     with connection.cursor() as cursor:
         cursor.execute(query)
         results = cursor.fetchall()
+        
+    column_names = ['code', 'name', 'date_travel','status','original_amount', 'final_amount', 'incoming_in', 'incoming_out', 'purpose','dv_no']
+    finance_data = []
 
-    total = len(results)
-
-    _start = request.GET.get('start')
-    _length = request.GET.get('length')
-
+    for finance_row in results:
+        finance_dict = dict(zip(column_names, finance_row))
+        finance_data.append(finance_dict)
+    
+    data = []
+    for row in finance_data:
+        amt_certified = ''
+        amt_journal = ''
+        amt_budget = ''
+        amt_check = ''
+        if row['dv_no']:
+            
+            finance_query = """
+                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount
+                FROM transactions AS ts
+                LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
+            """
+            with connections[finance_database_alias].cursor() as cursor2:
+                cursor2.execute(finance_query, (row['dv_no'],))
+                finance_results = cursor2.fetchall()
+                
+            if finance_results:
+                
+                amt_certified = finance_results[0][1]
+                amt_journal = finance_results[0][2]
+                amt_budget = finance_results[0][3]
+                amt_check = finance_results[0][4]
+        item = {
+            'code': row['code'],
+            'name': row['name'],
+            'date_travel': row['date_travel'],
+            'status': row['status'],
+            'original_amount': row['original_amount'],
+            'final_amount': row['final_amount'],
+            'incoming_in': row['incoming_in'],
+            'incoming_out': row['incoming_out'],
+            'purpose': row['purpose'],
+            'dv_no': row['dv_no'],
+            'amt_certified': amt_certified,
+            'amt_journal': amt_journal,
+            'amt_budget': amt_budget,
+            'amt_check': amt_check
+        }
+        data.append(item)
+        
+        _start = request.GET.get('start')
+        _length = request.GET.get('length')
+        
     if _start and _length:
         start = int(_start)
         length = int(_length)
         page = math.ceil(start / length) + 1
         per_page = length
         results = results[start:start + length]
-
-    data = []
-    
-    for row in results:
-        item = {
-            'id': row[0],
-            'code': row[1],
-            'name': row[2],
-            'id_no': row[3],
-            'original_amount': row[5],
-            'final_amount': row[6],
-            'incoming_in': row[7],
-            'incoming_out': row[8],
-            'slashed_out': row[9],
-            'remarks': row[10],
-            'purpose': row[12],
-            'status': row[13],
-            'user_id': row[13],
-            'date_travel': row[14]
-      
-        }
-        data.append(item)
-
+                
+        
+        print("finance_data11")
+        print(row['code'])
+        
+    total = len(finance_results)    
+          
     response = {
         'data': data,
         'page': page,
@@ -168,79 +181,6 @@ def tracking_load(request):
     }
     return JsonResponse(response)
 
-    
-# def tracking_load(request):
-#     finance_database_alias = 'finance'
-    
-    
-#     query = "SELECT dv_no,amt_certified,amt_journal, amt_budget FROM transactions"
-
-#     with connections[finance_database_alias].cursor() as cursor:
-#         cursor.execute(query)
-#         results = cursor.fetchall()
-        
-#     print("newdatabase")
-#     print(results)
-    
-    
-    
-#     # query = "SELECT dv_no,amt_certified,amt_journal, amt_budget FROM transactions WHERE dv_no = %s"
-#     # params = ['23-01-0001']
-
-#     # with connections[finance_database_alias].cursor() as cursor:
-#     #     cursor.execute(query, params)
-#     #     results = cursor.fetchall()
-        
-#     print("testdatabase")
-#     print(results)
-
-       
-#     item_data = (TevIncoming.objects.filter().select_related().distinct().order_by('-id').reverse())
-#     total = item_data.count()
-
-#     _start = request.GET.get('start')
-#     _length = request.GET.get('length')
-#     if _start and _length:
-#         start = int(_start)
-#         length = int(_length)
-#         page = math.ceil(start / length) + 1
-#         per_page = length
-#         item_data = item_data[start:start + length]
-
-#     data = []
-
-#     for item in item_data:
-#         userData = AuthUser.objects.filter(id=item.user_id)
-#         full_name = userData[0].first_name + ' ' + userData[0].last_name
-
-#         item = {
-#             'id': item.id,
-#             'code': item.code,
-#             'name': item.name,
-#             'id_no': item.id_no,
-#             'original_amount': item.original_amount,
-#             'final_amount': item.final_amount,
-#             'incoming_in': item.incoming_in,
-#             'incoming_out': item.incoming_out,
-#             'slashed_out': item.incoming_out,
-#             'remarks': item.remarks,
-#             'purpose': item.purpose,
-#             'status': item.status,
-#             'user_id': full_name
-#         }
-
-#         data.append(item)
-
-#     response = {
-#         'data': data,
-#         'page': page,
-#         'per_page': per_page,
-#         'recordsTotal': total,
-#         'recordsFiltered': total,
-#     }
-#     return JsonResponse(response)
-
-
 def item_load(request):
     idn = request.GET.get('identifier')
     if idn == "1":
@@ -249,14 +189,14 @@ def item_load(request):
         retrieve = [2, 3, 4]
     else:
         retrieve = [1, 2, 3, 4]
-
+    
     query = """
     SELECT t.*
     FROM tev_incoming t
     WHERE (
         t.status = 1
         OR (
-            t.status = 3 AND NOT EXISTS (
+            t.status = 3 AND t.slashed_out IS NOT NULL AND NOT EXISTS (
                 SELECT 1
                 FROM tev_incoming t2
                 WHERE t2.code = t.code
@@ -291,13 +231,15 @@ def item_load(request):
         item_entry = {
             'id': item['id'],
             'code': item['code'],
-            'name': item['name'],
+            'name': item['first_name'],
             'id_no': item['id_no'],
+            'account_no': item['account_no'],
+            'date_travel': item['date_travel'],
             'original_amount': item['original_amount'],
             'final_amount': item['final_amount'],
             'incoming_in': item['incoming_in'],
             'incoming_out': item['incoming_out'],
-            'slashed_out': item['incoming_out'],
+            'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
             'status': item['status'],
             'user_id': full_name
@@ -315,25 +257,19 @@ def item_load(request):
     return JsonResponse(response)
 
 
-from django.db import connection
-from django.http import JsonResponse
-import math
 
 def checking_load(request):
-    idn = request.GET.get('identifier')
-    retrieve = [2, 3, 4]
-
     query = """
         SELECT t.*
         FROM tev_incoming t
         WHERE t.status = 2
-           OR t.status = 7
-           OR (t.status = 3 AND (
-               SELECT COUNT(*)
-               FROM tev_incoming
-               WHERE code = t.code
-               ) = 1
-           );
+            OR t.status = 7
+            OR (t.status = 3 AND t.slashed_out IS NULL AND (
+                SELECT COUNT(*)
+                FROM tev_incoming
+                WHERE code = t.code
+            ) = 1
+        );
     """
 
     with connection.cursor() as cursor:
@@ -364,6 +300,8 @@ def checking_load(request):
             'code': row[1],
             'name': row[2],
             'id_no': row[3],
+            'account_no': row[4],
+            'date_travel': row[5],
             'original_amount': row[6],
             'final_amount': row[7],
             'incoming_in': row[8],
@@ -384,58 +322,6 @@ def checking_load(request):
     }
     return JsonResponse(response)
 
-
-
-# def checking_load(request):
-    
-#     idn = request.GET.get('identifier')
-#     retrieve =[2,3,4]
-
-       
-#     item_data = (TevIncoming.objects.filter(status__in=retrieve).select_related().distinct().order_by('-id').reverse())
-#     total = item_data.count()
-
-#     _start = request.GET.get('start')
-#     _length = request.GET.get('length')
-#     if _start and _length:
-#         start = int(_start)
-#         length = int(_length)
-#         page = math.ceil(start / length) + 1
-#         per_page = length
-#         item_data = item_data[start:start + length]
-
-#     data = []
-
-#     for item in item_data:
-#         userData = AuthUser.objects.filter(id=item.user_id)
-#         full_name = userData[0].first_name + ' ' + userData[0].last_name
-
-#         item = {
-#             'id': item.id,
-#             'code': item.code,
-#             'name': item.name,
-#             'id_no': item.id_no,
-#             'original_amount': item.original_amount,
-#             'final_amount': item.final_amount,
-#             'incoming_in': item.incoming_in,
-#             'incoming_out': item.incoming_out,
-#             'slashed_out': item.incoming_out,
-#             'remarks': item.remarks,
-#             'status': item.status,
-#             'user_id': full_name
-#         }
-
-#         data.append(item)
-
-#     response = {
-#         'data': data,
-#         'page': page,
-#         'per_page': per_page,
-#         'recordsTotal': total,
-#         'recordsFiltered': total,
-#     }
-#     return JsonResponse(response)
-
 def item_edit(request):
     id = request.GET.get('id')
     items = TevIncoming.objects.get(pk=id)
@@ -449,7 +335,7 @@ def item_update(request):
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
     remarks = request.POST.get('Remarks')
-    tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
+    tev_update = TevIncoming.objects.filter(id=id).update(first_name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
 @csrf_exempt
@@ -459,45 +345,73 @@ def item_returned(request):
     amount = request.POST.get('OriginalAmount')
     remarks = request.POST.get('Remarks')
     
+    travel_date = request.POST.get('DateTravel')
+    travel_date_stripped = travel_date.strip()
+    travel_date_spaces = travel_date_stripped.replace(' ', '')
+    
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
-
     
-    tev_add = TevIncoming(code=data.code,name=data.name,original_amount=amount,remarks=remarks,user_id=data.user_id)
+    tev_add = TevIncoming(code=data.code,first_name=data.name,date_travel = travel_date_spaces,original_amount=amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
     
     
     #tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
-    
 @csrf_exempt
 def item_add(request):
     employeename = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
     travel_date = request.POST.get('DateTravel')
+    idd_no = request.POST.get('IdNumber')
+    acct_no = request.POST.get('AccountNumber')
     remarks = request.POST.get('Remarks')
     user_id = request.session.get('user_id', 0)
     g_code = generate_code()
-    tev_add = TevIncoming(code=g_code,name=employeename,original_amount=amount,remarks=remarks,date_travel = travel_date,user_id=user_id)
-    tev_add.save()
     
-    if tev_add.id:
-        system_config = SystemConfiguration.objects.first()
-        system_config.transaction_code = g_code
-        system_config.save()
+    duplicate_travel = []
+    individual_dates = travel_date.split(',')
+    cleaned_dates = ','.join(date.strip() for date in individual_dates)
+    
+    for date in individual_dates:
+        cleaned_date = date.strip()
+
+        query = """
+            SELECT date_travel FROM tev_incoming
+            WHERE name = %s
+            AND date_travel LIKE %s;
+        """
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, [employeename, f"%{cleaned_date}%"])
+            results = cursor.fetchall()
+        if results:
+            duplicate_travel.append(cleaned_date)
         
-    return JsonResponse({'data': 'success', 'g_code': g_code})
+    if duplicate_travel:
+        return JsonResponse({'data': 'error', 'message':duplicate_travel})
+        
+    else:
+        tev_add = TevIncoming(code=g_code, name=employeename,id_no=idd_no,account_no=acct_no, date_travel=cleaned_dates, original_amount=amount, remarks=remarks, user_id=user_id)
+        tev_add.save()
+
+        if tev_add.id:
+            system_config = SystemConfiguration.objects.first()
+            system_config.transaction_code = g_code
+            system_config.save()
+
+        return JsonResponse({'data': 'success', 'g_code': g_code})
+
+
 
 
 @csrf_exempt
 def tracking(request):
     context = {
-		'employee_list' : TevIncoming.objects.filter().order_by('name'),
+		'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
 	}
     return render(request, 'receive/tracking.html', context)
-
-
 
 @csrf_exempt
 def out_pending_tev(request):
@@ -510,11 +424,19 @@ def out_pending_tev(request):
 
 @csrf_exempt
 def out_checking_tev(request):
-    out_list = request.POST.getlist('out_list[]')
-    
-    for item_id  in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).update(status=4,slashed_out=datetime.datetime.now())
-    
+    out_list = request.POST.getlist('out_list[]')   
+    for item_id in out_list:
+        tev_update = TevIncoming.objects.filter(id=item_id).first()  
+
+        if tev_update:
+            if tev_update.status == 3:
+                tev_update.slashed_out = datetime.datetime.now()
+            else:
+                tev_update.status = 4
+            tev_update.save()
+        else:
+            pass 
+
     return JsonResponse({'data': 'success'})
 
 @csrf_exempt
