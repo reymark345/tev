@@ -260,6 +260,7 @@ def employee_dv(request):
     user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     dvno = ''
+    total_amount = 0
     
     idd = request.POST.get('dv_id')
     dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no').first()
@@ -267,21 +268,21 @@ def employee_dv(request):
     if dv_no is not None:
         dvno = dv_no['dv_no']
 
-    print("dvno")
-    print(dvno)
 
     query = """
-        SELECT code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no FROM tev_incoming AS ti 
+        SELECT code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no, ch.name, cl.name FROM tev_incoming AS ti 
         LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
         LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        WHERE ti.status IN (1, 2, 4, 5, 7) AND dv_no = %s
+        LEFT JOIN charges AS ch ON ch.id = tb.charges_id
+        LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
+        WHERE ti.status IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
     """
 
     with connection.cursor() as cursor:
         cursor.execute(query, (dvno,))
         results = cursor.fetchall()
         
-    column_names = ['code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no']
+    column_names = ['code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no','charges','cluster']
     data_result = []
 
     for finance_row in results:
@@ -292,11 +293,14 @@ def employee_dv(request):
     
   
     for row in data_result:
+        
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
         last_name = row['last_name'] if row['last_name'] else ''
-        
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
+        
+        final_amount = float(row['final_amount'])
+        total_amount += final_amount
         item = {
             'code': row['code'],
             'name': emp_fullname,
@@ -304,9 +308,16 @@ def employee_dv(request):
             'account_no': row['account_no'],
             'final_amount': row['final_amount'],
             'purpose': row['purpose'],
-            'dv_no': row['dv_no']
+            'dv_no': row['dv_no'],
+            'charge':row['charges'],
+            'cluster':row['cluster'],
+            'total':total_amount,
+            
         }
         data.append(item)
+        
+    print("total_amounsst")
+    print(total_amount)
 
     #     _start = request.GET.get('start') if request.GET.get('start') else 0
     #     _length = request.GET.get('length') if request.GET.get('length') else 0
@@ -324,6 +335,7 @@ def employee_dv(request):
         'data': data,
         'recordsTotal': total,
         'recordsFiltered': total,
+        'total_amount':total_amount
     }
     return JsonResponse(response)
 
@@ -396,7 +408,19 @@ def box_load(request):
     for item in item_data: 
         userData = AuthUser.objects.filter(id=item.user_id)
         
-        full_name = userData[0].first_name + ' ' + userData[0].last_name
+        # Check if userData has results
+        if userData.exists():
+            full_name = userData[0].first_name + ' ' + userData[0].last_name
+        else:
+            full_name = ""
+        
+        userData_out = AuthUser.objects.filter(id=item.out_by)
+        
+        # Check if userData_out has results
+        if userData_out.exists():
+            full_name_out = userData_out[0].first_name + ' ' + userData_out[0].last_name
+        else:
+            full_name_out = ""
 
         item = {
             'id': item.id,
@@ -407,7 +431,70 @@ def box_load(request):
             'status':item.status,
             'box_b_in': item.box_b_in,
             'box_b_out': item.box_b_out,
-            'user_id': full_name
+            'user_id': full_name,
+            'out_by': full_name_out
+        }
+
+        data.append(item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+
+def box_emp_load(request):  
+    dv_id = request.POST.get('dv_id')
+    
+    print("Testtttt")
+    print(dv_id)
+         
+    item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
+    total = item_data.count()
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        item_data = item_data[start:start + length]
+
+    data = []
+
+    for item in item_data: 
+        userData = AuthUser.objects.filter(id=item.user_id)
+        
+        # Check if userData has results
+        if userData.exists():
+            full_name = userData[0].first_name + ' ' + userData[0].last_name
+        else:
+            full_name = ""
+        
+        userData_out = AuthUser.objects.filter(id=item.out_by)
+        
+        # Check if userData_out has results
+        if userData_out.exists():
+            full_name_out = userData_out[0].first_name + ' ' + userData_out[0].last_name
+        else:
+            full_name_out = ""
+
+        item = {
+            'id': item.id,
+            'dv_no': item.dv_no,
+            'cluster': item.cluster,
+            'division_name': item.division.name,
+            'division_chief': item.division.chief,
+            'status':item.status,
+            'box_b_in': item.box_b_in,
+            'box_b_out': item.box_b_out,
+            'user_id': full_name,
+            'out_by': full_name_out
         }
 
         data.append(item)
@@ -443,6 +530,7 @@ def item_update(request):
 @csrf_exempt
 def out_box_a(request):
     out_list = request.POST.getlist('out_list[]')
+    user_id = request.session.get('user_id', 0)
     
     # Convert the out_list items to integers
     out_list_int = [int(item) for item in out_list]
@@ -454,21 +542,10 @@ def out_box_a(request):
     TevIncoming.objects.filter(id__in=ids).update(status=6)
     
     for item_id  in out_list:
-        box_b = TevOutgoing.objects.filter(id=item_id).update(status=6,box_b_out=datetime.datetime.now())
+        box_b = TevOutgoing.objects.filter(id=item_id).update(status=6,box_b_out=datetime.datetime.now(), out_by = user_id)
 
     
     return JsonResponse({'data': 'success'})
-
-
-
-# @csrf_exempt
-# def out_box_a(request):
-#     out_list = request.POST.getlist('out_list[]')
-    
-#     for item_id  in out_list:
-#         box_b = TevOutgoing.objects.filter(id=item_id).update(box_b_out=datetime.datetime.now())
-    
-#     return JsonResponse({'data': 'success'})
 
 
 @csrf_exempt

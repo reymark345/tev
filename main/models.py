@@ -162,6 +162,8 @@ class TevOutgoing(models.Model):
     ard_out = models.DateTimeField(blank=True, null=True)
     status = models.IntegerField(max_length=128, blank=True, null=True,default=5)
     user_id = models.CharField(max_length=128, blank=True, null=True)
+    out_by = models.CharField(max_length=128, blank=True, null=True)
+    is_print = models.BooleanField(default=False)
     
     class Meta:
         managed = True
