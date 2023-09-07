@@ -263,14 +263,17 @@ def employee_dv(request):
     total_amount = 0
     
     idd = request.POST.get('dv_id')
-    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no').first()
+    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','is_print').first()
+    charges = Charges.objects.filter().order_by('name')
+    
+    charges_list = [{'name': charge.name} for charge in charges]
     
     if dv_no is not None:
         dvno = dv_no['dv_no']
 
 
     query = """
-        SELECT code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no, ch.name, cl.name FROM tev_incoming AS ti 
+        SELECT ti.id, code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no, ch.name, cl.name FROM tev_incoming AS ti 
         LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
         LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
         LEFT JOIN charges AS ch ON ch.id = tb.charges_id
@@ -282,7 +285,7 @@ def employee_dv(request):
         cursor.execute(query, (dvno,))
         results = cursor.fetchall()
         
-    column_names = ['code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no','charges','cluster']
+    column_names = ['id','code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no','charges','cluster']
     data_result = []
 
     for finance_row in results:
@@ -291,7 +294,7 @@ def employee_dv(request):
 
     data = []  
     
-  
+    
     for row in data_result:
         
         first_name = row['first_name'] if row['first_name'] else ''
@@ -302,6 +305,7 @@ def employee_dv(request):
         final_amount = float(row['final_amount'])
         total_amount += final_amount
         item = {
+            'id': row['id'],
             'code': row['code'],
             'name': emp_fullname,
             'id_no': row['id_no'],
@@ -316,8 +320,6 @@ def employee_dv(request):
         }
         data.append(item)
         
-    print("total_amounsst")
-    print(total_amount)
 
     #     _start = request.GET.get('start') if request.GET.get('start') else 0
     #     _length = request.GET.get('length') if request.GET.get('length') else 0
@@ -333,6 +335,8 @@ def employee_dv(request):
           
     response = {
         'data': data,
+        'charges': charges_list,
+        'is_print': dv_no['is_print'],
         'recordsTotal': total,
         'recordsFiltered': total,
         'total_amount':total_amount
@@ -359,11 +363,16 @@ def payroll_load(request):
         userData = AuthUser.objects.filter(id=item.user_id)
         
         full_name = userData[0].first_name + ' ' + userData[0].last_name
+        
+        fname = item.first_name if item.first_name else ''
+        mname = item.middle_name if item.middle_name else ''
+        lname = item.last_name if item.last_name else ''
+        emp_fullname = f"{fname} {mname} {lname}".strip()
 
         item = {
             'id': item.id,
             'code': item.code,
-            'name': item.first_name,
+            'name': emp_fullname,
             'middle_name': item.middle_name,
             'last_name': item.last_name,
             'id_no': item.id_no,
@@ -525,7 +534,33 @@ def item_update(request):
     tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
+@csrf_exempt
+def update_box_list(request):
+    incoming_id = request.POST.get('emp_id')
+    amount = request.POST.get('amount')
+    purpose = request.POST.get('purpose')
+    charges = request.POST.get('charges')
+    
+    # update = TevIncoming.objects.filter(id=incoming_id).update(final_amount=amount)
+    
 
+    tev_incoming = TevIncoming.objects.select_related('').get(id=incoming_id)
+
+    # Update the fields
+    tev_incoming.tevbridge.final_amount = amount
+    tev_incoming.tevbridge.purpose = purpose
+    tev_incoming.tevbridge.charges = charges
+    tev_incoming.tevbridge.save()
+    
+    
+    
+    # SELECT ti.id, ti.first_name, final_amount, tb.purpose, ch.name FROM tev_incoming AS ti 
+    # LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+    # LEFT JOIN charges AS ch ON ch.id = tb.charges_id
+    # WHERE ti.id = 1 
+
+
+    return JsonResponse({'data': 'success'})
 
 @csrf_exempt
 def out_box_a(request):

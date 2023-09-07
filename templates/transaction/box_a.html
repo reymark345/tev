@@ -479,6 +479,32 @@
             drawCallback: function (settings) {
                 const tableId = 'tbl-box-a'; // Change this to the specific table ID you want to populate
                 const tbody = $(`#${tableId} tbody`);
+                let selectOptions = '';
+
+                $('body').on('click', '.item-edit', function () {
+                  let emp_id = $(this).attr('id');
+                  let amount = $(this).closest('tr').find('.form-control.emp-amount').val();
+                  let purpose = $(this).closest('tr').find('.form-control.emp-purpose').val();
+                  let charges = $(this).closest('tr').find('select.emp-charges').val();
+
+                  $.ajax({
+                    type: 'POST',
+                    url: "{% url 'update-box-list' %}",
+                    data:{
+                        emp_id: emp_id,
+                        amount:amount,
+                        purpose:purpose,
+                        charges:charges
+                    }
+                }).done(function (data) {
+
+                  toastr.success('Data Successfully Save!', 'Success', toast_options);
+
+                })
+
+
+
+              });
 
                 $('.view-data').on('click', function () {
 
@@ -498,57 +524,56 @@
                             dv_id: id
                         }
                     }).done(function (data) {
-
+                      console.log(data);
+                      let charges = data.charges;
+                      let is_print = data.is_print;
                         tbody.empty();
-
-                        // Loop through the data and populate the table
                         data.data.forEach(function (item) {
-                        const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                          const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                          let amountColumn = '';
+                          if (is_print) {
+                              amountColumn = `<td><span class="badge bg-label-primary emp-amount"> ₱ ${formattedFinalAmount}</span></td>`;
+                          } else {
+                              amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                          }
+
+    
+                          for (var i = 0; i < charges.length; i++) {
+                              var charge = charges[i];
+                              selectOptions += `<option value="${charge.name}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                          }
                           const row = `
-                            <tr>
-                              <td><input type="checkbox"></td>
-                              <td><span class="badge bg-label-primary">${item.code}</span></td>
-                              <td><span class="badge bg-label-warning">${item.account_no}</span></td>
-                              <td><span class="badge bg-label-primary">${item.id_no}</span></td>
-                              <td>${item.name}</td>
-                              <td><span class="badge bg-label-primary"> ₱ ${formattedFinalAmount}</span></td>
-                              <td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>
-                              <td>
-                                <select id="emp-charges" name="emp-charges" class="form-select emp-charges" data-allow-clear="true">' +
-                                    <option value="${item.charge}"selected>${item.charge}</option>
-                                </select>
-                                    
-                                    
-                                    
-                                    
-                              <td>
-                                <a class="btn btn-sm btn-icon item-edit" id="delete-emp"><i class="text-primary ti ti-edit"></i></a>
-                                <a class="btn btn-sm btn-icon item-delete" id="delete-emp"><i class="text-primary ti ti-trash"></i></a>
-                              </td>
-                            </tr>
+                              <tr>
+                                  <td><input type="checkbox"></td>
+                                  <td><span class="badge bg-label-primary">${item.code}</span></td>
+                                  <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                                  <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                                  <td>${item.name}</td>
+                                  ${amountColumn}
+                                  <td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>
+                                  <td>
+                                    <select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">
+                                      ${selectOptions}
+                                    </select>
+                                  </td>
+                                  <td>
+                                      <a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>
+                                      <a class="btn btn-sm btn-icon item-delete" id="${item.id}"><i class="text-primary ti ti-trash"></i></a>
+                                  </td>
+                              </tr>
                           `;
                           tbody.append(row);
-                        });
-
-                        <!-- let totalAmount = data.total_amount; -->
-
+                      });
+                      $('#emp-charges').html(selectOptions);
                         let totalAmount = data.total_amount;
                         totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2
                         });
-
-
                         $('#total-amount').text("₱ "+totalAmount);
-                      
                         $('#update-transaction').modal('show');
-                        console.log(data);
-                        console.log("safasfasfasf");
                     })
                 });
-
-
-
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
                     // Do something when a checkbox in the table body is changed...
                 });
@@ -571,18 +596,9 @@
                             box_id: bx_id
                         }
                     }).done(function (data) {
-
-                       // var newTab = window.open('print_box_a.html', '_blank');
-
-                       // newTab.onload = function() {
-                            // Write the data to the new tab's document
-                         //   newTab.document.write(data.incoming_data);
-                          //  newTab.document.close();
-                       // };
-
-                        //console.log(data.incoming_data);
                     })
                 });
+
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
@@ -723,7 +739,9 @@
                     className: 'create-new btn btn-primary',
                 },
             ],
-            drawCallback: function (settings) {
+            drawCallback: function (settings) { 
+
+              
                 $('.view-data').on('click', function () {
                     let id = $(this).attr('id');
                     dv_no_id = id
@@ -936,6 +954,10 @@
             })
 
         }
+                      
+
+
+
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();

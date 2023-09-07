@@ -24,6 +24,7 @@ urlpatterns = [
     path('preview', views.preview_box_a, name='preview-box-a'),
     
     path('employee_dv', views.employee_dv, name='employee-dv'),
+    path('update_box_list', views.update_box_list, name='update-box-list'),
 
 
     

@@ -367,7 +367,7 @@ def item_returned(request):
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
     
-    tev_add = TevIncoming(code=data.code,first_name=data.name,date_travel = travel_date_spaces,original_amount=amount,remarks=remarks,user_id=data.user_id)
+    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
     
     

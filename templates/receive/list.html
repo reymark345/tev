@@ -48,12 +48,6 @@
                 <label class="form-label" for="employee-name">Employee Name</label>
                 <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
                     <option></option>
-                    <option>Reymark N. Valdehueza</option>
-                    <option>Satoru Gojou</option>
-                    <option>11Satoru Gojou</option>
-                    <option>22Satoru Gojou</option>
-                    <option>33Satoru Gojou</option>
-                    <option>44Satoru Gojou</option>
                 </select>
             </div>
 
@@ -334,6 +328,8 @@
                         if (data.length > 0) {
                             fetchEmployee();
                             let fields = data[0].fields
+
+
                             let pk = data[0].pk
                             let employee_name = $('#employee-name')
                             let floatvalue = parseFloat(fields.original_amount);
@@ -341,20 +337,16 @@
                             let date_travel = fields.date_travel;
                             formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
                             status_val = fields.status;
-
+                            let fullname = fields.first_name + " " + fields.middle_name + " " + fields.last_name
                             if(status_val ===3){
-                                EmployeeName.val(fields.name).trigger('change').prop("disabled", true);
+                                EmployeeName.val(fullname).trigger('change').prop("disabled", true);
                             }
                             else{
-                                EmployeeName.val(fields.name).trigger('change').prop("disabled", false);
-
+                                EmployeeName.val(fullname).trigger('change').prop("disabled", false);
                             }
                             OriginalAmount.val(convertedAmount);
                             Remarks.val(fields.remarks);
                             DateTravel.val(formattedDates);
-
-
-                            
                             ItemID.val(pk);
                             offCanvasEl.show()
                         }
