@@ -261,16 +261,32 @@ def employee_dv(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     dvno = ''
     total_amount = 0
+    charges_list = []
     
     idd = request.POST.get('dv_id')
     dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','is_print').first()
-    charges = Charges.objects.filter().order_by('name')
     
-    charges_list = [{'name': charge.name} for charge in charges]
+    # charges = Charges.objects.filter().order_by('name')
+
+    
+    charges = Charges.objects.filter().order_by('name')
+    for charge in charges:
+        charge_data = {
+            'id': charge.id,
+            'name': charge.name
+        }
+        charges_list.append(charge_data)
+        
+    
+    # charges_list = [{'name': charge.name} for charge in charges]
+    
+    # charges_list = [{'id': charge.id, 'name': charge.name} for charge in charges]
+
+    # print("chargesTESTTT")
+    # print(charges_list)
     
     if dv_no is not None:
         dvno = dv_no['dv_no']
-
 
     query = """
         SELECT ti.id, code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no, ch.name, cl.name FROM tev_incoming AS ti 
@@ -337,6 +353,7 @@ def employee_dv(request):
         'data': data,
         'charges': charges_list,
         'is_print': dv_no['is_print'],
+        'dv_number':dv_no['dv_no'],
         'recordsTotal': total,
         'recordsFiltered': total,
         'total_amount':total_amount
@@ -536,31 +553,94 @@ def item_update(request):
 
 @csrf_exempt
 def update_box_list(request):
+    total_amount = 0
     incoming_id = request.POST.get('emp_id')
     amount = request.POST.get('amount')
     purpose = request.POST.get('purpose')
     charges = request.POST.get('charges')
+    dv_no = request.POST.get('dv_number')
     
-    # update = TevIncoming.objects.filter(id=incoming_id).update(final_amount=amount)
+    try:
+        tev_incoming = TevIncoming.objects.get(id=incoming_id)
+        tev_bridge = tev_incoming.tevbridge_set.first()
+        if tev_bridge:
+            tev_incoming.final_amount = amount
+            tev_bridge.purpose = purpose
+            tev_bridge.charges_id = charges
+            tev_bridge.save()
+            tev_incoming.save()
+    except TevIncoming.DoesNotExist:
+        pass
     
+    query = """
+        SELECT final_amount FROM tev_incoming AS ti 
+        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        WHERE ti.status IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
+    """
 
-    tev_incoming = TevIncoming.objects.select_related('').get(id=incoming_id)
+    with connection.cursor() as cursor:
+        cursor.execute(query, (dv_no,))
+        results = cursor.fetchall()
+        
+    column_names = ['final_amount']
+    data_result = []
 
-    # Update the fields
-    tev_incoming.tevbridge.final_amount = amount
-    tev_incoming.tevbridge.purpose = purpose
-    tev_incoming.tevbridge.charges = charges
-    tev_incoming.tevbridge.save()
+    for finance_row in results:
+        finance_dict = dict(zip(column_names, finance_row))
+        data_result.append(finance_dict)
+        
+    for row in data_result:
+        final_amount = float(row['final_amount'])
+        total_amount += final_amount
     
     
+    response = {
+        'data': 'success',
+        'total_amount':total_amount
+    }
+    return JsonResponse(response)
+
+@csrf_exempt
+def delete_box_list(request):
+    total_amount = 0
+    incoming_id = request.POST.get('emp_id')
+    amount = request.POST.get('amount')
+    purpose = request.POST.get('purpose')
+    charges = request.POST.get('charges')
+    dv_no = request.POST.get('dv_number')
     
-    # SELECT ti.id, ti.first_name, final_amount, tb.purpose, ch.name FROM tev_incoming AS ti 
-    # LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-    # LEFT JOIN charges AS ch ON ch.id = tb.charges_id
-    # WHERE ti.id = 1 
+    
+    delete, _ = TevIncoming.objects.filter(id=incoming_id).delete()
+    
+    query = """
+        SELECT final_amount FROM tev_incoming AS ti 
+        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        WHERE ti.status IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
+    """
 
+    with connection.cursor() as cursor:
+        cursor.execute(query, (dv_no,))
+        results = cursor.fetchall()
+        
+    column_names = ['final_amount']
+    data_result = []
 
-    return JsonResponse({'data': 'success'})
+    for finance_row in results:
+        finance_dict = dict(zip(column_names, finance_row))
+        data_result.append(finance_dict)
+        
+    for row in data_result:
+        final_amount = float(row['final_amount'])
+        total_amount += final_amount
+    
+    
+    response = {
+        'data': 'success',
+        'total_amount':total_amount
+    }
+    return JsonResponse(response)
 
 @csrf_exempt
 def out_box_a(request):

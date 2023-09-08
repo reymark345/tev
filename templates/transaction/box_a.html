@@ -324,6 +324,7 @@
 <script>
     let clicked_id = 0;
     let dv_no_id =0;
+    let dv_number = '';
     $(document).ready(function () {
 
         const table_box_a = $('#tbl-box-a')
@@ -494,17 +495,51 @@
                         emp_id: emp_id,
                         amount:amount,
                         purpose:purpose,
-                        charges:charges
+                        charges:charges,
+                        dv_number: dv_number
                     }
                 }).done(function (data) {
+                    let totalAmount = data.total_amount;
 
+                    console.log(totalAmount);
+                    console.log("totalAmount");
+                    totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    $('#total-amount').text("₱ "+totalAmount);
                   toastr.success('Data Successfully Save!', 'Success', toast_options);
 
                 })
-
-
-
               });
+
+              $('body').on('click', '.item-delete', function () {
+                let emp_id = $(this).attr('id');
+                let amount = $(this).closest('tr').find('.form-control.emp-amount').val();
+
+                $.ajax({
+                  type: 'POST',
+                  url: "{% url 'delete-box-list' %}",
+                  data:{
+                      emp_id: emp_id,
+                      amount:amount,
+                      dv_number: dv_number
+                  }
+              }).done(function (data) {
+                let totalAmount = data.total_amount;
+
+                console.log(totalAmount);
+                console.log("totalAmount");
+                totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                $('#total-amount').text("₱ "+totalAmount);
+                toastr.success('Data Successfully Save!', 'Success', toast_options);
+
+
+              })
+            });
 
                 $('.view-data').on('click', function () {
 
@@ -524,23 +559,30 @@
                             dv_id: id
                         }
                     }).done(function (data) {
-                      console.log(data);
-                      let charges = data.charges;
-                      let is_print = data.is_print;
+                        console.log("data_TEST");
+                        console.log(data);
+                        dv_number = '';
+                        dv_number = data.dv_number;
+                        let charges = data.charges;
+                        let is_print = data.is_print;
                         tbody.empty();
+                       
                         data.data.forEach(function (item) {
                           const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
                           let amountColumn = '';
+                          let deleteColumn = '';
                           if (is_print) {
-                              amountColumn = `<td><span class="badge bg-label-primary emp-amount"> ₱ ${formattedFinalAmount}</span></td>`;
-                          } else {
-                              amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
-                          }
-
-    
+                            amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
+                            deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
+                        } else {
+                            amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                            deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                        }
+                          selectOptions = '';
                           for (var i = 0; i < charges.length; i++) {
+                          
                               var charge = charges[i];
-                              selectOptions += `<option value="${charge.name}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                              selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
                           }
                           const row = `
                               <tr>
@@ -558,7 +600,7 @@
                                   </td>
                                   <td>
                                       <a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>
-                                      <a class="btn btn-sm btn-icon item-delete" id="${item.id}"><i class="text-primary ti ti-trash"></i></a>
+                                      ${deleteColumn}
                                   </td>
                               </tr>
                           `;
@@ -714,7 +756,7 @@
                 },
                 {
                     className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Delete</span>',
                     action: function () {
                         // Get the IDs of checked items
                         var selectedItems = [];
