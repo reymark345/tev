@@ -66,6 +66,19 @@
             </div>
 
             <div class="col-sm-12">
+                <div class="col-md-12 mb-2">
+                  <label for="flatpickr-multi" class="form-label">Date Travel <small>(Range)</small></label>
+                  <input
+                  type="text"
+                  class="form-control"
+                  name="RangeTravel"
+                  placeholder="YYYY-MM-DD to YYYY-MM-DD"
+                  id="flatpickr-range"
+                />
+                </div>
+            </div>
+
+            <div class="col-sm-12">
                 <div class="form-group">
                     <label class="form-label" for="remarks">Remarks</label>
                     <div class="input-group input-group-merge">
@@ -113,6 +126,7 @@
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
+            RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
             IdNumber = jQuery(document.querySelector('[name="IdNumber"]')),
             AccountNumber = jQuery(document.querySelector('[name="AccountNumber"]')),
             EmpName = jQuery(document.querySelector('[name="EmpName"]')),
@@ -439,80 +453,94 @@
                 })
             },
         }).on('core.form.valid', function () {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, save it!',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-3',
-                    cancelButton: 'btn btn-label-secondary',
-                },
-                buttonsStyling: false,
-            }).then(function (result) {
-                if (result.value) {
-                    var form_data = $('#item-form').serialize()
-                    let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
-                   
-                    var form_data = $('#item-form').serialize()
-                    $.ajax({
-                        type: 'POST',
-                        url: post_url,
-                        data: form_data,
-                    }).done(function (data) {
-                        if (data.data == 'success') {
 
-                            let code = data.g_code;
-                            if (code){
-                                Swal.fire({
-                                    title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
-                                    icon: 'info',
-                                    html:
-                                      'Successfully <b>Save!</b>',
-                                    showCloseButton: true,
-                                    showCancelButton: false,
-                                    focusConfirm: false,
-                                    confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                                    confirmButtonAriaLabel: 'Thumbs up, great!',
-                                    customClass: {
-                                      confirmButton: 'btn btn-primary me-3'
-                                    },
-                                    buttonsStyling: false
-                                  });
+      
+            console.log(DateTravel.val());
+            console.log(RangeTravel.val());
+            console.log("DateTravel");
 
-                            }
-                            else{
-                                offCanvasEl.hide()
+            if (!DateTravel.val() && !RangeTravel.val()){
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, save it!',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-3',
+                        cancelButton: 'btn btn-label-secondary',
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (result.value) {
+                        var form_data = $('#item-form').serialize()
+                        let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
+                    
+                        var form_data = $('#item-form').serialize()
+                        $.ajax({
+                            type: 'POST',
+                            url: post_url,
+                            data: form_data,
+                        }).done(function (data) {
+                            if (data.data == 'success') {
+
+                                let code = data.g_code;
+                                if (code){
+                                    Swal.fire({
+                                        title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                        icon: 'info',
+                                        html:
+                                        'Successfully <b>Save!</b>',
+                                        showCloseButton: true,
+                                        showCancelButton: false,
+                                        focusConfirm: false,
+                                        confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!',
+                                        customClass: {
+                                        confirmButton: 'btn btn-primary me-3'
+                                        },
+                                        buttonsStyling: false
+                                    });
+
+                                }
+                                else{
+                                    offCanvasEl.hide()
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Update Successfully!',
+                                        html:
+                                        'Successfully <b>Save!</b>',
+                                        customClass: {
+                                            confirmButton: 'btn btn-success',
+                                        },
+                                    })
+                                }
+                                EmployeeName.val("").trigger('change');
+                                OriginalAmount.val("");
+                                DateTravel.val("")
+                                Remarks.val("");
+                                RangeTravel.val("")
+
+                                dataTable.ajax.reload();
+                            } else {
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Update Successfully!',
-                                    html:
-                                    'Successfully <b>Save!</b>',
+                                    icon: 'error',
+                                    title: 'Error saving!',
+                                    html:"Duplicate Travel <br><b>"+data.message+"</b>",
                                     customClass: {
                                         confirmButton: 'btn btn-success',
                                     },
                                 })
                             }
-                            EmployeeName.val("").trigger('change');
-                            OriginalAmount.val("");
-                            DateTravel.val("")
-                            Remarks.val("");
+                        })
+                    }
+                })
+            }
+            else {
+                toastr.error('Duplicate Travel Date : Select only one', 'Invalid', toast_options);
+            }
 
-                            dataTable.ajax.reload();
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                html:"Duplicate Travel <br><b>"+data.message+"</b>",
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                }
-            })
+
         });
         
 

@@ -150,14 +150,16 @@ def preview_box_a(request):
     
     results = []
     total_final_amount = 0
-    emp_list = []
+    emp_list_code = []
+    emp_list_lname = []
     charges_list = []
+    
     
     if outgoing_id:
         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
         
         
-        selected_tev_incoming_data = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
+        te_code = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
                 'code',
                 'first_name',
                 'last_name',
@@ -168,27 +170,43 @@ def preview_box_a(request):
                 'tevbridge__purpose',
                 'tevbridge__tev_outgoing__dv_no', 
                 'tevbridge__charges__name'  
-            )
+            ).order_by('code')
+        
+        te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
+                'code',
+                'first_name',
+                'last_name',
+                'middle_name',
+                'id_no',
+                'account_no',
+                'final_amount',
+                'tevbridge__purpose',
+                'tevbridge__tev_outgoing__dv_no', 
+                'tevbridge__charges__name'  
+            ).order_by('last_name')
     
-        result_count = len(selected_tev_incoming_data)
-        for item in selected_tev_incoming_data:
+        result_count = len(te_code)
+        
+        for item in te_lname:
+            final_amount = item['final_amount']
+            charge_name = item['tevbridge__charges__name']
+
+            existing_charge = next((charge for charge in charges_list if charge['charges'] == charge_name), None)
+            if existing_charge:
+                # If it exists, accumulate the final_amount
+                existing_charge['final_amount'] += final_amount
+            else:
+                charges = {
+                    "final_amount": final_amount,
+                    "charges": charge_name,
+                }
+                charges_list.append(charges)
+                
+              
+        for item in te_code:
             total_final_amount += item['final_amount']
             fullname = item['last_name'] + ', '+ item['first_name']
-            
-            # charges_name =  item['tevbridge__charges__name']
-            
-            # if charges_name:
-            
-            # else:
-            #     ch_list = {
-            #         "charges":  charges_name,
-            #         "amount":
-                    
-            #     }
-            #     charges_list.append(ch_list)
-                
-           
-            list = {
+            list_lname = {
                     "code": item['code'],
                     "name": fullname,
                     "id_no": item['id_no'],
@@ -198,11 +216,32 @@ def preview_box_a(request):
                     "dv_no": item['tevbridge__tev_outgoing__dv_no'],
                     "charges": item['tevbridge__charges__name'],
                 }
-            emp_list.append(list)
-            
-        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','division__chief','division__c_designation','division__approval','division__ap_designation').first()
-        dvno = outgoing['dv_no']
+            emp_list_code.append(list_lname)
 
+            
+            
+            # emp_list_code.append(list_code)
+            
+        for item in te_lname:
+            fullname = item['last_name'] + ', '+ item['first_name']
+            list_lname = {
+                    "code": item['code'],
+                    "name": fullname,
+                    "id_no": item['id_no'],
+                    "account_no": item['account_no'],
+                    "final_amount": item['final_amount'],
+                    "purpose": item['tevbridge__purpose'],
+                    "dv_no": item['tevbridge__tev_outgoing__dv_no'],
+                    "charges": item['tevbridge__charges__name'],
+                }
+            emp_list_lname.append(list_lname)
+            
+        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__chief','division__c_designation','division__approval','division__ap_designation').first()
+        dvno = outgoing['dv_no']
+        
+        
+        box_b_in  = outgoing['box_b_in']
+        
         query = """
             SELECT dv_no,dv_date,payee, modepayment
             FROM transactions
@@ -228,11 +267,14 @@ def preview_box_a(request):
             "ap_designation":outgoing['division__ap_designation']
         }
         context = {
+            'charges_list':charges_list,
+            'payroll_date':box_b_in,
             'total_amount':total_final_amount,
             'total_count':result_count,
             'finance':results,
             'details':designation_result,
-            'emp_list':emp_list
+            'emp_list_code':emp_list_code,
+            'emp_list_lname':emp_list_lname,
         }
         
         return render(request, 'transaction/print_box_a.html', context)
@@ -415,7 +457,7 @@ def payroll_load(request):
     return JsonResponse(response)
 
 
-
+@csrf_exempt
 def box_load(request):       
     item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
     total = item_data.count()
@@ -550,6 +592,19 @@ def item_update(request):
     remarks = request.POST.get('Remarks')
     tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
+
+
+@csrf_exempt
+def update_status(request):
+    id = request.POST.get('dv_id')
+    print("testadadsad")
+    print(id)
+    tev_update = TevOutgoing.objects.filter(dv_no=id).update(is_print=True)
+    return JsonResponse({'data': 'success'})
+
+
+
+
 
 @csrf_exempt
 def update_box_list(request):

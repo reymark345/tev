@@ -26,6 +26,11 @@ urlpatterns = [
     path('employee_dv', views.employee_dv, name='employee-dv'),
     path('update_box_list', views.update_box_list, name='update-box-list'),
     path('delete_box_list', views.delete_box_list, name='delete-box-list'),
+    
+    path('update_status', views.update_status, name='update-status'),
+    
+    
+
 
 
     

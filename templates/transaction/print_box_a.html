@@ -1,4 +1,5 @@
 {% load humanize %} 
+{% load staticfiles %}
 <html>
 
 <head>
@@ -88,6 +89,10 @@
       text-align: left;
       vertical-align: top;
     }
+
+    table.myClass * { /*new*/
+      border: 0;
+    }
      
       @media print {
         .container {
@@ -166,7 +171,9 @@
     <div class="container-wrapper">
         <div class="container">
           <h3></h3>
-          <button class="print-button" onclick="window.print()">Print</button>
+
+          <button class="print-button" onclick="printForms('{{ finance.0.dv_no }}')">Print</button>
+
         </div>
         <div class="container-body">
           <span class="appendix">Appendix 32</span>
@@ -793,8 +800,8 @@
         </div><br>
 
         <div class="container-body3">
-          <span ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ finance.0.dv_no }} <br> for February 8, 2023</center></span>
-          <table >
+          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ finance.0.dv_no }} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
+          <table style="font-family: Calibri, sans-serif;" >
             <thead></thead>
             <tbody>
               <tr >
@@ -806,72 +813,106 @@
                 <td><b>CHARGE</b></td>
                 <td><b><center>PURPOSE</center></b></td>
               
-              </tr>
-
-              {% for emp in emp_list %}
+              </tr>              
+              {% for emp in emp_list_code %}
               <tr>
-                <td class="align-text-right" style="padding: 2;">{{ emp.code }}</td>
+                <td class="align-text-right" style="padding: 2; width:12%">{{ emp.code }}</td>
                 <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
                 <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>
-                <td style="padding: 4;"><center>{{ emp.final_amount|floatformat:2|intcomma }}</center></td>
+                <td style="padding: 4;" class="align-text-right">{{ emp.final_amount|floatformat:2|intcomma }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.charges }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.purpose }}</td>
               </tr>
               {% endfor %}
-             
               <tr >
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"><b>TOTAL</b></td>
+                <td style="padding: 2;"><b>TOTAL</b></td>
                 <td style="padding: 0;"></td>
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"><center><b>{{ total_amount|floatformat:2 }}</b></center></td>
+                <td style="padding: 4;" class="align-text-right"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
                 <td style="padding: 0;"></td>
                 <td style="padding: 0;"><center><b>{{ total_count }}</b></center></td>
               </tr>
             </tbody>
           </table>
-          
-          <table style="border: 0;">
-            <tbody>
-              <tr >
-                <td style="width: 50px;border:0;"></td>
-                <td style="width: 125px;border:0;"></td>
-                <td style="width: 100px;border:0;"></td>
-                <td style="width: 140px;border:0;"></td>
-                <td style="width:80px;border:0;"></td>
-                <td style="width:72px;border:0;"></td>
-                <td style="border:0;"></td>
-              
-              </tr>
-              <tr>
-                <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
-                <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" colspan="2" class="no-border"><b><center>Sum of AMOUNT</center></b></td>
-              </tr>
 
-              {% for emp in emp_list %}
-                <tr >
-                  <td class="no-border"></td>
-                  <td class="no-border"></td>
-                  <td class="no-border"></td>
-                  <td style="padding: 0;" class="no-border">{{ emp.charges|upper }}</td>
-                  <td style="padding: 0;"  class="no-border" colspan="2"><center>{{ emp.final_amount|floatformat:2|intcomma }}</center></td>
-              
-                </tr>
-              {% endfor %}
+          <table  style="border: 0; font-family: Calibri, sans-serif;" class="myClass" cellspacing="0" cellpadding="0" width="100%">
+            <tbody>
               <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
-                <td style="padding: 0;background-color:rgb(158, 198, 255);"  class="no-border" colspan="2"><center><b>{{ total_amount|floatformat:2 }}</b></center></td>
+                <td>
+                  <table style="border: 0;">
+                    <tbody>
+                      <tr>
+                        <td style="width: 0px;border:0;"></td>
+                        <td style="width: 30px;border:0;"></td>
+                        <td style="width: 100px;border:0;"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
+      
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+      
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+                        <td class="no-border" colspan="2" >
+                          <!-- <center><b><u>Janice Lamorin</u></b></center> -->
+                          <center><b><u><span contenteditable="true" id="editableName">Janice Lamorin</span></u></b></center>
+                        </td>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+                        <td class="no-border" colspan="2">
+                            <center><span contenteditable="true" id="editablePosition">CMT II</span></center>
+                        </td>
+                      </tr>
+      
+      
+                    </tbody>
+                  </table>
+                </td>
+                <td>
+                  <table style="border: 0;">
+                    <tbody>
+                      <tr>
+                        <td style="width: 140px;border:0;"></td>
+                        <td style="width:80px;border:0;"></td>
+                        <td style="width:72px;border:0;"></td>
+                        <td style="border:0;"></td>
+      
+                      </tr>
+                      <tr>
+                        <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
+                        <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border"><b>Sum of AMOUNT</b></td>
+                      </tr>
+      
+                      {% for emp in charges_list %}
+                      <tr>
+                        <td style="padding: 0;" class="no-border"> {{ emp.charges|upper }}</td>
+                        <td style="padding: 0; text-align: right;" class="no-border" colspan="2">
+                          {{ emp.final_amount|floatformat:2|intcomma }} 
+                        </td>
+      
+                      </tr>
+                      {% endfor %}
+                      
+                      
+      
+                      <tr>
+                        <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
+                        <td style="padding: 0;background-color:rgb(158, 198, 255); text-align: right;"  class="no-border" colspan="2"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
               </tr>
             </tbody>
           </table>
-
-          
+           
           <div class="footer">
             Cash Unit's Copy
           </div>
@@ -880,8 +921,8 @@
 
         
         <div class="container-body4">
-          <span ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ finance.0.dv_no }} <br> for February 8, 2023</center></span>
-          <table >
+          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ finance.0.dv_no }} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
+          <table style="font-family: Calibri, sans-serif;" >
             <thead></thead>
             <tbody>
               <tr >
@@ -893,82 +934,106 @@
                 <td><b>CHARGE</b></td>
                 <td><b><center>PURPOSE</center></b></td>
               
-              </tr>
-              <!-- <tr>
-                <td class="align-text-right" style="padding: 4;">85</td>
-                <td class="align-text-right" style="padding: 4;">367</td>
-                <td class="align-text-left" style="padding: 4;">16-11810</td>
-                <td  class="align-text-left" style="padding: 4;">Valdehueza, Reymark</td>
-                <td style="padding: 4;"><center>23,275.40</center></td>
-                <td class="align-text-left" style="padding: 4;">TARA</td>
-                <td class="align-text-left" style="padding: 4;">TE for Jan 2023</td>
-              </tr> -->
-
-              
-              {% for emp in emp_list %}
+              </tr>              
+              {% for emp in emp_list_lname %}
               <tr>
-                <td class="align-text-right" style="padding: 2;">{{ emp.code }}</td>
+                <td class="align-text-right" style="padding: 2; width:12%">{{ emp.code }}</td>
                 <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
                 <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>
-                <td style="padding: 4;"><center>{{ emp.final_amount|floatformat:2|intcomma }}</center></td>
+                <td style="padding: 4;" class="align-text-right">{{ emp.final_amount|floatformat:2|intcomma }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.charges }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.purpose }}</td>
               </tr>
               {% endfor %}
               <tr >
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"><b>TOTAL</b></td>
+                <td style="padding: 2;"><b>TOTAL</b></td>
                 <td style="padding: 0;"></td>
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"><center><b>{{ emp.final_amount|floatformat:2|intcomma }}</b></center></td>
+                <td style="padding: 4;" class="align-text-right"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
                 <td style="padding: 0;"></td>
                 <td style="padding: 0;"><center><b>{{ total_count }}</b></center></td>
               </tr>
             </tbody>
           </table>
-          
-          <table style="border: 0;">
+
+          <table  style="border: 0; font-family: Calibri, sans-serif;" class="myClass" cellspacing="0" cellpadding="0" width="100%">
             <tbody>
-              <tr >
-                <td style="width: 50px;border:0;"></td>
-                <td style="width: 125px;border:0;"></td>
-                <td style="width: 100px;border:0;"></td>
-                <td style="width: 140px;border:0;"></td>
-                <td style="width:80px;border:0;"></td>
-                <td style="width:72px;border:0;"></td>
-                <td style="border:0;"></td>
-              </tr>
-
               <tr>
-                <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
-                <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" colspan="2" class="no-border"><b><center>Sum of AMOUNT</center></b></td>
+                <td>
+                  <table style="border: 0;">
+                    <tbody>
+                      <tr>
+                        <td style="width: 0px;border:0;"></td>
+                        <td style="width: 30px;border:0;"></td>
+                        <td style="width: 100px;border:0;"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
+      
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+      
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+                        <td class="no-border" colspan="2" >
+                          <!-- <center><b><u>Janice Lamorin</u></b></center> -->
+                          <center><b><u><span contenteditable="true" id="editableName">Janice Lamorin</span></u></b></center>
+                        </td>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+                        <td class="no-border" colspan="2">
+                            <center><span contenteditable="true" id="editablePosition">CMT II</span></center>
+                        </td>
+                      </tr>
+      
+      
+                    </tbody>
+                  </table>
+                </td>
+                <td>
+                  <table style="border: 0;">
+                    <tbody>
+                      <tr>
+                        <td style="width: 140px;border:0;"></td>
+                        <td style="width:80px;border:0;"></td>
+                        <td style="width:72px;border:0;"></td>
+                        <td style="border:0;"></td>
+      
+                      </tr>
+                      <tr>
+                        <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
+                        <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border"><b>Sum of AMOUNT</b></td>
+                      </tr>
+      
+                      {% for emp in charges_list %}
+                      <tr>
+                        <td style="padding: 0;" class="no-border"> {{ emp.charges|upper }}</td>
+                        <td style="padding: 0; text-align: right;" class="no-border" colspan="2">
+                          {{ emp.final_amount|floatformat:2|intcomma }} 
+                        </td>
+      
+                      </tr>
+                      {% endfor %}
+                      
+                      
+      
+                      <tr>
+                        <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
+                        <td style="padding: 0;background-color:rgb(158, 198, 255); text-align: right;"  class="no-border" colspan="2"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
               </tr>
-
-              {% for emp in emp_list %}
-                <tr >
-                  <td class="no-border"></td>
-                  <td class="no-border"></td>
-                  <td class="no-border"></td>
-                  <td style="padding: 0;" class="no-border">{{ emp.charges|upper }}</td>
-                  <td style="padding: 0;"  class="no-border" colspan="2"><center>{{ emp.final_amount|floatformat:2|intcomma }}</center></td>
-              
-                </tr>
-              {% endfor %}
-
-              <tr>
-                <td class="no-border"></td>
-                <td style="font-size: 13px;padding: 0;" class="no-border"><center><b></b></center></td>
-                <td class="no-border"></td>
-                <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
-                <td style="padding: 0;background-color:rgb(158, 198, 255);"  class="no-border" colspan="2"><center><b>{{ total_amount|floatformat:2 }}</b></center></td>
-              </tr> 
             </tbody>
           </table>
-
-          
+           
           <div class="footer">
             COA's Copy
           </div>
@@ -987,7 +1052,19 @@
 
 
 </body>   
+<script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
+<script type="text/javascript">
 
-
-
+  function printForms(dv_number) {
+      $.ajax({
+        type: 'POST',
+        url: "{% url 'update-status' %}",
+        data:{
+            dv_id: dv_number
+        }
+    }).done(function (data) {
+      window.print();
+    })
+  }
+</script>
 </html>
