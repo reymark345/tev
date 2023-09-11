@@ -9,7 +9,6 @@ from django.contrib import messages
 from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge)
 import json 
 from django.core import serializers
-import datetime 
 from datetime import date
 from django.contrib.auth.hashers import make_password
 from django.db import IntegrityError, connection
@@ -19,6 +18,7 @@ from django.forms.models import model_to_dict
 import requests
 from django.db.models import Q, F, Exists, OuterRef
 from django.db import connections
+from datetime import datetime, timedelta
 
 def get_user_details(request):
     return StaffDetails.objects.filter(user_id=request.user.id).first()
@@ -381,6 +381,7 @@ def item_add(request):
     employeename = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
     travel_date = request.POST.get('DateTravel')
+    range_travel = request.POST.get('RangeTravel')
     idd_no = request.POST.get('IdNumber')
     acct_no = request.POST.get('AccountNumber')
     name = request.POST.get('EmpName')
@@ -389,6 +390,24 @@ def item_add(request):
     remarks = request.POST.get('Remarks')
     user_id = request.session.get('user_id', 0)
     g_code = generate_code()
+
+    if travel_date:
+        travel_date = request.POST.get('DateTravel')
+    else :
+        start_date_str, end_date_str = range_travel.split(' to ')
+        
+        start_date = datetime.strptime(start_date_str.strip(), '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str.strip(), '%Y-%m-%d')
+        
+        formatted_dates = []
+
+        current_date = start_date
+        while current_date <= end_date:
+            formatted_dates.append(current_date.strftime('%d-%m-%Y'))
+            current_date += timedelta(days=1)
+
+        formatted_dates_str = ', '.join(formatted_dates)
+        travel_date = formatted_dates_str
 
     duplicate_travel = []
     individual_dates = travel_date.split(',')

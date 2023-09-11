@@ -70,7 +70,7 @@
                   <label for="flatpickr-multi" class="form-label">Date Travel <small>(Range)</small></label>
                   <input
                   type="text"
-                  class="form-control"
+                  class="form-control rangeTravel"
                   name="RangeTravel"
                   placeholder="YYYY-MM-DD to YYYY-MM-DD"
                   id="flatpickr-range"
@@ -120,6 +120,24 @@
                 'firstDayOfWeek': 1 // start week on Monday
             },
         });
+
+        $("#dateField").on("change", function() {
+            if(DateTravel.val()){
+                $(".rangeTravel").prop("disabled", true);
+            }
+            else{
+                $(".rangeTravel").prop("disabled", false);
+            } 
+          });
+
+          $(".rangeTravel").on("change", function() {
+            if(RangeTravel.val()){
+                $("#dateField").prop("disabled", true);
+            }
+            else{
+                $("#dateField").prop("disabled", false);
+            } 
+          });
 
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
@@ -406,6 +424,9 @@
                 newRecord.addEventListener('click', function () {
                     fetchEmployee();
                     ItemID.val(0)
+                    
+                    $("#dateField").prop("disabled", false);
+                    $(".rangeTravel").prop("disabled", false);
                     $('.title-name').text('Add Tev Record')
                     EmployeeName.val('').trigger('change').prop("disabled", false);
                     $('.form-control').val('')
@@ -431,13 +452,7 @@
                         },
                     },
                 },
-                DateTravel: {
-                    validators: {
-                        notEmpty: {
-                            message: 'Please Select Travel Date',
-                        },
-                    },
-                },
+
             },
             plugins: {
                 trigger: new FormValidation.plugins.Trigger(),
@@ -459,7 +474,13 @@
             console.log(RangeTravel.val());
             console.log("DateTravel");
 
-            if (!DateTravel.val() && !RangeTravel.val()){
+            if (DateTravel.val() && RangeTravel.val() ){
+                toastr.error('Duplicate Travel Date : Select only one', 'Invalid', toast_options);
+            }
+            else if (!DateTravel.val() && !RangeTravel.val()){
+                toastr.error('Please: Select one Date Travel', 'Invalid', toast_options);
+            }
+            else {
                 Swal.fire({
                     title: 'Are you sure?',
                     text: "You won't be able to revert this!",
@@ -520,6 +541,8 @@
                                 DateTravel.val("")
                                 Remarks.val("");
                                 RangeTravel.val("")
+                                $("#dateField").prop("disabled", false);
+                                $(".rangeTravel").prop("disabled", false);
 
                                 dataTable.ajax.reload();
                             } else {
@@ -534,10 +557,7 @@
                             }
                         })
                     }
-                })
-            }
-            else {
-                toastr.error('Duplicate Travel Date : Select only one', 'Invalid', toast_options);
+                });
             }
 
 
@@ -651,9 +671,7 @@
 
         }
 
-        $("#dateField").on("click", function() {
-         
-          });
+
 
 
         $('#approved').click(function() {
