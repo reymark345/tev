@@ -20,7 +20,7 @@
                             <th>Status</th>
                             <th>Date In</th>
                             <th>Date Out</th>
-                            <th>Created By</th>
+                            <th>Out by</th>
                             <th>ID</th>
                         </tr>
                     </thead>
@@ -34,33 +34,234 @@
 
 
 <div class="modal fade" id="update-transaction" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="min-width: 90%; min-height: 70%;" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel4">Update Transaction</h5>
+                <!-- <h5 class="modal-title" id="exampleModalLabel4">Update Transaction</h5> -->
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="card-datatable table-responsive pt-0">
+
+                <!-- Modern Vertical Wizard -->
+                <div class="col-12">
+                  <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
+                    <!-- <label class="form-label" for="modalAddCard"><b>Update Transaction</b></label> -->
+                    <div class="bs-stepper-content">
+                       <div class="card-datatable table-responsive pt-0">
                     <table id="tbl-box-a" class="table display compact">
                         <thead>
                             <tr>
-                                <th></th>
+                                <th><input type="checkbox" id="selectAll"></th>
                                 <th>Code #</th>
                                 <th>Accnt. No.</th>
                                 <th>ID Number</th>
                                 <th>Name</th>
-                                <th>Purpose</th>
                                 <th>Amount</th>
+                                <th>Purpose</th>
                                 <th>Charge</th>
+                                <th>Action</th>
                             </tr>
-                        </thead>                   
+                        </thead>    
+                        <tbody>
+                        </tbody>               
                     </table>
+                    </div>
+                      <form onSubmit="return false">
+                        <!-- Account Details -->
+                        <div id="account-details-modern-vertical" class="content">
+                          <div class="content-header mb-3">
+                            <h6 class="mb-0">Account Details</h6>
+                            <small>Enter Your Account Details.</small>
+                          </div>
+                          <div class="row g-3">
+                            <div class="col-sm-6">
+                              <label class="form-label" for="username-modern-vertical">Username</label>
+                              <input
+                                type="text"
+                                id="username-modern-vertical"
+                                class="form-control"
+                                placeholder="johndoe"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="email-modern-vertical">Email</label>
+                              <input
+                                type="email"
+                                id="email-modern-vertical"
+                                class="form-control"
+                                placeholder="john.doe@email.com"
+                                aria-label="john.doe"
+                              />
+                            </div>
+                            <div class="col-sm-6 form-password-toggle">
+                              <label class="form-label" for="password-modern-vertical">Password</label>
+                              <div class="input-group input-group-merge">
+                                <input
+                                  type="password"
+                                  id="password-modern-vertical"
+                                  class="form-control"
+                                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                  aria-describedby="password2-modern-vertical"
+                                />
+                                <span class="input-group-text cursor-pointer" id="password2-modern-vertical"
+                                  ><i class="ti ti-eye-off"></i
+                                ></span>
+                              </div>
+                            </div>
+                            <div class="col-sm-6 form-password-toggle">
+                              <label class="form-label" for="confirm-password-modern-vertical">Confirm Password</label>
+                              <div class="input-group input-group-merge">
+                                <input
+                                  type="password"
+                                  id="confirm-password-modern-vertical"
+                                  class="form-control"
+                                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                  aria-describedby="confirm-password-modern-vertical2"
+                                />
+                                <span class="input-group-text cursor-pointer" id="confirm-password-modern-vertical2"
+                                  ><i class="ti ti-eye-off"></i
+                                ></span>
+                              </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                              <button class="btn btn-label-secondary btn-prev" disabled>
+                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                              </button>
+                              <button class="btn btn-primary btn-next">
+                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
+                                <i class="ti ti-arrow-right"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Personal Info -->
+                        <div id="personal-info-modern-vertical" class="content">
+                          <div class="content-header mb-3">
+                            <h6 class="mb-0">Personal Info</h6>
+                            <small>Enter Your Personal Info.</small>
+                          </div>
+                          <div class="row g-3">
+                            <div class="col-sm-6">
+                              <label class="form-label" for="first-name-modern-vertical">First Name</label>
+                              <input
+                                type="text"
+                                id="first-name-modern-vertical"
+                                class="form-control"
+                                placeholder="John"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="last-name-modern-vertical">Last Name</label>
+                              <input
+                                type="text"
+                                id="last-name-modern-vertical"
+                                class="form-control"
+                                placeholder="Doe"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="country-modern-vertical">Country</label>
+                              <select class="select2" id="country-modern-vertical">
+                                <option label=" "></option>
+                                <option>UK</option>
+                                <option>USA</option>
+                                <option>Spain</option>
+                                <option>France</option>
+                                <option>Italy</option>
+                                <option>Australia</option>
+                              </select>
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="language-modern-vertical">Language</label>
+                              <select
+                                class="selectpicker w-auto"
+                                id="language-modern-vertical"
+                                data-style="btn-transparent"
+                                data-icon-base="ti"
+                                data-tick-icon="ti-check text-white"
+                                multiple
+                              >
+                                <option>English</option>
+                                <option>French</option>
+                                <option>Spanish</option>
+                              </select>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                              <button class="btn btn-label-secondary btn-prev">
+                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                              </button>
+                              <button class="btn btn-primary btn-next">
+                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
+                                <i class="ti ti-arrow-right"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Social Links -->
+                        <div id="social-links-modern-vertical" class="content">
+                          <div class="content-header mb-3">
+                            <h6 class="mb-0">Social Links</h6>
+                            <small>Enter Your Social Links.</small>
+                          </div>
+                          <div class="row g-3">
+                            <div class="col-sm-6">
+                              <label class="form-label" for="twitter-modern-vertical">Twitter</label>
+                              <input
+                                type="text"
+                                id="twitter-modern-vertical"
+                                class="form-control"
+                                placeholder="https://twitter.com/abc"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="facebook-modern-vertical">Facebook</label>
+                              <input
+                                type="text"
+                                id="facebook-modern-vertical"
+                                class="form-control"
+                                placeholder="https://facebook.com/abc"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="google-modern-vertical">Google+</label>
+                              <input
+                                type="text"
+                                id="google-modern-vertical"
+                                class="form-control"
+                                placeholder="https://plus.google.com/abc"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="linkedin-modern-vertical">LinkedIn</label>
+                              <input
+                                type="text"
+                                id="linkedin-modern-vertical"
+                                class="form-control"
+                                placeholder="https://linkedin.com/abc"
+                              />
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                              <button class="btn btn-label-secondary btn-prev">
+                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                              </button>
+                              <button class="btn btn-success btn-submit">Submit</button>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
                 </div>
+                <!-- /Modern Vertical Wizard -->
+               
             </div>
             <div class="modal-footer">
+                <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5>
                 <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="add-data">Add</button>
+                <button type="button" class="btn btn-primary" id="update-data">Update</button>
             </div>
         </div>
     </div>
@@ -123,6 +324,7 @@
 <script>
     let clicked_id = 0;
     let dv_no_id =0;
+    let dv_number = '';
     $(document).ready(function () {
 
         const table_box_a = $('#tbl-box-a')
@@ -177,8 +379,9 @@
                 { data: 'status' },
                 { data: 'box_b_in' },
                 { data: 'box_b_out' },
-                { data: 'user_id' },
+                { data: 'out_by' },
                 { data: 'id' },
+
             ],
             columnDefs: [
                 {
@@ -275,7 +478,77 @@
                 },
             ],
             drawCallback: function (settings) {
+                const tableId = 'tbl-box-a'; // Change this to the specific table ID you want to populate
+                const tbody = $(`#${tableId} tbody`);
+                let selectOptions = '';
+
+                $('body').on('click', '.item-edit', function () {
+                  let emp_id = $(this).attr('id');
+                  let amount = $(this).closest('tr').find('.form-control.emp-amount').val();
+                  let purpose = $(this).closest('tr').find('.form-control.emp-purpose').val();
+                  let charges = $(this).closest('tr').find('select.emp-charges').val();
+
+                  $.ajax({
+                    type: 'POST',
+                    url: "{% url 'update-box-list' %}",
+                    data:{
+                        emp_id: emp_id,
+                        amount:amount,
+                        purpose:purpose,
+                        charges:charges,
+                        dv_number: dv_number
+                    }
+                }).done(function (data) {
+                    let totalAmount = data.total_amount;
+
+                    console.log(totalAmount);
+                    console.log("totalAmount");
+                    totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    $('#total-amount').text("₱ "+totalAmount);
+                  toastr.success('Data Successfully Save!', 'Success', toast_options);
+
+                })
+              });
+
+              $('body').on('click', '.item-delete', function () {
+                let emp_id = $(this).attr('id');
+                let amount = $(this).closest('tr').find('.form-control.emp-amount').val();
+
+                $.ajax({
+                  type: 'POST',
+                  url: "{% url 'delete-box-list' %}",
+                  data:{
+                      emp_id: emp_id,
+                      amount:amount,
+                      dv_number: dv_number
+                  }
+              }).done(function (data) {
+                let totalAmount = data.total_amount;
+
+                console.log(totalAmount);
+                console.log("totalAmount");
+                totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                $('#total-amount').text("₱ "+totalAmount);
+                toastr.success('Data Successfully Save!', 'Success', toast_options);
+
+
+              })
+            });
+
                 $('.view-data').on('click', function () {
+
+                    const selectAllCheckbox = $(`#${tableId} #selectAll`);
+                    selectAllCheckbox.on('change', function () {
+                        const isChecked = this.checked;
+                        tbody.find(':checkbox').prop('checked', isChecked);
+                    });
+
                     let id = $(this).attr('id');
                     dv_no_id = id
                     
@@ -286,15 +559,63 @@
                             dv_id: id
                         }
                     }).done(function (data) {
-
-                        $('#update-transaction').modal('show');
-                        console.log("data");
+                        console.log("data_TEST");
                         console.log(data);
+                        dv_number = '';
+                        dv_number = data.dv_number;
+                        let charges = data.charges;
+                        let is_print = data.is_print;
+                        tbody.empty();
+                       
+                        data.data.forEach(function (item) {
+                          const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                          let amountColumn = '';
+                          let deleteColumn = '';
+                          if (is_print) {
+                            amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
+                            deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
+                        } else {
+                            amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                            deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                        }
+                          selectOptions = '';
+                          for (var i = 0; i < charges.length; i++) {
+                          
+                              var charge = charges[i];
+                              selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                          }
+                          const row = `
+                              <tr>
+                                  <td><input type="checkbox"></td>
+                                  <td><span class="badge bg-label-primary">${item.code}</span></td>
+                                  <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                                  <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                                  <td>${item.name}</td>
+                                  ${amountColumn}
+                                  <td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>
+                                  <td>
+                                    <select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">
+                                      ${selectOptions}
+                                    </select>
+                                  </td>
+                                  <td>
+                                      <a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>
+                                      ${deleteColumn}
+                                  </td>
+                              </tr>
+                          `;
+                          tbody.append(row);
+                      });
+                      $('#emp-charges').html(selectOptions);
+                        let totalAmount = data.total_amount;
+                        totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                        $('#total-amount').text("₱ "+totalAmount);
+                        $('#update-transaction').modal('show');
                     })
                 });
-
-
-
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
                     // Do something when a checkbox in the table body is changed...
                 });
@@ -317,18 +638,9 @@
                             box_id: bx_id
                         }
                     }).done(function (data) {
-
-                       // var newTab = window.open('print_box_a.html', '_blank');
-
-                       // newTab.onload = function() {
-                            // Write the data to the new tab's document
-                         //   newTab.document.write(data.incoming_data);
-                          //  newTab.document.close();
-                       // };
-
-                        //console.log(data.incoming_data);
                     })
                 });
+
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
@@ -444,7 +756,7 @@
                 },
                 {
                     className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Delete</span>',
                     action: function () {
                         // Get the IDs of checked items
                         var selectedItems = [];
@@ -469,7 +781,9 @@
                     className: 'create-new btn btn-primary',
                 },
             ],
-            drawCallback: function (settings) {
+            drawCallback: function (settings) { 
+
+              
                 $('.view-data').on('click', function () {
                     let id = $(this).attr('id');
                     dv_no_id = id
@@ -682,6 +996,10 @@
             })
 
         }
+                      
+
+
+
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();

@@ -48,12 +48,6 @@
                 <label class="form-label" for="employee-name">Employee Name</label>
                 <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
                     <option></option>
-                    <option>Reymark N. Valdehueza</option>
-                    <option>Satoru Gojou</option>
-                    <option>11Satoru Gojou</option>
-                    <option>22Satoru Gojou</option>
-                    <option>33Satoru Gojou</option>
-                    <option>44Satoru Gojou</option>
                 </select>
             </div>
 
@@ -68,6 +62,19 @@
                 <div class="col-md-12 mb-2">
                   <label for="flatpickr-multi" class="form-label">Date Travel</label>
                   <input type="text" class="form-control" name="DateTravel" placeholder="DD-MM-YYYY" id="dateField" autocomplete="off"/>
+                </div>
+            </div>
+
+            <div class="col-sm-12">
+                <div class="col-md-12 mb-2">
+                  <label for="flatpickr-multi" class="form-label">Date Travel <small>(Range)</small></label>
+                  <input
+                  type="text"
+                  class="form-control rangeTravel"
+                  name="RangeTravel"
+                  placeholder="YYYY-MM-DD to YYYY-MM-DD"
+                  id="flatpickr-range"
+                />
                 </div>
             </div>
 
@@ -90,6 +97,9 @@
             </div>
             <input id="id-number" name="IdNumber" class="form-control idn" type="hidden" placeholder="16-0000"/>
             <input id="acct-number" name="AccountNumber" class="form-control accn" type="hidden" placeholder="000000"/>
+            <input id="emp-name" name="EmpName" class="form-control accn" type="hidden" placeholder="nane"/>
+            <input id="emp-middle" name="EmpMiddle" class="form-control accn" type="hidden" placeholder="middle"/>
+            <input id="emp-lastname" name="EmpLastname" class="form-control accn" type="hidden" placeholder="lastname"/>
         </form>
     </div>
 </div>
@@ -111,13 +121,35 @@
             },
         });
 
+        $("#dateField").on("change", function() {
+            if(DateTravel.val()){
+                $(".rangeTravel").prop("disabled", true);
+            }
+            else{
+                $(".rangeTravel").prop("disabled", false);
+            } 
+          });
+
+          $(".rangeTravel").on("change", function() {
+            if(RangeTravel.val()){
+                $("#dateField").prop("disabled", true);
+            }
+            else{
+                $("#dateField").prop("disabled", false);
+            } 
+          });
+
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
+            RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
             IdNumber = jQuery(document.querySelector('[name="IdNumber"]')),
             AccountNumber = jQuery(document.querySelector('[name="AccountNumber"]')),
+            EmpName = jQuery(document.querySelector('[name="EmpName"]')),
+            EmpMiddle = jQuery(document.querySelector('[name="EmpMiddle"]')),
+            EmpLastname = jQuery(document.querySelector('[name="EmpLastname"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
             offCanvasElement = document.querySelector('#add-new-record')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
@@ -328,6 +360,8 @@
                         if (data.length > 0) {
                             fetchEmployee();
                             let fields = data[0].fields
+
+
                             let pk = data[0].pk
                             let employee_name = $('#employee-name')
                             let floatvalue = parseFloat(fields.original_amount);
@@ -335,20 +369,16 @@
                             let date_travel = fields.date_travel;
                             formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
                             status_val = fields.status;
-
+                            let fullname = fields.first_name + " " + fields.middle_name + " " + fields.last_name
                             if(status_val ===3){
-                                EmployeeName.val(fields.name).trigger('change').prop("disabled", true);
+                                EmployeeName.val(fullname).trigger('change').prop("disabled", true);
                             }
                             else{
-                                EmployeeName.val(fields.name).trigger('change').prop("disabled", false);
-
+                                EmployeeName.val(fullname).trigger('change').prop("disabled", false);
                             }
                             OriginalAmount.val(convertedAmount);
                             Remarks.val(fields.remarks);
                             DateTravel.val(formattedDates);
-
-
-                            
                             ItemID.val(pk);
                             offCanvasEl.show()
                         }
@@ -394,6 +424,9 @@
                 newRecord.addEventListener('click', function () {
                     fetchEmployee();
                     ItemID.val(0)
+                    
+                    $("#dateField").prop("disabled", false);
+                    $(".rangeTravel").prop("disabled", false);
                     $('.title-name').text('Add Tev Record')
                     EmployeeName.val('').trigger('change').prop("disabled", false);
                     $('.form-control').val('')
@@ -419,13 +452,7 @@
                         },
                     },
                 },
-                DateTravel: {
-                    validators: {
-                        notEmpty: {
-                            message: 'Please Select Travel Date',
-                        },
-                    },
-                },
+
             },
             plugins: {
                 trigger: new FormValidation.plugins.Trigger(),
@@ -441,80 +468,99 @@
                 })
             },
         }).on('core.form.valid', function () {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, save it!',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-3',
-                    cancelButton: 'btn btn-label-secondary',
-                },
-                buttonsStyling: false,
-            }).then(function (result) {
-                if (result.value) {
-                    var form_data = $('#item-form').serialize()
-                    let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
-                   
-                    var form_data = $('#item-form').serialize()
-                    $.ajax({
-                        type: 'POST',
-                        url: post_url,
-                        data: form_data,
-                    }).done(function (data) {
-                        if (data.data == 'success') {
 
-                            let code = data.g_code;
-                            if (code){
-                                Swal.fire({
-                                    title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
-                                    icon: 'info',
-                                    html:
-                                      'Successfully <b>Save!</b>',
-                                    showCloseButton: true,
-                                    showCancelButton: false,
-                                    focusConfirm: false,
-                                    confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                                    confirmButtonAriaLabel: 'Thumbs up, great!',
-                                    customClass: {
-                                      confirmButton: 'btn btn-primary me-3'
-                                    },
-                                    buttonsStyling: false
-                                  });
+      
+            console.log(DateTravel.val());
+            console.log(RangeTravel.val());
+            console.log("DateTravel");
 
-                            }
-                            else{
-                                offCanvasEl.hide()
+            if (DateTravel.val() && RangeTravel.val() ){
+                toastr.error('Duplicate Travel Date : Select only one', 'Invalid', toast_options);
+            }
+            else if (!DateTravel.val() && !RangeTravel.val()){
+                toastr.error('Please: Select one Date Travel', 'Invalid', toast_options);
+            }
+            else {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, save it!',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-3',
+                        cancelButton: 'btn btn-label-secondary',
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (result.value) {
+                        var form_data = $('#item-form').serialize()
+                        let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
+                    
+                        var form_data = $('#item-form').serialize()
+                        $.ajax({
+                            type: 'POST',
+                            url: post_url,
+                            data: form_data,
+                        }).done(function (data) {
+                            if (data.data == 'success') {
+
+                                let code = data.g_code;
+                                if (code){
+                                    Swal.fire({
+                                        title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                        icon: 'info',
+                                        html:
+                                        'Successfully <b>Save!</b>',
+                                        showCloseButton: true,
+                                        showCancelButton: false,
+                                        focusConfirm: false,
+                                        confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!',
+                                        customClass: {
+                                        confirmButton: 'btn btn-primary me-3'
+                                        },
+                                        buttonsStyling: false
+                                    });
+
+                                }
+                                else{
+                                    offCanvasEl.hide()
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Update Successfully!',
+                                        html:
+                                        'Successfully <b>Save!</b>',
+                                        customClass: {
+                                            confirmButton: 'btn btn-success',
+                                        },
+                                    })
+                                }
+                                EmployeeName.val("").trigger('change');
+                                OriginalAmount.val("");
+                                DateTravel.val("")
+                                Remarks.val("");
+                                RangeTravel.val("")
+                                $("#dateField").prop("disabled", false);
+                                $(".rangeTravel").prop("disabled", false);
+
+                                dataTable.ajax.reload();
+                            } else {
                                 Swal.fire({
-                                    icon: 'success',
-                                    title: 'Update Successfully!',
-                                    html:
-                                    'Successfully <b>Save!</b>',
+                                    icon: 'error',
+                                    title: 'Error saving!',
+                                    html:"Duplicate Travel <br><b>"+data.message+"</b>",
                                     customClass: {
                                         confirmButton: 'btn btn-success',
                                     },
                                 })
                             }
-                            EmployeeName.val("").trigger('change');
-                            OriginalAmount.val("");
-                            DateTravel.val("")
-                            Remarks.val("");
+                        })
+                    }
+                });
+            }
 
-                            dataTable.ajax.reload();
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                html:"Duplicate Travel <br><b>"+data.message+"</b>",
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                }
-            })
+
         });
         
 
@@ -625,9 +671,7 @@
 
         }
 
-        $("#dateField").on("click", function() {
-         
-          });
+
 
 
         $('#approved').click(function() {
@@ -668,6 +712,9 @@
                     if (selectedEmployee) {
                         $('#id-number').val(selectedEmployee.idNumber);
                         $('#acct-number').val(selectedEmployee.accNumber);
+                        $('#emp-name').val(selectedEmployee.firstName);
+                        $('#emp-middle').val(selectedEmployee.middleInitial);
+                        $('#emp-lastname').val(selectedEmployee.lastName);
                     }
                 } else {
                     console.log("No employee data found in local storage.");

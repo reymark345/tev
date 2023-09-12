@@ -220,6 +220,12 @@
             ],
             columnDefs: [
                 {
+                    targets: 1,
+                    render: function(data) {
+                        return '<span class="badge bg-label-primary">'+data+'</span>'
+                    },
+                },
+                {
                     targets: 3,
                     render: function(data) {
                         var floatValue = parseFloat(data);

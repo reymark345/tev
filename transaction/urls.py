@@ -10,6 +10,7 @@ urlpatterns = [
     
     path('payroll_load', views.payroll_load, name='payroll-load'),
     path('box_load', views.box_load, name='box-load'),
+    path('box_emp_load', views.box_emp_load, name='box-emp-load'),
     path('item_edit', views.item_edit, name='item-edit'),
     path('item_update', views.item_update, name='item-update'),
 
@@ -23,6 +24,13 @@ urlpatterns = [
     path('preview', views.preview_box_a, name='preview-box-a'),
     
     path('employee_dv', views.employee_dv, name='employee-dv'),
+    path('update_box_list', views.update_box_list, name='update-box-list'),
+    path('delete_box_list', views.delete_box_list, name='delete-box-list'),
+    
+    path('update_status', views.update_status, name='update-status'),
+    
+    
+
 
 
     
