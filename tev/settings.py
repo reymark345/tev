@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'receive',
     'transaction',
     'libraries',
+    'django_filters',
 ]
 
 MIDDLEWARE = [

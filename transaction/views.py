@@ -147,12 +147,16 @@ def box_a(request):
 def preview_box_a(request):
     finance_database_alias = 'finance'    
     outgoing_id = request.GET.get('id')
+    user_id = request.session.get('user_id', 0)
     
     results = []
     total_final_amount = 0
     emp_list_code = []
     emp_list_lname = []
     charges_list = []
+    
+    userData = AuthUser.objects.filter(id=user_id)
+    full_name = userData[0].first_name + ' ' + userData[0].last_name
     
     
     if outgoing_id:
@@ -275,6 +279,7 @@ def preview_box_a(request):
             'details':designation_result,
             'emp_list_code':emp_list_code,
             'emp_list_lname':emp_list_lname,
+            'user' : full_name
         }
         
         return render(request, 'transaction/print_box_a.html', context)

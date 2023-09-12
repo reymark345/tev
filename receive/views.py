@@ -19,6 +19,8 @@ import requests
 from django.db.models import Q, F, Exists, OuterRef
 from django.db import connections
 from datetime import datetime, timedelta
+import datetime
+from receive.filters import UserFilter
 
 def get_user_details(request):
     return StaffDetails.objects.filter(user_id=request.user.id).first()
@@ -83,6 +85,18 @@ def checking(request):
         return render(request, 'pages/unauthorized.html')
     
     
+@login_required(login_url='login')
+@csrf_exempt
+def search_list(request):
+    
+    print("dataheree")
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    
+    return JsonResponse({'data': "success"})
+    
+    
     
     
 def tracking_load(request):
@@ -114,6 +128,16 @@ def tracking_load(request):
         finance_data.append(finance_dict)
     
     data = []
+    
+    total = len(finance_data)
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        finance_data = finance_data[start:start + length]
 
     for row in finance_data:
         amt_certified = ''
@@ -138,7 +162,6 @@ def tracking_load(request):
                 amt_budget = finance_results[0][3]
                 amt_check = finance_results[0][4]
                 
-        
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
         last_name = row['last_name'] if row['last_name'] else ''
@@ -163,19 +186,6 @@ def tracking_load(request):
         }
         data.append(item)
         
-        _start = request.GET.get('start')
-        _length = request.GET.get('length')
-        
-        
-        
-    if _start and _length:
-        start = int(_start)
-        length = int(_length)
-        page = math.ceil(start / length) + 1
-        per_page = length
-        results = results[start:start + length]
-            
-          
     response = {
         'data': data,
         'page': page,
@@ -290,6 +300,7 @@ def checking_load(request):
 
     _start = request.GET.get('start')
     _length = request.GET.get('length')
+    
 
     if _start and _length:
         start = int(_start)
