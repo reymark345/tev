@@ -268,6 +268,7 @@
             <input id="emp-name" name="EmpName" class="form-control accn" type="hidden" placeholder="nane"/>
             <input id="emp-middle" name="EmpMiddle" class="form-control accn" type="hidden" placeholder="middle"/>
             <input id="emp-lastname" name="EmpLastname" class="form-control accn" type="hidden" placeholder="lastname"/>
+            <input id="hdate-travel" name="HDateTravel" class="form-control accn" type="hidden" placeholder="Date Travel"/>
         </form>
     </div>
 </div>
@@ -323,6 +324,7 @@
             FIncomingBy = jQuery(document.querySelector('[name="FIncomingBy"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
+            HDateTravel = jQuery(document.querySelector('[name="HDateTravel"]')),
             RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
             IdNumber = jQuery(document.querySelector('[name="IdNumber"]')),
             AccountNumber = jQuery(document.querySelector('[name="AccountNumber"]')),
@@ -550,7 +552,7 @@
 
                             let pk = data[0].pk
                             let employee_name = $('#employee-name')
-                            let floatvalue = parseFloat(fields.original_amount);
+                            let floatvalue = parseFloat(fields.final_amount);
                             let convertedAmount = floatvalue.toFixed(2);
                             let date_travel = fields.date_travel;
                             formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
@@ -562,6 +564,10 @@
                             else{
                                 EmployeeName.val(fullname).trigger('change').prop("disabled", false);
                             }
+                            OriginalAmount.prop("disabled", true);
+                            DateTravel.prop("disabled", true);
+                            RangeTravel.prop("disabled", true);
+                            HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
                             Remarks.val(fields.remarks);
                             DateTravel.val(formattedDates);

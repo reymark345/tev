@@ -204,18 +204,40 @@ def item_load(request):
     else:
         retrieve = [1, 2, 3, 4]
     
+    # query = """
+    # SELECT t.*
+    # FROM tev_incoming t
+    # WHERE (
+    #     t.status = 1
+    #     OR (
+    #         t.status = 3 AND t.slashed_out IS NOT NULL AND NOT EXISTS (
+    #             SELECT 1
+    #             FROM tev_incoming t2
+    #             WHERE t2.code = t.code
+    #             AND t2.status IN (1, 2)
+    #         )
+    #     )
+    # );
+    # """
     query = """
-    SELECT t.*
-    FROM tev_incoming t
-    WHERE (
-        t.status = 1
-        OR (
-            t.status = 3 AND t.slashed_out IS NOT NULL AND NOT EXISTS (
-                SELECT 1
-                FROM tev_incoming t2
-                WHERE t2.code = t.code
-                AND t2.status IN (1, 2)
-            )
+    SELECT t1.*
+    FROM tev_incoming t1
+    WHERE t1.status = 1
+    OR (
+        t1.status = 3
+        AND t1.slashed_out IS NOT NULL
+        AND NOT EXISTS (
+            SELECT 1
+            FROM tev_incoming t2
+            WHERE t2.code = t1.code
+            AND t2.status IN (1, 2)
+        )
+        AND NOT EXISTS (
+            SELECT 1
+            FROM tev_incoming t3
+            WHERE t3.code = t1.code
+            AND t3.status = 3
+            AND t3.slashed_out > t1.slashed_out
         )
     );
     """
@@ -279,16 +301,25 @@ def item_load(request):
 
 
 def checking_load(request):
+    # query = """
+    #     SELECT t.*
+    #     FROM tev_incoming t
+    #     WHERE t.status = 2
+    #         OR t.status = 7
+    #         OR (t.status = 3 AND t.slashed_out IS NULL AND (
+    #             SELECT COUNT(*)
+    #             FROM tev_incoming
+    #             WHERE code = t.code
+    #         ) = 1
+    #     );
+    # """
+    
     query = """
         SELECT t.*
         FROM tev_incoming t
         WHERE t.status = 2
             OR t.status = 7
-            OR (t.status = 3 AND t.slashed_out IS NULL AND (
-                SELECT COUNT(*)
-                FROM tev_incoming
-                WHERE code = t.code
-            ) = 1
+            OR (t.status = 3 AND t.slashed_out IS NULL
         );
     """
 
@@ -371,14 +402,21 @@ def item_returned(request):
     amount = request.POST.get('OriginalAmount')
     remarks = request.POST.get('Remarks')
     
-    travel_date = request.POST.get('DateTravel')
+    travel_date = request.POST.get('HDateTravel')
+    
+    
+    print(travel_date)
+    print("travel_date")
+    
+    
+    
     travel_date_stripped = travel_date.strip()
     travel_date_spaces = travel_date_stripped.replace(' ', '')
     
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
     
-    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=amount,remarks=remarks,user_id=data.user_id)
+    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
     
     

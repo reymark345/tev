@@ -51,7 +51,7 @@
                   <div class="input-group">
                     <span class="input-group-text">₱</span>
                     <input
-                      type="text"
+                      type="number"
                       id="final_amount"
                       name="FinalAmount"
                       class="form-control phone-number-otp-mask"
@@ -559,12 +559,25 @@
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
             let status = 3;
-              if (correctness_remarks === "") {
-                $("#amount_error").text("");
-                $("#remarks_error").text("Please enter Remarks for returned.");
+              if (correctness_remarks === "" && final_amount === "") {
+                $("#amount_error").text("Please enter Amount");
+                $("#remarks_error").text("Please enter Remarks");
                 $(".input-group").addClass("has-error");
                 event.preventDefault();
-              } else {
+              }
+              else if (final_amount === "" ) {
+                $("#amount_error").text("Please enter Amount");
+                $("#remarks_error").text("");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              }
+              else if (correctness_remarks === "" ) {
+                $("#amount_error").text("");
+                $("#remarks_error").text("Please enter Remarks");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              }
+               else {
                 $("#remarks_error").text("");
                 $(".input-group").removeClass("has-error");
                 tev_details(final_amount,correctness_remarks,status,clicked_id);
