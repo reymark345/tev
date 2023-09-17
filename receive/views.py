@@ -9,7 +9,7 @@ from django.contrib import messages
 from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge)
 import json 
 from django.core import serializers
-from datetime import date
+from datetime import date as datetime_date
 from django.contrib.auth.hashers import make_password
 from django.db import IntegrityError, connection
 import math
@@ -18,9 +18,11 @@ from django.forms.models import model_to_dict
 import requests
 from django.db.models import Q, F, Exists, OuterRef
 from django.db import connections
-from datetime import datetime, timedelta
-import datetime
+from datetime import timedelta
 from receive.filters import UserFilter
+import datetime
+
+
 
 def get_user_details(request):
     return StaffDetails.objects.filter(user_id=request.user.id).first()
@@ -30,7 +32,7 @@ def generate_code():
         'transaction_code', flat=True).first()
     
     last_code = trans_code.split('-')
-    sampleDate = date.today()
+    sampleDate = datetime_date.today()
     year = sampleDate.strftime("%y")
     month = sampleDate.strftime("%m")
     series = 1
@@ -389,10 +391,15 @@ def item_edit(request):
 @csrf_exempt
 def item_update(request):
     id = request.POST.get('ItemID')
-    emp_name = request.POST.get('EmployeeName')
+    name = request.POST.get('EmpName')
+    middle = request.POST.get('EmpMiddle')
+    lname = request.POST.get('EmpLastname')
     amount = request.POST.get('OriginalAmount')
+
+    print(amount)
+    print("whyywalayamount")
     remarks = request.POST.get('Remarks')
-    tev_update = TevIncoming.objects.filter(id=id).update(first_name=emp_name,original_amount=amount,remarks=remarks)
+    tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
 @csrf_exempt
@@ -418,9 +425,6 @@ def item_returned(request):
     
     tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
-    
-    
-    #tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
 

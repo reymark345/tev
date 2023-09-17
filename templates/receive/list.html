@@ -448,6 +448,7 @@
                         return result;
                     },
                 },
+
                 
                 {
                   targets: 7,
@@ -487,13 +488,12 @@
                 },
                 {
                   targets: -1,
-                  title: 'Actions',
+                  title: 'Action',
                   orderable: false,
                   searchable: false,
                   render: function (data) {
                       return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'+
-                          '<a class="btn btn-sm btn-icon item-delete" id="'+data+'"><i class="text-primary ti ti-trash"></i></a>'
+                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'
                       )
                   },
               },
@@ -548,30 +548,36 @@
                             const $selectElement1 = $('#employee-name');
                             fetchEmployee($selectElement1);
                             let fields = data[0].fields
-
-
                             let pk = data[0].pk
-                            let employee_name = $('#employee-name')
+                            let employee_name = $('#employee-name');
                             let floatvalue = parseFloat(fields.final_amount);
-                            let convertedAmount = floatvalue.toFixed(2);
+                            let convertedAmount = 0;
                             let date_travel = fields.date_travel;
                             formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
                             status_val = fields.status;
                             let fullname = fields.first_name + " " + fields.middle_name + " " + fields.last_name
                             if(status_val ===3){
                                 EmployeeName.val(fullname).trigger('change').prop("disabled", true);
+                                convertedAmount = floatvalue.toFixed(2);
+                                OriginalAmount.prop("disabled", true);
+                                DateTravel.prop("disabled", true);
+                                RangeTravel.prop("disabled", true);
                             }
                             else{
                                 EmployeeName.val(fullname).trigger('change').prop("disabled", false);
+                                let original_amt = parseFloat(fields.original_amount)
+                                convertedAmount = original_amt.toFixed(2);
+                                OriginalAmount.prop("disabled", false);
+                                DateTravel.prop("disabled", false);
+                                RangeTravel.prop("disabled", false);
                             }
-                            OriginalAmount.prop("disabled", true);
-                            DateTravel.prop("disabled", true);
-                            RangeTravel.prop("disabled", true);
+                            
                             HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
                             Remarks.val(fields.remarks);
                             DateTravel.val(formattedDates);
                             ItemID.val(pk);
+                            updateSelectedDates();
                             offCanvasEl.show()
                         }
                     })
@@ -626,8 +632,8 @@
                     $(".rangeTravel").prop("disabled", false);
                     $('.title-name').text('Add Tev Record')
                     EmployeeName.val('').trigger('change').prop("disabled", false);
-                    $('.form-control').val('')
-            
+                    $('.form-control').val('');
+                    updateSelectedDates();
                     offCanvasEl.show()
                 })
             }
@@ -808,6 +814,19 @@
             }
         }
 
+        function updateSelectedDates() {
+            var inputFieldValue = $('#dateField').val();
+            if (inputFieldValue) {
+                var inputDates = inputFieldValue.split(', ');
+                var selectedDates = inputDates.map(function(dateString) {
+                    return dateString; // No need to parse, use as is
+                });
+                dateField.setDate(selectedDates);
+            } else {
+                dateField.clear();
+            }
+        }
+
         function employeelist(){
             $.ajax({
                 type: 'GET',
@@ -839,14 +858,14 @@
             });
             
         }
-        $('#dateField').flatpickr({
-            mode: 'multiple',
-            allowInput: true,
-            dateFormat: 'd-m-Y',
-            locale: {
-                'firstDayOfWeek': 1 // start week on Monday
-            },
-        });
+       // $('#dateField').flatpickr({
+            //mode: 'multiple',
+           // allowInput: true,
+           // dateFormat: 'd-m-Y',
+           // locale: {
+                //'firstDayOfWeek': 1 // start week on Monday
+          //  },
+      //  });
         function incoming_out(selected_items){
             Swal.fire({
                 title: 'Mark as Out?',
