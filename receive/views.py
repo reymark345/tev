@@ -18,9 +18,9 @@ from django.forms.models import model_to_dict
 import requests
 from django.db.models import Q, F, Exists, OuterRef
 from django.db import connections
-from datetime import timedelta
+from datetime import datetime,timedelta
 from receive.filters import UserFilter
-import datetime
+import datetime as date_time
 
 
 
@@ -519,7 +519,7 @@ def out_pending_tev(request):
     out_list = request.POST.getlist('out_list[]')
     
     for item_id  in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=datetime.datetime.now())
+        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=date_time.datetime.now())
     
     return JsonResponse({'data': 'success'})
 
@@ -531,7 +531,7 @@ def out_checking_tev(request):
 
         if tev_update:
             if tev_update.status == 3:
-                tev_update.slashed_out = datetime.datetime.now()
+                tev_update.slashed_out = date_time.datetime.now()
             else:
                 tev_update.status = 4
             tev_update.save()
