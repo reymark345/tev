@@ -198,13 +198,17 @@ def tracking_load(request):
     return JsonResponse(response)
 
 def item_load(request):
-    idn = request.GET.get('identifier')
-    if idn == "1":
-        retrieve = [1, 3]
-    elif idn == "2":
-        retrieve = [2, 3, 4]
-    else:
-        retrieve = [1, 2, 3, 4]
+    _search = request.GET.get('search[value]')
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
+    
+    
+    print("_search1111")
+    print(_search)
+    
     
     # query = """
     # SELECT t.*
