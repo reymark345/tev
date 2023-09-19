@@ -271,7 +271,8 @@
                                 '{% for row in charges %}'+
                                 '<option value="{{ row.id }}">{{ row.name }}</option>'+
                                 '{% endfor %}'+
-                                '</select>';
+                                '</select>'+
+                                '<span id="charges_error" style="color: red;"></span>';
                         }
                         return data;
                     }
@@ -280,7 +281,8 @@
                     targets: -1,
                     render: function(data, type, row) {
                         if (type === 'display') {
-                            return '<input type="text" class="form-control purpose" id="basic-default-name" name="Purpose" disabled />';
+                            return '<input type="text" class="form-control purpose" id="basic-default-name" name="Purpose" disabled />'+
+                            '<span id="purpose_error" style="color: red;"></span>';;
                         }
                         return data;
                     }
@@ -520,6 +522,14 @@
                     }
                 })
             });
+
+        const chargesValidation = {
+            validators: {
+                notEmpty: {
+                    message: 'Required',
+                },
+            },
+        }
     
 
         // Form validation for Add new record
@@ -647,19 +657,57 @@
 
         function savepayroll(selected_items){
             console.log(selected_tev);
-            $('#saveModal').modal('show');
-            const currentDate = new Date();
-            const year = currentDate.getFullYear().toString().slice(-2); // Last two digits of the year
-            const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month with leading zero if needed
-            DvNumber.val(`${year}-${month}-`);
+            var emptyDataExists = false;
+            $('#tbl-items tbody select.charges').each(function() {
+                var selectedValue = $(this).val();
+                var errorSpan = $(this).closest('tr').find('#charges_error');
+                if (!$(this).is(':disabled')) {
+                    if (!selectedValue) {
+                        errorSpan.text("Required");
+                        emptyDataExists = true;
+                    } else {
+                        errorSpan.text("");
+                    }
+                } else {
+                    errorSpan.text("");
+                }
+            });
+
+            $('#tbl-items tbody input.purpose').each(function() {
+                var purposeValue = $(this).val();
+                var purposeErrorSpan = $(this).closest('tr').find('#purpose_error');
+                if (!$(this).is(':disabled')) {
+        
+                    if (!purposeValue) {
+                        purposeErrorSpan.text("Required");
+                        emptyDataExists = true;
+                    } else {
+                        purposeErrorSpan.text("");
+                    }
+                } else {
+                    purposeErrorSpan.text("");
+                }
+            });
+
+            if (!emptyDataExists) {
+                $('#saveModal').modal('show');
+                const currentDate = new Date();
+                const year = currentDate.getFullYear().toString().slice(-2); // Last two digits of the year
+                const month = (currentDate.getMonth() + 1).toString().padStart(2, '0'); // Month with leading zero if needed
+                DvNumber.val(`${year}-${month}-`);
+            } else {
+                toastr.error('Please Complete Required Fields', 'Invalid', toast_options);
+            }
         }
 
         $(document).on("change", ".purpose", function() {
             var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
+            var purposeErrorSpan = $(this).closest('tr').find('#purpose_error');
             var purposeValue = $(this).val();
             var existingItem = selected_tev.find(function(item) {
               return item.id === checkboxId;
             });
+            purposeErrorSpan.text("");
             if (existingItem) {
               existingItem.purpose = purposeValue;
             }
@@ -668,11 +716,12 @@
 
         $(document).on("change", ".charges", function() {
             var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
+            var errorSpan = $(this).closest('tr').find('#charges_error');
             var chargesValue = $(this).val();
             var existingItem = selected_tev.find(function(item) {
                 return item.id === checkboxId;
             });
-            
+            errorSpan.text("");
             if (existingItem) {
                 existingItem.charges = chargesValue;
                 console.log("Updated type for item with ID:", checkboxId, "New type:", chargesValue);
