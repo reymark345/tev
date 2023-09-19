@@ -571,6 +571,14 @@
                                 DateTravel.prop("disabled", false);
                                 RangeTravel.prop("disabled", false);
                             }
+
+                            if (DateTravel){
+                                RangeTravel.prop("disabled", true);
+                            }
+                            else if(RangeTravel){
+                                DateTravel.prop("disabled", true);
+                            }
+
                             
                             HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
