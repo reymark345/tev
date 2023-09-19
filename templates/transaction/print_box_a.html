@@ -93,6 +93,8 @@
     table.myClass * { /*new*/
       border: 0;
     }
+
+    
      
       @media print {
         .container {
@@ -860,7 +862,7 @@
                         <td class="no-border"></td>
                         <td class="no-border" colspan="2" >
                           <!-- <center><b><u>Janice Lamorin</u></b></center> -->
-                          <center><b><u><span contenteditable="true" id="editableName">Janice Lamorin</span></u></b></center>
+                          <center><b><u><span contenteditable="true" id="editableName">{{ user }}</span></u></b></center>
                         </td>
                         </td>
                       </tr>
@@ -886,8 +888,8 @@
       
                       </tr>
                       <tr>
-                        <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
-                        <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border"><b>Sum of AMOUNT</b></td>
+                        <td style="font-size: 15px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
+                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border"><b>Sum of AMOUNT</b></td>
                       </tr>
       
                       {% for emp in charges_list %}
@@ -981,7 +983,7 @@
                         <td class="no-border"></td>
                         <td class="no-border" colspan="2" >
                           <!-- <center><b><u>Janice Lamorin</u></b></center> -->
-                          <center><b><u><span contenteditable="true" id="editableName">Janice Lamorin</span></u></b></center>
+                          <center><b><u><span contenteditable="true" id="editableName">{{ user }}</span></u></b></center>
                         </td>
                         </td>
                       </tr>
@@ -1007,8 +1009,8 @@
       
                       </tr>
                       <tr>
-                        <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
-                        <td style="font-size: 13px;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border"><b>Sum of AMOUNT</b></td>
+                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
+                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border"><b>Sum of AMOUNT</b></td>
                       </tr>
       
                       {% for emp in charges_list %}

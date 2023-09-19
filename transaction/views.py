@@ -147,12 +147,16 @@ def box_a(request):
 def preview_box_a(request):
     finance_database_alias = 'finance'    
     outgoing_id = request.GET.get('id')
+    user_id = request.session.get('user_id', 0)
     
     results = []
     total_final_amount = 0
     emp_list_code = []
     emp_list_lname = []
     charges_list = []
+    
+    userData = AuthUser.objects.filter(id=user_id)
+    full_name = userData[0].first_name + ' ' + userData[0].last_name
     
     
     if outgoing_id:
@@ -275,6 +279,7 @@ def preview_box_a(request):
             'details':designation_result,
             'emp_list_code':emp_list_code,
             'emp_list_lname':emp_list_lname,
+            'user' : full_name
         }
         
         return render(request, 'transaction/print_box_a.html', context)
@@ -584,14 +589,14 @@ def item_edit(request):
     return HttpResponse(data, content_type="application/json")
 
 
-@csrf_exempt
-def item_update(request):
-    id = request.POST.get('ItemID')
-    emp_name = request.POST.get('EmployeeName')
-    amount = request.POST.get('OriginalAmount')
-    remarks = request.POST.get('Remarks')
-    tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
-    return JsonResponse({'data': 'success'})
+# @csrf_exempt
+# def item_update(request):
+#     id = request.POST.get('ItemID')
+#     emp_name = request.POST.get('EmployeeName')
+#     amount = request.POST.get('OriginalAmount')
+#     remarks = request.POST.get('Remarks')
+#     tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
+#     return JsonResponse({'data': 'success'})
 
 
 @csrf_exempt

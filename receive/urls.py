@@ -23,5 +23,9 @@ urlpatterns = [
 
     path('checking', views.checking, name='receive-checking'),
     path('api', views.api, name='receive-api'),
+    path('search_list', views.search_list, name='search-list'),
+    
+    
+
  
 ]

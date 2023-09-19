@@ -34,6 +34,174 @@
     </div>
 </div>
 
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="advance-filter" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-lg modal-simple modal-edit-user">
+    <div class="modal-content p-3 p-md-5">
+    <div class="modal-body">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="text-center mb-4">
+        <h3 class="mb-2">Advanced Filter </h3>
+        <p class="text-muted">Filter data by filling the details below</p>
+        </div>
+        <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+            <select
+            id="f-employee-name"
+            name="FEmployeeName"
+            class="form-select"
+            aria-label="Default select example"
+            >
+            <option></option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="modalEditUserFirstName">ID Number</label>
+            <input
+            type="text"
+            id="f-id-number"
+            name="FIdNumber"
+            class="form-control"
+            placeholder="16-0000"
+            />
+        </div>
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="modalEditUserLastName">Transaction Code</label>
+            <input
+            type="text"
+            id="f-transaction-code"
+            name="FTransactionCode"
+            class="form-control"
+            placeholder="23-00-00000"
+            />
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="modalEditTaxID">Date Travel</label>
+            <input type="text" class="form-control" name="FDateTravel" placeholder="DD-MM-YYYY" id="f-dateField" autocomplete="off"/>
+        </div>
+
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" >Incoming In</label>
+            <input
+            type="date"
+            id="f-incoming-in"
+            name="FIncomingIn"
+            class="form-control"
+            />
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" >Slashed out</label>
+            <input
+            type="date"
+            id="f-slashed-out"
+            name="FSLashedOut"
+            class="form-control"
+            />
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label">Original Amount</label>
+            <div class="input-group">
+            <span class="input-group-text">₱</span>
+            <input
+                type="number"
+                id="f-original-amount"
+                name="FOriginalAmount"
+                class="form-control phone-number-mask"
+                placeholder="0.00"
+            />
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label">Final Amount</label>
+            <div class="input-group">
+            <span class="input-group-text">₱</span>
+            <input
+                type="number"
+                id="f-final-amount"
+                name="FFinalAmount"
+                class="form-control phone-number-mask"
+                placeholder="0.00"
+            />
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="modalAccountNumber">Account number</label>
+            <input
+            type="text"
+            id="f-account-number"
+            name="FAccountNumber"
+            class="form-control"
+            placeholder="23-00-00000"
+            />
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="modalFEmployeeName">Incoming by</label>
+            <select
+            id="f-incoming-by"
+            name="FIncomingBy"
+            class="form-select"
+            aria-label="Default select example"
+            >
+            <option></option>
+            <option value="1">Reymark N. Valdehueza</option>
+            <option value="2">Marwen A. Valeroso</option>
+            <option value="3">Suspended</option>
+            </select>
+        </div>
+            <input
+            type="text"
+            id="f-first-name"
+            name="FFirstName"
+            class="form-control"
+            placeholder="Firstname"
+            />
+
+            <input
+            type="text"
+            id="f-middle-name"
+            name="FFirstName"
+            class="form-control"
+            placeholder="Middle"
+            />
+
+            <input
+            type="text"
+            id="f-last-name"
+            name="FFirstName"
+            class="form-control"
+            placeholder="Lastname"
+            />
+    
+
+
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-primary me-sm-3 me-1">Search</button>
+            <button
+            type="reset"
+            class="btn btn-label-secondary"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            >
+            Cancel
+            </button>
+        </div>
+        </form>
+    </div>
+    </div>
+</div>
+</div>
+<!--/ Edit User Modal -->
+
       
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
@@ -100,6 +268,7 @@
             <input id="emp-name" name="EmpName" class="form-control accn" type="hidden" placeholder="nane"/>
             <input id="emp-middle" name="EmpMiddle" class="form-control accn" type="hidden" placeholder="middle"/>
             <input id="emp-lastname" name="EmpLastname" class="form-control accn" type="hidden" placeholder="lastname"/>
+            <input id="hdate-travel" name="HDateTravel" class="form-control accn" type="hidden" placeholder="Date Travel"/>
         </form>
     </div>
 </div>
@@ -113,6 +282,14 @@
     $(document).ready(function () {
         employeelist();
         var dateField = $('#dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+        });
+        var fdateField = $('#f-dateField').flatpickr({
             mode: 'multiple',
             allowInput: true,
             dateFormat: 'd-m-Y',
@@ -141,9 +318,13 @@
 
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
+            AdvancedFilter = document.getElementById('advanced-filter-list'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
+            FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
+            FIncomingBy = jQuery(document.querySelector('[name="FIncomingBy"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
+            HDateTravel = jQuery(document.querySelector('[name="HDateTravel"]')),
             RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
             IdNumber = jQuery(document.querySelector('[name="IdNumber"]')),
             AccountNumber = jQuery(document.querySelector('[name="AccountNumber"]')),
@@ -267,6 +448,7 @@
                         return result;
                     },
                 },
+
                 
                 {
                   targets: 7,
@@ -306,13 +488,12 @@
                 },
                 {
                   targets: -1,
-                  title: 'Actions',
+                  title: 'Action',
                   orderable: false,
                   searchable: false,
                   render: function (data) {
                       return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'+
-                          '<a class="btn btn-sm btn-icon item-delete" id="'+data+'"><i class="text-primary ti ti-trash"></i></a>'
+                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'
                       )
                   },
               },
@@ -322,6 +503,12 @@
                 {
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                    action: function () {
+                        const $selectElement = $('#f-employee-name');
+                        fetchEmployee($selectElement);
+                        $("#advance-filter").modal("show");
+                    }
+    
                 },
                 {
                     className: 'btn btn-label-primary me-2',
@@ -358,28 +545,39 @@
                         dataType: 'json',
                     }).done(function (data) {
                         if (data.length > 0) {
-                            fetchEmployee();
+                            const $selectElement1 = $('#employee-name');
+                            fetchEmployee($selectElement1);
                             let fields = data[0].fields
-
-
                             let pk = data[0].pk
-                            let employee_name = $('#employee-name')
-                            let floatvalue = parseFloat(fields.original_amount);
-                            let convertedAmount = floatvalue.toFixed(2);
+                            let employee_name = $('#employee-name');
+                            let floatvalue = parseFloat(fields.final_amount);
+                            let convertedAmount = 0;
                             let date_travel = fields.date_travel;
                             formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
                             status_val = fields.status;
                             let fullname = fields.first_name + " " + fields.middle_name + " " + fields.last_name
                             if(status_val ===3){
                                 EmployeeName.val(fullname).trigger('change').prop("disabled", true);
+                                convertedAmount = floatvalue.toFixed(2);
+                                OriginalAmount.prop("disabled", true);
+                                DateTravel.prop("disabled", true);
+                                RangeTravel.prop("disabled", true);
                             }
                             else{
                                 EmployeeName.val(fullname).trigger('change').prop("disabled", false);
+                                let original_amt = parseFloat(fields.original_amount)
+                                convertedAmount = original_amt.toFixed(2);
+                                OriginalAmount.prop("disabled", false);
+                                DateTravel.prop("disabled", false);
+                                RangeTravel.prop("disabled", false);
                             }
+                            
+                            HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
                             Remarks.val(fields.remarks);
                             DateTravel.val(formattedDates);
                             ItemID.val(pk);
+                            updateSelectedDates();
                             offCanvasEl.show()
                         }
                     })
@@ -422,15 +620,20 @@
         const newRecord = document.querySelector('.create-new')
             if (newRecord) {
                 newRecord.addEventListener('click', function () {
-                    fetchEmployee();
+
+
+                    const $selectElement1 = $('#employee-name');
+                    fetchEmployee($selectElement1);
+
+
                     ItemID.val(0)
                     
                     $("#dateField").prop("disabled", false);
                     $(".rangeTravel").prop("disabled", false);
                     $('.title-name').text('Add Tev Record')
                     EmployeeName.val('').trigger('change').prop("disabled", false);
-                    $('.form-control').val('')
-            
+                    $('.form-control').val('');
+                    updateSelectedDates();
                     offCanvasEl.show()
                 })
             }
@@ -468,12 +671,6 @@
                 })
             },
         }).on('core.form.valid', function () {
-
-      
-            console.log(DateTravel.val());
-            console.log(RangeTravel.val());
-            console.log("DateTravel");
-
             if (DateTravel.val() && RangeTravel.val() ){
                 toastr.error('Duplicate Travel Date : Select only one', 'Invalid', toast_options);
             }
@@ -559,19 +756,54 @@
                     }
                 });
             }
+        });
 
+
+
+        
+        // Form validation for Add new record
+        const adv = FormValidation.formValidation(AdvancedFilter, {
+            fields: {
+            },
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                submitButton: new FormValidation.plugins.SubmitButton(),
+                autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: (instance) => {
+                instance.on('plugins.message.placed', function (e) {
+                    if (e.element.parentElement.classList.contains('input-group')) {
+                        e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                    }
+                })
+            },
+        }).on('core.form.valid', function () {
+            var form_data = $('#advanced-filter-list').serialize();
+            var form_data = $('#item-form').serialize()
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'search-list' %}",
+                data: form_data,
+            }).done(function (data) {
+                if (data.data == 'success') {
+
+                } else {
+
+                }
+            });
 
         });
         
+        
 
-        function fetchEmployee(){
+        function fetchEmployee($selectElement) {
             const employees = JSON.parse(localStorage.getItem('employees'));
             if (employees) {
-                const $selectElement = $('#employee-name');
                 $.each(employees, function (index, employee) {
                     const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
                     const $option = $('<option>', {
-                        value: optionText, 
+                        value: optionText,
                         text: optionText,
                         id: employee.idNumber
                     });
@@ -579,6 +811,19 @@
                 });
             } else {
                 console.log("No employee data found in local storage.");
+            }
+        }
+
+        function updateSelectedDates() {
+            var inputFieldValue = $('#dateField').val();
+            if (inputFieldValue) {
+                var inputDates = inputFieldValue.split(', ');
+                var selectedDates = inputDates.map(function(dateString) {
+                    return dateString; // No need to parse, use as is
+                });
+                dateField.setDate(selectedDates);
+            } else {
+                dateField.clear();
             }
         }
 
@@ -613,14 +858,14 @@
             });
             
         }
-        $('#dateField').flatpickr({
-            mode: 'multiple',
-            allowInput: true,
-            dateFormat: 'd-m-Y',
-            locale: {
-                'firstDayOfWeek': 1 // start week on Monday
-            },
-        });
+       // $('#dateField').flatpickr({
+            //mode: 'multiple',
+           // allowInput: true,
+           // dateFormat: 'd-m-Y',
+           // locale: {
+                //'firstDayOfWeek': 1 // start week on Monday
+          //  },
+      //  });
         function incoming_out(selected_items){
             Swal.fire({
                 title: 'Mark as Out?',
@@ -654,6 +899,7 @@
                                 },
                             })
 
+                            dateField.clear();
                             dataTable.ajax.reload()
                         } else {
                             Swal.fire({
@@ -696,12 +942,6 @@
           $('#employee-name').change(function() {
             var selectedOption = $(this).find('option:selected');
             var optionText = selectedOption.attr('id');
-
-
-
-
-            
-        
             if (optionText) {
                 const employees = JSON.parse(localStorage.getItem('employees'));
                 if (employees) {
@@ -715,6 +955,27 @@
                         $('#emp-name').val(selectedEmployee.firstName);
                         $('#emp-middle').val(selectedEmployee.middleInitial);
                         $('#emp-lastname').val(selectedEmployee.lastName);
+                    }
+                } else {
+                    console.log("No employee data found in local storage.");
+                }
+            }
+        });
+
+        $('#f-employee-name').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var optionText = selectedOption.attr('id');
+            if (optionText) {
+                const employees = JSON.parse(localStorage.getItem('employees'));
+                if (employees) {
+                    const selectedEmployeeId = selectedOption.attr('id');
+                    const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
+      
+                    
+                    if (selectedEmployee) {
+                        $('#f-first-name').val(selectedEmployee.firstName);
+                        $('#f-middle-name').val(selectedEmployee.middleInitial);
+                        $('#f-last-name').val(selectedEmployee.lastName);
                     }
                 } else {
                     console.log("No employee data found in local storage.");
@@ -764,6 +1025,9 @@
             });
             }
 
+
+
+        //select 2
         if (EmployeeName.length) {
             EmployeeName.wrap('<div class="position-relative"></div>')
             EmployeeName.select2({
@@ -772,8 +1036,26 @@
                 allowClear: true,
             })
         }
-        
 
+        if (FEmployeeName.length) {
+            FEmployeeName.wrap('<div class="position-relative"></div>')
+            FEmployeeName.select2({
+                placeholder: 'Choose employee',
+                dropdownParent: FEmployeeName.parent(),
+                allowClear: true,
+            })
+        }
+
+        if (FIncomingBy.length) {
+            FIncomingBy.wrap('<div class="position-relative"></div>')
+            FIncomingBy.select2({
+                placeholder: 'Choose Incoming',
+                dropdownParent: FIncomingBy.parent(),
+                allowClear: true,
+            })
+        }
+        
+        //end select2
 
     })
 </script>

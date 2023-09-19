@@ -9,7 +9,7 @@ from django.contrib import messages
 from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge)
 import json 
 from django.core import serializers
-from datetime import date
+from datetime import date as datetime_date
 from django.contrib.auth.hashers import make_password
 from django.db import IntegrityError, connection
 import math
@@ -18,7 +18,11 @@ from django.forms.models import model_to_dict
 import requests
 from django.db.models import Q, F, Exists, OuterRef
 from django.db import connections
-from datetime import datetime, timedelta
+from datetime import datetime,timedelta
+from receive.filters import UserFilter
+import datetime as date_time
+
+
 
 def get_user_details(request):
     return StaffDetails.objects.filter(user_id=request.user.id).first()
@@ -28,7 +32,7 @@ def generate_code():
         'transaction_code', flat=True).first()
     
     last_code = trans_code.split('-')
-    sampleDate = date.today()
+    sampleDate = datetime_date.today()
     year = sampleDate.strftime("%y")
     month = sampleDate.strftime("%m")
     series = 1
@@ -83,6 +87,18 @@ def checking(request):
         return render(request, 'pages/unauthorized.html')
     
     
+@login_required(login_url='login')
+@csrf_exempt
+def search_list(request):
+    
+    print("dataheree")
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    
+    return JsonResponse({'data': "success"})
+    
+    
     
     
 def tracking_load(request):
@@ -114,6 +130,16 @@ def tracking_load(request):
         finance_data.append(finance_dict)
     
     data = []
+    
+    total = len(finance_data)
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        finance_data = finance_data[start:start + length]
 
     for row in finance_data:
         amt_certified = ''
@@ -138,7 +164,6 @@ def tracking_load(request):
                 amt_budget = finance_results[0][3]
                 amt_check = finance_results[0][4]
                 
-        
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
         last_name = row['last_name'] if row['last_name'] else ''
@@ -163,19 +188,6 @@ def tracking_load(request):
         }
         data.append(item)
         
-        _start = request.GET.get('start')
-        _length = request.GET.get('length')
-        
-        
-        
-    if _start and _length:
-        start = int(_start)
-        length = int(_length)
-        page = math.ceil(start / length) + 1
-        per_page = length
-        results = results[start:start + length]
-            
-          
     response = {
         'data': data,
         'page': page,
@@ -186,26 +198,52 @@ def tracking_load(request):
     return JsonResponse(response)
 
 def item_load(request):
-    idn = request.GET.get('identifier')
-    if idn == "1":
-        retrieve = [1, 3]
-    elif idn == "2":
-        retrieve = [2, 3, 4]
-    else:
-        retrieve = [1, 2, 3, 4]
+    _search = request.GET.get('search[value]')
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
     
+    
+    print("_search1111")
+    print(_search)
+    
+    
+    # query = """
+    # SELECT t.*
+    # FROM tev_incoming t
+    # WHERE (
+    #     t.status = 1
+    #     OR (
+    #         t.status = 3 AND t.slashed_out IS NOT NULL AND NOT EXISTS (
+    #             SELECT 1
+    #             FROM tev_incoming t2
+    #             WHERE t2.code = t.code
+    #             AND t2.status IN (1, 2)
+    #         )
+    #     )
+    # );
+    # """
     query = """
-    SELECT t.*
-    FROM tev_incoming t
-    WHERE (
-        t.status = 1
-        OR (
-            t.status = 3 AND t.slashed_out IS NOT NULL AND NOT EXISTS (
-                SELECT 1
-                FROM tev_incoming t2
-                WHERE t2.code = t.code
-                AND t2.status IN (1, 2)
-            )
+    SELECT t1.*
+    FROM tev_incoming t1
+    WHERE t1.status = 1
+    OR (
+        t1.status = 3
+        AND t1.slashed_out IS NOT NULL
+        AND NOT EXISTS (
+            SELECT 1
+            FROM tev_incoming t2
+            WHERE t2.code = t1.code
+            AND t2.status IN (1, 2)
+        )
+        AND NOT EXISTS (
+            SELECT 1
+            FROM tev_incoming t3
+            WHERE t3.code = t1.code
+            AND t3.status = 3
+            AND t3.slashed_out > t1.slashed_out
         )
     );
     """
@@ -269,16 +307,25 @@ def item_load(request):
 
 
 def checking_load(request):
+    # query = """
+    #     SELECT t.*
+    #     FROM tev_incoming t
+    #     WHERE t.status = 2
+    #         OR t.status = 7
+    #         OR (t.status = 3 AND t.slashed_out IS NULL AND (
+    #             SELECT COUNT(*)
+    #             FROM tev_incoming
+    #             WHERE code = t.code
+    #         ) = 1
+    #     );
+    # """
+    
     query = """
         SELECT t.*
         FROM tev_incoming t
         WHERE t.status = 2
             OR t.status = 7
-            OR (t.status = 3 AND t.slashed_out IS NULL AND (
-                SELECT COUNT(*)
-                FROM tev_incoming
-                WHERE code = t.code
-            ) = 1
+            OR (t.status = 3 AND t.slashed_out IS NULL
         );
     """
 
@@ -290,6 +337,7 @@ def checking_load(request):
 
     _start = request.GET.get('start')
     _length = request.GET.get('length')
+    
 
     if _start and _length:
         start = int(_start)
@@ -347,10 +395,15 @@ def item_edit(request):
 @csrf_exempt
 def item_update(request):
     id = request.POST.get('ItemID')
-    emp_name = request.POST.get('EmployeeName')
+    name = request.POST.get('EmpName')
+    middle = request.POST.get('EmpMiddle')
+    lname = request.POST.get('EmpLastname')
     amount = request.POST.get('OriginalAmount')
+
+    print(amount)
+    print("whyywalayamount")
     remarks = request.POST.get('Remarks')
-    tev_update = TevIncoming.objects.filter(id=id).update(first_name=emp_name,original_amount=amount,remarks=remarks)
+    tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
 @csrf_exempt
@@ -360,18 +413,22 @@ def item_returned(request):
     amount = request.POST.get('OriginalAmount')
     remarks = request.POST.get('Remarks')
     
-    travel_date = request.POST.get('DateTravel')
+    travel_date = request.POST.get('HDateTravel')
+    
+    
+    print(travel_date)
+    print("travel_date")
+    
+    
+    
     travel_date_stripped = travel_date.strip()
     travel_date_spaces = travel_date_stripped.replace(' ', '')
     
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
     
-    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=amount,remarks=remarks,user_id=data.user_id)
+    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
-    
-    
-    #tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
 
 
@@ -462,7 +519,7 @@ def out_pending_tev(request):
     out_list = request.POST.getlist('out_list[]')
     
     for item_id  in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=datetime.datetime.now())
+        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=date_time.datetime.now())
     
     return JsonResponse({'data': 'success'})
 
@@ -474,7 +531,7 @@ def out_checking_tev(request):
 
         if tev_update:
             if tev_update.status == 3:
-                tev_update.slashed_out = datetime.datetime.now()
+                tev_update.slashed_out = date_time.datetime.now()
             else:
                 tev_update.status = 4
             tev_update.save()

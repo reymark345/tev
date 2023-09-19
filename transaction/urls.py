@@ -12,7 +12,7 @@ urlpatterns = [
     path('box_load', views.box_load, name='box-load'),
     path('box_emp_load', views.box_emp_load, name='box-emp-load'),
     path('item_edit', views.item_edit, name='item-edit'),
-    path('item_update', views.item_update, name='item-update'),
+    # path('item_update', views.item_update, name='item-update'),
 
     path('out_box_a', views.out_box_a, name='out-box-a'),
     path('tev_details', views.tev_details, name='tev-details'),
