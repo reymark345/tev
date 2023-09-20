@@ -523,6 +523,19 @@ def out_pending_tev(request):
     
     return JsonResponse({'data': 'success'})
 
+
+@csrf_exempt
+def add_existing_record(request):
+    out_list = request.POST.getlist('out_list[]')
+    
+    for item_id  in out_list:
+        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=date_time.datetime.now())
+    
+    return JsonResponse({'data': 'success'})
+
+
+
+
 @csrf_exempt
 def out_checking_tev(request):
     out_list = request.POST.getlist('out_list[]')   

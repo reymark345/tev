@@ -267,6 +267,154 @@
     </div>
 </div>
 
+<!-- Edit User Modal -->
+<div class="modal fade" id="add-record" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+      <div class="modal-content p-3 p-md-5">
+      <div class="modal-body">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="text-center mb-4">
+          <h3 class="mb-2">Add New Record</h3>
+          <h4 class="mb-2"><span class="badge bg-label-primary" id="record-dv-number"></span></h4>
+          <p class="text-muted">Create new record by filling the details below</p>
+          </div>
+          <form id="add-record-dv" class="row g-3" onsubmit="return false">
+          <div class="col-12 col-md-6">
+              <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+              <select
+              id="f-employee-name"
+              name="FEmployeeName"
+              class="form-select"
+              aria-label="Default select example"
+              >
+              <option></option>
+              </select>
+          </div>
+  
+          <div class="col-12 col-md-6">
+            <label class="form-label">Final Amount</label>
+            <div class="input-group">
+            <span class="input-group-text">₱</span>
+            <input
+                type="number"
+                id="final-amount"
+                name="FinalAmount"
+                class="form-control phone-number-mask"
+                placeholder="0.00"
+            />
+            </div>
+        </div>
+  
+          <div class="col-12 col-md-6">
+              <label class="form-label" for="modalEditTaxID">Date Travel</label>
+              <input type="text" class="form-control" name="DateTravel" placeholder="DD-MM-YYYY" id="dateField" autocomplete="off"/>
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label class="form-label" for="modalEditUserLastName">Date Travel <small>(Range)</small></label>
+            <input
+            type="text"
+            class="form-control rangeTravel"
+            name="RangeTravel"
+            placeholder="YYYY-MM-DD to YYYY-MM-DD"
+            id="flatpickr-range"
+          />
+        </div>
+
+        <div class="col-12 col-md-6">
+          <label class="form-label" for="modalEditUserLastName">Purpose</label>
+          <input
+          type="text"
+          id="f-purpose"
+          name="FPurpose"
+          class="form-control"
+          placeholder="TE for"
+          />
+        </div>
+        
+  
+          <div class="col-12 col-md-6">
+              <label class="form-label" >Charges</label>
+              <select
+              id="f-charges"
+              name="FCharges"
+              class="form-select"
+              aria-label="Default select example"
+              >
+              <option></option>
+              </select>
+          </div>
+  
+          <div class="col-12 col-md-12">
+              <label class="form-label">Remarks</label>
+              <div class="input-group">
+              <textarea class="form-control dt-remarks" placeholder="Enter remarks (optional)" rows="6" id="f-remarks" name="FRemarks"></textarea>
+              <span class="input-group-text">
+                <i class="ti ti-microphone cursor-pointer text-to-speech-toggle"></i>
+              </span>
+              </div>
+          </div>
+
+          <input
+            type="hidden"
+            id="f-first-name"
+            name="FFirstName"
+            class="form-control"
+            placeholder="Firstname"
+            />
+
+            <input
+            type="hidden"
+            id="f-middle-name"
+            name="FMiddleName"
+            class="form-control"
+            placeholder="Middle"
+            />
+
+            <input
+            type="hidden"
+            id="f-last-name"
+            name="FLastname"
+            class="form-control"
+            placeholder="Lastname"
+            />
+
+            <input
+            type="hidden"
+            id="f-id-no"
+            name="FIdNumber"
+            class="form-control"
+            placeholder="FIdNumber"
+            />
+
+            <input
+            type="hidden"
+            id="f-accountt-no"
+            name="FAccountNumber"
+            class="form-control"
+            placeholder="Account Number"
+            />
+      
+  
+  
+          <div class="col-12 text-center">
+              <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+              <button
+              type="reset"
+              class="btn btn-label-secondary"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+              >
+              Cancel
+              </button>
+          </div>
+          </form>
+      </div>
+      </div>
+  </div>
+  </div>
+  <!--/ Edit User Modal -->
+
 
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
@@ -325,14 +473,24 @@
     let clicked_id = 0;
     let dv_no_id =0;
     let dv_number = '';
+    let charges = '';
+    let outgoing_id = 0;
     $(document).ready(function () {
 
         const table_box_a = $('#tbl-box-a')
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
+            AddRecordDv = document.getElementById('add-record-dv'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
+            FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
+            DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
+            RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
+            FPurpose = jQuery(document.querySelector('[name="FPurpose"]')),
+            FCharges = jQuery(document.querySelector('[name="FCharges"]')),
+            FinalAmount = jQuery(document.querySelector('[name="FinalAmount"]')),
+            FRemarks = jQuery(document.querySelector('[name="FRemarks"]')),
             offCanvasElement = document.querySelector('#add-new-record')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
@@ -470,12 +628,6 @@
                         }
                     }
                 },
-
-
-                {
-                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                    className: 'create-new btn btn-primary',
-                },
             ],
             drawCallback: function (settings) {
                 const tableId = 'tbl-box-a'; // Change this to the specific table ID you want to populate
@@ -500,9 +652,6 @@
                     }
                 }).done(function (data) {
                     let totalAmount = data.total_amount;
-
-                    console.log(totalAmount);
-                    console.log("totalAmount");
                     totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
@@ -562,11 +711,13 @@
                         console.log("data_TEST");
                         console.log(data);
                         dv_number = '';
+                        charges = '';
+                        outgoing_id = 0;
                         dv_number = data.dv_number;
-                        let charges = data.charges;
+                        charges = data.charges;
+                        outgoing_id = data.outgoing_id;
                         let is_print = data.is_print;
                         tbody.empty();
-                       
                         data.data.forEach(function (item) {
                           const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
                           let amountColumn = '';
@@ -772,16 +923,83 @@
                         }
                     }
                 },
-
-
                 {
                     text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
                     className: 'create-new btn btn-primary',
+                    action: function () {
+                      const $selectElement = $('#f-employee-name');
+                      fetchEmployee($selectElement);
+                      if (FEmployeeName.length) {
+                        FEmployeeName.wrap('<div class="position-relative"></div>')
+                        FEmployeeName.select2({
+                            placeholder: 'Choose employee',
+                            dropdownParent: FEmployeeName.parent(),
+                            allowClear: true,
+                        })
+                      }
+
+                      if (FCharges.length) {
+                        FCharges.wrap('<div class="position-relative"></div>')
+                        FCharges.select2({
+                            placeholder: 'Choose employee',
+                            dropdownParent: FCharges.parent(),
+                            allowClear: true,
+                        })
+                      }
+
+                    
+                    var selectElement = $('#f-charges');
+                    selectElement.empty();
+
+                    var defaultOption = $('<option>');
+                      defaultOption.val(''); 
+                      defaultOption.text('Choose Charges');
+                      defaultOption.prop('selected', true); 
+                      selectElement.append(defaultOption);
+                      
+                    for (var i = 0; i < charges.length; i++) {
+                      var option = $('<option>');
+
+                      option.val(charges[i].id); 
+                      option.text(charges[i].name); 
+                      selectElement.append(option); 
+                    }
+
+                      
+                    $("#record-dv-number").text("DV # "+ dv_number);
+                    $('#update-transaction').modal('hide');
+                    $("#add-record").modal("show");
+                    $('#f-employee-name').change(function() {
+                      var selectedOption = $(this).find('option:selected');
+                      var optionText = selectedOption.attr('id');
+                      if (optionText) {
+                          const employees = JSON.parse(localStorage.getItem('employees'));
+                          if (employees) {
+                              const selectedEmployeeId = selectedOption.attr('id');
+                              const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
+
+                              console.log(selectedEmployee);
+                              console.log("selectedEmployeedadaada");
+                              if (selectedEmployee) {
+                                  $('#f-first-name').val(selectedEmployee.firstName);
+                                  $('#f-middle-name').val(selectedEmployee.middleInitial);
+                                  $('#f-last-name').val(selectedEmployee.lastName);
+                                  $('#f-id-no').val(selectedEmployee.idNumber);
+                                  $('#f-accountt-no').val(selectedEmployee.accNumber);
+                              }
+                          } else {
+                              console.log("No employee data found in local storage.");
+                          }
+                      }
+                    });
+                      RenderFlatpickr();
+                      NewRecordValidation();  
+                  }
+                  
+                  
                 },
             ],
             drawCallback: function (settings) { 
-
-              
                 $('.view-data').on('click', function () {
                     let id = $(this).attr('id');
                     dv_no_id = id
@@ -838,24 +1056,9 @@
                 });
             },
         });
+        
 
  
-
-
-        const newRecord = document.querySelector('.create-new')
-
-        setTimeout(() => {
-            if (newRecord) {
-                newRecord.addEventListener('click', function () {
-                    ItemID.val(0)
-                    $('.title-name').text('Add Tev Record')
-                    EmployeeName.val('').trigger('change')
-                    $('.form-control').val('')
-         
-                    offCanvasEl.show()
-                })
-            }
-        }, 200)
 
         // Form validation for Add new record
         const fv = FormValidation.formValidation(ItemFormValidation, {
@@ -945,7 +1148,188 @@
                 }
             })
         });
-        function incoming_out(selected_items){
+
+
+
+      function NewRecordValidation(){
+          const fvdv = FormValidation.formValidation(AddRecordDv, {
+            fields: {
+                FEmployeeName: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Required',
+                        },
+                    },
+                },
+                FinalAmount: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Required',
+                        },
+                    },
+                },
+                FPurpose: {
+                  validators: {
+                      notEmpty: {
+                          message: 'Required',
+                      },
+                  },
+              },
+                FCharges: {
+                  validators: {
+                    notEmpty: {
+                        message: 'Required',
+                      },
+                  },
+              },
+            },
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                submitButton: new FormValidation.plugins.SubmitButton(),
+                autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: (instance) => {
+                instance.on('plugins.message.placed', function (e) {
+                    if (e.element.parentElement.classList.contains('input-group')) {
+                        e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                    }
+                })
+            },
+        }).on('core.form.valid', function () {
+          if (DateTravel.val() && RangeTravel.val() ){
+            toastr.error('Duplicate Travel Date : Select only one', 'Invalid', toast_options);
+          }
+          else if (!DateTravel.val() && !RangeTravel.val()){
+              toastr.error('Please: Select one Date Travel', 'Invalid', toast_options);
+          }
+          else{
+              Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, save it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    var form_data = $('#add-record-dv').serialize();
+                    var requestData = {
+                      idd: 1
+                  };
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'add-existing-record' %}",
+                        data: {...form_data, ...requestData},
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                icon: 'info',
+                                html:
+                                  'Successfully <b>Save!</b>',
+                                showCloseButton: true,
+                                showCancelButton: false,
+                                focusConfirm: false,
+                                confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                confirmButtonAriaLabel: 'Thumbs up, great!',
+                                customClass: {
+                                  confirmButton: 'btn btn-primary me-3'
+                                },
+                                buttonsStyling: false
+                              });
+
+                            FEmployeeName.val("").trigger('change');
+                            FinalAmount.val("");
+                            FRemarks.val("");
+                            FCharges.val("").trigger('change');
+                            FPurpose.val("");
+                        } else {
+                            Swal.fire({
+                              icon: 'error',
+                              title: 'Error saving!',
+                              html:"Duplicate Travel <br><b>"+data.message+"</b>",
+                              customClass: {
+                                  confirmButton: 'btn btn-success',
+                              },
+                          })
+                        }
+                    })
+                }
+            })
+
+          }
+ 
+        });
+
+        }
+
+        function fetchEmployee($selectElement) {
+          const employees = JSON.parse(localStorage.getItem('employees'));
+          $selectElement.empty();
+          var defaultOption = $('<option>');
+            defaultOption.val(''); 
+            defaultOption.text('Choose Employee');
+            defaultOption.prop('selected', true); 
+            $selectElement.append(defaultOption);
+
+          if (employees) {
+              $.each(employees, function (index, employee) {
+                  const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                  const $option = $('<option>', {
+                      value: optionText,
+                      text: optionText,
+                      id: employee.idNumber
+                  });
+                  $selectElement.append($option);
+              });
+          } else {
+              console.log("No employee data found in local storage.");
+          }
+      }
+
+      function RenderFlatpickr(){
+          var dateField = $('#dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+          });
+        var fdateField = $('#f-dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+        });
+
+        $("#dateField").on("change", function() {
+            if(DateTravel.val()){
+                $(".rangeTravel").prop("disabled", true);
+            }
+            else{
+                $(".rangeTravel").prop("disabled", false);
+            } 
+          });
+
+        $(".rangeTravel").on("change", function() {
+            if(RangeTravel.val()){
+                $("#dateField").prop("disabled", true);
+            }
+            else{
+                $("#dateField").prop("disabled", false);
+            } 
+          });
+      }
+
+      function incoming_out(selected_items){
             Swal.fire({
                 title: 'Date out, Are you sure?',
                 text: "You won't be able to revert this!",
@@ -1014,14 +1398,6 @@
               }
               
             });
-
-
-
-
-            
-
-
-            
     })
 </script>
 {% endblock footer_scripts %}
