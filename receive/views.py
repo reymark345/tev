@@ -101,101 +101,7 @@ def search_list(request):
     
     
     
-def tracking_load(request):
-    total = 0
-    finance_database_alias = 'finance'
 
-    query = """
-        SELECT code,first_name,middle_name,last_name,date_travel,ti.status,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no FROM tev_incoming AS ti 
-        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        WHERE ti.status IN (1, 2, 4, 5 ,6, 7)
-        OR (ti.status = 3 AND 
-            (
-                SELECT COUNT(*)
-                FROM tev_incoming
-                WHERE code = ti.code
-            ) = 1
-        );
-        """
-    with connection.cursor() as cursor:
-        cursor.execute(query)
-        results = cursor.fetchall()
-        
-    column_names = ['code', 'first_name','middle_name','last_name', 'date_travel','status','original_amount', 'final_amount', 'incoming_in', 'incoming_out', 'purpose','dv_no']
-    finance_data = []
-
-    for finance_row in results:
-        finance_dict = dict(zip(column_names, finance_row))
-        finance_data.append(finance_dict)
-    
-    data = []
-    
-    total = len(finance_data)
-    _start = request.GET.get('start')
-    _length = request.GET.get('length')
-    if _start and _length:
-        start = int(_start)
-        length = int(_length)
-        page = math.ceil(start / length) + 1
-        per_page = length
-        finance_data = finance_data[start:start + length]
-
-    for row in finance_data:
-        amt_certified = ''
-        amt_journal = ''
-        amt_budget = ''
-        amt_check = ''
-        if row['dv_no']:
-            
-            finance_query = """
-                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount
-                FROM transactions AS ts
-                LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
-            """
-            with connections[finance_database_alias].cursor() as cursor2:
-                cursor2.execute(finance_query, (row['dv_no'],))
-                finance_results = cursor2.fetchall()
-
-            if finance_results:
-                
-                amt_certified = finance_results[0][1]
-                amt_journal = finance_results[0][2]
-                amt_budget = finance_results[0][3]
-                amt_check = finance_results[0][4]
-                
-        first_name = row['first_name'] if row['first_name'] else ''
-        middle_name = row['middle_name'] if row['middle_name'] else ''
-        last_name = row['last_name'] if row['last_name'] else ''
-        
-        emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
-        
-        item = {
-            'code': row['code'],
-            'full_name': emp_fullname,
-            'date_travel': row['date_travel'],
-            'status': row['status'],
-            'original_amount': row['original_amount'],
-            'final_amount': row['final_amount'],
-            'incoming_in': row['incoming_in'],
-            'incoming_out': row['incoming_out'],
-            'purpose': row['purpose'],
-            'dv_no': row['dv_no'],
-            'amt_certified': amt_certified,
-            'amt_journal': amt_journal,
-            'amt_budget': amt_budget,
-            'amt_check': amt_check
-        }
-        data.append(item)
-        
-    response = {
-        'data': data,
-        'page': page,
-        'per_page': per_page,
-        'recordsTotal': total,
-        'recordsFiltered': total,
-    }
-    return JsonResponse(response)
 
 def item_load(request):
     _search = request.GET.get('search[value]')
@@ -505,14 +411,6 @@ def item_add(request):
             system_config.save()
 
         return JsonResponse({'data': 'success', 'g_code': g_code})
-
-
-@csrf_exempt
-def tracking(request):
-    context = {
-		'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-	}
-    return render(request, 'receive/tracking.html', context)
 
 @csrf_exempt
 def out_pending_tev(request):

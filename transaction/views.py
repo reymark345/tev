@@ -654,42 +654,14 @@ def update_box_list(request):
 
 @csrf_exempt
 def delete_box_list(request):
-    total_amount = 0
     incoming_id = request.POST.get('emp_id')
-    amount = request.POST.get('amount')
-    purpose = request.POST.get('purpose')
-    charges = request.POST.get('charges')
     dv_no = request.POST.get('dv_number')
     
-    
+    deleteBridge, _ = TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
     delete, _ = TevIncoming.objects.filter(id=incoming_id).delete()
-    
-    query = """
-        SELECT final_amount FROM tev_incoming AS ti 
-        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        WHERE ti.status IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
-    """
 
-    with connection.cursor() as cursor:
-        cursor.execute(query, (dv_no,))
-        results = cursor.fetchall()
-        
-    column_names = ['final_amount']
-    data_result = []
-
-    for finance_row in results:
-        finance_dict = dict(zip(column_names, finance_row))
-        data_result.append(finance_dict)
-        
-    for row in data_result:
-        final_amount = float(row['final_amount'])
-        total_amount += final_amount
-    
-    
     response = {
-        'data': 'success',
-        'total_amount':total_amount
+        'data': 'success'
     }
     return JsonResponse(response)
 
@@ -762,7 +734,7 @@ def add_existing_record(request):
     user_id = request.session.get('user_id', 0)
     travel_date = request.POST.get('DateTravel')
     range_travel = request.POST.get('RangeTravel')
-    outgoing_id = request.POST.get('idd')
+    outgoing_id = request.POST.get('FOutgoingId')
     g_code = generate_code()
 
 

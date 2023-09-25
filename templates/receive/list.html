@@ -709,6 +709,7 @@
                             data: form_data,
                         }).done(function (data) {
                             if (data.data == 'success') {
+                                dateField.clear();
 
                                 let code = data.g_code;
                                 if (code){

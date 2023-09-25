@@ -159,6 +159,7 @@
         let selected_tev = [];
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
+            Charges = jQuery(document.querySelector('[name="Charges"]')),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
@@ -168,6 +169,7 @@
             DvNumber = jQuery(document.querySelector('[name="DvNumber"]')),
             Cluster = jQuery(document.querySelector('[name="Cluster"]')),
             Division = jQuery(document.querySelector('[name="Division"]'));
+            
 
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
@@ -314,9 +316,6 @@
                         }
                     }
                 },
-
-
-     
             ],
             drawCallback: function (settings) {
                 $('.item-edit').on('click', function () {
@@ -353,18 +352,10 @@
                     })
                 }),
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
-                    // Do something when a checkbox in the table body is changed...
                 });
 
                 $('#check-all').change(function () {
-
-                    // Get the checked state of the "check-all" checkbox
                     var isChecked = $(this).is(':checked');
-        
-                    // Set the checked state of all checkboxes in the table body
-
-                    //$('#tbl-items tbody input[type="checkbox"][id="checkbox_data"]').prop('checked', isChecked);
-
                     $('.checkbox_data').prop('checked', isChecked).trigger('change');
                 });
 
@@ -386,6 +377,7 @@
                         $("#correctness_remarks").val(value);
                     })
                 });
+
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
@@ -835,14 +827,25 @@
             });
             }
 
-        if (EmployeeName.length) {
-            EmployeeName.wrap('<div class="position-relative"></div>')
-            EmployeeName.select2({
-                placeholder: 'Choose employee',
-                dropdownParent: EmployeeName.parent(),
+
+
+        if (Cluster.length) {
+            Cluster.wrap('<div class="position-relative"></div>')
+            Cluster.select2({
+                placeholder: 'Choose Cluster',
+                dropdownParent: Cluster.parent(),
                 allowClear: true,
             })
         }
+        if (Division.length) {
+            Division.wrap('<div class="position-relative"></div>')
+            Division.select2({
+                placeholder: 'Choose Division',
+                dropdownParent: Division.parent(),
+                allowClear: true,
+            })
+        }
+        
     })
 </script>
 {% endblock footer_scripts %}

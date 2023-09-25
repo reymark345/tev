@@ -318,6 +318,7 @@
             name="RangeTravel"
             placeholder="YYYY-MM-DD to YYYY-MM-DD"
             id="flatpickr-range"
+            autocomplete="off"
           />
         </div>
 
@@ -393,6 +394,14 @@
             name="FAccountNumber"
             class="form-control"
             placeholder="Account Number"
+            />
+
+            <input
+            type="hidden"
+            id="f-outgoing-id"
+            name="FOutgoingId"
+            class="form-control"
+            placeholder="Outgoing Id"
             />
       
   
@@ -664,137 +673,168 @@
 
               $('body').on('click', '.item-delete', function () {
                 let emp_id = $(this).attr('id');
-                let amount = $(this).closest('tr').find('.form-control.emp-amount').val();
-
-                $.ajax({
-                  type: 'POST',
-                  url: "{% url 'delete-box-list' %}",
-                  data:{
-                      emp_id: emp_id,
-                      amount:amount,
-                      dv_number: dv_number
+                Swal.fire({
+                  title: 'Are you sure?',
+                  text: "You won't be able to revert this!",
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Yes, Delete it!',
+                  customClass: {
+                      confirmButton: 'btn btn-primary me-3',
+                      cancelButton: 'btn btn-label-secondary',
+                  },
+                  buttonsStyling: false,
+              }).then(function (result) {
+                  if (result.value) {
+                      $.ajax({
+                          type: 'POST',
+                          url: "{% url 'delete-box-list' %}",
+                          data:{
+                            emp_id: emp_id,
+                            dv_number: dv_number
+                        }
+                      }).done(function (data) {
+                        $('#update-transaction').modal('hide');
+                          if (data.data == 'success') {
+                              Swal.fire({
+                                  title: '<strong>TEV Code <u>'+dv_number+'</u></strong>',
+                                  icon: 'info',
+                                  html:
+                                    'Successfully <b>Deleted!</b>',
+                                  showCloseButton: true,
+                                  showCancelButton: false,
+                                  focusConfirm: false,
+                                  confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                  confirmButtonAriaLabel: 'Thumbs up, great!',
+                                  customClass: {
+                                    confirmButton: 'btn btn-primary me-3'
+                                  },
+                                  buttonsStyling: false
+                                });
+                          } else {
+                              Swal.fire({
+                                  icon: 'error',
+                                  title: 'Error saving!',
+                                  text: data.message,
+                                  customClass: {
+                                      confirmButton: 'btn btn-success',
+                                  },
+                              })
+                          }
+                      })
                   }
-              }).done(function (data) {
-                let totalAmount = data.total_amount;
-
-                console.log(totalAmount);
-                console.log("totalAmount");
-                totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                $('#total-amount').text("₱ "+totalAmount);
-                toastr.success('Data Successfully Save!', 'Success', toast_options);
-
-
               })
             });
 
-                $('.view-data').on('click', function () {
+            $('.view-data').on('click', function () {
 
-                    const selectAllCheckbox = $(`#${tableId} #selectAll`);
-                    selectAllCheckbox.on('change', function () {
-                        const isChecked = this.checked;
-                        tbody.find(':checkbox').prop('checked', isChecked);
+                const selectAllCheckbox = $(`#${tableId} #selectAll`);
+                selectAllCheckbox.on('change', function () {
+                    const isChecked = this.checked;
+                    tbody.find(':checkbox').prop('checked', isChecked);
+                });
+
+                let id = $(this).attr('id');
+                dv_no_id = id
+                
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'employee-dv' %}",
+                    data:{
+                        dv_id: id
+                    }
+                }).done(function (data) {
+                    console.log("data_TEST");
+                    console.log(data);
+                    dv_number = '';
+                    charges = '';
+                    outgoing_id = 0;
+                    dv_number = data.dv_number;
+                    charges = data.charges;
+                    outgoing_id = data.outgoing_id;
+                    $("#f-outgoing-id").val(data.outgoing_id)
+                    let is_print = data.is_print;
+                    tbody.empty();
+                    data.data.forEach(function (item) {
+                      const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                      let amountColumn = '';
+                      let editColumn = '';
+                      let deleteColumn = '';
+                      let purposeColumn = '';
+                      let chargesColumn = '';
+                      selectOptions = '';
+                      for (var i = 0; i < charges.length; i++) {
+                          var charge = charges[i];
+                          selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                      }
+                      if (is_print) {
+                        $(".create-new").prop("disabled", true);
+                        amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
+                        purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}" disabled></td>`;
+                        chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true" disabled>${selectOptions}</select></td>`;
+                        editColumn = `<a class="btn btn-sm btn-icon" id="${item.id}"><i class="text-primary ti ti-edit-off"></i></a>`;
+                        deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
+                    } else {
+                      $(".create-new").prop("disabled", false);
+                        amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                        purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+                        chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+                        editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                        deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                    }
+                      const row = `
+                          <tr>
+                              <td><input type="checkbox"></td>
+                              <td><span class="badge bg-label-primary">${item.code}</span></td>
+                              <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                              <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                              <td>${item.name}</td>
+                              ${amountColumn}
+                              ${purposeColumn}
+                              ${chargesColumn}
+                              <td>${editColumn}${deleteColumn}</td>
+                          </tr>
+                      `;
+                      tbody.append(row);
+                  });
+                  $('#emp-charges').html(selectOptions);
+                    let totalAmount = data.total_amount;
+                    totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
                     });
+                    $('#total-amount').text("₱ "+totalAmount);
+                    $('#update-transaction').modal('show');
+                })
+            });
+            $('#tbl-items tbody input[type="checkbox"]').change(function () {
+                // Do something when a checkbox in the table body is changed...
+            });
 
-                    let id = $(this).attr('id');
-                    dv_no_id = id
-                    
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'employee-dv' %}",
-                        data:{
-                            dv_id: id
-                        }
-                    }).done(function (data) {
-                        console.log("data_TEST");
-                        console.log(data);
-                        dv_number = '';
-                        charges = '';
-                        outgoing_id = 0;
-                        dv_number = data.dv_number;
-                        charges = data.charges;
-                        outgoing_id = data.outgoing_id;
-                        let is_print = data.is_print;
-                        tbody.empty();
-                        data.data.forEach(function (item) {
-                          const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
-                          let amountColumn = '';
-                          let deleteColumn = '';
-                          if (is_print) {
-                            amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
-                            deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
-                        } else {
-                            amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
-                            deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
-                        }
-                          selectOptions = '';
-                          for (var i = 0; i < charges.length; i++) {
-                          
-                              var charge = charges[i];
-                              selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
-                          }
-                          const row = `
-                              <tr>
-                                  <td><input type="checkbox"></td>
-                                  <td><span class="badge bg-label-primary">${item.code}</span></td>
-                                  <td><span class="badge bg-label-warning">${item.account_no}</span></td>
-                                  <td><span class="badge bg-label-primary">${item.id_no}</span></td>
-                                  <td>${item.name}</td>
-                                  ${amountColumn}
-                                  <td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>
-                                  <td>
-                                    <select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">
-                                      ${selectOptions}
-                                    </select>
-                                  </td>
-                                  <td>
-                                      <a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>
-                                      ${deleteColumn}
-                                  </td>
-                              </tr>
-                          `;
-                          tbody.append(row);
-                      });
-                      $('#emp-charges').html(selectOptions);
-                        let totalAmount = data.total_amount;
-                        totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                        });
-                        $('#total-amount').text("₱ "+totalAmount);
-                        $('#update-transaction').modal('show');
-                    })
-                });
-                $('#tbl-items tbody input[type="checkbox"]').change(function () {
-                    // Do something when a checkbox in the table body is changed...
+            $('#check-all').change(function () {
+                // Get the checked state of the "check-all" checkbox
+                var isChecked = $(this).is(':checked');
+    
+                // Set the checked state of all checkboxes in the table body
+                $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
                 });
 
-                $('#check-all').change(function () {
-                    // Get the checked state of the "check-all" checkbox
-                    var isChecked = $(this).is(':checked');
-        
-                    // Set the checked state of all checkboxes in the table body
-                    $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
-                });
+            $('.preview-details').on('click', function () {
+                bx_id = $(this).data('id');
 
-                $('.preview-details').on('click', function () {
-                    bx_id = $(this).data('id');
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'preview-box-a' %}",
+                    data:{
+                        box_id: bx_id
+                    }
+                }).done(function (data) {
+                })
+            });
 
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'preview-box-a' %}",
-                        data:{
-                            box_id: bx_id
-                        }
-                    }).done(function (data) {
-                    })
-                });
-
-            },
-        })
-        $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
+        },
+     })
+    $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
 
 
         //newbox_a
@@ -928,6 +968,13 @@
                     className: 'create-new btn btn-primary',
                     action: function () {
                       const $selectElement = $('#f-employee-name');
+                      let currentDate = new Date();
+                      let month = currentDate.getMonth();
+                      let monthDate = new Date(currentDate.getFullYear(), month);
+                      let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
+                      let year = currentDate.getFullYear();
+                      let defaultPurposeValue = "TE for " + monthName + " " + year;
+
                       fetchEmployee($selectElement);
                       if (FEmployeeName.length) {
                         FEmployeeName.wrap('<div class="position-relative"></div>')
@@ -968,6 +1015,10 @@
                       
                     $("#record-dv-number").text("DV # "+ dv_number);
                     $('#update-transaction').modal('hide');
+                    $("#f-purpose").val(defaultPurposeValue);
+                    $(".rangeTravel").val('');
+
+                    
                     $("#add-record").modal("show");
                     $('#f-employee-name').change(function() {
                       var selectedOption = $(this).find('option:selected');
@@ -1218,13 +1269,10 @@
             }).then(function (result) {
                 if (result.value) {
                     var form_data = $('#add-record-dv').serialize();
-                    var requestData = {
-                      idd: 1
-                  };
                     $.ajax({
                         type: 'POST',
                         url: "{% url 'add-existing-record' %}",
-                        data: {...form_data, ...requestData},
+                        data: form_data,
                     }).done(function (data) {
                         if (data.data == 'success') {
                             Swal.fire({
@@ -1247,7 +1295,7 @@
                             FinalAmount.val("");
                             FRemarks.val("");
                             FCharges.val("").trigger('change');
-                            FPurpose.val("");
+                            clearFlatpickr();
                         } else {
                             Swal.fire({
                               icon: 'error',
@@ -1290,6 +1338,19 @@
           } else {
               console.log("No employee data found in local storage.");
           }
+      }
+
+      function clearFlatpickr(){
+        var dateField = $('#dateField').flatpickr({
+          mode: 'multiple',
+          allowInput: true,
+          dateFormat: 'd-m-Y',
+          locale: {
+              'firstDayOfWeek': 1 // start week on Monday
+          },
+        });
+        
+        dateField.clear();;
       }
 
       function RenderFlatpickr(){
