@@ -16,11 +16,11 @@ import math
 from django.core.serializers import serialize
 from django.forms.models import model_to_dict
 import requests
-from django.db.models import Q, F, Exists, OuterRef
 from django.db import connections
 from datetime import datetime,timedelta
 from receive.filters import UserFilter
 import datetime as date_time
+from django.db.models import Subquery, Max, F, Q, Exists, OuterRef
 
 
 
@@ -46,33 +46,15 @@ def tracking_list(request):
     
 def tracking_load(request):
     total = 0
-    finance_database_alias = 'finance'
-
-    query = """
-        SELECT code,first_name,middle_name,last_name,date_travel,ti.status,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no FROM tev_incoming AS ti 
-        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        WHERE ti.status IN (1, 2, 4, 5 ,6, 7)
-        OR (ti.status = 3 AND 
-            (
-                SELECT COUNT(*)
-                FROM tev_incoming
-                WHERE code = ti.code
-            ) = 1
-        );
-        """
-    with connection.cursor() as cursor:
-        cursor.execute(query)
-        results = cursor.fetchall()
-        
-    column_names = ['code', 'first_name','middle_name','last_name', 'date_travel','status','original_amount', 'final_amount', 'incoming_in', 'incoming_out', 'purpose','dv_no']
-    finance_data = []
-
-    for finance_row in results:
-        finance_dict = dict(zip(column_names, finance_row))
-        finance_data.append(finance_dict)
-    
     data = []
+    finance_database_alias = 'finance'
+    latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
+    finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
+        'code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status',
+        'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
+        purposes=F('tevbridge__purpose'),
+        dv_no=F('tevbridge__tev_outgoing__dv_no')
+    )
     
     total = len(finance_data)
     _start = request.GET.get('start')
@@ -122,7 +104,7 @@ def tracking_load(request):
             'final_amount': row['final_amount'],
             'incoming_in': row['incoming_in'],
             'incoming_out': row['incoming_out'],
-            'purpose': row['purpose'],
+            'purpose': row['purposes'],
             'dv_no': row['dv_no'],
             'amt_certified': amt_certified,
             'amt_journal': amt_journal,

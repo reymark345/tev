@@ -131,27 +131,37 @@ def item_load(request):
     #     )
     # );
     # """
+    # query = """
+    # SELECT t1.*
+    # FROM tev_incoming t1
+    # WHERE t1.status = 1
+    # OR (
+    #     t1.status = 3
+    #     AND t1.slashed_out IS NOT NULL
+    #     AND NOT EXISTS (
+    #         SELECT 1
+    #         FROM tev_incoming t2
+    #         WHERE t2.code = t1.code
+    #         AND t2.status IN (1, 2)
+    #     )
+    #     AND NOT EXISTS (
+    #         SELECT 1
+    #         FROM tev_incoming t3
+    #         WHERE t3.code = t1.code
+    #         AND t3.status = 3
+    #         AND t3.slashed_out > t1.slashed_out
+    #     )
+    # );
+    # """
+
     query = """
-    SELECT t1.*
-    FROM tev_incoming t1
-    WHERE t1.status = 1
-    OR (
-        t1.status = 3
-        AND t1.slashed_out IS NOT NULL
-        AND NOT EXISTS (
-            SELECT 1
-            FROM tev_incoming t2
-            WHERE t2.code = t1.code
-            AND t2.status IN (1, 2)
-        )
-        AND NOT EXISTS (
-            SELECT 1
-            FROM tev_incoming t3
-            WHERE t3.code = t1.code
-            AND t3.status = 3
-            AND t3.slashed_out > t1.slashed_out
-        )
-    );
+        SELECT *
+        FROM tev_incoming t1
+        WHERE (code, id) IN (
+            SELECT DISTINCT code, MAX(id)
+            FROM tev_incoming
+            GROUP BY code
+        )AND (`status` IN (3) AND slashed_out IS NOT NULL) OR (`status` IN (1) AND slashed_out IS NULL);
     """
 
     with connection.cursor() as cursor:

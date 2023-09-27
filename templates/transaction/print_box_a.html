@@ -85,6 +85,10 @@
         border:1.8px solid;
         font-size: 12px;
       }
+      .coloredrow {
+        background-color: rgb(158, 198, 255);
+        -webkit-print-color-adjust: exact;
+      }
       .align-u-left {
       text-align: left;
       vertical-align: top;
@@ -131,7 +135,8 @@
           font-size: 14px;
         }
         .dvnumber {
-          background-color: #c6e0b4 !important; /* Use !important to ensure it's applied */
+          background-color: #c6e0b4 !important;
+          -webkit-print-color-adjust: exact;
           color: black; /* Make sure text remains readable */
           border: 1.8px solid;
           font-size: 10px;
@@ -139,6 +144,9 @@
 
         .container-body2,.container-body3,.container-body4 {
           page-break-before: always;
+        }
+        .footer {
+          margin-top: 99% !important;
         }
       }
      .innerTable{
@@ -159,9 +167,8 @@
       border: 0;
      }
 
-     .footer {
-      margin-top: 95%;
-      
+    .footer {
+      margin-top: 99%;
     }
 
 
@@ -888,8 +895,8 @@
       
                       </tr>
                       <tr>
-                        <td style="font-size: 15px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
-                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border"><b>Sum of AMOUNT</b></td>
+                        <td style="font-size: 15px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border coloredrow"><b>CHARGE</b></td>
+                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border coloredrow"><b>Sum of AMOUNT</b></td>
                       </tr>
       
                       {% for emp in charges_list %}
@@ -905,8 +912,8 @@
                       
       
                       <tr>
-                        <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
-                        <td style="padding: 0;background-color:rgb(158, 198, 255); text-align: right;"  class="no-border" colspan="2"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
+                        <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border coloredrow"><b>GRAND Total</b></td>
+                        <td style="padding: 0;background-color:rgb(158, 198, 255); text-align: right;"  class="no-border coloredrow" colspan="2"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
                       </tr>
                     </tbody>
                   </table>
@@ -1009,8 +1016,8 @@
       
                       </tr>
                       <tr>
-                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0;" class="no-border"><b>CHARGE</b></td>
-                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border"><b>Sum of AMOUNT</b></td>
+                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0;" class="no-border coloredrow"><b>CHARGE</b></td>
+                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border coloredrow"><b>Sum of AMOUNT</b></td>
                       </tr>
       
                       {% for emp in charges_list %}
@@ -1026,8 +1033,8 @@
                       
       
                       <tr>
-                        <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border"><b>GRAND Total</b></td>
-                        <td style="padding: 0;background-color:rgb(158, 198, 255); text-align: right;"  class="no-border" colspan="2"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
+                        <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border coloredrow"><b>GRAND Total</b></td>
+                        <td style="padding: 0;background-color:rgb(158, 198, 255); text-align: right;"  class="no-border coloredrow" colspan="2"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
                       </tr>
                     </tbody>
                   </table>

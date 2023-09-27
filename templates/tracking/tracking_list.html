@@ -16,7 +16,7 @@
                             <th>Dv No</th>
                             <th>Employee Name</th>
                             <th>Date Travel</th>
-                            <th>Purpose</th>
+                            <th>Amt. Certified</th>
                             <th>Incoming</th>
                             <th>Checking</th>
                             <th>Payroll</th>
@@ -121,7 +121,7 @@
                 { data: 'dv_no' },
                 { data: 'full_name' },
                 { data: 'date_travel'},
-                { data: 'purpose'},
+                { data: 'final_amount'},
                 { data: 'status'},
                 { data: 'status'},
                 { data: 'status' },
@@ -172,13 +172,21 @@
                     return result;
                 },
             },
-
             {
                 targets: 4,
-                render: function (data) {
-                    return data
+                render: function(data) {
+                    var floatValue = parseFloat(data);
+                    if (floatValue !== 0) {
+                        var formattedValue = floatValue.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                        return '<span class="badge bg-label-primary">₱' +formattedValue+'</span>';
+                    } else {
+                        return "";
+                    }
                 },
-            },
+            },            
             {
                 targets: 5,
                 render: function (data) {
@@ -316,7 +324,7 @@
                 },
             ],
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
 
     })
 </script>

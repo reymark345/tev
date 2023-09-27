@@ -807,6 +807,7 @@
         
 
         function fetchEmployee($selectElement) {
+            $selectElement.empty();
             const employees = JSON.parse(localStorage.getItem('employees'));
             if (employees) {
                 $.each(employees, function (index, employee) {

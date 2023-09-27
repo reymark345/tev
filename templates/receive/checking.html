@@ -373,6 +373,16 @@
                     }).done(function (data) {
                         let value = data.data.remarks;
                         let final_amount = data.data.final_amount;
+                        if(final_amount && final_amount !="0E-10"){
+                            final_amount = data.data.final_amount;
+                            console.log("halaa1");
+                            console.log(final_amount);
+                        }
+                        else{
+                            final_amount = data.data.original_amount;
+                            console.log("halaa2");
+                            console.log(final_amount);
+                        }
                         let floatvalue = parseFloat(final_amount);
                         let convertedAmount = floatvalue.toFixed(2);
                         if (convertedAmount === "0.00") {convertedAmount =""} 
