@@ -255,7 +255,7 @@
                           <i class="ti ti-microphone cursor-pointer text-to-speech-toggle"></i>
                         </span>
                        
-                      </div>
+                    </div>
                 </div>
             </div>
             
@@ -307,7 +307,7 @@
             } 
           });
 
-          $(".rangeTravel").on("change", function() {
+        $(".rangeTravel").on("change", function() {
             if(RangeTravel.val()){
                 $("#dateField").prop("disabled", true);
             }
@@ -571,6 +571,14 @@
                                 DateTravel.prop("disabled", false);
                                 RangeTravel.prop("disabled", false);
                             }
+
+                            if (DateTravel){
+                                RangeTravel.prop("disabled", true);
+                            }
+                            else if(RangeTravel){
+                                DateTravel.prop("disabled", true);
+                            }
+
                             
                             HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
@@ -701,6 +709,7 @@
                             data: form_data,
                         }).done(function (data) {
                             if (data.data == 'success') {
+                                dateField.clear();
 
                                 let code = data.g_code;
                                 if (code){
@@ -798,6 +807,7 @@
         
 
         function fetchEmployee($selectElement) {
+            $selectElement.empty();
             const employees = JSON.parse(localStorage.getItem('employees'));
             if (employees) {
                 $.each(employees, function (index, employee) {

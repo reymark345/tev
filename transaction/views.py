@@ -9,8 +9,7 @@ from django.contrib import messages
 from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division)
 import json 
 from django.core import serializers
-import datetime 
-from datetime import date
+from datetime import date, datetime, timedelta
 from django.contrib.auth.hashers import make_password
 from django.db import IntegrityError
 import math
@@ -19,6 +18,8 @@ from django.forms.models import model_to_dict
 from urllib.parse import parse_qs
 from django.db import connections
 from django.db import IntegrityError, connection
+from django.db.models import Q, Max
+import datetime as date_time
 
 
 
@@ -108,7 +109,7 @@ def save_payroll(request):
         dv_number = formdata_dict.get('DvNumber', [None])[0]
         div_id = formdata_dict.get('Division', [None])[0]
         selected_tev = json.loads(request.POST.get('selected_item'))
-        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_name,box_b_in=datetime.datetime.now(),user_id=user_id, division_id = div_id)
+        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_name,box_b_in=date_time.datetime.now(),user_id=user_id, division_id = div_id)
         outgoing.save()
         latest_outgoing = TevOutgoing.objects.latest('id')
         for item in selected_tev:
@@ -311,11 +312,8 @@ def employee_dv(request):
     charges_list = []
     
     idd = request.POST.get('dv_id')
-    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','is_print').first()
-    
-    # charges = Charges.objects.filter().order_by('name')
+    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','is_print','id').first()
 
-    
     charges = Charges.objects.filter().order_by('name')
     for charge in charges:
         charge_data = {
@@ -323,14 +321,6 @@ def employee_dv(request):
             'name': charge.name
         }
         charges_list.append(charge_data)
-        
-    
-    # charges_list = [{'name': charge.name} for charge in charges]
-    
-    # charges_list = [{'id': charge.id, 'name': charge.name} for charge in charges]
-
-    # print("chargesTESTTT")
-    # print(charges_list)
     
     if dv_no is not None:
         dvno = dv_no['dv_no']
@@ -401,6 +391,7 @@ def employee_dv(request):
         'charges': charges_list,
         'is_print': dv_no['is_print'],
         'dv_number':dv_no['dv_no'],
+        'outgoing_id':dv_no['id'],
         'recordsTotal': total,
         'recordsFiltered': total,
         'total_amount':total_amount
@@ -663,42 +654,14 @@ def update_box_list(request):
 
 @csrf_exempt
 def delete_box_list(request):
-    total_amount = 0
     incoming_id = request.POST.get('emp_id')
-    amount = request.POST.get('amount')
-    purpose = request.POST.get('purpose')
-    charges = request.POST.get('charges')
     dv_no = request.POST.get('dv_number')
     
-    
+    deleteBridge, _ = TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
     delete, _ = TevIncoming.objects.filter(id=incoming_id).delete()
-    
-    query = """
-        SELECT final_amount FROM tev_incoming AS ti 
-        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        WHERE ti.status IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
-    """
 
-    with connection.cursor() as cursor:
-        cursor.execute(query, (dv_no,))
-        results = cursor.fetchall()
-        
-    column_names = ['final_amount']
-    data_result = []
-
-    for finance_row in results:
-        finance_dict = dict(zip(column_names, finance_row))
-        data_result.append(finance_dict)
-        
-    for row in data_result:
-        final_amount = float(row['final_amount'])
-        total_amount += final_amount
-    
-    
     response = {
-        'data': 'success',
-        'total_amount':total_amount
+        'data': 'success'
     }
     return JsonResponse(response)
 
@@ -717,7 +680,7 @@ def out_box_a(request):
     TevIncoming.objects.filter(id__in=ids).update(status=6)
     
     for item_id  in out_list:
-        box_b = TevOutgoing.objects.filter(id=item_id).update(status=6,box_b_out=datetime.datetime.now(), out_by = user_id)
+        box_b = TevOutgoing.objects.filter(id=item_id).update(status=6,box_b_out=date_time.datetime.now(), out_by = user_id)
 
     
     return JsonResponse({'data': 'success'})
@@ -755,6 +718,81 @@ def addtev(request):
     tev_add.save()
 
     return JsonResponse({'data': 'success'})
+
+
+@csrf_exempt
+def add_existing_record(request):
+    fname = request.POST.get('FFirstName')
+    mname = request.POST.get('FMiddleName')
+    lname = request.POST.get('FLastname')
+    idno = request.POST.get('FIdNumber')
+    acctno = request.POST.get('FAccountNumber')
+    amount = request.POST.get('FinalAmount')
+    remarks = request.POST.get('FRemarks')
+    purpose = request.POST.get('FPurpose')
+    charges_id = request.POST.get('FCharges')
+    user_id = request.session.get('user_id', 0)
+    travel_date = request.POST.get('DateTravel')
+    range_travel = request.POST.get('RangeTravel')
+    outgoing_id = request.POST.get('FOutgoingId')
+    g_code = generate_code()
+
+
+    print("travel_datesssss")
+    print(outgoing_id)
+
+    if travel_date:
+        travel_date = request.POST.get('DateTravel')
+    else :
+        start_date_str, end_date_str = range_travel.split(' to ')
+        
+        start_date = datetime.strptime(start_date_str.strip(), '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str.strip(), '%Y-%m-%d')
+        
+        formatted_dates = []
+
+        current_date = start_date
+        while current_date <= end_date:
+            formatted_dates.append(current_date.strftime('%d-%m-%Y'))
+            current_date += timedelta(days=1)
+
+        formatted_dates_str = ', '.join(formatted_dates)
+        travel_date = formatted_dates_str
+
+    duplicate_travel = []
+    individual_dates = travel_date.split(',')
+    cleaned_dates = ','.join(date.strip() for date in individual_dates)
+
+    for date in individual_dates:
+        cleaned_date = date.strip()
+
+        results = TevIncoming.objects.filter(
+            Q(first_name=fname) & Q(middle_name=mname) & Q(last_name=lname) &
+            Q(date_travel__contains=cleaned_date)
+        ).values('date_travel')
+
+        if results:
+            duplicate_travel.append(cleaned_date)
+
+    if duplicate_travel:
+        return JsonResponse({'data': 'error', 'message': duplicate_travel})
+    else:
+        max_id = TevIncoming.objects.aggregate(Max('id'))['id__max']
+        if max_id is not None:
+            max_id += 1
+
+        tev_add = TevIncoming(code=g_code,first_name=fname,middle_name = mname, last_name = lname, id_no = idno, account_no = acctno,date_travel = cleaned_dates,original_amount=amount,final_amount = amount,incoming_out = date_time.datetime.now(),slashed_out = date_time.datetime.now(),remarks=remarks,status = 5,user_id=user_id)
+        tev_add.save()
+
+        bridge = TevBridge(purpose = purpose,charges_id = charges_id, tev_incoming_id = max_id, tev_outgoing_id = outgoing_id)
+        bridge.save()
+
+        if tev_add.id:
+            system_config = SystemConfiguration.objects.first()
+            system_config.transaction_code = g_code
+            system_config.save()
+        return JsonResponse({'data': 'success', 'g_code': g_code})
+
 
 
 

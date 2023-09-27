@@ -6,6 +6,11 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from main.models import (RoleDetails, StaffDetails)
+
+
+def get_user_details(request):
+    return StaffDetails.objects.filter(user_id=request.user.id).first()
 
 
 def index(request):
@@ -37,8 +42,17 @@ def login(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    return render(request, 'dashboard.html')
-
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+   
+    user_details = get_user_details(request)
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    context = {
+        'role_permission' : role.role_name,
+    }
+    if role.role_name in allowed_roles:
+        return render(request, 'dashboard.html',context)
+    else:
+        return redirect("travel-history")
 
 @csrf_exempt
 def logout(request):

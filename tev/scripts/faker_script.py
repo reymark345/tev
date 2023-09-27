@@ -5,7 +5,7 @@ import numpy as np
 fake = Faker()
 Faker.seed(313)
 middle_name = ['N','A','A','B']
-role_details = ['Admin','Incoming staff','Validating staff','Payroll staff', 'Certified staff']
+role_details = ['Admin','Incoming staff','Validating staff','Payroll staff', 'Certified staff','End user']
 cluster = ['Cluster 01','Cluster 02','Cluster 03','Cluster 04', 'Cluster 05', 'Cluster 06', 'Cluster 07']
 charges = ['AICS','Socpen','Disaster','CCAM', '4PS']
 division = ['Finance Management Division','Pantawid','DRMD','HRRMD', 'PSD', 'PPD','ORD']

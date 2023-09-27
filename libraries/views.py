@@ -69,11 +69,14 @@ def division_update(request):
     division = request.POST.get('Division')
     acrym = request.POST.get('Acronym')
     divchief = request.POST.get('Chief')
+    chiefdesignate = request.POST.get('CDesignation')
+    apr = request.POST.get('Approval')
+    apvldesginate = request.POST.get('APDesignation')
 
     if Division.objects.filter(name=division).exclude(id=id):
         return JsonResponse({'data': 'error', 'message': 'Duplicate Division'})
     else:
-        Division.objects.filter(id=id).update(name=division, acronym = acrym, chief = divchief)
+        Division.objects.filter(id=id).update(name=division, acronym = acrym, chief = divchief, c_designation = chiefdesignate, approval = apr, ap_designation =apvldesginate)
         return JsonResponse({'data': 'success'})
     
     

@@ -105,7 +105,11 @@
 
                     <div class="menu-inner-shadow"></div>
                     {% with request.resolver_match.url_name as url_name %}
+
+                   
+
                     <ul class="menu-inner py-1">
+                        {% if role_permission != 'End user' %}
                         <!-- Dashboard -->
                         <li class="menu-item {% if url_name == 'dashboard' %}active{% endif %}">
                             <a href="{% url 'dashboard' %}" class="menu-link">
@@ -114,6 +118,8 @@
                             </a>
                         </li>
 
+                        {% endif %}
+                        {% if role_permission != 'End user' %}
                         <!-- Inventory -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Received Document</span>
@@ -132,15 +138,34 @@
                                 <div data-i18n="Checking">Checking</div>
                             </a>
                         </li>
-                        <li class="menu-item {% if url_name == 'receive-tracking' %}active{% endif %}">
-                            <a href="{% url 'receive-tracking' %}" class="menu-link">
-                                <i class="menu-icon tf-icons ti ti-checkbox"></i>
-                                <div data-i18n="Tracking">Tracking</div>
+                        {% endif %}
+                       
+                       
+                        <!-- Tracking -->
+                        <li class="menu-header small text-uppercase">
+                            <span class="menu-header-text">Tracking</span>
+                        </li>
+                        {% if role_permission != 'End user' %}
+                       
+                        <li class="menu-item {% if url_name == 'tracking-list' %}active{% endif %}" >
+                            <a href="{% url 'tracking-list' %}" class="menu-link">
+                               
+                                <i class="menu-icon tf-icons ti-solid fa-inbox"></i>
+                                <div data-i18n="List">List</div>
                             </a>
                         </li>
+                        {% endif %}
 
+                        <li class="menu-item {% if url_name == 'travel-history' %}active{% endif %}">
+                            <a href="{% url 'travel-history' %}" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
+                                <div data-i18n="Travel History">Travel History</div>
+                            </a>
+                        </li>
+                       
 
-                        <!-- Management -->
+                        {% if role_permission != 'End user' %}
+                        <!-- Transaction -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Transaction</span>
                         </li>
@@ -157,8 +182,9 @@
                                 <div data-i18n="Box A">Box A</div>
                             </a>
                         </li>
-                      
+                        {% endif %}
 
+                        {% if role_permission != 'End user' %}
                         <!-- Libraries -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Libraries</span>
@@ -178,15 +204,16 @@
                                 <div data-i18n="Division">Division</div>
                             </a>
                         </li>
+                        {% endif %}
                         
-
+                        {% if role_permission == 'Admin' %}
                         <!-- Admin -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Admin</span>
                         </li>
 
-                        <li class="menu-item">
-                            <a href="app-email.html" class="menu-link">
+                        <li class="menu-item {% if url_name == 'users' %}active{% endif %}">
+                            <a href="{% url 'users' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti ti-settings"></i>
                                 <div data-i18n="Users">Users</div>
                             </a>
@@ -205,6 +232,7 @@
                             </a>
                         </li>
                     </ul>
+                    {% endif %}
                     {% endwith %}
                 </aside>
 

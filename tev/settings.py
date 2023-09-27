@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'main',
     'receive',
+    'tracking',
     'transaction',
     'libraries',
     'django_filters',
