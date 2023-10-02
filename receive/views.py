@@ -114,45 +114,6 @@ def item_load(request):
     
     print("_search1111")
     print(_search)
-    
-    
-    # query = """
-    # SELECT t.*
-    # FROM tev_incoming t
-    # WHERE (
-    #     t.status = 1
-    #     OR (
-    #         t.status = 3 AND t.slashed_out IS NOT NULL AND NOT EXISTS (
-    #             SELECT 1
-    #             FROM tev_incoming t2
-    #             WHERE t2.code = t.code
-    #             AND t2.status IN (1, 2)
-    #         )
-    #     )
-    # );
-    # """
-    # query = """
-    # SELECT t1.*
-    # FROM tev_incoming t1
-    # WHERE t1.status = 1
-    # OR (
-    #     t1.status = 3
-    #     AND t1.slashed_out IS NOT NULL
-    #     AND NOT EXISTS (
-    #         SELECT 1
-    #         FROM tev_incoming t2
-    #         WHERE t2.code = t1.code
-    #         AND t2.status IN (1, 2)
-    #     )
-    #     AND NOT EXISTS (
-    #         SELECT 1
-    #         FROM tev_incoming t3
-    #         WHERE t3.code = t1.code
-    #         AND t3.status = 3
-    #         AND t3.slashed_out > t1.slashed_out
-    #     )
-    # );
-    # """
 
     query = """
         SELECT *
@@ -161,7 +122,7 @@ def item_load(request):
             SELECT DISTINCT code, MAX(id)
             FROM tev_incoming
             GROUP BY code
-        )AND (`status` IN (3) AND slashed_out IS NOT NULL) OR (`status` IN (1) AND slashed_out IS NULL);
+        )AND (`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL);
     """
 
     with connection.cursor() as cursor:
@@ -205,7 +166,7 @@ def item_load(request):
             'incoming_out': item['incoming_out'],
             'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
-            'status': item['status'],
+            'status': item['status_id'],
             'user_id': full_name
         }
 
@@ -239,9 +200,9 @@ def checking_load(request):
     query = """
         SELECT t.*
         FROM tev_incoming t
-        WHERE t.status = 2
-            OR t.status = 7
-            OR (t.status = 3 AND t.slashed_out IS NULL
+        WHERE t.status_id = 2
+            OR t.status_id = 7
+            OR (t.status_id = 3 AND t.slashed_out IS NULL
         );
     """
 
@@ -266,7 +227,7 @@ def checking_load(request):
 
     for row in results:
 
-        userData = AuthUser.objects.filter(id=row[16])
+        userData = AuthUser.objects.filter(id=row[14])
         full_name = userData[0].first_name + ' ' + userData[0].last_name
         first_name = row[2] if row[2] else ''
         middle_name = row[3] if row[3] else ''
@@ -451,10 +412,10 @@ def out_checking_tev(request):
         tev_update = TevIncoming.objects.filter(id=item_id).first()  
 
         if tev_update:
-            if tev_update.status == 3:
+            if tev_update.status_id == 3:
                 tev_update.slashed_out = date_time.datetime.now()
             else:
-                tev_update.status = 4
+                tev_update.status_id = 4
             tev_update.save()
         else:
             pass 
