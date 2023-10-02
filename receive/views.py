@@ -98,40 +98,39 @@ def search_list(request):
     
     return JsonResponse({'data': "success"})
     
-    
-    
-    
-
-
 def item_load(request):
     _search = request.GET.get('search[value]')
-    _start = request.GET.get('start')
-    _length = request.GET.get('length')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
-    
-    
-    print("_search1111")
-    print(_search)
-
+    status_txt = ''
+    status_txt = '1' if _search == 'pending' else '3'
     query = """
-        SELECT *
-        FROM tev_incoming t1
-        WHERE (code, id) IN (
-            SELECT DISTINCT code, MAX(id)
-            FROM tev_incoming
-            GROUP BY code
-        )AND (`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL);
+    SELECT *
+    FROM tev_incoming t1
+    WHERE (code, id) IN (
+        SELECT DISTINCT code, MAX(id)
+        FROM tev_incoming
+        GROUP BY code
+    ) 
+    AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+    AND (code LIKE %s
+        OR first_name LIKE %s
+        OR last_name LIKE %s
+            OR id_no LIKE %s
+            OR account_no LIKE %s
+            OR date_travel LIKE %s
+            OR original_amount LIKE %s
+            OR final_amount LIKE %s
+            OR status_id LIKE %s
+    );
     """
-
     with connection.cursor() as cursor:
-        cursor.execute(query)
+        cursor.execute(query, ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%'])
         columns = [col[0] for col in cursor.description]
         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     total = len(results)
-
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     if _start and _length:
@@ -184,34 +183,45 @@ def item_load(request):
 
 
 def checking_load(request):
-    # query = """
-    #     SELECT t.*
-    #     FROM tev_incoming t
-    #     WHERE t.status = 2
-    #         OR t.status = 7
-    #         OR (t.status = 3 AND t.slashed_out IS NULL AND (
-    #             SELECT COUNT(*)
-    #             FROM tev_incoming
-    #             WHERE code = t.code
-    #         ) = 1
-    #     );
-    # """
-    
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
+    status_txt = ''
+    if status_txt == "for checking":
+        status_txt = '%'+'2'+'%'
+    elif status_txt == "approved":
+        status_txt = '%'+'7'+'%'
+    elif status_txt == "returned":
+        status_txt = '%'+'3'+'%'
+
+    search_pattern = '%' + _search + '%'
+
     query = """
         SELECT t.*
         FROM tev_incoming t
-        WHERE t.status_id = 2
-            OR t.status_id = 7
-            OR (t.status_id = 3 AND t.slashed_out IS NULL
+        WHERE (t.status_id = 2
+                OR t.status_id = 7
+                OR (t.status_id = 3 AND t.slashed_out IS NULL)
+        )
+        AND (code LIKE %s
+        OR first_name LIKE %s
+        OR last_name LIKE %s
+        OR id_no LIKE %s
+        OR account_no LIKE %s
+        OR date_travel LIKE %s
+        OR original_amount LIKE %s
+        OR final_amount LIKE %s
+        OR remarks LIKE %s
+        OR status_id LIKE %s
         );
-    """
+"""
 
     with connection.cursor() as cursor:
-        cursor.execute(query)
+        cursor.execute(query, [search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern,search_pattern,status_txt])
         results = cursor.fetchall()
 
     total = len(results)
-
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     
