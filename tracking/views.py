@@ -48,6 +48,11 @@ def tracking_load(request):
     total = 0
     data = []
     finance_database_alias = 'finance'
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
+
     latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
     finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
         'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',

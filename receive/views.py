@@ -103,8 +103,69 @@ def item_load(request):
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
+
+    FIdNumber= request.GET.get('FIdNumber')
+    FTransactionCode= request.GET.get('FTransactionCode')
+    FDateTravel= request.GET.get('FDateTravel')
+    FIncomingIn= request.GET.get('FIncomingIn')
+    FSLashedOut= request.GET.get('FSLashedOut')
+    FOriginalAmount= request.GET.get('FOriginalAmount')
+    FFinalAmount= request.GET.get('FFinalAmount')
+    FAccountNumber= request.GET.get('FAccountNumber')
+    FIncomingBy= request.GET.get('FIncomingBy')
+    FFirstName= request.GET.get('FFirstName')
+    FMiddleName= request.GET.get('FMiddleName')
+    FLastName= request.GET.get('FLastName')
+
+
+    filters = {}
+
+
+    # if len(FTransactionCode) > 0:
+    #     filters['code__icontains'] = FTransactionCode
+
+    # if len(FDateTravel) > 0:
+    #     filters['date_travel__in'] = FDateTravel
+
+    # if len(FIdNumber) > 0:
+    #     filters['id_no__in'] = FIdNumber
+
+    # if len(FIncomingIn) > 0:
+    #     filters['incoming_in__in'] = FIncomingIn
+
+    # if len(FSLashedOut) > 0:
+    #     filters['slashed_out__in'] = FSLashedOut 
+
+    # if len(FOriginalAmount) > 0:
+    #     filters['original_amount__in'] = FOriginalAmount
+
+    # if len(FFinalAmount) > 0:
+    #     filters['final_amount__in'] = FFinalAmount
+
+    # if len(FAccountNumber) > 0:
+    #     filters['account_no__in'] = FAccountNumber
+
+    # if len(FIncomingBy) > 0:
+    #     filters['user_id__in'] = FIncomingBy
+
+    # if len(FFirstName) > 0:
+    #     filters['first_name__in'] = FFirstName
+
+    # if len(FMiddleName) > 0:
+    #     filters['middle_name__in'] = FMiddleName
+
+    # if len(FLastName) > 0:
+    #     filters['last_name__in'] = FLastName
+
+
     status_txt = ''
-    status_txt = '1' if _search == 'pending' else '3'
+    if _search in "returned":
+        status_txt = '3'
+    else:
+        status_txt = '1'
+
+
+
     query = """
     SELECT *
     FROM tev_incoming t1
@@ -117,20 +178,53 @@ def item_load(request):
     AND (code LIKE %s
         OR first_name LIKE %s
         OR last_name LIKE %s
-            OR id_no LIKE %s
-            OR account_no LIKE %s
-            OR date_travel LIKE %s
-            OR original_amount LIKE %s
-            OR final_amount LIKE %s
-            OR status_id LIKE %s
+        OR id_no LIKE %s
+        OR account_no LIKE %s
+        OR date_travel LIKE %s
+        OR original_amount LIKE %s
+        OR final_amount LIKE %s
+        OR status_id LIKE %s
     );
     """
+
+    params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%']
+
+    # with connection.cursor() as cursor:
+    #     cursor.execute(query, ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%'])
+    #     columns = [col[0] for col in cursor.description]
+    #     results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    if FTransactionCode:
+        query += "AND code LIKE %s "
+        params.append('%' + FTransactionCode + '%')
+
+    if FDateTravel:
+        query += "AND date_travel LIKE %s "
+        params.append('%' + FDateTravel + '%')
+
+    # if FFirstName:
+    #     query += "AND first_name LIKE %s "
+    #     params.append('%' + FFirstName + '%')
+
+    # if FMiddleName:
+    #     query += "AND middle_name LIKE %s "
+    #     params.append('%' + FMiddleName + '%')
+
+    # if FLastName:
+    #     query += "AND last_name LIKE %s "
+    #     params.append('%' + FLastName + '%')
+
+    query += ";"
+
     with connection.cursor() as cursor:
-        cursor.execute(query, ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%'])
+        cursor.execute(query, params)
         columns = [col[0] for col in cursor.description]
         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     total = len(results)
+
+    print("daottttna")
+    print(total)
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     if _start and _length:
@@ -299,21 +393,11 @@ def item_returned(request):
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
     remarks = request.POST.get('Remarks')
-    
     travel_date = request.POST.get('HDateTravel')
-    
-    
-    print(travel_date)
-    print("travel_date")
-    
-    
-    
     travel_date_stripped = travel_date.strip()
     travel_date_spaces = travel_date_stripped.replace(' ', '')
-    
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
-    
     tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
     return JsonResponse({'data': 'success'})

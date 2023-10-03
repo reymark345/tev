@@ -399,8 +399,24 @@ def employee_dv(request):
     return JsonResponse(response)
 
 
-def payroll_load(request):       
-    item_data = (TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by('-id').reverse())
+def payroll_load(request):  
+
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+
+    search_fields = ['code', 'first_name', 'last_name'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+    if _search:
+        item_data = TevIncoming.objects.filter(status_id=4).filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
+    else:
+        item_data = TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by(_order_dash + 'id')
+
+    # item_data = (TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by('-id').reverse())
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -454,8 +470,26 @@ def payroll_load(request):
 
 
 @csrf_exempt
-def box_load(request):       
-    item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
+def box_load(request):  
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
+    status_txt = ''
+    status_txt = '5' if _search == 'outgoing' else '6'
+     
+    # item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
+    search_fields = ['dv_no', 'division__name', 'status__name'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+    if _search:
+        item_data = TevOutgoing.objects.filter().filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
+    else:
+        item_data = TevOutgoing.objects.filter().select_related().distinct().order_by(_order_dash + 'id')
+
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -492,7 +526,7 @@ def box_load(request):
             'cluster': item.cluster,
             'division_name': item.division.name,
             'division_chief': item.division.chief,
-            'status':item.status,
+            'status':item.status_id,
             'box_b_in': item.box_b_in,
             'box_b_out': item.box_b_out,
             'user_id': full_name,

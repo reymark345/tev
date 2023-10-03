@@ -152,10 +152,10 @@
             class="form-select"
             aria-label="Default select example"
             >
-            <option></option>
-            <option value="1">Reymark N. Valdehueza</option>
-            <option value="2">Marwen A. Valeroso</option>
-            <option value="3">Suspended</option>
+                <option></option>
+                <option value="1">Reymark N. Valdehueza</option>
+                <option value="2">Marwen A. Valeroso</option>
+                <option value="3">Suspended</option>
             </select>
         </div>
             <input
@@ -169,7 +169,7 @@
             <input
             type="text"
             id="f-middle-name"
-            name="FFirstName"
+            name="FMiddleName"
             class="form-control"
             placeholder="Middle"
             />
@@ -177,7 +177,7 @@
             <input
             type="text"
             id="f-last-name"
-            name="FFirstName"
+            name="FLastName"
             class="form-control"
             placeholder="Lastname"
             />
@@ -185,7 +185,7 @@
 
 
         <div class="col-12 text-center">
-            <button type="submit" class="btn btn-primary me-sm-3 me-1">Search</button>
+            <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
             <button
             type="reset"
             class="btn btn-label-secondary"
@@ -316,13 +316,25 @@
                 $("#dateField").prop("disabled", false);
             } 
           });
-
+        
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             AdvancedFilter = document.getElementById('advanced-filter-list'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
-            FIncomingBy = jQuery(document.querySelector('[name="FIncomingBy"]')),
+            FIdNumber= jQuery(document.querySelector('[name="FIdNumber"]')),
+            FTransactionCode= jQuery(document.querySelector('[name="FTransactionCode"]')),
+            FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
+            FIncomingIn= jQuery(document.querySelector('[name="FIncomingIn"]')),
+            FSLashedOut= jQuery(document.querySelector('[name="FSLashedOut"]')),
+            FOriginalAmount= jQuery(document.querySelector('[name="FOriginalAmount"]')),
+            FFinalAmount= jQuery(document.querySelector('[name="FFinalAmount"]')),
+            FAccountNumber= jQuery(document.querySelector('[name="FAccountNumber"]')),
+            FIncomingBy= jQuery(document.querySelector('[name="FIncomingBy"]')),
+            FFirstName= jQuery(document.querySelector('[name="FFirstName"]')),
+            FMiddleName= jQuery(document.querySelector('[name="FMiddleName"]')),
+            FLastName= jQuery(document.querySelector('[name="FLastName"]')),
+
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
             HDateTravel = jQuery(document.querySelector('[name="HDateTravel"]')),
@@ -333,7 +345,8 @@
             EmpMiddle = jQuery(document.querySelector('[name="EmpMiddle"]')),
             EmpLastname = jQuery(document.querySelector('[name="EmpLastname"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
-            offCanvasElement = document.querySelector('#add-new-record')
+            offCanvasElement = document.querySelector('#add-new-record'),
+            search_advance_filter = $('#search-advance-filter')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
             maxOpened: 1,
@@ -351,10 +364,20 @@
             serverSide: true,
             ajax: {
                 url: "{% url 'item-load' %}",
-                type: "GET",
-                data: {
-                    identifier: 1
-                }
+                data: function (d) {
+                    d.FIdNumber = FIdNumber.val()
+                    d.FTransactionCode = FTransactionCode.val()
+                    d.FDateTravel = FDateTravel.val()
+                    d.FIncomingIn = FIncomingIn.val()
+                    d.FSLashedOut = FSLashedOut.val()
+                    d.FOriginalAmount = FOriginalAmount.val()
+                    d.FFinalAmount = FFinalAmount.val()
+                    d.FAccountNumber = FAccountNumber.val()
+                    d.FIncomingBy = FIncomingBy.val()
+                    d.FFirstName = FFirstName.val()
+                    d.FMiddleName = FMiddleName.val()
+                    d.FLastName = FLastName.val()
+                },
             },
             columns: [
                 {
@@ -929,6 +952,11 @@
         }
 
 
+
+        search_advance_filter.on('click', function () {
+            alert("daaaa");
+            dataTable.ajax.reload();
+        })
 
 
         $('#approved').click(function() {

@@ -167,7 +167,7 @@ class TevOutgoing(models.Model):
     box_c_out = models.DateTimeField(blank=True, null=True)
     ard_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     ard_out = models.DateTimeField(blank=True, null=True)
-    status = models.IntegerField(max_length=128, blank=True, null=True,default=5)
+    status = models.ForeignKey(Status, models.DO_NOTHING,default=5)
     user_id = models.CharField(max_length=128, blank=True, null=True)
     out_by = models.CharField(max_length=128, blank=True, null=True)
     is_print = models.BooleanField(default=False)
