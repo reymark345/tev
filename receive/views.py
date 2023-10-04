@@ -105,8 +105,8 @@ def item_load(request):
     _order_col_num = request.GET.get('order[0][column]')
 
     FIdNumber= request.GET.get('FIdNumber')
-    FTransactionCode= request.GET.get('FTransactionCode')
-    FDateTravel= request.GET.get('FDateTravel')
+    FTransactionCode = request.GET.get('FTransactionCode')
+    FDateTravel= request.GET.get('FDateTravel') 
     FIncomingIn= request.GET.get('FIncomingIn')
     FSLashedOut= request.GET.get('FSLashedOut')
     FOriginalAmount= request.GET.get('FOriginalAmount')
@@ -116,55 +116,17 @@ def item_load(request):
     FFirstName= request.GET.get('FFirstName')
     FMiddleName= request.GET.get('FMiddleName')
     FLastName= request.GET.get('FLastName')
+    FAdvancedFilter =  request.GET.get('FAdvancedFilter')
+    FStatus = ""
+    
 
-
-    filters = {}
-
-
-    # if len(FTransactionCode) > 0:
-    #     filters['code__icontains'] = FTransactionCode
-
-    # if len(FDateTravel) > 0:
-    #     filters['date_travel__in'] = FDateTravel
-
-    # if len(FIdNumber) > 0:
-    #     filters['id_no__in'] = FIdNumber
-
-    # if len(FIncomingIn) > 0:
-    #     filters['incoming_in__in'] = FIncomingIn
-
-    # if len(FSLashedOut) > 0:
-    #     filters['slashed_out__in'] = FSLashedOut 
-
-    # if len(FOriginalAmount) > 0:
-    #     filters['original_amount__in'] = FOriginalAmount
-
-    # if len(FFinalAmount) > 0:
-    #     filters['final_amount__in'] = FFinalAmount
-
-    # if len(FAccountNumber) > 0:
-    #     filters['account_no__in'] = FAccountNumber
-
-    # if len(FIncomingBy) > 0:
-    #     filters['user_id__in'] = FIncomingBy
-
-    # if len(FFirstName) > 0:
-    #     filters['first_name__in'] = FFirstName
-
-    # if len(FMiddleName) > 0:
-    #     filters['middle_name__in'] = FMiddleName
-
-    # if len(FLastName) > 0:
-    #     filters['last_name__in'] = FLastName
-
-
+    print("FFirstName")
+    print(FFirstName)
     status_txt = ''
     if _search in "returned":
         status_txt = '3'
     else:
         status_txt = '1'
-
-
 
     query = """
     SELECT *
@@ -176,55 +138,41 @@ def item_load(request):
     ) 
     AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
     AND (code LIKE %s
-        OR first_name LIKE %s
-        OR last_name LIKE %s
-        OR id_no LIKE %s
-        OR account_no LIKE %s
-        OR date_travel LIKE %s
-        OR original_amount LIKE %s
-        OR final_amount LIKE %s
-        OR status_id LIKE %s
+    OR first_name LIKE %s
+
+
     );
     """
+    if _search:
+        params = ['%' + _search + '%', '%' + _search + '%', '%']
+        # params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%']
+    
+    elif FAdvancedFilter:
+        print("ngeee")
+        print(FIdNumber)
+        params = [
+        '%' + FTransactionCode + '%' if FTransactionCode else '%""%',
+        '%' + FFirstName + '%' if FFirstName else '%""%'
+        # '%' + FLastName + '%' if FLastName else '%""%',
+        # '%' + FIdNumber + '%' if FIdNumber else '%""%',
+        # '%' + FAccountNumber + '%' if FAccountNumber else '%""%',
+        # '%' + FDateTravel + '%' if FDateTravel else '%""%',
+        # '%' + FOriginalAmount + '%' if FOriginalAmount else '%""%',
+        # '%' + FFinalAmount + '%' if FFinalAmount else '%""%',
+        # '%' + FStatus + '%' if FStatus else '%""%'
+        ]
 
-    params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%']
-
-    # with connection.cursor() as cursor:
-    #     cursor.execute(query, ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%'])
-    #     columns = [col[0] for col in cursor.description]
-    #     results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-    if FTransactionCode:
-        query += "AND code LIKE %s "
-        params.append('%' + FTransactionCode + '%')
-
-    if FDateTravel:
-        query += "AND date_travel LIKE %s "
-        params.append('%' + FDateTravel + '%')
-
-    # if FFirstName:
-    #     query += "AND first_name LIKE %s "
-    #     params.append('%' + FFirstName + '%')
-
-    # if FMiddleName:
-    #     query += "AND middle_name LIKE %s "
-    #     params.append('%' + FMiddleName + '%')
-
-    # if FLastName:
-    #     query += "AND last_name LIKE %s "
-    #     params.append('%' + FLastName + '%')
-
-    query += ";"
-
+    else:
+        params = ['%' + _search + '%', '%' + _search + '%']
+        # params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%']
+    
     with connection.cursor() as cursor:
         cursor.execute(query, params)
         columns = [col[0] for col in cursor.description]
         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
+    print(results)
     total = len(results)
-
-    print("daottttna")
-    print(total)
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     if _start and _length:

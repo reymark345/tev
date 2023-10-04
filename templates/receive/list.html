@@ -181,6 +181,14 @@
             class="form-control"
             placeholder="Lastname"
             />
+
+            <input
+            type="text"
+            id="f-adv-filter"
+            name="FAdvancedFilter"
+            class="form-control"
+            placeholder="AdvFilter"
+            />
     
 
 
@@ -334,6 +342,7 @@
             FFirstName= jQuery(document.querySelector('[name="FFirstName"]')),
             FMiddleName= jQuery(document.querySelector('[name="FMiddleName"]')),
             FLastName= jQuery(document.querySelector('[name="FLastName"]')),
+            FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
 
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
@@ -365,6 +374,7 @@
             ajax: {
                 url: "{% url 'item-load' %}",
                 data: function (d) {
+                    d.FAdvancedFilter = FAdvancedFilter.val()
                     d.FIdNumber = FIdNumber.val()
                     d.FTransactionCode = FTransactionCode.val()
                     d.FDateTravel = FDateTravel.val()
@@ -530,6 +540,7 @@
                     action: function () {
                         const $selectElement = $('#f-employee-name');
                         fetchEmployee($selectElement);
+                        FEmployeeName.val('').trigger('change');
                         $("#advance-filter").modal("show");
                     }
     
@@ -831,7 +842,7 @@
         
 
         function fetchEmployee($selectElement) {
-            $selectElement.empty();
+            // $selectElement.empty();
             const employees = JSON.parse(localStorage.getItem('employees'));
             if (employees) {
                 $.each(employees, function (index, employee) {
@@ -954,7 +965,9 @@
 
 
         search_advance_filter.on('click', function () {
-            alert("daaaa");
+            FAdvancedFilter.val("true");
+            $('#f-employee-name').empty();
+            $("#advance-filter").modal("hide");
             dataTable.ajax.reload();
         })
 
@@ -1002,6 +1015,7 @@
         });
 
         $('#f-employee-name').change(function() {
+          
             var selectedOption = $(this).find('option:selected');
             var optionText = selectedOption.attr('id');
             if (optionText) {
@@ -1076,7 +1090,19 @@
             })
         }
 
+        // if (FEmployeeName.length) {
+        //     FEmployeeName.wrap('<div class="position-relative"></div>')
+        //     FEmployeeName.select2({
+        //         placeholder: 'Choose employee',
+        //         dropdownParent: Company.parent(),
+        //     }).on('change.select2', function () {
+        //         // Revalidate the color field when an option is chosen
+        //         // fv.revalidateField('Company')
+        //     })
+        // }
+
         if (FEmployeeName.length) {
+            console.log("nggiiii");
             FEmployeeName.wrap('<div class="position-relative"></div>')
             FEmployeeName.select2({
                 placeholder: 'Choose employee',
@@ -1093,6 +1119,7 @@
                 allowClear: true,
             })
         }
+
         
         //end select2
 
