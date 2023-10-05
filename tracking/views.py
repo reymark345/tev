@@ -190,7 +190,6 @@ def employee_details(request):
 @csrf_exempt
 def travel_history(request):
     user_details = get_user_details(request)
-    print("testtt")
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
@@ -279,7 +278,7 @@ def travel_history_load(request):
             'code': row['code'],
             'full_name': emp_fullname,
             'date_travel': row['date_travel'],
-            'status': row['status_id'],
+            'status': row['status'],
             'original_amount': row['original_amount'],
             'final_amount': row['final_amount'],
             'incoming_in': row['incoming_in'],

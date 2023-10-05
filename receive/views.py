@@ -117,54 +117,86 @@ def item_load(request):
     FMiddleName= request.GET.get('FMiddleName')
     FLastName= request.GET.get('FLastName')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
-    FStatus = ""
+    FStatus = request.GET.get('FStatus')
     
 
-    print("FFirstName")
-    print(FFirstName)
+
     status_txt = ''
     if _search in "returned":
         status_txt = '3'
     else:
         status_txt = '1'
 
-    query = """
-    SELECT *
-    FROM tev_incoming t1
-    WHERE (code, id) IN (
-        SELECT DISTINCT code, MAX(id)
-        FROM tev_incoming
-        GROUP BY code
-    ) 
-    AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
-    AND (code LIKE %s
-    OR first_name LIKE %s
 
+    if FAdvancedFilter:
+        print("FFirstName")
+        print(FSLashedOut)
+        query = """
+            SELECT *
+            FROM tev_incoming t1
+            WHERE (code, id) IN (
+                SELECT DISTINCT code, MAX(id)
+                FROM tev_incoming
+                GROUP BY code
+            ) 
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+            AND (code LIKE %s
+                AND first_name LIKE %s
+                AND middle_name LIKE %s
+                AND last_name LIKE %s
+                AND id_no LIKE %s
+                AND account_no LIKE %s
+                AND date_travel LIKE %s
+                AND original_amount LIKE %s
+                AND final_amount LIKE %s
+                AND incoming_in LIKE %s
+                AND status_id LIKE %s
+                AND (slashed_out LIKE %s OR slashed_out IS NOT NULL)
+            );
+        """
 
-    );
-    """
-    if _search:
-        params = ['%' + _search + '%', '%' + _search + '%', '%']
-        # params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%']
-    
-    elif FAdvancedFilter:
-        print("ngeee")
-        print(FIdNumber)
         params = [
-        '%' + FTransactionCode + '%' if FTransactionCode else '%""%',
-        '%' + FFirstName + '%' if FFirstName else '%""%'
-        # '%' + FLastName + '%' if FLastName else '%""%',
-        # '%' + FIdNumber + '%' if FIdNumber else '%""%',
-        # '%' + FAccountNumber + '%' if FAccountNumber else '%""%',
-        # '%' + FDateTravel + '%' if FDateTravel else '%""%',
-        # '%' + FOriginalAmount + '%' if FOriginalAmount else '%""%',
-        # '%' + FFinalAmount + '%' if FFinalAmount else '%""%',
-        # '%' + FStatus + '%' if FStatus else '%""%'
+            '%' + FTransactionCode + '%' if FTransactionCode else "%%",
+            '%' + FFirstName + '%' if FFirstName else "%%",
+            '%' + FMiddleName + '%' if FMiddleName else "%%",
+            '%' + FLastName + '%' if FLastName else "%%",
+            '%' + FIdNumber + '%' if FIdNumber else "%%",
+            '%' + FAccountNumber + '%' if FAccountNumber else "%%",
+            '%' + FDateTravel + '%' if FDateTravel else "%%",
+            '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
+            '%' + FFinalAmount + '%' if FFinalAmount else "%%",
+            '%' + FIncomingIn + '%' if FIncomingIn else "%%",
+            '%' + FStatus + '%' if FStatus else "%%",
+            '%' + FSLashedOut + '%' if FSLashedOut else "%%"
         ]
 
+
     else:
-        params = ['%' + _search + '%', '%' + _search + '%']
-        # params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + status_txt + '%']
+        print("FFirstName222")
+        print(FSLashedOut)
+        query = """
+            SELECT *
+            FROM tev_incoming t1
+            WHERE (code, id) IN (
+                SELECT DISTINCT code, MAX(id)
+                FROM tev_incoming
+                GROUP BY code
+            ) 
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+            AND (code LIKE %s
+            OR first_name LIKE %s
+            OR middle_name LIKE %s
+            OR last_name LIKE %s
+            OR id_no LIKE %s
+            OR account_no LIKE %s
+            OR date_travel LIKE %s
+            OR original_amount LIKE %s
+            OR final_amount LIKE %s
+            OR status_id LIKE %s
+            );
+        """
+            
+        params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
     
     with connection.cursor() as cursor:
         cursor.execute(query, params)

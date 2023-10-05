@@ -46,7 +46,7 @@
         <p class="text-muted">Filter data by filling the details below</p>
         </div>
         <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-12">
             <label class="form-label" for="modalFEmployeeName">Employee Name</label>
             <select
             id="f-employee-name"
@@ -145,12 +145,24 @@
         </div>
 
         <div class="col-12 col-md-6">
+            <label class="form-label" for="modalFEmployeeName">Status</label>
+            <select
+            id="f-status"
+            name="FStatus"
+            class="form-select"
+            >
+                <option></option>
+                <option value="1">Pending</option>
+                <option value="3">Returned</option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-6">
             <label class="form-label" for="modalFEmployeeName">Incoming by</label>
             <select
             id="f-incoming-by"
             name="FIncomingBy"
             class="form-select"
-            aria-label="Default select example"
             >
                 <option></option>
                 <option value="1">Reymark N. Valdehueza</option>
@@ -158,8 +170,9 @@
                 <option value="3">Suspended</option>
             </select>
         </div>
+
             <input
-            type="text"
+            type="hidden"
             id="f-first-name"
             name="FFirstName"
             class="form-control"
@@ -167,7 +180,7 @@
             />
 
             <input
-            type="text"
+            type="hidden"
             id="f-middle-name"
             name="FMiddleName"
             class="form-control"
@@ -175,7 +188,7 @@
             />
 
             <input
-            type="text"
+            type="hidden"
             id="f-last-name"
             name="FLastName"
             class="form-control"
@@ -183,7 +196,7 @@
             />
 
             <input
-            type="text"
+            type="hidden"
             id="f-adv-filter"
             name="FAdvancedFilter"
             class="form-control"
@@ -338,6 +351,7 @@
             FOriginalAmount= jQuery(document.querySelector('[name="FOriginalAmount"]')),
             FFinalAmount= jQuery(document.querySelector('[name="FFinalAmount"]')),
             FAccountNumber= jQuery(document.querySelector('[name="FAccountNumber"]')),
+            FStatus= jQuery(document.querySelector('[name="FStatus"]')),
             FIncomingBy= jQuery(document.querySelector('[name="FIncomingBy"]')),
             FFirstName= jQuery(document.querySelector('[name="FFirstName"]')),
             FMiddleName= jQuery(document.querySelector('[name="FMiddleName"]')),
@@ -383,6 +397,7 @@
                     d.FOriginalAmount = FOriginalAmount.val()
                     d.FFinalAmount = FFinalAmount.val()
                     d.FAccountNumber = FAccountNumber.val()
+                    d.FStatus = FStatus.val()
                     d.FIncomingBy = FIncomingBy.val()
                     d.FFirstName = FFirstName.val()
                     d.FMiddleName = FMiddleName.val()
@@ -512,6 +527,12 @@
                     targets: -4,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+                {
+                    targets: -3,
+                    render: function (data) {
+                        return '<span class="badge bg-label-danger">'+data+'</span>'
                     },
                 },
                 {
@@ -663,12 +684,8 @@
         const newRecord = document.querySelector('.create-new')
             if (newRecord) {
                 newRecord.addEventListener('click', function () {
-
-
                     const $selectElement1 = $('#employee-name');
                     fetchEmployee($selectElement1);
-
-
                     ItemID.val(0)
                     
                     $("#dateField").prop("disabled", false);
@@ -838,26 +855,54 @@
             });
 
         });
+
+
+    function fetchEmployee($selectElement) {
+        const employees = JSON.parse(localStorage.getItem('employees'));
+        if (employees) {
+            $.each(employees, function (index, employee) {
+                const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                const $option = $('<option>', {
+                    value: optionText,
+                    text: optionText,
+                    id: employee.idNumber
+                });
+                $selectElement.append($option);
+            });
+
+            if (FEmployeeName.length) {
+            FEmployeeName.wrap('<div class="position-relative"></div>')
+            FEmployeeName.select2({
+                placeholder: 'Choose employee',
+                dropdownParent: FEmployeeName.parent(),
+                allowClear: true,
+            })
+        }
+        } else {
+            console.log("No employee data found in local storage.");
+        }
+}
+
         
         
 
-        function fetchEmployee($selectElement) {
-            // $selectElement.empty();
-            const employees = JSON.parse(localStorage.getItem('employees'));
-            if (employees) {
-                $.each(employees, function (index, employee) {
-                    const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
-                    const $option = $('<option>', {
-                        value: optionText,
-                        text: optionText,
-                        id: employee.idNumber
-                    });
-                    $selectElement.append($option);
-                });
-            } else {
-                console.log("No employee data found in local storage.");
-            }
-        }
+        // function fetchEmployee($selectElement) {
+        //     $selectElement.empty();
+        //     const employees = JSON.parse(localStorage.getItem('employees'));
+        //     if (employees) {
+        //         $.each(employees, function (index, employee) {
+        //             const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+        //             const $option = $('<option>', {
+        //                 value: optionText,
+        //                 text: optionText,
+        //                 id: employee.idNumber
+        //             });
+        //             $selectElement.append($option);
+        //         });
+        //     } else {
+        //         console.log("No employee data found in local storage.");
+        //     }
+        // }
 
         function updateSelectedDates() {
             var inputFieldValue = $('#dateField').val();
@@ -968,6 +1013,7 @@
             FAdvancedFilter.val("true");
             $('#f-employee-name').empty();
             $("#advance-filter").modal("hide");
+
             dataTable.ajax.reload();
         })
 
@@ -1078,8 +1124,6 @@
             });
             }
 
-
-
         //select 2
         if (EmployeeName.length) {
             EmployeeName.wrap('<div class="position-relative"></div>')
@@ -1090,23 +1134,21 @@
             })
         }
 
-        // if (FEmployeeName.length) {
-        //     FEmployeeName.wrap('<div class="position-relative"></div>')
-        //     FEmployeeName.select2({
-        //         placeholder: 'Choose employee',
-        //         dropdownParent: Company.parent(),
-        //     }).on('change.select2', function () {
-        //         // Revalidate the color field when an option is chosen
-        //         // fv.revalidateField('Company')
-        //     })
-        // }
-
         if (FEmployeeName.length) {
             console.log("nggiiii");
             FEmployeeName.wrap('<div class="position-relative"></div>')
             FEmployeeName.select2({
                 placeholder: 'Choose employee',
                 dropdownParent: FEmployeeName.parent(),
+                allowClear: true,
+            })
+        }
+
+        if (FStatus.length) {
+            FStatus.wrap('<div class="position-relative"></div>')
+            FStatus.select2({
+                placeholder: 'Choose Status',
+                dropdownParent: FStatus.parent(),
                 allowClear: true,
             })
         }
