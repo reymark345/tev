@@ -46,7 +46,7 @@
         <p class="text-muted">Filter data by filling the details below</p>
         </div>
         <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
-        <div class="col-12 col-md-12">
+        <div class="col-12 col-md-6">
             <label class="form-label" for="modalFEmployeeName">Employee Name</label>
             <select
             id="f-employee-name"
@@ -95,7 +95,7 @@
             />
         </div>
 
-        <div class="col-12 col-md-6">
+        <!-- <div class="col-12 col-md-6">
             <label class="form-label" >Slashed out</label>
             <input
             type="date"
@@ -103,7 +103,7 @@
             name="FSLashedOut"
             class="form-control"
             />
-        </div>
+        </div> -->
 
         <div class="col-12 col-md-6">
             <label class="form-label">Original Amount</label>
@@ -207,14 +207,9 @@
 
         <div class="col-12 text-center">
             <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
-            <button
-            type="reset"
-            class="btn btn-label-secondary"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-            >
-            Cancel
-            </button>
+            <button type="button" id="reset-advance-filter" class="btn btn-danger me-sm-3 me-1">Reset</button>
+            <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
+        
         </div>
         </form>
     </div>
@@ -347,7 +342,7 @@
             FTransactionCode= jQuery(document.querySelector('[name="FTransactionCode"]')),
             FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
             FIncomingIn= jQuery(document.querySelector('[name="FIncomingIn"]')),
-            FSLashedOut= jQuery(document.querySelector('[name="FSLashedOut"]')),
+            // FSLashedOut= jQuery(document.querySelector('[name="FSLashedOut"]')),
             FOriginalAmount= jQuery(document.querySelector('[name="FOriginalAmount"]')),
             FFinalAmount= jQuery(document.querySelector('[name="FFinalAmount"]')),
             FAccountNumber= jQuery(document.querySelector('[name="FAccountNumber"]')),
@@ -369,7 +364,9 @@
             EmpLastname = jQuery(document.querySelector('[name="EmpLastname"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
             offCanvasElement = document.querySelector('#add-new-record'),
-            search_advance_filter = $('#search-advance-filter')
+            search_advance_filter = $('#search-advance-filter'),
+            reset_advance_filter = $('#reset-advance-filter'),
+            clear_advance_filter = $('#clear-advance-filter')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
             maxOpened: 1,
@@ -393,7 +390,6 @@
                     d.FTransactionCode = FTransactionCode.val()
                     d.FDateTravel = FDateTravel.val()
                     d.FIncomingIn = FIncomingIn.val()
-                    d.FSLashedOut = FSLashedOut.val()
                     d.FOriginalAmount = FOriginalAmount.val()
                     d.FFinalAmount = FFinalAmount.val()
                     d.FAccountNumber = FAccountNumber.val()
@@ -560,6 +556,7 @@
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
                     action: function () {
                         const $selectElement = $('#f-employee-name');
+                        $selectElement.empty();
                         fetchEmployee($selectElement);
                         FEmployeeName.val('').trigger('change');
                         $("#advance-filter").modal("show");
@@ -602,7 +599,16 @@
                     }).done(function (data) {
                         if (data.length > 0) {
                             const $selectElement1 = $('#employee-name');
+                            $selectElement1.empty();
                             fetchEmployee($selectElement1);
+                            if (EmployeeName.length) {
+                                EmployeeName.wrap('<div class="position-relative"></div>')
+                                EmployeeName.select2({
+                                placeholder: 'Choose employee',
+                                dropdownParent: EmployeeName.parent(),
+                                allowClear: true,
+                                })
+                            }
                             let fields = data[0].fields
                             let pk = data[0].pk
                             let employee_name = $('#employee-name');
@@ -685,9 +691,17 @@
             if (newRecord) {
                 newRecord.addEventListener('click', function () {
                     const $selectElement1 = $('#employee-name');
+                    $selectElement1.empty();
                     fetchEmployee($selectElement1);
-                    ItemID.val(0)
-                    
+                    if (EmployeeName.length) {
+                        EmployeeName.wrap('<div class="position-relative"></div>')
+                        EmployeeName.select2({
+                            placeholder: 'Choose employee',
+                            dropdownParent: EmployeeName.parent(),
+                            allowClear: true,
+                        })
+                    }
+                    ItemID.val(0);
                     $("#dateField").prop("disabled", false);
                     $(".rangeTravel").prop("disabled", false);
                     $('.title-name').text('Add Tev Record')
@@ -871,17 +885,32 @@
             });
 
             if (FEmployeeName.length) {
-            FEmployeeName.wrap('<div class="position-relative"></div>')
-            FEmployeeName.select2({
-                placeholder: 'Choose employee',
-                dropdownParent: FEmployeeName.parent(),
-                allowClear: true,
-            })
-        }
+                FEmployeeName.wrap('<div class="position-relative"></div>')
+                FEmployeeName.select2({
+                    placeholder: 'Choose employee',
+                    dropdownParent: FEmployeeName.parent(),
+                    allowClear: true,
+                });
+            }
+            
+            if (FEmployeeName.length) {
+                console.log("nggiiii");
+                FEmployeeName.wrap('<div class="position-relative"></div>')
+                FEmployeeName.select2({
+                    placeholder: 'Choose employee',
+                    dropdownParent: FEmployeeName.parent(),
+                    allowClear: true,
+                });
+            }
+
+
+
+            
+       
         } else {
             console.log("No employee data found in local storage.");
         }
-}
+    }
 
         
         
@@ -1006,16 +1035,35 @@
             })
 
         }
-
-
-
         search_advance_filter.on('click', function () {
             FAdvancedFilter.val("true");
             $('#f-employee-name').empty();
             $("#advance-filter").modal("hide");
-
             dataTable.ajax.reload();
-        })
+            toastr.success('Search successfully', 'Success', toast_options);
+        });
+
+        reset_advance_filter.on('click', function () {
+            FAdvancedFilter.val('');
+            $('#f-employee-name').empty();
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Data has been reset', 'Success', toast_options);
+        });
+
+        clear_advance_filter.on('click', function () {
+            FIdNumber.val('');
+            FTransactionCode.val('');
+            FOriginalAmount.val('');
+            FFinalAmount.val('');
+            FAccountNumber.val('');
+            FIncomingIn.val('');
+            fdateField.clear();
+            FEmployeeName.val('').trigger('change');
+            FStatus.val('').trigger('change');
+            FIncomingBy.val('').trigger('change');
+            toastr.success('Clear successfully', 'Success', toast_options);
+        });
 
 
         $('#approved').click(function() {

@@ -108,7 +108,7 @@ def item_load(request):
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
     FIncomingIn= request.GET.get('FIncomingIn')
-    FSLashedOut= request.GET.get('FSLashedOut')
+    # FSLashedOut= request.GET.get('FSLashedOut')
     FOriginalAmount= request.GET.get('FOriginalAmount')
     FFinalAmount= request.GET.get('FFinalAmount')
     FAccountNumber= request.GET.get('FAccountNumber')
@@ -130,7 +130,7 @@ def item_load(request):
 
     if FAdvancedFilter:
         print("FFirstName")
-        print(FSLashedOut)
+        print(FStatus)
         query = """
             SELECT *
             FROM tev_incoming t1
@@ -151,7 +151,6 @@ def item_load(request):
                 AND final_amount LIKE %s
                 AND incoming_in LIKE %s
                 AND status_id LIKE %s
-                AND (slashed_out LIKE %s OR slashed_out IS NOT NULL)
             );
         """
 
@@ -166,14 +165,12 @@ def item_load(request):
             '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
             '%' + FFinalAmount + '%' if FFinalAmount else "%%",
             '%' + FIncomingIn + '%' if FIncomingIn else "%%",
-            '%' + FStatus + '%' if FStatus else "%%",
-            '%' + FSLashedOut + '%' if FSLashedOut else "%%"
+            '%' + FStatus + '%' if FStatus else "%%"
         ]
 
 
     else:
         print("FFirstName222")
-        print(FSLashedOut)
         query = """
             SELECT *
             FROM tev_incoming t1
