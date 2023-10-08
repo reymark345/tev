@@ -46,16 +46,30 @@
         <p class="text-muted">Filter data by filling the details below</p>
         </div>
         <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-12">
             <label class="form-label" for="modalFEmployeeName">Employee Name</label>
-            <select
+
+
+
+
+                <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
+                  <option></option>
+                </select>
+          
+
+
+
+
+
+
+            {% comment %} <select
             id="f-employee-name"
             name="FEmployeeName"
             class="form-select"
             aria-label="Default select example"
             >
             <option></option>
-            </select>
+            </select> {% endcomment %}
         </div>
 
         <div class="col-12 col-md-6">
@@ -157,19 +171,7 @@
             </select>
         </div>
 
-        <div class="col-12 col-md-6">
-            <label class="form-label" for="modalFEmployeeName">Incoming by</label>
-            <select
-            id="f-incoming-by"
-            name="FIncomingBy"
-            class="form-select"
-            >
-                <option></option>
-                <option value="1">Reymark N. Valdehueza</option>
-                <option value="2">Marwen A. Valeroso</option>
-                <option value="3">Suspended</option>
-            </select>
-        </div>
+
 
             <input
             type="hidden"
@@ -207,7 +209,7 @@
 
         <div class="col-12 text-center">
             <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
-            <button type="button" id="reset-advance-filter" class="btn btn-danger me-sm-3 me-1">Reset</button>
+            <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
             <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
         
         </div>
@@ -294,6 +296,7 @@
     let clicked_id = 0;
     let status_val =0;
     let formattedDates = ''
+    let employeeList = [];
 
     $(document).ready(function () {
         employeelist();
@@ -347,7 +350,6 @@
             FFinalAmount= jQuery(document.querySelector('[name="FFinalAmount"]')),
             FAccountNumber= jQuery(document.querySelector('[name="FAccountNumber"]')),
             FStatus= jQuery(document.querySelector('[name="FStatus"]')),
-            FIncomingBy= jQuery(document.querySelector('[name="FIncomingBy"]')),
             FFirstName= jQuery(document.querySelector('[name="FFirstName"]')),
             FMiddleName= jQuery(document.querySelector('[name="FMiddleName"]')),
             FLastName= jQuery(document.querySelector('[name="FLastName"]')),
@@ -394,10 +396,10 @@
                     d.FFinalAmount = FFinalAmount.val()
                     d.FAccountNumber = FAccountNumber.val()
                     d.FStatus = FStatus.val()
-                    d.FIncomingBy = FIncomingBy.val()
                     d.FFirstName = FFirstName.val()
                     d.FMiddleName = FMiddleName.val()
                     d.FLastName = FLastName.val()
+                    d.EmployeeList = employeeList
                 },
             },
             columns: [
@@ -555,10 +557,26 @@
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
                     action: function () {
+                        employeeList = [];
                         const $selectElement = $('#f-employee-name');
                         $selectElement.empty();
                         fetchEmployee($selectElement);
                         FEmployeeName.val('').trigger('change');
+
+                        setTimeout(function() {
+                            if (FEmployeeName.length) {
+                                FEmployeeName.wrap('<div class="position-relative"></div>')
+                                FEmployeeName.select2({
+                                    placeholder: 'Choose employee',
+                                    dropdownParent: FEmployeeName.parent(),
+                                    allowClear: true,
+                                })
+                            }
+                        }, 300);
+                        
+
+
+                        
                         $("#advance-filter").modal("show");
                     }
     
@@ -877,31 +895,22 @@
             $.each(employees, function (index, employee) {
                 const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
                 const $option = $('<option>', {
-                    value: optionText,
+                    value: employee.idNumber,
                     text: optionText,
                     id: employee.idNumber
                 });
                 $selectElement.append($option);
             });
 
-            if (FEmployeeName.length) {
-                FEmployeeName.wrap('<div class="position-relative"></div>')
-                FEmployeeName.select2({
-                    placeholder: 'Choose employee',
-                    dropdownParent: FEmployeeName.parent(),
-                    allowClear: true,
-                });
-            }
+           //// if (FEmployeeName.length) {
+             //   FEmployeeName.wrap('<div class="position-relative"></div>')
+             //   FEmployeeName.select2({
+             //       placeholder: 'Choose employee',
+            //        dropdownParent: FEmployeeName.parent(),
+           //         allowClear: true,
+          //      });
+        //    }
             
-            if (FEmployeeName.length) {
-                console.log("nggiiii");
-                FEmployeeName.wrap('<div class="position-relative"></div>')
-                FEmployeeName.select2({
-                    placeholder: 'Choose employee',
-                    dropdownParent: FEmployeeName.parent(),
-                    allowClear: true,
-                });
-            }
 
 
 
@@ -1040,6 +1049,7 @@
             $('#f-employee-name').empty();
             $("#advance-filter").modal("hide");
             dataTable.ajax.reload();
+            clear_advfilter();
             toastr.success('Search successfully', 'Success', toast_options);
         });
 
@@ -1052,6 +1062,11 @@
         });
 
         clear_advance_filter.on('click', function () {
+            clear_advfilter();
+            toastr.success('Clear successfully', 'Success', toast_options);
+        });
+
+        function clear_advfilter(){
             FIdNumber.val('');
             FTransactionCode.val('');
             FOriginalAmount.val('');
@@ -1061,10 +1076,7 @@
             fdateField.clear();
             FEmployeeName.val('').trigger('change');
             FStatus.val('').trigger('change');
-            FIncomingBy.val('').trigger('change');
-            toastr.success('Clear successfully', 'Success', toast_options);
-        });
-
+        }
 
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();
@@ -1108,31 +1120,50 @@
             }
         });
 
-        $('#f-employee-name').change(function() {
-          
-            var selectedOption = $(this).find('option:selected');
-            var optionText = selectedOption.attr('id');
-            if (optionText) {
-                const employees = JSON.parse(localStorage.getItem('employees'));
-                if (employees) {
-                    const selectedEmployeeId = selectedOption.attr('id');
-                    const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
-      
-                    
-                    if (selectedEmployee) {
-                        $('#f-first-name').val(selectedEmployee.firstName);
-                        $('#f-middle-name').val(selectedEmployee.middleInitial);
-                        $('#f-last-name').val(selectedEmployee.lastName);
-                    }
-                } else {
-                    console.log("No employee data found in local storage.");
-                }
-            }
-        });
+       // $('#f-employee-name').change(function() {
+          //  var selectedOption = $(this).find('option:selected');
+         //   var optionText = selectedOption.attr('id');
+         //   console.log(selectedOption);
+        //    console.log("DAAA");
+        //    if (optionText) {
+              //    const employees = JSON.parse(localStorage.getItem('employees'));
+              //    if (employees) {
+               //       const selectedEmployeeId = selectedOption.attr('id');
+               //       const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
+       
+                //      if (selectedEmployee) {
+                 //         employeeList.push(selectedEmployee.idNumber);
+                 //         $('#f-first-name').val(selectedEmployee.firstName);
+                //          $('#f-middle-name').val(selectedEmployee.middleInitial);
+                  //        $('#f-last-name').val(selectedEmployee.lastName);
+                  //    }
+               //   } else {
+                   //   console.log("No employee data found in local storage.");
+                //  }
+                
+             // }
+            //  console.log(employeeList);
+         // });
+
+         $('#f-employee-name').change(function() {
+             var selectedOptions = $(this).find('option:selected');
+             selectedOptions.each(function() {
+                 var optionValue = $(this).val();
+                 if (employeeList.indexOf(optionValue) === -1) {
+                    employeeList.push(optionValue);
+                 }
+             });
+             $(this).find('option:not(:selected)').each(function() {
+                 var optionValue = $(this).val();
+                 var index = employeeList.indexOf(optionValue);
+                 if (index !== -1) {
+                    employeeList.splice(index, 1);
+                 }
+             });
+             console.log("Newly added values: " + employeeList);
         
-
-
-          
+         });
+        
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
@@ -1200,16 +1231,6 @@
                 allowClear: true,
             })
         }
-
-        if (FIncomingBy.length) {
-            FIncomingBy.wrap('<div class="position-relative"></div>')
-            FIncomingBy.select2({
-                placeholder: 'Choose Incoming',
-                dropdownParent: FIncomingBy.parent(),
-                allowClear: true,
-            })
-        }
-
         
         //end select2
 

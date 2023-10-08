@@ -103,7 +103,6 @@ def item_load(request):
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
-
     FIdNumber= request.GET.get('FIdNumber')
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
@@ -118,19 +117,14 @@ def item_load(request):
     FLastName= request.GET.get('FLastName')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
     FStatus = request.GET.get('FStatus')
-    
-
-
+    EmployeeList = request.GET.getlist('EmployeeList[]')
     status_txt = ''
     if _search in "returned":
         status_txt = '3'
     else:
         status_txt = '1'
-
-
-    if FAdvancedFilter:
-        print("FFirstName")
-        print(FStatus)
+    id_numbers = EmployeeList if EmployeeList else []
+    if FAdvancedFilter and not EmployeeList:
         query = """
             SELECT *
             FROM tev_incoming t1
@@ -141,9 +135,6 @@ def item_load(request):
             ) 
             AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
             AND (code LIKE %s
-                AND first_name LIKE %s
-                AND middle_name LIKE %s
-                AND last_name LIKE %s
                 AND id_no LIKE %s
                 AND account_no LIKE %s
                 AND date_travel LIKE %s
@@ -156,10 +147,7 @@ def item_load(request):
 
         params = [
             '%' + FTransactionCode + '%' if FTransactionCode else "%%",
-            '%' + FFirstName + '%' if FFirstName else "%%",
-            '%' + FMiddleName + '%' if FMiddleName else "%%",
-            '%' + FLastName + '%' if FLastName else "%%",
-            '%' + FIdNumber + '%' if FIdNumber else "%%",
+            '%' + EmployeeList + '%' if EmployeeList else "%%",
             '%' + FAccountNumber + '%' if FAccountNumber else "%%",
             '%' + FDateTravel + '%' if FDateTravel else "%%",
             '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
@@ -168,9 +156,39 @@ def item_load(request):
             '%' + FStatus + '%' if FStatus else "%%"
         ]
 
+    elif FAdvancedFilter:
+        query = """
+            SELECT *
+            FROM tev_incoming t1
+            WHERE (code, id) IN (
+                SELECT DISTINCT code, MAX(id)
+                FROM tev_incoming
+                GROUP BY code
+            ) 
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+            AND (code LIKE %s
+                AND id_no IN %s
+                AND account_no LIKE %s
+                AND date_travel LIKE %s
+                AND original_amount LIKE %s
+                AND final_amount LIKE %s
+                AND incoming_in LIKE %s
+                AND status_id LIKE %s
+            );
+        """
+
+        params = [
+            '%' + FTransactionCode + '%' if FTransactionCode else "%%",
+            tuple(id_numbers),
+            '%' + FAccountNumber + '%' if FAccountNumber else "%%",
+            '%' + FDateTravel + '%' if FDateTravel else "%%",
+            '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
+            '%' + FFinalAmount + '%' if FFinalAmount else "%%",
+            '%' + FIncomingIn + '%' if FIncomingIn else "%%",
+            '%' + FStatus + '%' if FStatus else "%%"
+        ]
 
     else:
-        print("FFirstName222")
         query = """
             SELECT *
             FROM tev_incoming t1
@@ -200,7 +218,6 @@ def item_load(request):
         columns = [col[0] for col in cursor.description]
         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    print(results)
     total = len(results)
     _start = request.GET.get('start')
     _length = request.GET.get('length')
