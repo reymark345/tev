@@ -98,79 +98,127 @@ def search_list(request):
     
     return JsonResponse({'data': "success"})
     
-    
-    
-    
-
-
 def item_load(request):
     _search = request.GET.get('search[value]')
-    _start = request.GET.get('start')
-    _length = request.GET.get('length')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
-    
-    
-    print("_search1111")
-    print(_search)
-    
-    
-    # query = """
-    # SELECT t.*
-    # FROM tev_incoming t
-    # WHERE (
-    #     t.status = 1
-    #     OR (
-    #         t.status = 3 AND t.slashed_out IS NOT NULL AND NOT EXISTS (
-    #             SELECT 1
-    #             FROM tev_incoming t2
-    #             WHERE t2.code = t.code
-    #             AND t2.status IN (1, 2)
-    #         )
-    #     )
-    # );
-    # """
-    # query = """
-    # SELECT t1.*
-    # FROM tev_incoming t1
-    # WHERE t1.status = 1
-    # OR (
-    #     t1.status = 3
-    #     AND t1.slashed_out IS NOT NULL
-    #     AND NOT EXISTS (
-    #         SELECT 1
-    #         FROM tev_incoming t2
-    #         WHERE t2.code = t1.code
-    #         AND t2.status IN (1, 2)
-    #     )
-    #     AND NOT EXISTS (
-    #         SELECT 1
-    #         FROM tev_incoming t3
-    #         WHERE t3.code = t1.code
-    #         AND t3.status = 3
-    #         AND t3.slashed_out > t1.slashed_out
-    #     )
-    # );
-    # """
+    FIdNumber= request.GET.get('FIdNumber')
+    FTransactionCode = request.GET.get('FTransactionCode')
+    FDateTravel= request.GET.get('FDateTravel') 
+    FIncomingIn= request.GET.get('FIncomingIn')
+    # FSLashedOut= request.GET.get('FSLashedOut')
+    FOriginalAmount= request.GET.get('FOriginalAmount')
+    FFinalAmount= request.GET.get('FFinalAmount')
+    FAccountNumber= request.GET.get('FAccountNumber')
+    FIncomingBy= request.GET.get('FIncomingBy')
+    FFirstName= request.GET.get('FFirstName')
+    FMiddleName= request.GET.get('FMiddleName')
+    FLastName= request.GET.get('FLastName')
+    FAdvancedFilter =  request.GET.get('FAdvancedFilter')
+    FStatus = request.GET.get('FStatus')
+    EmployeeList = request.GET.getlist('EmployeeList[]')
+    status_txt = ''
+    if _search in "returned":
+        status_txt = '3'
+    else:
+        status_txt = '1'
+    id_numbers = EmployeeList if EmployeeList else []
+    if FAdvancedFilter and not EmployeeList:
+        query = """
+            SELECT *
+            FROM tev_incoming t1
+            WHERE (code, id) IN (
+                SELECT DISTINCT code, MAX(id)
+                FROM tev_incoming
+                GROUP BY code
+            ) 
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+            AND (code LIKE %s
+                AND id_no LIKE %s
+                AND account_no LIKE %s
+                AND date_travel LIKE %s
+                AND original_amount LIKE %s
+                AND final_amount LIKE %s
+                AND incoming_in LIKE %s
+                AND status_id LIKE %s
+            );
+        """
 
-    query = """
-        SELECT *
-        FROM tev_incoming t1
-        WHERE (code, id) IN (
-            SELECT DISTINCT code, MAX(id)
-            FROM tev_incoming
-            GROUP BY code
-        )AND (`status` IN (3) AND slashed_out IS NOT NULL) OR (`status` IN (1) AND slashed_out IS NULL);
-    """
+        params = [
+            '%' + FTransactionCode + '%' if FTransactionCode else "%%",
+            '%' + EmployeeList + '%' if EmployeeList else "%%",
+            '%' + FAccountNumber + '%' if FAccountNumber else "%%",
+            '%' + FDateTravel + '%' if FDateTravel else "%%",
+            '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
+            '%' + FFinalAmount + '%' if FFinalAmount else "%%",
+            '%' + FIncomingIn + '%' if FIncomingIn else "%%",
+            '%' + FStatus + '%' if FStatus else "%%"
+        ]
 
+    elif FAdvancedFilter:
+        query = """
+            SELECT *
+            FROM tev_incoming t1
+            WHERE (code, id) IN (
+                SELECT DISTINCT code, MAX(id)
+                FROM tev_incoming
+                GROUP BY code
+            ) 
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+            AND (code LIKE %s
+                AND id_no IN %s
+                AND account_no LIKE %s
+                AND date_travel LIKE %s
+                AND original_amount LIKE %s
+                AND final_amount LIKE %s
+                AND incoming_in LIKE %s
+                AND status_id LIKE %s
+            );
+        """
+
+        params = [
+            '%' + FTransactionCode + '%' if FTransactionCode else "%%",
+            tuple(id_numbers),
+            '%' + FAccountNumber + '%' if FAccountNumber else "%%",
+            '%' + FDateTravel + '%' if FDateTravel else "%%",
+            '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
+            '%' + FFinalAmount + '%' if FFinalAmount else "%%",
+            '%' + FIncomingIn + '%' if FIncomingIn else "%%",
+            '%' + FStatus + '%' if FStatus else "%%"
+        ]
+
+    else:
+        query = """
+            SELECT *
+            FROM tev_incoming t1
+            WHERE (code, id) IN (
+                SELECT DISTINCT code, MAX(id)
+                FROM tev_incoming
+                GROUP BY code
+            ) 
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+            AND (code LIKE %s
+            OR first_name LIKE %s
+            OR middle_name LIKE %s
+            OR last_name LIKE %s
+            OR id_no LIKE %s
+            OR account_no LIKE %s
+            OR date_travel LIKE %s
+            OR original_amount LIKE %s
+            OR final_amount LIKE %s
+            OR status_id LIKE %s
+            );
+        """
+            
+        params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
+    
     with connection.cursor() as cursor:
-        cursor.execute(query)
+        cursor.execute(query, params)
         columns = [col[0] for col in cursor.description]
         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     total = len(results)
-
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     if _start and _length:
@@ -205,7 +253,7 @@ def item_load(request):
             'incoming_out': item['incoming_out'],
             'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
-            'status': item['status'],
+            'status': item['status_id'],
             'user_id': full_name
         }
 
@@ -223,34 +271,45 @@ def item_load(request):
 
 
 def checking_load(request):
-    # query = """
-    #     SELECT t.*
-    #     FROM tev_incoming t
-    #     WHERE t.status = 2
-    #         OR t.status = 7
-    #         OR (t.status = 3 AND t.slashed_out IS NULL AND (
-    #             SELECT COUNT(*)
-    #             FROM tev_incoming
-    #             WHERE code = t.code
-    #         ) = 1
-    #     );
-    # """
-    
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
+    status_txt = ''
+    if status_txt == "for checking":
+        status_txt = '%'+'2'+'%'
+    elif status_txt == "approved":
+        status_txt = '%'+'7'+'%'
+    elif status_txt == "returned":
+        status_txt = '%'+'3'+'%'
+
+    search_pattern = '%' + _search + '%'
+
     query = """
         SELECT t.*
         FROM tev_incoming t
-        WHERE t.status = 2
-            OR t.status = 7
-            OR (t.status = 3 AND t.slashed_out IS NULL
+        WHERE (t.status_id = 2
+                OR t.status_id = 7
+                OR (t.status_id = 3 AND t.slashed_out IS NULL)
+        )
+        AND (code LIKE %s
+        OR first_name LIKE %s
+        OR last_name LIKE %s
+        OR id_no LIKE %s
+        OR account_no LIKE %s
+        OR date_travel LIKE %s
+        OR original_amount LIKE %s
+        OR final_amount LIKE %s
+        OR remarks LIKE %s
+        OR status_id LIKE %s
         );
-    """
+"""
 
     with connection.cursor() as cursor:
-        cursor.execute(query)
+        cursor.execute(query, [search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern,search_pattern,status_txt])
         results = cursor.fetchall()
 
     total = len(results)
-
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     
@@ -266,7 +325,7 @@ def checking_load(request):
 
     for row in results:
 
-        userData = AuthUser.objects.filter(id=row[16])
+        userData = AuthUser.objects.filter(id=row[14])
         full_name = userData[0].first_name + ' ' + userData[0].last_name
         first_name = row[2] if row[2] else ''
         middle_name = row[3] if row[3] else ''
@@ -328,21 +387,11 @@ def item_returned(request):
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
     remarks = request.POST.get('Remarks')
-    
     travel_date = request.POST.get('HDateTravel')
-    
-    
-    print(travel_date)
-    print("travel_date")
-    
-    
-    
     travel_date_stripped = travel_date.strip()
     travel_date_spaces = travel_date_stripped.replace(' ', '')
-    
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
-    
     tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,remarks=remarks,user_id=data.user_id)
     tev_add.save()
     return JsonResponse({'data': 'success'})
@@ -451,10 +500,10 @@ def out_checking_tev(request):
         tev_update = TevIncoming.objects.filter(id=item_id).first()  
 
         if tev_update:
-            if tev_update.status == 3:
+            if tev_update.status_id == 3:
                 tev_update.slashed_out = date_time.datetime.now()
             else:
-                tev_update.status = 4
+                tev_update.status_id = 4
             tev_update.save()
         else:
             pass 

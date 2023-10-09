@@ -45,9 +45,8 @@
                 <!-- Modern Vertical Wizard -->
                 <div class="col-12">
                   <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
-                    <!-- <label class="form-label" for="modalAddCard"><b>Update Transaction</b></label> -->
                     <div class="bs-stepper-content">
-                       <div class="card-datatable table-responsive pt-0">
+                       <div class="card-datatable table-responsive pt-0">  <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label>
                     <table id="tbl-box-a" class="table display compact">
                         <thead>
                             <tr>
@@ -260,8 +259,7 @@
             </div>
             <div class="modal-footer">
                 <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5>
-                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="update-data">Update</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -744,8 +742,6 @@
                         dv_id: id
                     }
                 }).done(function (data) {
-                    console.log("data_TEST");
-                    console.log(data);
                     dv_number = '';
                     charges = '';
                     outgoing_id = 0;
@@ -944,26 +940,6 @@
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
                 },
                 {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Delete</span>',
-                    action: function () {
-                        // Get the IDs of checked items
-                        var selectedItems = [];
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-
-                        console.log(selectedItems);
-            
-                        if(selectedItems.length ===0){
-                            toastr.error('Select item first', 'Invalid', toast_options);
-                        }
-                        else{
-                            incoming_out(selectedItems);
-                        }
-                    }
-                },
-                {
                     text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
                     className: 'create-new btn btn-primary',
                     action: function () {
@@ -1053,24 +1029,8 @@
             drawCallback: function (settings) { 
                 $('.view-data').on('click', function () {
                     let id = $(this).attr('id');
-                    dv_no_id = id
-                    
-                    // $.ajax({
-                    //     type: 'POST',
-                    //     url: "{% url 'employee-dv' %}",
-                    //     data:{
-                    //         dv_id: id
-                    //     }
-                    // }).done(function (data) {
-
-                    //     $('#update-transaction').modal('show');
-                    //     console.log("data");
-                    //     console.log(data);
-                    // })
+                    dv_no_id = id;
                 });
-
-
-
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
                     // Do something when a checkbox in the table body is changed...
                 });

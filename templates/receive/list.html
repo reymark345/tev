@@ -46,16 +46,30 @@
         <p class="text-muted">Filter data by filling the details below</p>
         </div>
         <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-12">
             <label class="form-label" for="modalFEmployeeName">Employee Name</label>
-            <select
+
+
+
+
+                <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
+                  <option></option>
+                </select>
+          
+
+
+
+
+
+
+            {% comment %} <select
             id="f-employee-name"
             name="FEmployeeName"
             class="form-select"
             aria-label="Default select example"
             >
             <option></option>
-            </select>
+            </select> {% endcomment %}
         </div>
 
         <div class="col-12 col-md-6">
@@ -95,7 +109,7 @@
             />
         </div>
 
-        <div class="col-12 col-md-6">
+        <!-- <div class="col-12 col-md-6">
             <label class="form-label" >Slashed out</label>
             <input
             type="date"
@@ -103,7 +117,7 @@
             name="FSLashedOut"
             class="form-control"
             />
-        </div>
+        </div> -->
 
         <div class="col-12 col-md-6">
             <label class="form-label">Original Amount</label>
@@ -145,21 +159,22 @@
         </div>
 
         <div class="col-12 col-md-6">
-            <label class="form-label" for="modalFEmployeeName">Incoming by</label>
+            <label class="form-label" for="modalFEmployeeName">Status</label>
             <select
-            id="f-incoming-by"
-            name="FIncomingBy"
+            id="f-status"
+            name="FStatus"
             class="form-select"
-            aria-label="Default select example"
             >
-            <option></option>
-            <option value="1">Reymark N. Valdehueza</option>
-            <option value="2">Marwen A. Valeroso</option>
-            <option value="3">Suspended</option>
+                <option></option>
+                <option value="1">Pending</option>
+                <option value="3">Returned</option>
             </select>
         </div>
+
+
+
             <input
-            type="text"
+            type="hidden"
             id="f-first-name"
             name="FFirstName"
             class="form-control"
@@ -167,33 +182,36 @@
             />
 
             <input
-            type="text"
+            type="hidden"
             id="f-middle-name"
-            name="FFirstName"
+            name="FMiddleName"
             class="form-control"
             placeholder="Middle"
             />
 
             <input
-            type="text"
+            type="hidden"
             id="f-last-name"
-            name="FFirstName"
+            name="FLastName"
             class="form-control"
             placeholder="Lastname"
+            />
+
+            <input
+            type="hidden"
+            id="f-adv-filter"
+            name="FAdvancedFilter"
+            class="form-control"
+            placeholder="AdvFilter"
             />
     
 
 
         <div class="col-12 text-center">
-            <button type="submit" class="btn btn-primary me-sm-3 me-1">Search</button>
-            <button
-            type="reset"
-            class="btn btn-label-secondary"
-            data-bs-dismiss="modal"
-            aria-label="Close"
-            >
-            Cancel
-            </button>
+            <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
+            <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
+            <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
+        
         </div>
         </form>
     </div>
@@ -278,6 +296,7 @@
     let clicked_id = 0;
     let status_val =0;
     let formattedDates = ''
+    let employeeList = [];
 
     $(document).ready(function () {
         employeelist();
@@ -308,6 +327,7 @@
           });
 
         $(".rangeTravel").on("change", function() {
+          
             if(RangeTravel.val()){
                 $("#dateField").prop("disabled", true);
             }
@@ -315,13 +335,26 @@
                 $("#dateField").prop("disabled", false);
             } 
           });
-
+        
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             AdvancedFilter = document.getElementById('advanced-filter-list'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
-            FIncomingBy = jQuery(document.querySelector('[name="FIncomingBy"]')),
+            FIdNumber= jQuery(document.querySelector('[name="FIdNumber"]')),
+            FTransactionCode= jQuery(document.querySelector('[name="FTransactionCode"]')),
+            FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
+            FIncomingIn= jQuery(document.querySelector('[name="FIncomingIn"]')),
+            // FSLashedOut= jQuery(document.querySelector('[name="FSLashedOut"]')),
+            FOriginalAmount= jQuery(document.querySelector('[name="FOriginalAmount"]')),
+            FFinalAmount= jQuery(document.querySelector('[name="FFinalAmount"]')),
+            FAccountNumber= jQuery(document.querySelector('[name="FAccountNumber"]')),
+            FStatus= jQuery(document.querySelector('[name="FStatus"]')),
+            FFirstName= jQuery(document.querySelector('[name="FFirstName"]')),
+            FMiddleName= jQuery(document.querySelector('[name="FMiddleName"]')),
+            FLastName= jQuery(document.querySelector('[name="FLastName"]')),
+            FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
+
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
             HDateTravel = jQuery(document.querySelector('[name="HDateTravel"]')),
@@ -332,7 +365,10 @@
             EmpMiddle = jQuery(document.querySelector('[name="EmpMiddle"]')),
             EmpLastname = jQuery(document.querySelector('[name="EmpLastname"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
-            offCanvasElement = document.querySelector('#add-new-record')
+            offCanvasElement = document.querySelector('#add-new-record'),
+            search_advance_filter = $('#search-advance-filter'),
+            reset_advance_filter = $('#reset-advance-filter'),
+            clear_advance_filter = $('#clear-advance-filter')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
             maxOpened: 1,
@@ -350,10 +386,21 @@
             serverSide: true,
             ajax: {
                 url: "{% url 'item-load' %}",
-                type: "GET",
-                data: {
-                    identifier: 1
-                }
+                data: function (d) {
+                    d.FAdvancedFilter = FAdvancedFilter.val()
+                    d.FIdNumber = FIdNumber.val()
+                    d.FTransactionCode = FTransactionCode.val()
+                    d.FDateTravel = FDateTravel.val()
+                    d.FIncomingIn = FIncomingIn.val()
+                    d.FOriginalAmount = FOriginalAmount.val()
+                    d.FFinalAmount = FFinalAmount.val()
+                    d.FAccountNumber = FAccountNumber.val()
+                    d.FStatus = FStatus.val()
+                    d.FFirstName = FFirstName.val()
+                    d.FMiddleName = FMiddleName.val()
+                    d.FLastName = FLastName.val()
+                    d.EmployeeList = employeeList
+                },
             },
             columns: [
                 {
@@ -481,6 +528,12 @@
                     },
                 },
                 {
+                    targets: -3,
+                    render: function (data) {
+                        return '<span class="badge bg-label-danger">'+data+'</span>'
+                    },
+                },
+                {
                     targets: -2,
                     render: function (data) {
                         return data
@@ -504,8 +557,26 @@
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
                     action: function () {
+                        employeeList = [];
                         const $selectElement = $('#f-employee-name');
+                        $selectElement.empty();
                         fetchEmployee($selectElement);
+                        FEmployeeName.val('').trigger('change');
+
+                        setTimeout(function() {
+                            if (FEmployeeName.length) {
+                                FEmployeeName.wrap('<div class="position-relative"></div>')
+                                FEmployeeName.select2({
+                                    placeholder: 'Choose employee',
+                                    dropdownParent: FEmployeeName.parent(),
+                                    allowClear: true,
+                                })
+                            }
+                        }, 300);
+                        
+
+
+                        
                         $("#advance-filter").modal("show");
                     }
     
@@ -546,7 +617,16 @@
                     }).done(function (data) {
                         if (data.length > 0) {
                             const $selectElement1 = $('#employee-name');
+                            $selectElement1.empty();
                             fetchEmployee($selectElement1);
+                            if (EmployeeName.length) {
+                                EmployeeName.wrap('<div class="position-relative"></div>')
+                                EmployeeName.select2({
+                                placeholder: 'Choose employee',
+                                dropdownParent: EmployeeName.parent(),
+                                allowClear: true,
+                                })
+                            }
                             let fields = data[0].fields
                             let pk = data[0].pk
                             let employee_name = $('#employee-name');
@@ -628,14 +708,18 @@
         const newRecord = document.querySelector('.create-new')
             if (newRecord) {
                 newRecord.addEventListener('click', function () {
-
-
                     const $selectElement1 = $('#employee-name');
+                    $selectElement1.empty();
                     fetchEmployee($selectElement1);
-
-
-                    ItemID.val(0)
-                    
+                    if (EmployeeName.length) {
+                        EmployeeName.wrap('<div class="position-relative"></div>')
+                        EmployeeName.select2({
+                            placeholder: 'Choose employee',
+                            dropdownParent: EmployeeName.parent(),
+                            allowClear: true,
+                        })
+                    }
+                    ItemID.val(0);
                     $("#dateField").prop("disabled", false);
                     $(".rangeTravel").prop("disabled", false);
                     $('.title-name').text('Add Tev Record')
@@ -803,26 +887,60 @@
             });
 
         });
+
+
+    function fetchEmployee($selectElement) {
+        const employees = JSON.parse(localStorage.getItem('employees'));
+        if (employees) {
+            $.each(employees, function (index, employee) {
+                const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                const $option = $('<option>', {
+                    value: employee.idNumber,
+                    text: optionText,
+                    id: employee.idNumber
+                });
+                $selectElement.append($option);
+            });
+
+           //// if (FEmployeeName.length) {
+             //   FEmployeeName.wrap('<div class="position-relative"></div>')
+             //   FEmployeeName.select2({
+             //       placeholder: 'Choose employee',
+            //        dropdownParent: FEmployeeName.parent(),
+           //         allowClear: true,
+          //      });
+        //    }
+            
+
+
+
+            
+       
+        } else {
+            console.log("No employee data found in local storage.");
+        }
+    }
+
         
         
 
-        function fetchEmployee($selectElement) {
-            $selectElement.empty();
-            const employees = JSON.parse(localStorage.getItem('employees'));
-            if (employees) {
-                $.each(employees, function (index, employee) {
-                    const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
-                    const $option = $('<option>', {
-                        value: optionText,
-                        text: optionText,
-                        id: employee.idNumber
-                    });
-                    $selectElement.append($option);
-                });
-            } else {
-                console.log("No employee data found in local storage.");
-            }
-        }
+        // function fetchEmployee($selectElement) {
+        //     $selectElement.empty();
+        //     const employees = JSON.parse(localStorage.getItem('employees'));
+        //     if (employees) {
+        //         $.each(employees, function (index, employee) {
+        //             const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+        //             const $option = $('<option>', {
+        //                 value: optionText,
+        //                 text: optionText,
+        //                 id: employee.idNumber
+        //             });
+        //             $selectElement.append($option);
+        //         });
+        //     } else {
+        //         console.log("No employee data found in local storage.");
+        //     }
+        // }
 
         function updateSelectedDates() {
             var inputFieldValue = $('#dateField').val();
@@ -926,9 +1044,39 @@
             })
 
         }
+        search_advance_filter.on('click', function () {
+            FAdvancedFilter.val("true");
+            $('#f-employee-name').empty();
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            clear_advfilter();
+            toastr.success('Search successfully', 'Success', toast_options);
+        });
 
+        reset_advance_filter.on('click', function () {
+            FAdvancedFilter.val('');
+            $('#f-employee-name').empty();
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Data has been reset', 'Success', toast_options);
+        });
 
+        clear_advance_filter.on('click', function () {
+            clear_advfilter();
+            toastr.success('Clear successfully', 'Success', toast_options);
+        });
 
+        function clear_advfilter(){
+            FIdNumber.val('');
+            FTransactionCode.val('');
+            FOriginalAmount.val('');
+            FFinalAmount.val('');
+            FAccountNumber.val('');
+            FIncomingIn.val('');
+            fdateField.clear();
+            FEmployeeName.val('').trigger('change');
+            FStatus.val('').trigger('change');
+        }
 
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();
@@ -972,30 +1120,50 @@
             }
         });
 
-        $('#f-employee-name').change(function() {
-            var selectedOption = $(this).find('option:selected');
-            var optionText = selectedOption.attr('id');
-            if (optionText) {
-                const employees = JSON.parse(localStorage.getItem('employees'));
-                if (employees) {
-                    const selectedEmployeeId = selectedOption.attr('id');
-                    const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
-      
-                    
-                    if (selectedEmployee) {
-                        $('#f-first-name').val(selectedEmployee.firstName);
-                        $('#f-middle-name').val(selectedEmployee.middleInitial);
-                        $('#f-last-name').val(selectedEmployee.lastName);
-                    }
-                } else {
-                    console.log("No employee data found in local storage.");
-                }
-            }
-        });
+       // $('#f-employee-name').change(function() {
+          //  var selectedOption = $(this).find('option:selected');
+         //   var optionText = selectedOption.attr('id');
+         //   console.log(selectedOption);
+        //    console.log("DAAA");
+        //    if (optionText) {
+              //    const employees = JSON.parse(localStorage.getItem('employees'));
+              //    if (employees) {
+               //       const selectedEmployeeId = selectedOption.attr('id');
+               //       const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
+       
+                //      if (selectedEmployee) {
+                 //         employeeList.push(selectedEmployee.idNumber);
+                 //         $('#f-first-name').val(selectedEmployee.firstName);
+                //          $('#f-middle-name').val(selectedEmployee.middleInitial);
+                  //        $('#f-last-name').val(selectedEmployee.lastName);
+                  //    }
+               //   } else {
+                   //   console.log("No employee data found in local storage.");
+                //  }
+                
+             // }
+            //  console.log(employeeList);
+         // });
+
+         $('#f-employee-name').change(function() {
+             var selectedOptions = $(this).find('option:selected');
+             selectedOptions.each(function() {
+                 var optionValue = $(this).val();
+                 if (employeeList.indexOf(optionValue) === -1) {
+                    employeeList.push(optionValue);
+                 }
+             });
+             $(this).find('option:not(:selected)').each(function() {
+                 var optionValue = $(this).val();
+                 var index = employeeList.indexOf(optionValue);
+                 if (index !== -1) {
+                    employeeList.splice(index, 1);
+                 }
+             });
+             console.log("Newly added values: " + employeeList);
         
-
-
-          
+         });
+        
           $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
@@ -1035,8 +1203,6 @@
             });
             }
 
-
-
         //select 2
         if (EmployeeName.length) {
             EmployeeName.wrap('<div class="position-relative"></div>')
@@ -1048,6 +1214,7 @@
         }
 
         if (FEmployeeName.length) {
+            console.log("nggiiii");
             FEmployeeName.wrap('<div class="position-relative"></div>')
             FEmployeeName.select2({
                 placeholder: 'Choose employee',
@@ -1056,11 +1223,11 @@
             })
         }
 
-        if (FIncomingBy.length) {
-            FIncomingBy.wrap('<div class="position-relative"></div>')
-            FIncomingBy.select2({
-                placeholder: 'Choose Incoming',
-                dropdownParent: FIncomingBy.parent(),
+        if (FStatus.length) {
+            FStatus.wrap('<div class="position-relative"></div>')
+            FStatus.select2({
+                placeholder: 'Choose Status',
+                dropdownParent: FStatus.parent(),
                 allowClear: true,
             })
         }

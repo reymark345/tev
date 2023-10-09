@@ -7,5 +7,6 @@ urlpatterns = [
     path('travel_history', views.travel_history, name='travel-history'),
     path('tracking_load', views.tracking_load, name='tracking-load'),
     path('travel_history_load', views.travel_history_load, name='travel-history-load'),
+    path('employee_details', views.employee_details, name='employee-details'),
     
 ]

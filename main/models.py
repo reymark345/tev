@@ -112,6 +112,14 @@ class DjangoSession(models.Model):
     class Meta:
         managed = False
         db_table = 'django_session'
+
+class Status(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'status'
         
 class TevIncoming(models.Model):
     code = models.CharField(max_length=128, blank=True, null=True)
@@ -127,8 +135,7 @@ class TevIncoming(models.Model):
     incoming_out = models.DateTimeField(blank=True, null=True)
     slashed_out = models.DateTimeField(blank=True, null=True)
     remarks = models.TextField(blank=True, null=True)
-    purpose = models.CharField(max_length=255, blank=True, null=True)
-    status = models.IntegerField(max_length=128, blank=True, null=True,default=1)
+    status = models.ForeignKey(Status, models.DO_NOTHING,default=1)
     user_id = models.CharField(max_length=128, blank=True, null=True)
     
     class Meta:
@@ -160,7 +167,7 @@ class TevOutgoing(models.Model):
     box_c_out = models.DateTimeField(blank=True, null=True)
     ard_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     ard_out = models.DateTimeField(blank=True, null=True)
-    status = models.IntegerField(max_length=128, blank=True, null=True,default=5)
+    status = models.ForeignKey(Status, models.DO_NOTHING,default=5)
     user_id = models.CharField(max_length=128, blank=True, null=True)
     out_by = models.CharField(max_length=128, blank=True, null=True)
     is_print = models.BooleanField(default=False)
@@ -217,15 +224,6 @@ class StaffDetails(models.Model):
     class Meta:
         managed = True
         db_table = 'staff_details'
-        
-class Status(models.Model):
-    name = models.CharField(max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
-    updated_at = models.DateTimeField(blank=True, null=True)
-    class Meta:
-        managed = True
-        db_table = 'status'
-        
         
 class SystemConfiguration(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)

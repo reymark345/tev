@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge,Charges)
 import json 
 from django.core import serializers
 from datetime import date as datetime_date
@@ -48,9 +48,14 @@ def tracking_load(request):
     total = 0
     data = []
     finance_database_alias = 'finance'
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
+
     latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
     finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
-        'code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status',
+        'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',
         'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
         purposes=F('tevbridge__purpose'),
         dv_no=F('tevbridge__tev_outgoing__dv_no')
@@ -99,17 +104,18 @@ def tracking_load(request):
             'code': row['code'],
             'full_name': emp_fullname,
             'date_travel': row['date_travel'],
-            'status': row['status'],
+            'status': row['status_id'],
             'original_amount': row['original_amount'],
             'final_amount': row['final_amount'],
             'incoming_in': row['incoming_in'],
             'incoming_out': row['incoming_out'],
             'purpose': row['purposes'],
             'dv_no': row['dv_no'],
+            'id': row['id'],
             'amt_certified': amt_certified,
             'amt_journal': amt_journal,
             'amt_budget': amt_budget,
-            'amt_check': amt_check
+            'amt_check': amt_check,
         }
         data.append(item)
         
@@ -121,13 +127,69 @@ def tracking_load(request):
         'recordsFiltered': total,
     }
     return JsonResponse(response)
+
+
+@login_required(login_url='login')
+@csrf_exempt
+def employee_details(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    dvno = ''
+    fullname = ''
+    total_amount = 0
+    charges_list = []
+    data = []  
+    
+    idd = request.POST.get('dv_id')
+    incoming = TevIncoming.objects.filter(id=idd).first()
+    inc_list = TevIncoming.objects.filter(code=incoming.code).order_by('-id')
+
+    id_number = incoming.id_no
+    if incoming:
+        first_name = incoming.first_name or ""
+        middle_name = incoming.middle_name or ""
+        last_name = incoming.last_name or ""
+        fullname = first_name + " "+ middle_name + " "+ last_name
+
+
+    for row in inc_list:
+        item = {
+            'id': row.id,
+            'code': row.code,
+            'id_no': row.id_no,
+            'account_no': row.account_no,
+            'date_travel': row.date_travel,
+            'original_amount': row.original_amount,
+            'final_amount': row.final_amount,
+            'incoming_in': row.incoming_in,
+            'remarks': row.remarks,
+            'status': row.status_id,
+            'purpose': "",
+        }
+        data.append(item)
+        
+               
+    total = len(data)    
+
+          
+    response = {
+        'data': data,
+        'full_name': fullname,
+        'id_number': id_number,
+        'charges': charges_list,
+        'is_print': 1,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+        'total_amount':total_amount
+    }
+    return JsonResponse(response)
+
     
 
 @login_required(login_url='login')
 @csrf_exempt
 def travel_history(request):
     user_details = get_user_details(request)
-    print("testtt")
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
@@ -147,12 +209,12 @@ def travel_history_load(request):
     userData = StaffDetails.objects.filter(user_id=usr_id)
     id_number = userData[0].id_number
     query = """
-        SELECT code,first_name,middle_name,last_name,date_travel,ti.status,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no, ti.user_id FROM tev_incoming AS ti 
+        SELECT code,first_name,middle_name,last_name,date_travel,ti.status_id,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no, ti.user_id FROM tev_incoming AS ti 
         LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
         LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
         WHERE ti.id_no = %s AND
-        (ti.status IN (1, 2, 4, 5 ,6, 7) 
-        OR (ti.status = 3 AND 
+        (ti.status_id IN (1, 2, 4, 5 ,6, 7) 
+        OR (ti.status_id = 3 AND 
                 (
                         SELECT COUNT(*)
                         FROM tev_incoming

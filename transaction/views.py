@@ -113,7 +113,7 @@ def save_payroll(request):
         outgoing.save()
         latest_outgoing = TevOutgoing.objects.latest('id')
         for item in selected_tev:
-            tev_update = TevIncoming.objects.filter(id=item['id']).update(status=5)
+            tev_update = TevIncoming.objects.filter(id=item['id']).update(status_id=5)
             obj, was_created_bool = TevBridge.objects.get_or_create(
                 tev_incoming_id=item['id'],
                 tev_outgoing_id=latest_outgoing.id,
@@ -331,7 +331,7 @@ def employee_dv(request):
         LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
         LEFT JOIN charges AS ch ON ch.id = tb.charges_id
         LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
-        WHERE ti.status IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
+        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
     """
 
     with connection.cursor() as cursor:
@@ -399,8 +399,24 @@ def employee_dv(request):
     return JsonResponse(response)
 
 
-def payroll_load(request):       
-    item_data = (TevIncoming.objects.filter(status=4).select_related().distinct().order_by('-id').reverse())
+def payroll_load(request):  
+
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+
+    search_fields = ['code', 'first_name', 'last_name'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+    if _search:
+        item_data = TevIncoming.objects.filter(status_id=4).filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
+    else:
+        item_data = TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by(_order_dash + 'id')
+
+    # item_data = (TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by('-id').reverse())
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -437,7 +453,7 @@ def payroll_load(request):
             'incoming_out': item.incoming_out,
             'slashed_out': item.incoming_out,
             'remarks': item.remarks,
-            'status': item.status,
+            'status': item.status_id,
             'user_id': full_name
         }
 
@@ -454,8 +470,26 @@ def payroll_load(request):
 
 
 @csrf_exempt
-def box_load(request):       
-    item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
+def box_load(request):  
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
+    status_txt = ''
+    status_txt = '5' if _search == 'outgoing' else '6'
+     
+    # item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
+    search_fields = ['dv_no', 'division__name', 'status__name'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+    if _search:
+        item_data = TevOutgoing.objects.filter().filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
+    else:
+        item_data = TevOutgoing.objects.filter().select_related().distinct().order_by(_order_dash + 'id')
+
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -469,7 +503,7 @@ def box_load(request):
 
     data = []
 
-    for item in item_data: 
+    for item in item_data:
         userData = AuthUser.objects.filter(id=item.user_id)
         
         # Check if userData has results
@@ -492,7 +526,7 @@ def box_load(request):
             'cluster': item.cluster,
             'division_name': item.division.name,
             'division_chief': item.division.chief,
-            'status':item.status,
+            'status':item.status_id,
             'box_b_in': item.box_b_in,
             'box_b_out': item.box_b_out,
             'user_id': full_name,
@@ -554,7 +588,7 @@ def box_emp_load(request):
             'cluster': item.cluster,
             'division_name': item.division.name,
             'division_chief': item.division.chief,
-            'status':item.status,
+            'status':item.status_id,
             'box_b_in': item.box_b_in,
             'box_b_out': item.box_b_out,
             'user_id': full_name,
@@ -627,7 +661,7 @@ def update_box_list(request):
         SELECT final_amount FROM tev_incoming AS ti 
         LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
         LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        WHERE ti.status IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
+        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
     """
 
     with connection.cursor() as cursor:
@@ -677,10 +711,10 @@ def out_box_a(request):
     # Update the tev_incoming table
     ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
     
-    TevIncoming.objects.filter(id__in=ids).update(status=6)
+    TevIncoming.objects.filter(id__in=ids).update(status_id=6)
     
     for item_id  in out_list:
-        box_b = TevOutgoing.objects.filter(id=item_id).update(status=6,box_b_out=date_time.datetime.now(), out_by = user_id)
+        box_b = TevOutgoing.objects.filter(id=item_id).update(status_id=6,box_b_out=date_time.datetime.now(), out_by = user_id)
 
     
     return JsonResponse({'data': 'success'})
@@ -781,7 +815,7 @@ def add_existing_record(request):
         if max_id is not None:
             max_id += 1
 
-        tev_add = TevIncoming(code=g_code,first_name=fname,middle_name = mname, last_name = lname, id_no = idno, account_no = acctno,date_travel = cleaned_dates,original_amount=amount,final_amount = amount,incoming_out = date_time.datetime.now(),slashed_out = date_time.datetime.now(),remarks=remarks,status = 5,user_id=user_id)
+        tev_add = TevIncoming(code=g_code,first_name=fname,middle_name = mname, last_name = lname, id_no = idno, account_no = acctno,date_travel = cleaned_dates,original_amount=amount,final_amount = amount,incoming_out = date_time.datetime.now(),slashed_out = date_time.datetime.now(),remarks=remarks,status_id = 5,user_id=user_id)
         tev_add.save()
 
         bridge = TevBridge(purpose = purpose,charges_id = charges_id, tev_incoming_id = max_id, tev_outgoing_id = outgoing_id)
@@ -807,7 +841,7 @@ def addtevdetails(request):
     if amount =='':
         amount = 0
   
-    tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,remarks=remarks,status=status)
+    tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,remarks=remarks,status_id=status)
 
     return JsonResponse({'data': 'success'})
 
