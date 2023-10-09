@@ -142,7 +142,7 @@ def item_load(request):
                 AND final_amount LIKE %s
                 AND incoming_in LIKE %s
                 AND status_id LIKE %s
-            );
+            )ORDER BY id DESC;
         """
 
         params = [
@@ -174,7 +174,7 @@ def item_load(request):
                 AND final_amount LIKE %s
                 AND incoming_in LIKE %s
                 AND status_id LIKE %s
-            );
+            )ORDER BY id DESC;
         """
 
         params = [
@@ -195,7 +195,7 @@ def item_load(request):
             WHERE (code, id) IN (
                 SELECT DISTINCT code, MAX(id)
                 FROM tev_incoming
-                GROUP BY code
+                GROUP BY code 
             ) 
             AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
             AND (code LIKE %s
@@ -208,7 +208,7 @@ def item_load(request):
             OR original_amount LIKE %s
             OR final_amount LIKE %s
             OR status_id LIKE %s
-            );
+            )ORDER BY id DESC;
         """
             
         params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
@@ -302,7 +302,7 @@ def checking_load(request):
         OR final_amount LIKE %s
         OR remarks LIKE %s
         OR status_id LIKE %s
-        );
+        )ORDER BY id DESC;
 """
 
     with connection.cursor() as cursor:
@@ -374,9 +374,6 @@ def item_update(request):
     middle = request.POST.get('EmpMiddle')
     lname = request.POST.get('EmpLastname')
     amount = request.POST.get('OriginalAmount')
-
-    print(amount)
-    print("whyywalayamount")
     remarks = request.POST.get('Remarks')
     tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount,remarks=remarks)
     return JsonResponse({'data': 'success'})
@@ -447,6 +444,35 @@ def item_add(request):
             duplicate_travel.append(cleaned_date)
 
     if duplicate_travel:
+        date_components = cleaned_dates.split(',')
+        def format_date(date_str):
+            date_object = datetime.strptime(date_str, '%d-%m-%Y')
+            formatted_date = date_object.strftime('%b. %d, %Y')
+            return formatted_date
+        formatted_dates = [format_date(date) for date in date_components]
+        formatted_dates_string = ', '.join(formatted_dates)
+        formatted_dates_string = "Duplicate Travel for " + formatted_dates_string
+        
+
+        tev_add = TevIncoming(
+            code=g_code,
+            first_name=name,
+            middle_name=middle,
+            last_name=lname,
+            id_no=idd_no,
+            account_no=acct_no,
+            date_travel=cleaned_dates,
+            original_amount=amount,
+            remarks=formatted_dates_string,
+            user_id=user_id
+        )
+        tev_add.save()
+
+        if tev_add.id:
+            system_config = SystemConfiguration.objects.first()
+            system_config.transaction_code = g_code
+            system_config.save()
+
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
 
     else:

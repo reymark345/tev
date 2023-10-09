@@ -451,7 +451,7 @@
                     }
                     if(data==2){
                       tooltip = 'For Checking';
-                      return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-x"></i></span>'
+                      return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
                     }
                     if(data==7){
                       tooltip = 'Approved';
@@ -560,8 +560,6 @@
                 orderable: false,
                 searchable: false,
                 render: function (data) {
-                    console.log("IDNISIYA");
-                    console.log(data);
                     return (
                         '<a href="javascript:;" data-id="' + data + '" id="'+data+'" class="item-edit text-body view-data"><i class="text-primary ti ti-eye"></i></a>'
                     )
@@ -618,8 +616,6 @@
                           let editColumn = '';
                           let statusColumn = '';
                           let status = item.status;
-                          console.log("dadaadad");
-                          console.log(status);
                           if (status ==1){
                             statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
                           }

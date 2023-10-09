@@ -442,11 +442,19 @@
                     },
                 },
                 {
+                    targets: -3,
+                    render: function (data) {
+                        return '<span class="badge bg-label-danger">'+data+'</span>'
+                    },
+                },
+
+                {
                     targets: -4,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
+                
                 {
                   targets: -1,
                   title: 'Actions',

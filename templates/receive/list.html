@@ -220,6 +220,58 @@
 </div>
 <!--/ Edit User Modal -->
 
+
+<!--/ Modal Import-->
+
+<!-- Modal 1-->
+<div
+    class="modal fade"
+    id="import-excel"
+    aria-labelledby="modalToggleLabel"
+    tabindex="-1"
+    style="display: none"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="modalToggleLabel">Upload Excel File <small>(xlsx)</small></h5>
+        <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+        ></button>
+        </div>
+        <div class="modal-body">
+            <form action="/upload" class="dropzone needsclick" id="dropzone-basic">
+                <div class="dz-message needsclick">
+                  Drop Excel file here or click to upload
+                  <span class="note needsclick"
+                    >Please check the format of your Excel file it must <strong>xlsx </strong>format to upload</span
+                  >
+                </div>
+                <div class="fallback">
+                  <input name="file" type="file" />
+                </div>
+            </form>
+
+        </div>
+        <div class="modal-footer">
+        <button
+            class="btn btn-primary"
+        >
+            Upload
+        </button>
+        </div>
+    </div>
+    </div>
+</div>
+
+
+
+
+
       
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
@@ -600,6 +652,18 @@
                     }
                 },
 
+                {
+                    className: 'btn btn-label-success me-2 waves-effect',
+                    text: '<i class="ti ti-file-import me-sm-1"></i> <span class="d-none d-sm-inline-block">Import xlsx</span>',
+                    action: function () {
+                        $("#import-excel").modal("show");
+
+                        
+                        
+                       
+                    }
+                },
+
 
                 {
                     text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
@@ -636,15 +700,16 @@
                             formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
                             status_val = fields.status;
                             let fullname = fields.first_name + " " + fields.middle_name + " " + fields.last_name
+                            let id_no = fields.id_no;
                             if(status_val ===3){
-                                EmployeeName.val(fullname).trigger('change').prop("disabled", true);
+                                EmployeeName.val(id_no).trigger('change').prop("disabled", true);
                                 convertedAmount = floatvalue.toFixed(2);
                                 OriginalAmount.prop("disabled", true);
                                 DateTravel.prop("disabled", true);
                                 RangeTravel.prop("disabled", true);
                             }
                             else{
-                                EmployeeName.val(fullname).trigger('change').prop("disabled", false);
+                                EmployeeName.val(id_no).trigger('change').prop("disabled", false);
                                 let original_amt = parseFloat(fields.original_amount)
                                 convertedAmount = original_amt.toFixed(2);
                                 OriginalAmount.prop("disabled", false);
@@ -662,6 +727,17 @@
                             
                             HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
+
+                            if (Remarks.indexOf("Duplicate Travel") !== -1) {
+                                // Remarks contains the value "Duplicate Travel"
+                                console.log("Remarks contain Duplicate Travel");
+                                Remarks.prop("disabled", false);
+                            } else {
+                                // Remarks does not contain the value "Duplicate Travel"
+                                console.log("Remarks do not contain Duplicate Travel");
+                                Remarks.prop("disabled", true);
+                            }
+                            
                             Remarks.val(fields.remarks);
                             DateTravel.val(formattedDates);
                             ItemID.val(pk);
@@ -722,6 +798,7 @@
                     ItemID.val(0);
                     $("#dateField").prop("disabled", false);
                     $(".rangeTravel").prop("disabled", false);
+                    OriginalAmount.prop("disabled", false);
                     $('.title-name').text('Add Tev Record')
                     EmployeeName.val('').trigger('change').prop("disabled", false);
                     $('.form-control').val('');
@@ -836,6 +913,15 @@
 
                                 dataTable.ajax.reload();
                             } else {
+                                dateField.clear();
+                                EmployeeName.val("").trigger('change');
+                                OriginalAmount.val("");
+                                DateTravel.val("")
+                                Remarks.val("");
+                                RangeTravel.val("")
+                                $("#dateField").prop("disabled", false);
+                                $(".rangeTravel").prop("disabled", false);
+                                dataTable.ajax.reload();
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Error saving!',

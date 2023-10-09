@@ -42,8 +42,6 @@ def tracking_list(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-    
-    
 def tracking_load(request):
     total = 0
     data = []
@@ -59,7 +57,7 @@ def tracking_load(request):
         'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
         purposes=F('tevbridge__purpose'),
         dv_no=F('tevbridge__tev_outgoing__dv_no')
-    )
+    ).order_by('-id')
     
     total = len(finance_data)
     _start = request.GET.get('start')
