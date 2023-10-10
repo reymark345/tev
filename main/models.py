@@ -137,6 +137,7 @@ class TevIncoming(models.Model):
     remarks = models.TextField(blank=True, null=True)
     status = models.ForeignKey(Status, models.DO_NOTHING,default=1)
     user_id = models.CharField(max_length=128, blank=True, null=True)
+    is_upload = models.BooleanField(default=False)
     
     class Meta:
         managed = True

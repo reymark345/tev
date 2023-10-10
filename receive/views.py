@@ -21,6 +21,8 @@ from django.db import connections
 from datetime import datetime,timedelta
 from receive.filters import UserFilter
 import datetime as date_time
+from openpyxl import load_workbook
+from tablib import Dataset
 
 
 
@@ -359,6 +361,84 @@ def checking_load(request):
         'recordsFiltered': total,
     }
     return JsonResponse(response)
+
+# @csrf_exempt
+# def upload_tev(request):
+#     if request.method == 'POST' and request.FILES['ExcelData']:
+#         excel_file = request.FILES['ExcelData']
+#         user_id = request.session.get('user_id', 0)
+#         g_code = generate_code()
+        
+#         if not excel_file.name.endswith('xlsx'):
+#             return JsonResponse({'data': 'errorxlsx'})
+#         else:
+#             try:
+#                 workbook = load_workbook(excel_file, data_only=True)
+#                 worksheet = workbook.active
+
+#                 for row in worksheet.iter_rows(min_row=2, values_only=True):
+#                     # Assuming the columns in Excel file are in order: Column1, Column2, Column3
+#                     column1, column2, column3 = row
+                    
+#                     # Create and save TevIncoming object
+#                     tev_add = TevIncoming.objects.create(code =g_code, id_no=column1, original_amount=column2, date_travel=column3, user_id = user_id)
+
+#                     if tev_add.id:
+#                         print("dalaaa")
+#                         system_config = SystemConfiguration.objects.first()
+#                         system_config.transaction_code = g_code
+#                         system_config.save()
+#                     else:
+#                         print("ngikoo")
+
+#                 return redirect('receive-list')
+#             except Exception as e:
+#                 print(e)
+#                 return JsonResponse({'data': 'error' + str(e)})
+#     else:
+#         return JsonResponse({'data': 'errorahh'})
+    
+
+@csrf_exempt
+def upload_tev(request):
+    if request.method == 'POST' and request.FILES['ExcelData']:
+        excel_file = request.FILES['ExcelData']
+        user_id = request.session.get('user_id', 0)
+        g_code = generate_code()
+        
+        if not excel_file.name.endswith('xlsx'):
+            return JsonResponse({'data': 'errorxlsx'})
+        else:
+            try:
+                workbook = load_workbook(excel_file, data_only=True)
+                worksheet = workbook.active
+
+                for row in worksheet.iter_rows(min_row=2, values_only=True):
+                    column1, column2, column3 = row
+                    
+                    # Create and save TevIncoming object for each row
+                    tev_add = TevIncoming.objects.create(code =g_code,id_no=column1, original_amount=column2, date_travel=column3, user_id=user_id, is_upload = True)
+                    
+                    if tev_add.id:
+                        print("dalaaa")
+                        system_config = SystemConfiguration.objects.first()
+                        system_config.transaction_code = g_code
+                        system_config.save()
+                    else:
+                        print("ngikoo")
+
+                return JsonResponse({'data': 'success'})
+            except Exception as e:
+                print(e)
+                return JsonResponse({'data': 'error' + str(e)})
+    else:
+        return JsonResponse({'data': 'errorahh'})
+
+
+
+
+
+
 
 def item_edit(request):
     id = request.GET.get('id')
