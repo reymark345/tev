@@ -15,6 +15,7 @@
                             <th><input type="checkbox" id="check-all"></th>
                             <th>Transaction Code</th>
                             <th>Employee Name</th>
+                            <th>Date Travel</th>
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Incoming In</th>
@@ -213,6 +214,7 @@
                 },
                 { data: 'code' },
                 { data: 'name' },
+                { data: 'date_travel' },
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'incoming_in' },
@@ -230,6 +232,23 @@
                 {
                     targets: 3,
                     render: function(data) {
+                        let dates = data.split(',');
+
+                        let formattedDates = dates.map(date => {
+                            let [day, month, year] = date.split('-');
+                            let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            month = months[parseInt(month, 10) - 1];
+                            return `${month} ${day} ${year}`;
+                        });
+                        
+                        let result = formattedDates.join(', ');
+
+                        return '<span class="badge bg-label-primary">'+result+'</span>'
+                    },
+                },
+                {
+                    targets: 4,
+                    render: function(data) {
                         var floatValue = parseFloat(data);
                         if (floatValue !== 0) {
                             var convertedValue = floatValue.toFixed(2);
@@ -240,7 +259,7 @@
                     },
                 },
                 {
-                  targets: 4,
+                  targets: 5,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
@@ -724,7 +743,7 @@
 
         $(document).on('change', '.checkbox_data', function(event) {
             var clickedCheckbox = $(event.target);
-            var row = clickedCheckbox.closest('tr'); // Get the parent row of the clicked checkbox
+            var row = clickedCheckbox.closest('tr');
             var checkboxId = clickedCheckbox.attr('value');
             var purposeInput = row.find('input[name="Purpose"]');
             var purposeValue = purposeInput.val().trim();
@@ -735,25 +754,57 @@
             let monthDate = new Date(currentDate.getFullYear(), month);
             let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
             let year = currentDate.getFullYear();
-          
+            let travel = '';
             let defaultPurposeValue = "TE for " + monthName + " " + year;
             if (clickedCheckbox.prop('checked')) {
                 var existingItem = selected_tev.find(function(item) {
                     return item.id === checkboxId;
                 });
-              
+
+                travel = row.find('td:eq(3)').text();
+                console.log(travel);
+                console.log("gegege");
+
+                let dates = travel.split(', ').map(dateString => {
+                    let [month, day, year] = dateString.split(' ');
+                    return { month, year };
+                });
+                
+                // Group months based on years
+                let groupedMonths = {};
+                dates.forEach(date => {
+                    if (!groupedMonths[date.year]) {
+                        groupedMonths[date.year] = [];
+                    }
+                    if (!groupedMonths[date.year].includes(date.month)) {
+                        groupedMonths[date.year].push(date.month);
+                    }
+                });
+                
+                // Format output string
+                let output = Object.entries(groupedMonths).map(([year, months]) => {
+                    return `${months.join(', ')} ${year}`;
+                }).join(' and ');
+                
+                travel = "TE for " + output;
+         
+
+                
+
                 if (!existingItem) {
                     var array_id = {
                         id: stck_id,
                         code: row.find('td:eq(1)').text(),
                         name: row.find('td:eq(2)').text(),
-                        amount: row.find('td:eq(3)').text(),
-                        status: row.find('td:eq(4)').text(),
+                        date_travel: row.find('td:eq(3)').text(),
+                        amount: row.find('td:eq(4)').text(),
+                        status: row.find('td:eq(5)').text(),
                         charges: row.find('select[name="Charges"]').val(),
-                        purpose: purposeValue || defaultPurposeValue,
+                        purpose: travel,
                     };
                     selected_tev.push(array_id);
                     console.log(array_id);
+
                 } else {
                     existingItem.purpose = purposeValue;
 
@@ -763,9 +814,9 @@
                 purposeInput.prop("disabled", false);
               
                 if (!purposeValue) {
-                    purposeInput.val(defaultPurposeValue);
+                    purposeInput.val(travel);
                 }
-            } else {
+                } else {
                 var index = selected_tev.findIndex(function(item) {
                     return item.id === checkboxId;
                 });

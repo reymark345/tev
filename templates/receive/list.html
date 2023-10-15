@@ -4,7 +4,7 @@
 <div class="content-wrapper">
     <!-- Content -->
     <div class="container-fluid flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Item /</span> List</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Received Document /</span> Incoming</h4>
 
         <!-- DataTable with Buttons -->
         <div class="card">
@@ -633,10 +633,6 @@
                                 })
                             }
                         }, 300);
-                        
-
-
-                        
                         $("#advance-filter").modal("show");
                     }
     
@@ -699,8 +695,8 @@
                                 allowClear: true,
                                 })
                             }
-                            let fields = data[0].fields
-                            let pk = data[0].pk
+                            let fields = data[0].fields;
+                            let pk = data[0].pk;
                             let employee_name = $('#employee-name');
                             let floatvalue = parseFloat(fields.final_amount);
                             let convertedAmount = 0;
@@ -735,8 +731,9 @@
                             
                             HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
+                            console.log(Remarks);
 
-                            if (Remarks.indexOf("Duplicate Travel") !== -1) {
+                            if (fields.remarks.indexOf("Duplicate Travel") !== -1) {
                                 // Remarks contains the value "Duplicate Travel"
                                 console.log("Remarks contain Duplicate Travel");
                                 Remarks.prop("disabled", false);
@@ -787,7 +784,7 @@
                 });
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
 
         const newRecord = document.querySelector('.create-new')
             if (newRecord) {
@@ -932,7 +929,7 @@
                                 dataTable.ajax.reload();
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Error saving!',
+                                    title: 'Data saved!',
                                     html:"Duplicate Travel <br><b>"+data.message+"</b>",
                                     customClass: {
                                         confirmButton: 'btn btn-success',
@@ -995,21 +992,6 @@
                 });
                 $selectElement.append($option);
             });
-
-           //// if (FEmployeeName.length) {
-             //   FEmployeeName.wrap('<div class="position-relative"></div>')
-             //   FEmployeeName.select2({
-             //       placeholder: 'Choose employee',
-            //        dropdownParent: FEmployeeName.parent(),
-           //         allowClear: true,
-          //      });
-        //    }
-            
-
-
-
-            
-       
         } else {
             console.log("No employee data found in local storage.");
         }

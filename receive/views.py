@@ -271,51 +271,151 @@ def item_load(request):
     return JsonResponse(response)
 
 
-
 def checking_load(request):
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
+    FIdNumber= request.GET.get('FIdNumber')
+    FTransactionCode = request.GET.get('FTransactionCode')
+    FDateTravel= request.GET.get('FDateTravel') 
+    FIncomingIn= request.GET.get('FIncomingIn')
+    # FSLashedOut= request.GET.get('FSLashedOut')
+    FOriginalAmount= request.GET.get('FOriginalAmount')
+    FFinalAmount= request.GET.get('FFinalAmount')
+    FAccountNumber= request.GET.get('FAccountNumber')
+    FIncomingBy= request.GET.get('FIncomingBy')
+    FFirstName= request.GET.get('FFirstName')
+    FMiddleName= request.GET.get('FMiddleName')
+    FLastName= request.GET.get('FLastName')
+    FAdvancedFilter =  request.GET.get('FAdvancedFilter')
+    FStatus = request.GET.get('FStatus')
+    EmployeeList = request.GET.getlist('EmployeeList[]')
     status_txt = ''
-    if status_txt == "for checking":
-        status_txt = '%'+'2'+'%'
-    elif status_txt == "approved":
-        status_txt = '%'+'7'+'%'
-    elif status_txt == "returned":
-        status_txt = '%'+'3'+'%'
+    if _search in "returned":
+        status_txt = '3'
 
-    search_pattern = '%' + _search + '%'
+    elif _search in "for checking":
+        status_txt = '2'
+    else:
+        status_txt = '7'
+        
+    id_numbers = EmployeeList if EmployeeList else []
+    # if FAdvancedFilter and not EmployeeList:
+    #     print("first attempt")
+    #     query = """
+    #         SELECT t.*
+    #         FROM tev_incoming t
+    #         WHERE (t.status_id = 2
+    #                 OR t.status_id = 7
+    #                 OR (t.status_id = 3 AND t.slashed_out IS NULL)
+    #         )
+    #         AND (code LIKE %s
+    #         OR id_no LIKE %s
+    #         OR account_no LIKE %s
+    #         OR date_travel LIKE %s
+    #         OR original_amount LIKE %s
+    #         OR final_amount LIKE %s
+    #         AND incoming_in LIKE %s
+    #         OR status_id LIKE %s
+    #         )ORDER BY incoming_out DESC;
+    #     """
 
-    query = """
-        SELECT t.*
-        FROM tev_incoming t
-        WHERE (t.status_id = 2
+    #     params = [
+    #         '%' + FTransactionCode + '%' if FTransactionCode else "",
+    #         '%' + EmployeeList + '%' if EmployeeList else "",
+    #         '%' + FAccountNumber + '%' if FAccountNumber else "% %",
+    #         '%' + FDateTravel + '%' if FDateTravel else "",
+    #         '%' + FOriginalAmount + '%' if FOriginalAmount else "",
+    #         '%' + FFinalAmount + '%' if FFinalAmount else "",
+    #         '%' + FIncomingIn + '%' if FIncomingIn else "",
+    #         '%' + FStatus + '%' if FStatus else "",
+    #     ]
+
+    if FAdvancedFilter:
+        def dictfetchall(cursor):
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        query = """
+            SELECT t.*
+            FROM tev_incoming t
+            WHERE (t.status_id = 2
                 OR t.status_id = 7
-                OR (t.status_id = 3 AND t.slashed_out IS NULL)
-        )
-        AND (code LIKE %s
-        OR first_name LIKE %s
-        OR last_name LIKE %s
-        OR id_no LIKE %s
-        OR account_no LIKE %s
-        OR date_travel LIKE %s
-        OR original_amount LIKE %s
-        OR final_amount LIKE %s
-        OR remarks LIKE %s
-        OR status_id LIKE %s
-        )ORDER BY id DESC;
-"""
+                OR (t.status_id = 3 AND t.slashed_out IS NULL))
+        """
+        params = []
 
+        if FTransactionCode:
+            query += " AND t.code = %s"
+            params.append(FTransactionCode)
+
+        if FDateTravel:
+            query += " AND t.date_travel = %s"
+            params.append(FDateTravel)
+
+        if FIncomingIn:
+            query += " AND t.incoming_in = %s"
+            params.append(FIncomingIn)
+
+        if FStatus:
+            query += " AND t.status_id = %s"
+            params.append(FStatus)
+
+            
+        if FAccountNumber:
+            query += " AND t.account_no = %s"
+            params.append(FStatus)
+
+        if FOriginalAmount:
+            query += " AND t.original_amount = %s"
+            params.append(FStatus)
+
+        if FFinalAmount:
+            query += " AND t.final_amount = %s"
+            params.append(FStatus)
+
+        if EmployeeList:
+            placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
+            query += f" AND t.id_no IN ({placeholders})"
+            params.extend(EmployeeList)
+
+        query += " ORDER BY t.incoming_out DESC;"
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, params)
+            results = dictfetchall(cursor)
+
+    else:
+        print("third attempt")
+        query = """
+            SELECT t.*
+            FROM tev_incoming t
+            WHERE (t.status_id = 2
+                    OR t.status_id = 7
+                    OR (t.status_id = 3 AND t.slashed_out IS NULL)
+            )
+            AND (code LIKE %s
+            OR id_no LIKE %s
+            OR account_no LIKE %s
+            OR date_travel LIKE %s
+            OR original_amount LIKE %s
+            OR final_amount LIKE %s
+            OR remarks LIKE %s
+            OR status_id LIKE %s
+            )ORDER BY id DESC;
+        """
+            
+        params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
+    
     with connection.cursor() as cursor:
-        cursor.execute(query, [search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern,search_pattern,status_txt])
-        results = cursor.fetchall()
+        cursor.execute(query, params)
+        columns = [col[0] for col in cursor.description]
+        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     total = len(results)
     _start = request.GET.get('start')
     _length = request.GET.get('length')
-    
-
     if _start and _length:
         start = int(_start)
         length = int(_length)
@@ -325,33 +425,34 @@ def checking_load(request):
 
     data = []
 
-    for row in results:
-
-        userData = AuthUser.objects.filter(id=row[14])
-        full_name = userData[0].first_name + ' ' + userData[0].last_name
-        first_name = row[2] if row[2] else ''
-        middle_name = row[3] if row[3] else ''
-        last_name = row[4] if row[4] else ''
-        emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
+    for item in results:
+        userData = AuthUser.objects.filter(id=item['user_id'])
+        full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
         
+        first_name = item['first_name'] if item['first_name'] else ''
+        middle_name = item['middle_name'] if item['middle_name'] else ''
+        last_name = item['last_name'] if item['last_name'] else ''
+        
+        emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
 
-        item = {
-            'id': row[0],
-            'code': row[1],
+        item_entry = {
+            'id': item['id'],
+            'code': item['code'],
             'name': emp_fullname,
-            'id_no': row[5],
-            'account_no': row[6],
-            'date_travel': row[7],
-            'original_amount': row[8],
-            'final_amount': row[9],
-            'incoming_in': row[10],
-            'incoming_out': row[11],
-            'slashed_out': row[12],
-            'remarks': row[13],
-            'status': row[15],
+            'id_no': item['id_no'],
+            'account_no': item['account_no'],
+            'date_travel': item['date_travel'],
+            'original_amount': item['original_amount'],
+            'final_amount': item['final_amount'],
+            'incoming_in': item['incoming_in'],
+            'incoming_out': item['incoming_out'],
+            'slashed_out': item['slashed_out'],
+            'remarks': item['remarks'],
+            'status': item['status_id'],
             'user_id': full_name
         }
-        data.append(item)
+
+        data.append(item_entry)
 
     response = {
         'data': data,
@@ -361,6 +462,123 @@ def checking_load(request):
         'recordsFiltered': total,
     }
     return JsonResponse(response)
+
+
+
+# def checking_load(request):
+#     _search = request.GET.get('search[value]')
+#     _order_dir = request.GET.get('order[0][dir]')
+#     _order_dash = '-' if _order_dir == 'desc' else ''
+#     _order_col_num = request.GET.get('order[0][column]')
+
+#     FIdNumber= request.GET.get('FIdNumber')
+#     FTransactionCode = request.GET.get('FTransactionCode')
+#     FDateTravel= request.GET.get('FDateTravel') 
+#     FIncomingIn= request.GET.get('FIncomingIn')
+#     # FSLashedOut= request.GET.get('FSLashedOut')
+#     FOriginalAmount= request.GET.get('FOriginalAmount')
+#     FFinalAmount= request.GET.get('FFinalAmount')
+#     FAccountNumber= request.GET.get('FAccountNumber')
+#     FIncomingBy= request.GET.get('FIncomingBy')
+#     FFirstName= request.GET.get('FFirstName')
+#     FMiddleName= request.GET.get('FMiddleName')
+#     FLastName= request.GET.get('FLastName')
+#     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
+#     FStatus = request.GET.get('FStatus')
+#     EmployeeList = request.GET.getlist('EmployeeList[]')
+#     status_txt = ''
+#     if _search in "returned":
+#         status_txt = '3'
+#     else:
+#         status_txt = '1'
+#     id_numbers = EmployeeList if EmployeeList else []
+
+
+
+
+
+#     if status_txt == "for checking":
+#         status_txt = '%'+'2'+'%'
+#     elif status_txt == "approved":
+#         status_txt = '%'+'7'+'%'
+#     elif status_txt == "returned":
+#         status_txt = '%'+'3'+'%'
+
+#     search_pattern = '%' + _search + '%'
+
+#     query = """
+#         SELECT t.*
+#         FROM tev_incoming t
+#         WHERE (t.status_id = 2
+#                 OR t.status_id = 7
+#                 OR (t.status_id = 3 AND t.slashed_out IS NULL)
+#         )
+#         AND (code LIKE %s
+#         OR first_name LIKE %s
+#         OR last_name LIKE %s
+#         OR id_no LIKE %s
+#         OR account_no LIKE %s
+#         OR date_travel LIKE %s
+#         OR original_amount LIKE %s
+#         OR final_amount LIKE %s
+#         OR remarks LIKE %s
+#         OR status_id LIKE %s
+#         )ORDER BY id DESC;
+# """
+
+#     with connection.cursor() as cursor:
+#         cursor.execute(query, [search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern,search_pattern,status_txt])
+#         results = cursor.fetchall()
+
+#     total = len(results)
+#     _start = request.GET.get('start')
+#     _length = request.GET.get('length')
+    
+
+#     if _start and _length:
+#         start = int(_start)
+#         length = int(_length)
+#         page = math.ceil(start / length) + 1
+#         per_page = length
+#         results = results[start:start + length]
+
+#     data = []
+
+#     for row in results:
+#         userData = AuthUser.objects.filter(id=row[14])
+#         full_name = userData[0].first_name + ' ' + userData[0].last_name
+#         first_name = row[2] if row[2] else ''
+#         middle_name = row[3] if row[3] else ''
+#         last_name = row[4] if row[4] else ''
+#         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
+        
+
+#         item = {
+#             'id': row[0],
+#             'code': row[1],
+#             'name': emp_fullname,
+#             'id_no': row[5],
+#             'account_no': row[6],
+#             'date_travel': row[7],
+#             'original_amount': row[8],
+#             'final_amount': row[9],
+#             'incoming_in': row[10],
+#             'incoming_out': row[11],
+#             'slashed_out': row[12],
+#             'remarks': row[13],
+#             'status': row[16],
+#             'user_id': full_name
+#         }
+#         data.append(item)
+
+#     response = {
+#         'data': data,
+#         'page': page,
+#         'per_page': per_page,
+#         'recordsTotal': total,
+#         'recordsFiltered': total,
+#     }
+#     return JsonResponse(response)
 
 # @csrf_exempt
 # def upload_tev(request):
@@ -524,7 +742,11 @@ def item_add(request):
             duplicate_travel.append(cleaned_date)
 
     if duplicate_travel:
-        date_components = cleaned_dates.split(',')
+
+        formatted_dates = [date.replace("'", "") for date in duplicate_travel]
+        result = ",".join(formatted_dates)
+
+        date_components = result.split(',')
         def format_date(date_str):
             date_object = datetime.strptime(date_str, '%d-%m-%Y')
             formatted_date = date_object.strftime('%b. %d, %Y')

@@ -446,6 +446,7 @@ def payroll_load(request):
             'name': emp_fullname,
             'middle_name': item.middle_name,
             'last_name': item.last_name,
+            'date_travel': item.date_travel,
             'id_no': item.id_no,
             'original_amount': item.original_amount,
             'final_amount': item.final_amount,
