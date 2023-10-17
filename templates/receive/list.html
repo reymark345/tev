@@ -4,7 +4,7 @@
 <div class="content-wrapper">
     <!-- Content -->
     <div class="container-fluid flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Received Document /</span> Incoming</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Item /</span> List</h4>
 
         <!-- DataTable with Buttons -->
         <div class="card">
@@ -248,17 +248,9 @@
                 </div>
 
 
-                <!-- <div id ="load">  &nbsp;&nbsp;&nbsp;        
-                    <div id="load121" class="spinner-grow " role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <span>Uploading Data please wait...</span>
-                  </div>    -->
-                
-
 
                 <div class="modal-footer">
-                <button type="submit" class="btn btn-outline-success">Upload</button>
+                <button type="button"  class="btn btn-outline-success" id="uploadButton">Upload</button>
                 <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
             </form> 
 
@@ -633,6 +625,10 @@
                                 })
                             }
                         }, 300);
+                        
+
+
+                        
                         $("#advance-filter").modal("show");
                     }
     
@@ -695,8 +691,8 @@
                                 allowClear: true,
                                 })
                             }
-                            let fields = data[0].fields;
-                            let pk = data[0].pk;
+                            let fields = data[0].fields
+                            let pk = data[0].pk
                             let employee_name = $('#employee-name');
                             let floatvalue = parseFloat(fields.final_amount);
                             let convertedAmount = 0;
@@ -731,9 +727,8 @@
                             
                             HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
-                            console.log(Remarks);
 
-                            if (fields.remarks.indexOf("Duplicate Travel") !== -1) {
+                            if (Remarks.indexOf("Duplicate Travel") !== -1) {
                                 // Remarks contains the value "Duplicate Travel"
                                 console.log("Remarks contain Duplicate Travel");
                                 Remarks.prop("disabled", false);
@@ -784,7 +779,7 @@
                 });
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
 
         const newRecord = document.querySelector('.create-new')
             if (newRecord) {
@@ -929,7 +924,7 @@
                                 dataTable.ajax.reload();
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Data saved!',
+                                    title: 'Error saving!',
                                     html:"Duplicate Travel <br><b>"+data.message+"</b>",
                                     customClass: {
                                         confirmButton: 'btn btn-success',
@@ -992,6 +987,21 @@
                 });
                 $selectElement.append($option);
             });
+
+           //// if (FEmployeeName.length) {
+             //   FEmployeeName.wrap('<div class="position-relative"></div>')
+             //   FEmployeeName.select2({
+             //       placeholder: 'Choose employee',
+            //        dropdownParent: FEmployeeName.parent(),
+           //         allowClear: true,
+          //      });
+        //    }
+            
+
+
+
+            
+       
         } else {
             console.log("No employee data found in local storage.");
         }
@@ -1121,13 +1131,12 @@
 
         }
 
-        $('#uploadButton').on('click', function() {
-            var excelFile = $('#excelFileInput')[0].files[0];
-            console.log(excelFile);
-            console.log("excelFile");
+        $('#uploadButton').on('click', function(event) {
+            event.preventDefault();
+            let LStorage = JSON.parse(localStorage.getItem('employees'));
             var formData = new FormData();
-            formData.append('ExcelData', excelFile);
-
+            formData.append('ExcelData', $('input[name=ExcelData]')[0].files[0]);
+            formData.append('employees', JSON.stringify(LStorage));
             $.ajax({
                 type: "POST",
                 url: "{% url 'upload-tev' %}",
@@ -1138,32 +1147,10 @@
                 if (data.data == 'success') {
                     toastr.success('Successfully save', 'Success', toast_options);
                 } else {
-                    toastr.danger('Data not saved', 'Danger', toast_options);
+                    toastr.error('Data not saved', 'Danger', toast_options);
                 }
             });
         });
-
-
-            // Get form data using FormData object
-            // var formData = new FormData($('#dropzone-basic')[0]);
-
-            // // Perform AJAX POST request
-            // $.ajax({
-            //     url: '/upload', // Your form's action URL
-            //     type: 'POST', // Use POST method
-            //     data: formData,
-            //     contentType: false,
-            //     processData: false,
-            //     success: function(response) {
-            //         // Handle success response here
-            //         console.log(response);
-            //     },
-            //     error: function(error) {
-            //         // Handle error response here
-            //         console.error(error);
-            //     }
-            // });
-
 
         search_advance_filter.on('click', function () {
             FAdvancedFilter.val("true");

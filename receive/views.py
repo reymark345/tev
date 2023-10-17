@@ -615,47 +615,140 @@ def checking_load(request):
 #                 return JsonResponse({'data': 'error' + str(e)})
 #     else:
 #         return JsonResponse({'data': 'errorahh'})
-    
+
+
+
+# def read_excel_file(excel_file):
+#     workbook = load_workbook(excel_file, data_only=True)
+#     worksheet = workbook.active
+
+#     excel_data = []
+#     for row in worksheet.iter_rows(min_row=2, values_only=True):
+#         print("testonly")
+#         print(row)
+#         id_no, amount, date_travel = row
+#         excel_data.append({
+#             'id_no': id_no,
+#             'amount': amount,
+#             'date_travel': date_travel,
+#         })
+
+#     return excel_data
+
+
+def read_excel_file(excel_file):
+    workbook = load_workbook(excel_file, data_only=True)
+    worksheet = workbook.active
+
+    excel_data = []
+    for row in worksheet.iter_rows(min_row=2, values_only=True):
+        id_no, amount, date_travel = row
+        dates = [date.strip() for date in date_travel.split(',')]
+        excel_data.append({
+            'id_no': id_no,
+            'amount': amount,
+            'date_travel': dates,  # Store dates as a list of strings
+        })
+
+    return excel_data
+
+
 
 @csrf_exempt
 def upload_tev(request):
-    if request.method == 'POST' and request.FILES['ExcelData']:
+    user_id = request.session.get('user_id', 0)
+    if request.method == 'POST' and request.FILES.get('ExcelData'):
         excel_file = request.FILES['ExcelData']
-        user_id = request.session.get('user_id', 0)
-        g_code = generate_code()
-        
+
+        # Ensure the file format is 'xlsx'
         if not excel_file.name.endswith('xlsx'):
             return JsonResponse({'data': 'errorxlsx'})
-        else:
-            try:
-                workbook = load_workbook(excel_file, data_only=True)
-                worksheet = workbook.active
 
-                for row in worksheet.iter_rows(min_row=2, values_only=True):
-                    column1, column2, column3 = row
-                    
-                    # Create and save TevIncoming object for each row
-                    tev_add = TevIncoming.objects.create(code =g_code,id_no=column1, original_amount=column2, date_travel=column3, user_id=user_id, is_upload = True)
-                    
-                    if tev_add.id:
-                        print("dalaaa")
-                        system_config = SystemConfiguration.objects.first()
-                        system_config.transaction_code = g_code
-                        system_config.save()
-                    else:
-                        print("ngikoo")
+        try:
+            matched_data = []
 
-                return JsonResponse({'data': 'success'})
-            except Exception as e:
-                print(e)
-                return JsonResponse({'data': 'error' + str(e)})
+            employees_data = json.loads(request.POST.get('employees'))
+            excel_data = read_excel_file(excel_file)
+
+            for row in excel_data:
+                id_no, amount, date_travel = row['id_no'], row['amount'], row['date_travel']
+                id_number_value = None
+
+                for employee in employees_data:
+                    if employee.get('idNumber') == id_no:
+                        id_number_value = employee.get('idNumber')
+                        first_name_value = employee.get('firstName')
+                        middle_initial_value = employee.get('middleInitial')
+                        last_name_value = employee.get('lastName')
+
+                if id_number_value:
+                    matched_data.append({
+                        'id_no': id_no,
+                        'amount': amount,
+                        'date_travel': date_travel,
+                        'idNumber': id_number_value,
+                        'firstName': first_name_value,
+                        'middleInitial': middle_initial_value,
+                        'lastName': last_name_value,
+                    })
+                    tev_add = TevIncoming.objects.create(first_name=first_name_value,middle_name = middle_initial_value,last_name=last_name_value , id_no=id_number_value, original_amount=amount, date_travel=date_travel,user_id = user_id)
+                else:
+                    print(f"idNumber {id_no} not found in employee data")
+
+            return JsonResponse({'data': matched_data})
+
+        except json.JSONDecodeError:
+            print("JSON decoding error")
+            return JsonResponse({'data': 'errorjson'})
+
     else:
-        return JsonResponse({'data': 'errorahh'})
+        print("Invalid request")
+        # Handle other cases (e.g., no file uploaded, incorrect request method)
+        return JsonResponse({'data': 'error'})
 
 
 
 
+# @csrf_exempt
+# def upload_tev(request):
+#     if request.method == 'POST' and request.FILES.get('ExcelData'):
+#         excel_file = request.FILES['ExcelData']
 
+#         # Ensure the file format is 'xlsx'
+#         if not excel_file.name.endswith('xlsx'):
+#             return JsonResponse({'data': 'errorxlsx'})
+
+#         try:
+#             matched_data = []
+
+            
+#             employees_data = json.loads(request.POST.get('employees'))
+#             excel_data = read_excel_file(excel_file)
+#             for employee in employees_data:
+#                 id_number_value = employee.get('idNumber')
+#                 first_name_value = employee.get('firstName')
+#                 middle_initial_value = employee.get('middleInitial')
+#                 last_name_value = employee.get('lastName')
+
+
+#                 if id_number_value:
+#                     print(id_number_value)
+#                 else:
+#                     print("idNumber not found in employee data")
+
+#             for row in excel_data:
+#                 id_no, amount, date_travel = row['id_no'], row['amount'], row['date_travel']
+#                 return JsonResponse({'data': matched_data})
+            
+
+#         except json.JSONDecodeError:
+#             print("jsonnnerror")
+#             return JsonResponse({'data': 'errorjson'})
+
+#     else:
+#         print("errorrrs")
+#         # Handle other cases (e.g., no file uploaded, incorrect request method)
+#         return JsonResponse({'data': 'error'})
 
 
 def item_edit(request):
