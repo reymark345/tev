@@ -462,13 +462,9 @@ def upload_tev(request):
         try:
             sc_code = SystemConfiguration.objects.first()
             sc_code = sc_code.transaction_code
-
-            print("codeenii")
-            print(sc_code)
-
-
             matched_data = []
             id_list = []
+            duplicate_travel = []
             employees_data = json.loads(request.POST.get('employees'))
             excel_data = read_excel_file(excel_file)
 
@@ -485,6 +481,34 @@ def upload_tev(request):
                         first_name_value = employee.get('firstName')
                         middle_initial_value = employee.get('middleInitial')
                         last_name_value = employee.get('lastName')
+
+
+
+                # results = TevIncoming.objects.filter(id_no=id_number_value,date_travel__contains=formatted_date_travel).first()
+
+                dates_to_check = formatted_date_travel.split(',')
+                duplicate_records = {}
+
+                for date in dates_to_check:
+                    results = TevIncoming.objects.filter(date_travel__contains=date).filter(id_no=id_number_value).all()
+
+                    # If there are matching records, store id_no and date_travel in the dictionary
+                    if results:
+                        for record in results:
+                            if date not in duplicate_records:
+                                duplicate_records[date] = []
+                            duplicate_records[date].append({'id_no': record.id_no, 'date_travel': record.date_travel})
+
+                # Print the duplicate records
+                for date, records in duplicate_records.items():
+                    print(f'Duplicate date_travel: {date}')
+                    for record in records:
+                        print(f'  id_no: {record["id_no"]}, duplicate_travel: {date}')
+                        
+
+
+                if results:
+                    duplicate_travel.append(formatted_date_travel)
 
                 if id_number_value:
                     matched_data.append({
@@ -514,6 +538,16 @@ def upload_tev(request):
                     'id_no': id_list
                 }
                 return JsonResponse(response_data) 
+            
+            elif duplicate_travel:
+                print("duplicate uiee")
+                print(duplicate_travel)
+                response_data = {
+                    'data': 'success',
+                    'id_no': "Duplicateee travel "
+                }
+                return JsonResponse(response_data) 
+
             else:
                 try:
                     matched_data_list = matched_data
