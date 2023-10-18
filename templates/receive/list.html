@@ -582,7 +582,12 @@
                 {
                     targets: -3,
                     render: function (data) {
-                        return '<span class="badge bg-label-danger">'+data+'</span>'
+                        if (data === null || data === undefined || data === "") {
+                            return ''; // Return an empty string if data is null, undefined, or empty
+                        } 
+                        else {
+                            return '<span class="badge bg-label-danger">' + data + '</span>';
+                        }
                     },
                 },
                 {
@@ -1145,7 +1150,33 @@
                 processData: false,
                 }).done(function(data){
                 if (data.data == 'success') {
-                    toastr.success('Successfully save', 'Success', toast_options);
+                    console.log(data);
+                    console.log(data.id_no);
+                    if (data.id_no && data.id_no.length){
+                        Swal.fire({
+                            title: '<strong>ID NUMBER NOT FOUND!</strong> <br><h5><u>'+data.id_no+'<h5></u>',
+                            icon: 'error',
+                            html:
+                            'Excel <b>NOT SAVE!</b>',
+                            showCloseButton: true,
+                            showCancelButton: false,
+                            focusConfirm: false,
+                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                            confirmButtonAriaLabel: 'Thumbs up, great!',
+                            customClass: {
+                            confirmButton: 'btn btn-danger me-3'
+                            },
+                            buttonsStyling: false
+                        });
+                        toastr.error('Invalid', 'Error', toast_options);
+                    }
+                    else{
+                        toastr.success('Successfully save', 'Success', toast_options);
+                    }
+
+                    $("#import-excel").modal("hide");
+                    dataTable.ajax.reload();
+                    
                 } else {
                     toastr.error('Data not saved', 'Danger', toast_options);
                 }

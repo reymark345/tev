@@ -23,6 +23,7 @@ from receive.filters import UserFilter
 import datetime as date_time
 from openpyxl import load_workbook
 from tablib import Dataset
+import ast
 
 
 
@@ -301,36 +302,6 @@ def checking_load(request):
         status_txt = '7'
         
     id_numbers = EmployeeList if EmployeeList else []
-    # if FAdvancedFilter and not EmployeeList:
-    #     print("first attempt")
-    #     query = """
-    #         SELECT t.*
-    #         FROM tev_incoming t
-    #         WHERE (t.status_id = 2
-    #                 OR t.status_id = 7
-    #                 OR (t.status_id = 3 AND t.slashed_out IS NULL)
-    #         )
-    #         AND (code LIKE %s
-    #         OR id_no LIKE %s
-    #         OR account_no LIKE %s
-    #         OR date_travel LIKE %s
-    #         OR original_amount LIKE %s
-    #         OR final_amount LIKE %s
-    #         AND incoming_in LIKE %s
-    #         OR status_id LIKE %s
-    #         )ORDER BY incoming_out DESC;
-    #     """
-
-    #     params = [
-    #         '%' + FTransactionCode + '%' if FTransactionCode else "",
-    #         '%' + EmployeeList + '%' if EmployeeList else "",
-    #         '%' + FAccountNumber + '%' if FAccountNumber else "% %",
-    #         '%' + FDateTravel + '%' if FDateTravel else "",
-    #         '%' + FOriginalAmount + '%' if FOriginalAmount else "",
-    #         '%' + FFinalAmount + '%' if FFinalAmount else "",
-    #         '%' + FIncomingIn + '%' if FIncomingIn else "",
-    #         '%' + FStatus + '%' if FStatus else "",
-    #     ]
 
     if FAdvancedFilter:
         def dictfetchall(cursor):
@@ -463,179 +434,6 @@ def checking_load(request):
     }
     return JsonResponse(response)
 
-
-
-# def checking_load(request):
-#     _search = request.GET.get('search[value]')
-#     _order_dir = request.GET.get('order[0][dir]')
-#     _order_dash = '-' if _order_dir == 'desc' else ''
-#     _order_col_num = request.GET.get('order[0][column]')
-
-#     FIdNumber= request.GET.get('FIdNumber')
-#     FTransactionCode = request.GET.get('FTransactionCode')
-#     FDateTravel= request.GET.get('FDateTravel') 
-#     FIncomingIn= request.GET.get('FIncomingIn')
-#     # FSLashedOut= request.GET.get('FSLashedOut')
-#     FOriginalAmount= request.GET.get('FOriginalAmount')
-#     FFinalAmount= request.GET.get('FFinalAmount')
-#     FAccountNumber= request.GET.get('FAccountNumber')
-#     FIncomingBy= request.GET.get('FIncomingBy')
-#     FFirstName= request.GET.get('FFirstName')
-#     FMiddleName= request.GET.get('FMiddleName')
-#     FLastName= request.GET.get('FLastName')
-#     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
-#     FStatus = request.GET.get('FStatus')
-#     EmployeeList = request.GET.getlist('EmployeeList[]')
-#     status_txt = ''
-#     if _search in "returned":
-#         status_txt = '3'
-#     else:
-#         status_txt = '1'
-#     id_numbers = EmployeeList if EmployeeList else []
-
-
-
-
-
-#     if status_txt == "for checking":
-#         status_txt = '%'+'2'+'%'
-#     elif status_txt == "approved":
-#         status_txt = '%'+'7'+'%'
-#     elif status_txt == "returned":
-#         status_txt = '%'+'3'+'%'
-
-#     search_pattern = '%' + _search + '%'
-
-#     query = """
-#         SELECT t.*
-#         FROM tev_incoming t
-#         WHERE (t.status_id = 2
-#                 OR t.status_id = 7
-#                 OR (t.status_id = 3 AND t.slashed_out IS NULL)
-#         )
-#         AND (code LIKE %s
-#         OR first_name LIKE %s
-#         OR last_name LIKE %s
-#         OR id_no LIKE %s
-#         OR account_no LIKE %s
-#         OR date_travel LIKE %s
-#         OR original_amount LIKE %s
-#         OR final_amount LIKE %s
-#         OR remarks LIKE %s
-#         OR status_id LIKE %s
-#         )ORDER BY id DESC;
-# """
-
-#     with connection.cursor() as cursor:
-#         cursor.execute(query, [search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern, search_pattern,search_pattern,status_txt])
-#         results = cursor.fetchall()
-
-#     total = len(results)
-#     _start = request.GET.get('start')
-#     _length = request.GET.get('length')
-    
-
-#     if _start and _length:
-#         start = int(_start)
-#         length = int(_length)
-#         page = math.ceil(start / length) + 1
-#         per_page = length
-#         results = results[start:start + length]
-
-#     data = []
-
-#     for row in results:
-#         userData = AuthUser.objects.filter(id=row[14])
-#         full_name = userData[0].first_name + ' ' + userData[0].last_name
-#         first_name = row[2] if row[2] else ''
-#         middle_name = row[3] if row[3] else ''
-#         last_name = row[4] if row[4] else ''
-#         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
-        
-
-#         item = {
-#             'id': row[0],
-#             'code': row[1],
-#             'name': emp_fullname,
-#             'id_no': row[5],
-#             'account_no': row[6],
-#             'date_travel': row[7],
-#             'original_amount': row[8],
-#             'final_amount': row[9],
-#             'incoming_in': row[10],
-#             'incoming_out': row[11],
-#             'slashed_out': row[12],
-#             'remarks': row[13],
-#             'status': row[16],
-#             'user_id': full_name
-#         }
-#         data.append(item)
-
-#     response = {
-#         'data': data,
-#         'page': page,
-#         'per_page': per_page,
-#         'recordsTotal': total,
-#         'recordsFiltered': total,
-#     }
-#     return JsonResponse(response)
-
-# @csrf_exempt
-# def upload_tev(request):
-#     if request.method == 'POST' and request.FILES['ExcelData']:
-#         excel_file = request.FILES['ExcelData']
-#         user_id = request.session.get('user_id', 0)
-#         g_code = generate_code()
-        
-#         if not excel_file.name.endswith('xlsx'):
-#             return JsonResponse({'data': 'errorxlsx'})
-#         else:
-#             try:
-#                 workbook = load_workbook(excel_file, data_only=True)
-#                 worksheet = workbook.active
-
-#                 for row in worksheet.iter_rows(min_row=2, values_only=True):
-#                     # Assuming the columns in Excel file are in order: Column1, Column2, Column3
-#                     column1, column2, column3 = row
-                    
-#                     # Create and save TevIncoming object
-#                     tev_add = TevIncoming.objects.create(code =g_code, id_no=column1, original_amount=column2, date_travel=column3, user_id = user_id)
-
-#                     if tev_add.id:
-#                         print("dalaaa")
-#                         system_config = SystemConfiguration.objects.first()
-#                         system_config.transaction_code = g_code
-#                         system_config.save()
-#                     else:
-#                         print("ngikoo")
-
-#                 return redirect('receive-list')
-#             except Exception as e:
-#                 print(e)
-#                 return JsonResponse({'data': 'error' + str(e)})
-#     else:
-#         return JsonResponse({'data': 'errorahh'})
-
-
-
-# def read_excel_file(excel_file):
-#     workbook = load_workbook(excel_file, data_only=True)
-#     worksheet = workbook.active
-
-#     excel_data = []
-#     for row in worksheet.iter_rows(min_row=2, values_only=True):
-#         print("testonly")
-#         print(row)
-#         id_no, amount, date_travel = row
-#         excel_data.append({
-#             'id_no': id_no,
-#             'amount': amount,
-#             'date_travel': date_travel,
-#         })
-
-#     return excel_data
-
-
 def read_excel_file(excel_file):
     workbook = load_workbook(excel_file, data_only=True)
     worksheet = workbook.active
@@ -652,31 +450,38 @@ def read_excel_file(excel_file):
 
     return excel_data
 
-
-
 @csrf_exempt
 def upload_tev(request):
     user_id = request.session.get('user_id', 0)
+
     if request.method == 'POST' and request.FILES.get('ExcelData'):
         excel_file = request.FILES['ExcelData']
-
-        # Ensure the file format is 'xlsx'
         if not excel_file.name.endswith('xlsx'):
             return JsonResponse({'data': 'errorxlsx'})
 
         try:
-            matched_data = []
+            sc_code = SystemConfiguration.objects.first()
+            sc_code = sc_code.transaction_code
 
+            print("codeenii")
+            print(sc_code)
+
+
+            matched_data = []
+            id_list = []
             employees_data = json.loads(request.POST.get('employees'))
             excel_data = read_excel_file(excel_file)
 
             for row in excel_data:
+                g_code = generate_code()
                 id_no, amount, date_travel = row['id_no'], row['amount'], row['date_travel']
                 id_number_value = None
-
+                formatted_date_travel = ', '.join(date_travel).replace(', ', ',')
                 for employee in employees_data:
+                    
                     if employee.get('idNumber') == id_no:
                         id_number_value = employee.get('idNumber')
+                        acc_no_value = employee.get('accNumber')
                         first_name_value = employee.get('firstName')
                         middle_initial_value = employee.get('middleInitial')
                         last_name_value = employee.get('lastName')
@@ -684,18 +489,54 @@ def upload_tev(request):
                 if id_number_value:
                     matched_data.append({
                         'id_no': id_no,
+                        'g_code': g_code,
                         'amount': amount,
-                        'date_travel': date_travel,
+                        'date_travel': formatted_date_travel,
                         'idNumber': id_number_value,
+                        'accNumber': acc_no_value,
                         'firstName': first_name_value,
                         'middleInitial': middle_initial_value,
                         'lastName': last_name_value,
                     })
-                    tev_add = TevIncoming.objects.create(first_name=first_name_value,middle_name = middle_initial_value,last_name=last_name_value , id_no=id_number_value, original_amount=amount, date_travel=date_travel,user_id = user_id)
-                else:
-                    print(f"idNumber {id_no} not found in employee data")
+                    system_config = SystemConfiguration.objects.first()
+                    system_config.transaction_code = g_code
+                    system_config.save()
 
-            return JsonResponse({'data': matched_data})
+                else:
+                    id_list.append(id_no)
+
+            if id_list:
+                system_config = SystemConfiguration.objects.first()
+                system_config.transaction_code = sc_code
+                system_config.save()
+                response_data = {
+                    'data': 'success',
+                    'id_no': id_list
+                }
+                return JsonResponse(response_data) 
+            else:
+                try:
+                    matched_data_list = matched_data
+                    tev_incoming_instances = [
+                        TevIncoming(
+                            code=data['g_code'],
+                            original_amount=data['amount'],
+                            id_no=data['id_no'],
+                            account_no=data['accNumber'],
+                            date_travel=data['date_travel'],
+                            first_name=data['firstName'],
+                            middle_name=data['middleInitial'],
+                            last_name=data['lastName'],
+                            user_id = user_id
+                            )
+                            for data in matched_data_list
+                        ]
+                    TevIncoming.objects.bulk_create(tev_incoming_instances)
+                    return JsonResponse({'data': 'success'})
+            
+                except json.JSONDecodeError as e:
+                   print(f"Error decoding JSON: {e}")
+                   matched_data_list = []
 
         except json.JSONDecodeError:
             print("JSON decoding error")
@@ -703,53 +544,7 @@ def upload_tev(request):
 
     else:
         print("Invalid request")
-        # Handle other cases (e.g., no file uploaded, incorrect request method)
         return JsonResponse({'data': 'error'})
-
-
-
-
-# @csrf_exempt
-# def upload_tev(request):
-#     if request.method == 'POST' and request.FILES.get('ExcelData'):
-#         excel_file = request.FILES['ExcelData']
-
-#         # Ensure the file format is 'xlsx'
-#         if not excel_file.name.endswith('xlsx'):
-#             return JsonResponse({'data': 'errorxlsx'})
-
-#         try:
-#             matched_data = []
-
-            
-#             employees_data = json.loads(request.POST.get('employees'))
-#             excel_data = read_excel_file(excel_file)
-#             for employee in employees_data:
-#                 id_number_value = employee.get('idNumber')
-#                 first_name_value = employee.get('firstName')
-#                 middle_initial_value = employee.get('middleInitial')
-#                 last_name_value = employee.get('lastName')
-
-
-#                 if id_number_value:
-#                     print(id_number_value)
-#                 else:
-#                     print("idNumber not found in employee data")
-
-#             for row in excel_data:
-#                 id_no, amount, date_travel = row['id_no'], row['amount'], row['date_travel']
-#                 return JsonResponse({'data': matched_data})
-            
-
-#         except json.JSONDecodeError:
-#             print("jsonnnerror")
-#             return JsonResponse({'data': 'errorjson'})
-
-#     else:
-#         print("errorrrs")
-#         # Handle other cases (e.g., no file uploaded, incorrect request method)
-#         return JsonResponse({'data': 'error'})
-
 
 def item_edit(request):
     id = request.GET.get('id')
