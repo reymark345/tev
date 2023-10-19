@@ -616,6 +616,9 @@
                           let editColumn = '';
                           let statusColumn = '';
                           let status = item.status;
+                          let remarks = '';
+                          if (item.remarks) {remarks = item.remarks;} 
+                          else {remarks = remarks = '';}
                           if (status ==1){
                             statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
                           }
@@ -654,7 +657,7 @@
                                   ${finalAmountColumn}
                                   ${statusColumn}
                                   <td>${item.purpose}</td>
-                                  <td>${item.remarks}</td>
+                                  <td><span class="badge bg-label-danger">${remarks}</span></td>
                                   <td><span class="badge bg-label-primary">${formattedDate}</span></td>
                        
                               </tr>

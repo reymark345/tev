@@ -587,7 +587,8 @@ def upload_tev(request):
                             first_name=data['firstName'],
                             middle_name=data['middleInitial'],
                             last_name=data['lastName'],
-                            user_id = user_id
+                            user_id = user_id,
+                            is_upload = True
                             )
                             for data in matched_data_list
                         ]
