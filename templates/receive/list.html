@@ -1170,6 +1170,72 @@
                         });
                         toastr.error('Invalid', 'Error', toast_options);
                     }
+                    else if(data.duplicate_travel){
+                        let duplicate = data.duplicate_travel;
+                        let tableRows = duplicate.map(item => {
+                            return `<tr>
+                                        <td style="border: 1px solid black;">${item.id_no}</td>
+                                        <td style="border: 1px solid black;">${item.duplicate_travel}</td>
+                                    </tr>`;
+                        });
+
+                        Swal.fire({
+                            title: '<strong>Duplicate TRAVEL, Added already in System!</strong>',
+                            icon: 'error',
+                            html:
+                            'Excel <b>NOT SAVE!</b> Please <b>reupload</b> the file!' +
+                            '<table style="width:100%;">' +
+                            '<tr>' +
+                            '<th style="border: 1px solid black;"><b>ID number</b></th>' +
+                            '<th style="border: 1px solid black;"><b>Duplicate date</b> <small>(dd-mm-yyyy)</small></th>' +
+                            '</tr>' +
+                            `${tableRows.join('')}` + // Join the rows and insert them into the table
+                            '</table>',
+                            showCloseButton: true,
+                            showCancelButton: false,
+                            focusConfirm: false,
+                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                            confirmButtonAriaLabel: 'Thumbs up, great!',
+                            customClass: {
+                            confirmButton: 'btn btn-danger me-3'
+                            },
+                            buttonsStyling: false
+                        });
+                        toastr.error('Invalid', 'Error', toast_options);
+                        
+
+                    }
+
+
+                    // else if(data.duplicate_id_no){
+                    //     Swal.fire({
+                    //         title: '<strong>Duplicate TRAVEL, Added already in System!</strong> <br><h5><u>'+data.duplicate_id_no+'<h5></u>',
+                    //         icon: 'error',
+                    //         html:
+                    //         'Excel <b>NOT SAVE!</b> Please <b>reupload</b> the file!' +
+                    //         '<table style="width:100%;">' +
+                    //         '<tr>' +
+                    //         '<td style="border: 1px solid black;">Column 1 Data</td>' +
+                    //         '<td style="border: 1px solid black;">Column 2 Data</td>' +
+                    //         '</tr>' +
+                    //         '<tr>' +
+                    //         '<td style="border: 1px solid black;">Row 2, Column 1 Data</td>' +
+                    //         '<td style="border: 1px solid black;">Row 2, Column 2 Data</td>' +
+                    //         '</tr>' +
+                    //         '</table>',
+                    //         showCloseButton: true,
+                    //         showCancelButton: false,
+                    //         focusConfirm: false,
+                    //         confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                    //         confirmButtonAriaLabel: 'Thumbs up, great!',
+                    //         customClass: {
+                    //         confirmButton: 'btn btn-danger me-3'
+                    //         },
+                    //         buttonsStyling: false
+                    //     });
+                    //     toastr.error('Invalid', 'Error', toast_options);
+
+                    // }
                     else{
                         toastr.success('Successfully save', 'Success', toast_options);
                     }

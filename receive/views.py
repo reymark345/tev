@@ -465,6 +465,7 @@ def upload_tev(request):
             matched_data = []
             id_list = []
             duplicate_travel = []
+            duplicate_te = []
             employees_data = json.loads(request.POST.get('employees'))
             excel_data = read_excel_file(excel_file)
 
@@ -501,14 +502,40 @@ def upload_tev(request):
 
                 # Print the duplicate records
                 for date, records in duplicate_records.items():
-                    print(f'Duplicate date_travel: {date}')
+                    # print(f'Duplicate date_travel: {date}')
                     for record in records:
-                        print(f'  id_no: {record["id_no"]}, duplicate_travel: {date}')
-                        
+                        # print(f'  id_no: {record["id_no"]}, duplicate_travel: {date}')
 
+                        duplicate_te.append({
+                            'id_no': record["id_no"],
+                            'travel': date
+                        })
+                        
+                # print(duplicate_te)
+                # print("testtttdup")
+                # print(id_no)
+
+                # id = "16-11810"
+                # duplicate_te = [{'id_no': '16-11810', 'travel': '08-10-2023'}, {'id_no': '16-11810', 'travel': '18-11-2023'}, {'id_no': '16-11810', 'travel': '15-11-2023'}, {'id_no': '16-11810', 'travel': '15-11-2023'}, {'id_no': '16-11588', 'travel': '17-10-2023'}, {'id_no': '16-11588', 'travel': '18-10-2023'}, {'id_no': '16-11588', 'travel': '19-10-2023'}, {'id_no': '16-11588', 'travel': '20-10-2023'}]
+                # result = "Duplicate Travel for "+ "08-10-2023,18-11-2023,15-11-2023,15-11-2023"
+
+                # duplicate_travels = [record['travel'] for record in duplicate_te if record['id_no'] == id_no]
+                
+                # formatted_dates = [
+                #     datetime.strptime(record['travel'], '%d-%m-%Y').strftime('%b. %d %Y') 
+                #     for record in duplicate_te if record['id_no'] == id_no
+                # ]
+
+                # print("test")
+                # print(id_no)
+                # print(formatted_date_travel)
 
                 if results:
-                    duplicate_travel.append(formatted_date_travel)
+                    # duplicate_travel.append(formatted_date_travel)
+                    duplicate_travel.append({
+                        'id_no': id_no,
+                        'duplicate_travel': formatted_date_travel
+                    })
 
                 if id_number_value:
                     matched_data.append({
@@ -520,7 +547,7 @@ def upload_tev(request):
                         'accNumber': acc_no_value,
                         'firstName': first_name_value,
                         'middleInitial': middle_initial_value,
-                        'lastName': last_name_value,
+                        'lastName': last_name_value
                     })
                     system_config = SystemConfiguration.objects.first()
                     system_config.transaction_code = g_code
@@ -538,16 +565,15 @@ def upload_tev(request):
                     'id_no': id_list
                 }
                 return JsonResponse(response_data) 
-            
+
             elif duplicate_travel:
-                print("duplicate uiee")
+                print("test")
                 print(duplicate_travel)
                 response_data = {
                     'data': 'success',
-                    'id_no': "Duplicateee travel "
+                    'duplicate_travel': duplicate_travel
                 }
                 return JsonResponse(response_data) 
-
             else:
                 try:
                     matched_data_list = matched_data
@@ -565,8 +591,19 @@ def upload_tev(request):
                             )
                             for data in matched_data_list
                         ]
+                    
                     TevIncoming.objects.bulk_create(tev_incoming_instances)
                     return JsonResponse({'data': 'success'})
+                
+                    # if duplicate_travel:
+                    #     response_data = {
+                    #         'data': 'success',
+                    #         'duplicate_id_no':unique_id_no_count
+                    #         # 'id_no': duplicate_travel
+                    #     }
+                    #     return JsonResponse(response_data) 
+                    # else:
+                    #     
             
                 except json.JSONDecodeError as e:
                    print(f"Error decoding JSON: {e}")
