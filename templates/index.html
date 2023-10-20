@@ -65,6 +65,11 @@
         <link rel="stylesheet" href="{% static 'assets/vendor/libs/jquery-timepicker/jquery-timepicker.css' %}" />
         <link rel="stylesheet" href="{% static 'assets/vendor/libs/pickr/pickr-themes.css' %}" />
 
+        <link rel="stylesheet" href="{% static 'assets/vendor/libs/fullcalendar/fullcalendar.css' %}" />
+        <link rel="stylesheet" href="{% static 'assets/vendor/css/pages/app-calendar.css' %}" />
+
+
+
         <!-- sales -->
         <link rel="stylesheet" href="{% static 'assets/vendor/libs/bs-stepper/bs-stepper.css' %}" />
         <link rel="stylesheet" href="{% static 'assets/vendor/css/pages/wizard-ex-checkout.css' %}" />
@@ -164,9 +169,17 @@
                                 <div data-i18n="Travel History">Travel History</div>
                             </a>
                         </li>
-                       
 
                         {% if role_permission != 'End user' %}
+                        <li class="menu-item {% if url_name == 'travel-calendar' %}active{% endif %}">
+                            <a href="{% url 'travel-calendar' %}" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-calendar"></i>
+                                <div data-i18n="Travel Calendar">Travel Calendar</div>
+                            </a>
+                        </li>
+                       
+
+                        
                         <!-- Transaction -->
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Transaction</span>
@@ -853,6 +866,11 @@
         <script src="{% static 'assets/js/modal-add-new-address.js' %}"></script>
         {% endcomment %}
         <script src="{% static 'assets/js/wizard-ex-checkout.js' %}"></script>
+
+        
+        <script src="{% static 'assets/vendor/libs/fullcalendar/fullcalendar.js' %}"></script>
+        <script src="{% static 'assets/js/app-calendar-events.js' %}"></script>
+        <script src="{% static 'assets/js/app-calendar.js' %}"></script>
 
 
         <!-- <script src="../../assets/js/modal-add-new-address.js"></script>

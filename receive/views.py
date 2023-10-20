@@ -437,18 +437,148 @@ def checking_load(request):
 def read_excel_file(excel_file):
     workbook = load_workbook(excel_file, data_only=True)
     worksheet = workbook.active
+    has_empty_fields = False
 
     excel_data = []
     for row in worksheet.iter_rows(min_row=2, values_only=True):
         id_no, amount, date_travel = row
-        dates = [date.strip() for date in date_travel.split(',')]
+        
+        # Handle empty or missing values in the "AMOUNT" column
+        if amount is None:
+            amount = 0
+        
+        dates = []
+        # Split dates and convert them into datetime objects
+        if date_travel:
+            date_list = date_travel.split(',')
+            for date_str in date_list:
+                date_obj = datetime.strptime(date_str.strip(), '%d-%m-%Y')
+                dates.append(date_obj.strftime('%d-%m-%Y'))  # Store dates as strings or use date_obj if you need datetime objects
+
         excel_data.append({
             'id_no': id_no,
             'amount': amount,
-            'date_travel': dates,  # Store dates as a list of strings
+            'date_travel': dates,
         })
 
-    return excel_data
+    for record in excel_data:
+    # Check if any of the fields is empty (None, 0, or [])
+        if record['id_no'] is None or record['amount'] == 0 or not record['date_travel']:
+            # If any field is empty, set the flag variable to True and break the loop
+            has_empty_fields = True
+            break
+
+    if has_empty_fields:
+        return has_empty_fields
+    else:
+        return excel_data
+
+
+# def read_excel_file(excel_file):
+#     workbook = load_workbook(excel_file, data_only=True)
+#     worksheet = workbook.active
+
+#     excel_data = []
+#     for row in worksheet.iter_rows(min_row=2, values_only=True):
+#         id_no, amount, date_travel = row
+
+#         # print("testttdattt")
+#         # print(date_travel)
+#         dates = [date.strip() for date in date_travel.split(',')]
+#         excel_data.append({
+#             'id_no': id_no,
+#             'amount': amount,
+#             'date_travel': dates,  # Store dates as a list of strings
+#         })
+    
+#     print("excel_data")
+#     print(excel_data)
+
+#     return excel_data
+
+# def read_excel_file(excel_file):
+#     workbook = load_workbook(excel_file, data_only=True)
+#     worksheet = workbook.active
+
+#     excel_data = []
+#     for row in worksheet.iter_rows(min_row=2, values_only=True):
+#         id_no, amount, date_travel = row
+        
+#         # Handle empty or missing values in the "AMOUNT" column
+#         if amount is None:
+#             amount = 0
+        
+#         dates = []
+#         # Split dates and convert them into datetime objects
+#         if date_travel and isinstance(date_travel, str):
+#             date_list = date_travel.split(',')
+#             for date_str in date_list:
+#                 date_obj = datetime.strptime(date_str.strip(), '%d-%m-%Y')
+#                 dates.append(date_obj.strftime('%d-%m-%Y'))  # Store dates as strings or use date_obj if you need datetime objects
+        
+#         # Handle empty or None date_travel values
+#         if not dates:
+#             dates.append('')  # Append an empty string if date_travel is empty or None
+        
+#         excel_data.append({
+#             'id_no': id_no,
+#             'amount': amount,
+#             'date_travel': dates,
+#         })
+
+#     empty_date_travel_ids = [data['id_no'] for data in excel_data if not data['date_travel'][0]]
+#     formatted_ids = ",".join(empty_date_travel_ids)
+
+#     if formatted_ids:
+#         response_data = {
+#             'data': 'empty',
+#             'empty_id_no': formatted_ids
+#         }
+#         return JsonResponse(response_data) 
+#     else:
+#         return excel_data
+
+# def read_excel_file(excel_file):
+#     workbook = load_workbook(excel_file, data_only=True)
+#     worksheet = workbook.active
+
+#     excel_data = []
+#     for row in worksheet.iter_rows(min_row=2, values_only=True):
+#         id_no, amount, date_travel = row
+        
+#         # Handle empty or missing values in the "AMOUNT" column
+#         if amount is None:
+#             amount = 0
+        
+#         dates = []
+#         # Split dates and convert them into datetime objects
+#         if date_travel and isinstance(date_travel, str):
+#             date_list = date_travel.split(',')
+#             for date_str in date_list:
+#                 date_obj = datetime.strptime(date_str.strip(), '%d-%m-%Y')
+#                 dates.append(date_obj.strftime('%d-%m-%Y'))  # Store dates as strings or use date_obj if you need datetime objects
+        
+#         # Handle empty or None date_travel values
+#         if not dates:
+#             dates.append('')  # Append an empty string if date_travel is empty or None
+        
+#         excel_data.append({
+#             'id_no': id_no,
+#             'amount': amount,
+#             'date_travel': dates,
+#         })
+
+#     empty_date_travel_ids = [data['id_no'] for data in excel_data if not data['date_travel'][0]]
+#     formatted_ids = ",".join(empty_date_travel_ids)
+    
+#     if formatted_ids:
+#         # print("diriiaaaa11")
+#         return formatted_ids
+#     else:
+#         print("diriiaaaa222")
+#         print(excel_data)
+#         return excel_data
+
 
 @csrf_exempt
 def upload_tev(request):
@@ -466,12 +596,41 @@ def upload_tev(request):
             id_list = []
             duplicate_travel = []
             duplicate_te = []
+
+            formatted_duplicates = []
+            duplicate_dates = {}
+            seen_dates = {}
+
             employees_data = json.loads(request.POST.get('employees'))
             excel_data = read_excel_file(excel_file)
+
+            if excel_data ==True:
+                response_data = {
+                    'data': 'empty'
+                }
+                return JsonResponse(response_data) 
+            else:
+                print("falseeee")
+                print(excel_data)
 
             for row in excel_data:
                 g_code = generate_code()
                 id_no, amount, date_travel = row['id_no'], row['amount'], row['date_travel']
+                
+
+                for date in date_travel:
+                    if id_no not in seen_dates:
+                        seen_dates[id_no] = set()
+                    if date in seen_dates[id_no]:
+                        if id_no not in duplicate_dates:
+                            duplicate_dates[id_no] = []
+                        duplicate_dates[id_no].append(date)
+                    seen_dates[id_no].add(date)
+                
+
+
+        
+
                 id_number_value = None
                 formatted_date_travel = ', '.join(date_travel).replace(', ', ',')
                 for employee in employees_data:
@@ -556,6 +715,13 @@ def upload_tev(request):
                 else:
                     id_list.append(id_no)
 
+            print("Duplicate Dates:")
+            print(duplicate_dates)
+
+
+
+
+
             if id_list:
                 system_config = SystemConfiguration.objects.first()
                 system_config.transaction_code = sc_code
@@ -565,10 +731,23 @@ def upload_tev(request):
                     'id_no': id_list
                 }
                 return JsonResponse(response_data) 
+            
+            elif duplicate_dates:
+                for id_no, dates in duplicate_dates.items():
+                    formatted_entry = {
+                        'id_no': id_no,
+                        'duplicate_travel': ','.join(dates)
+                    }
+                    formatted_duplicates.append(formatted_entry)
+                response_data = {
+                    'data': 'success',
+                    'duplicate_excel_dates': formatted_duplicates
+                }
+                return JsonResponse(response_data) 
 
             elif duplicate_travel:
-                print("test")
-                print(duplicate_travel)
+                # print("test")
+                # print(duplicate_travel)
                 response_data = {
                     'data': 'success',
                     'duplicate_travel': duplicate_travel

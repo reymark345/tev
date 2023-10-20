@@ -224,7 +224,7 @@
         ></button>
         </div>
         <div class="modal-body">
-            <!-- <form action="#" class="dropzone" id="dropzone-basic">
+            <!-- <form method="post" action="{% url 'upload-tev' %}"  class="dropzone" id="dropzone-basic">
                 <div class="dz-message needsclick">
                   Drop Excel file here or click to upload
                   <span class="note needsclick"
@@ -236,22 +236,11 @@
                 </div>
             </form> -->
 
-            <form method="post" action="{% url 'upload-tev' %}" class="dropzone" id="dropzone-basic"  enctype="multipart/form-data">
-                <div class="dz-message needsclick">
-                    Drop Excel file here or click to upload
-                    <span class="note needsclick"
-                      >Please check the format of your Excel file it must <strong>xlsx </strong>format to upload</span
-                    >
-                  </div>
-                  
+            <form method="post" action="{% url 'upload-tev' %}"  enctype="multipart/form-data">
                 <center><input type="file" name="ExcelData" ></center>
-                </div>
-
-
-
                 <div class="modal-footer">
-                <button type="button"  class="btn btn-outline-success" id="uploadButton">Upload</button>
-                <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
+                    <button type="button"  class="btn btn-outline-success" id="uploadButton">Upload</button>
+                </div>
             </form> 
 
         </div>
@@ -1150,8 +1139,7 @@
                 processData: false,
                 }).done(function(data){
                 if (data.data == 'success') {
-                    console.log(data);
-                    console.log(data.id_no);
+
                     if (data.id_no && data.id_no.length){
                         Swal.fire({
                             title: '<strong>ID NUMBER NOT FOUND!</strong> <br><h5><u>'+data.id_no+'<h5></u>',
@@ -1169,6 +1157,41 @@
                             buttonsStyling: false
                         });
                         toastr.error('Invalid', 'Error', toast_options);
+                    }
+                    else if (data.duplicate_excel_dates){
+                        let duplicate = data.duplicate_excel_dates;
+                        let tableRows = duplicate.map(item => {
+                            return `<tr>
+                                        <td style="border: 1px solid black;">${item.id_no}</td>
+                                        <td style="border: 1px solid black;">${item.duplicate_travel}</td>
+                                    </tr>`;
+                        });
+
+                        Swal.fire({
+                            title: '<strong>Excel File Duplication Date!</strong>',
+                            icon: 'error',
+                            html:
+                            'Excel <b>NOT SAVE!</b> Please <b>reupload</b> the file!' +
+                            '<table style="width:100%;">' +
+                            '<tr>' +
+                            '<th style="border: 1px solid black;"><b>ID number</b></th>' +
+                            '<th style="border: 1px solid black;"><b>Duplicate date</b> <small>(dd-mm-yyyy)</small></th>' +
+                            '</tr>' +
+                            `${tableRows.join('')}` + // Join the rows and insert them into the table
+                            '</table>',
+                            showCloseButton: true,
+                            showCancelButton: false,
+                            focusConfirm: false,
+                            allowOutsideClick: false,
+                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                            confirmButtonAriaLabel: 'Thumbs up, great!',
+                            customClass: {
+                            confirmButton: 'btn btn-danger me-3'
+                            },
+                            buttonsStyling: false
+                        });
+                        toastr.error('Invalid', 'Error', toast_options);
+
                     }
                     else if(data.duplicate_travel){
                         let duplicate = data.duplicate_travel;
@@ -1194,6 +1217,7 @@
                             showCloseButton: true,
                             showCancelButton: false,
                             focusConfirm: false,
+                            allowOutsideClick: false,
                             confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
                             confirmButtonAriaLabel: 'Thumbs up, great!',
                             customClass: {
@@ -1205,46 +1229,36 @@
                         
 
                     }
-
-
-                    // else if(data.duplicate_id_no){
-                    //     Swal.fire({
-                    //         title: '<strong>Duplicate TRAVEL, Added already in System!</strong> <br><h5><u>'+data.duplicate_id_no+'<h5></u>',
-                    //         icon: 'error',
-                    //         html:
-                    //         'Excel <b>NOT SAVE!</b> Please <b>reupload</b> the file!' +
-                    //         '<table style="width:100%;">' +
-                    //         '<tr>' +
-                    //         '<td style="border: 1px solid black;">Column 1 Data</td>' +
-                    //         '<td style="border: 1px solid black;">Column 2 Data</td>' +
-                    //         '</tr>' +
-                    //         '<tr>' +
-                    //         '<td style="border: 1px solid black;">Row 2, Column 1 Data</td>' +
-                    //         '<td style="border: 1px solid black;">Row 2, Column 2 Data</td>' +
-                    //         '</tr>' +
-                    //         '</table>',
-                    //         showCloseButton: true,
-                    //         showCancelButton: false,
-                    //         focusConfirm: false,
-                    //         confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                    //         confirmButtonAriaLabel: 'Thumbs up, great!',
-                    //         customClass: {
-                    //         confirmButton: 'btn btn-danger me-3'
-                    //         },
-                    //         buttonsStyling: false
-                    //     });
-                    //     toastr.error('Invalid', 'Error', toast_options);
-
-                    // }
                     else{
                         toastr.success('Successfully save', 'Success', toast_options);
                     }
 
                     $("#import-excel").modal("hide");
                     dataTable.ajax.reload();
+
+                } 
+                else if (data.data == 'empty'){
+                    $("#import-excel").modal("hide");
+                    Swal.fire({
+                            title: '<strong>Excel File has empty column!</strong>',
+                            icon: 'error',
+                            html:
+                            'Excel <b>NOT SAVE! Please Review and Reupload</b> the file!',
+                            showCloseButton: true,
+                            showCancelButton: false,
+                            focusConfirm: false,
+                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                            confirmButtonAriaLabel: 'Thumbs up, great!',
+                            customClass: {
+                            confirmButton: 'btn btn-danger me-3'
+                            },
+                            buttonsStyling: false
+                        });
+                    toastr.error('Invalid', 'Error', toast_options);
                     
-                } else {
-                    toastr.error('Data not saved', 'Danger', toast_options);
+                }
+                else {
+                    toastr.error('Data not saved Please Contact Administrator', 'Danger', toast_options);
                 }
             });
         });

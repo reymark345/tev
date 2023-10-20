@@ -199,6 +199,21 @@ def travel_history(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
+@login_required(login_url='login')
+@csrf_exempt
+def travel_calendar(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'tracking/travel_calendar.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
 
 def travel_history_load(request):
     total = 0
