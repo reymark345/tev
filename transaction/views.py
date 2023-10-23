@@ -401,6 +401,33 @@ def employee_dv(request):
 
 def payroll_load(request):  
 
+    FIdNumber= request.GET.get('FIdNumber')
+    FTransactionCode = request.GET.get('FTransactionCode')
+    FDateTravel= request.GET.get('FDateTravel') 
+    FIncomingIn= request.GET.get('FIncomingIn')
+    FFinalAmount= request.GET.get('FFinalAmount')
+    FAdvancedFilter =  request.GET.get('FAdvancedFilter')
+    EmployeeList = request.GET.getlist('EmployeeList[]')
+
+   
+    print(EmployeeList)
+    print("FIdNumber"+ FIdNumber)
+    print("FTransactionCode"+ FTransactionCode)
+    print("FDateTravel"+ FDateTravel)
+
+    print("FFinalAmount"+ FFinalAmount)
+    print("FAdvancedFilter"+ FAdvancedFilter)
+
+    print("Last")
+
+    # filters = {
+    # 'code': request.GET.get('FTransactionCode'),
+    # 'date_travel': request.GET.get('FDateTravel'),
+    # 'incoming_in': request.GET.get('FIncomingIn'),
+    # 'final_amount': request.GET.get('FFinalAmount'),
+    # 'id_no': request.GET.getlist('EmployeeList[]')
+    # }
+
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
@@ -411,13 +438,60 @@ def payroll_load(request):
     for field in search_fields:
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
-    if _search:
+    if FAdvancedFilter:
+        print("thisss")
+        item_data = TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by(_order_dash + 'id')
+        
+
+
+        def dictfetchall(cursor):
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        query = """
+            SELECT * FROM `tev_incoming` WHERE status_id = 4
+        """
+
+        params = []
+
+        if FTransactionCode:
+            query += " AND code = %s"
+            params.append(FTransactionCode)
+
+        if FIdNumber:
+            query += " AND id_no = %s"
+            params.append(FIdNumber)
+
+        if FDateTravel:
+            query += " AND date_travel = %s"
+            params.append(FDateTravel)
+
+        if FFinalAmount:
+            query += " AND t.final_amount = %s"
+            params.append(FFinalAmount)
+
+        if EmployeeList:
+            placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
+            query += f" AND t.id_no IN ({placeholders})"
+            params.extend(EmployeeList)
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, params)
+            results = dictfetchall(cursor)
+
+            print (results)
+
+    
+    elif _search:
         item_data = TevIncoming.objects.filter(status_id=4).filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
     else:
         item_data = TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by(_order_dash + 'id')
 
     # item_data = (TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by('-id').reverse())
     total = item_data.count()
+
+
+    
 
     _start = request.GET.get('start')
     _length = request.GET.get('length')

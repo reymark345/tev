@@ -12,7 +12,6 @@
     </center>
 </div>
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
-
 <style>
     #loading-screen {
         position: fixed;
@@ -29,8 +28,20 @@
         width: 15px; /* Set the width of each cube */
         height: 15px; /* Set the height of each cube */
     }
-</style>
+    .custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    color: #495057;
+    border-radius: 4px;
+    }
 
+    .custom-file-upload:hover {
+        background-color: #e9ecef;
+    }
+</style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -246,6 +257,7 @@
     <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
         <div class="modal-header">
+            <!-- <span class="badge rounded-pill bg-primary bg-glow">Upload Excel File <small>(xlsx)</small></span></center> -->
         <h5 class="modal-title" id="modalToggleLabel">Upload Excel File <small>(xlsx)</small></h5>
         <button
             type="button"
@@ -255,24 +267,18 @@
         ></button>
         </div>
         <div class="modal-body">
-            <!-- <form method="post" action="{% url 'upload-tev' %}"  class="dropzone" id="dropzone-basic">
-                <div class="dz-message needsclick">
-                  Drop Excel file here or click to upload
-                  <span class="note needsclick"
-                    >Please check the format of your Excel file it must <strong>xlsx </strong>format to upload</span
-                  >
-                </div>
-                <div class="fallback">
-                  <input name="uploadData" id="excelFileInput" type="file" />
-                </div>
-            </form> -->
-
-            <form method="post" action="{% url 'upload-tev' %}"  enctype="multipart/form-data">
-                <center><input type="file" name="ExcelData" ></center>
+            <form method="post" action="{% url 'upload-tev' %}" enctype="multipart/form-data" class="text-center">
+                <label for="fileInput" class="custom-file-upload">
+                    <i class="fas fa-cloud-upload-alt"></i> Choose Excel File
+                </label>
+                <input type="file" name="ExcelData" id="fileInput" class="input-file" accept=".xls,.xlsx" style="display:none;">
+                <br><br>
+                <div id="selectedFileName"></div>
                 <div class="modal-footer">
-                    <button type="button"  class="btn btn-outline-success" id="uploadButton">Upload</button>
+                    <button type="button" class="btn btn-primary" id="uploadButton">Upload</button>
                 </div>
-            </form> 
+      
+            </form>
 
         </div>
         <div class="modal-footer">
@@ -388,6 +394,11 @@
             locale: {
                 'firstDayOfWeek': 1 // start week on Monday
             },
+        });
+
+        $('#fileInput').change(function() {
+            var fileName = $(this).val().split('\\').pop(); // Get the selected file name
+            $('#selectedFileName').text(fileName);
         });
 
         $("#dateField").on("change", function() {
@@ -1013,21 +1024,6 @@
                 });
                 $selectElement.append($option);
             });
-
-           //// if (FEmployeeName.length) {
-             //   FEmployeeName.wrap('<div class="position-relative"></div>')
-             //   FEmployeeName.select2({
-             //       placeholder: 'Choose employee',
-            //        dropdownParent: FEmployeeName.parent(),
-           //         allowClear: true,
-          //      });
-        //    }
-            
-
-
-
-            
-       
         } else {
             console.log("No employee data found in local storage.");
         }
@@ -1158,144 +1154,154 @@
         }
 
         $('#uploadButton').on('click', function(event) {
-            $("#import-excel").modal("hide");
-            $('#loading-screen').show();
-            event.preventDefault();
-            let LStorage = JSON.parse(localStorage.getItem('employees'));
-            var formData = new FormData();
-            formData.append('ExcelData', $('input[name=ExcelData]')[0].files[0]);
-            formData.append('employees', JSON.stringify(LStorage));
-            $.ajax({
-                type: "POST",
-                url: "{% url 'upload-tev' %}",
-                data: formData,
-                contentType: false,
-                processData: false,
-                }).done(function(data){
-                if (data.data == 'success') {
-                    $('#loading-screen').hide();
+            if ($('#fileInput').get(0).files.length === 0) {
+                toastr.error('No Excel File Selected', 'Invalid', toast_options);
+            } 
+            else {
+                $("#import-excel").modal("hide");
+                $('#loading-screen').show();
+                event.preventDefault();
+                let LStorage = JSON.parse(localStorage.getItem('employees'));
+                var formData = new FormData();
+                formData.append('ExcelData', $('input[name=ExcelData]')[0].files[0]);
+                formData.append('employees', JSON.stringify(LStorage));
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'upload-tev' %}",
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    }).done(function(data){
+                    if (data.data == 'success') {
+                        $('#fileInput').val('');
+                        $('#selectedFileName').text('');
 
-                    if (data.id_no && data.id_no.length){
+                        $('#loading-screen').hide();
+
+                        if (data.id_no && data.id_no.length){
+                            Swal.fire({
+                                title: '<strong>ID NUMBER NOT FOUND!</strong> <br><h5><u>'+data.id_no+'<h5></u>',
+                                icon: 'error',
+                                html:
+                                'Excel <b>NOT SAVE!</b>',
+                                showCloseButton: true,
+                                showCancelButton: false,
+                                focusConfirm: false,
+                                confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                confirmButtonAriaLabel: 'Thumbs up, great!',
+                                customClass: {
+                                confirmButton: 'btn btn-danger me-3'
+                                },
+                                buttonsStyling: false
+                            });
+                            toastr.error('Invalid', 'Error', toast_options);
+                        }
+                        else if (data.duplicate_excel_dates){
+                            let duplicate = data.duplicate_excel_dates;
+                            let tableRows = duplicate.map(item => {
+                                return `<tr>
+                                            <td style="border: 1px solid black;">${item.id_no}</td>
+                                            <td style="border: 1px solid black;">${item.duplicate_travel}</td>
+                                        </tr>`;
+                            });
+
+                            Swal.fire({
+                                title: '<strong>Excel File Duplication Date!</strong>',
+                                icon: 'error',
+                                html:
+                                'Excel <b>NOT SAVE!</b> Please <b>reupload</b> the file!' +
+                                '<table style="width:100%;">' +
+                                '<tr>' +
+                                '<th style="border: 1px solid black;"><b>ID number</b></th>' +
+                                '<th style="border: 1px solid black;"><b>Duplicate date</b> <small>(dd-mm-yyyy)</small></th>' +
+                                '</tr>' +
+                                `${tableRows.join('')}` + // Join the rows and insert them into the table
+                                '</table>',
+                                showCloseButton: true,
+                                showCancelButton: false,
+                                focusConfirm: false,
+                                allowOutsideClick: false,
+                                confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                confirmButtonAriaLabel: 'Thumbs up, great!',
+                                customClass: {
+                                confirmButton: 'btn btn-danger me-3'
+                                },
+                                buttonsStyling: false
+                            });
+                            toastr.error('Invalid', 'Error', toast_options);
+
+                        }
+                        else if(data.duplicate_travel){
+                            let duplicate = data.duplicate_travel;
+                            let tableRows = duplicate.map(item => {
+                                return `<tr>
+                                            <td style="border: 1px solid black;">${item.id_no}</td>
+                                            <td style="border: 1px solid black;">${item.duplicate_travel}</td>
+                                        </tr>`;
+                            });
+
+                            Swal.fire({
+                                title: '<strong>Duplicate TRAVEL, Added already in System!</strong>',
+                                icon: 'error',
+                                html:
+                                'Excel <b>NOT SAVE!</b> Please <b>reupload</b> the file!' +
+                                '<table style="width:100%;">' +
+                                '<tr>' +
+                                '<th style="border: 1px solid black;"><b>ID number</b></th>' +
+                                '<th style="border: 1px solid black;"><b>Duplicate date</b> <small>(dd-mm-yyyy)</small></th>' +
+                                '</tr>' +
+                                `${tableRows.join('')}` + // Join the rows and insert them into the table
+                                '</table>',
+                                showCloseButton: true,
+                                showCancelButton: false,
+                                focusConfirm: false,
+                                allowOutsideClick: false,
+                                confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                confirmButtonAriaLabel: 'Thumbs up, great!',
+                                customClass: {
+                                confirmButton: 'btn btn-danger me-3'
+                                },
+                                buttonsStyling: false
+                            });
+                            toastr.error('Invalid', 'Error', toast_options);
+                            
+
+                        }
+                        else{
+                            toastr.success('Successfully save', 'Success', toast_options);
+                        }
+
+                        $("#import-excel").modal("hide");
+                        dataTable.ajax.reload();
+
+                    } 
+                    else if (data.data == 'empty'){
+                        $("#import-excel").modal("hide");
                         Swal.fire({
-                            title: '<strong>ID NUMBER NOT FOUND!</strong> <br><h5><u>'+data.id_no+'<h5></u>',
-                            icon: 'error',
-                            html:
-                            'Excel <b>NOT SAVE!</b>',
-                            showCloseButton: true,
-                            showCancelButton: false,
-                            focusConfirm: false,
-                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                            confirmButtonAriaLabel: 'Thumbs up, great!',
-                            customClass: {
-                            confirmButton: 'btn btn-danger me-3'
-                            },
-                            buttonsStyling: false
-                        });
-                        toastr.error('Invalid', 'Error', toast_options);
-                    }
-                    else if (data.duplicate_excel_dates){
-                        let duplicate = data.duplicate_excel_dates;
-                        let tableRows = duplicate.map(item => {
-                            return `<tr>
-                                        <td style="border: 1px solid black;">${item.id_no}</td>
-                                        <td style="border: 1px solid black;">${item.duplicate_travel}</td>
-                                    </tr>`;
-                        });
-
-                        Swal.fire({
-                            title: '<strong>Excel File Duplication Date!</strong>',
-                            icon: 'error',
-                            html:
-                            'Excel <b>NOT SAVE!</b> Please <b>reupload</b> the file!' +
-                            '<table style="width:100%;">' +
-                            '<tr>' +
-                            '<th style="border: 1px solid black;"><b>ID number</b></th>' +
-                            '<th style="border: 1px solid black;"><b>Duplicate date</b> <small>(dd-mm-yyyy)</small></th>' +
-                            '</tr>' +
-                            `${tableRows.join('')}` + // Join the rows and insert them into the table
-                            '</table>',
-                            showCloseButton: true,
-                            showCancelButton: false,
-                            focusConfirm: false,
-                            allowOutsideClick: false,
-                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                            confirmButtonAriaLabel: 'Thumbs up, great!',
-                            customClass: {
-                            confirmButton: 'btn btn-danger me-3'
-                            },
-                            buttonsStyling: false
-                        });
-                        toastr.error('Invalid', 'Error', toast_options);
-
-                    }
-                    else if(data.duplicate_travel){
-                        let duplicate = data.duplicate_travel;
-                        let tableRows = duplicate.map(item => {
-                            return `<tr>
-                                        <td style="border: 1px solid black;">${item.id_no}</td>
-                                        <td style="border: 1px solid black;">${item.duplicate_travel}</td>
-                                    </tr>`;
-                        });
-
-                        Swal.fire({
-                            title: '<strong>Duplicate TRAVEL, Added already in System!</strong>',
-                            icon: 'error',
-                            html:
-                            'Excel <b>NOT SAVE!</b> Please <b>reupload</b> the file!' +
-                            '<table style="width:100%;">' +
-                            '<tr>' +
-                            '<th style="border: 1px solid black;"><b>ID number</b></th>' +
-                            '<th style="border: 1px solid black;"><b>Duplicate date</b> <small>(dd-mm-yyyy)</small></th>' +
-                            '</tr>' +
-                            `${tableRows.join('')}` + // Join the rows and insert them into the table
-                            '</table>',
-                            showCloseButton: true,
-                            showCancelButton: false,
-                            focusConfirm: false,
-                            allowOutsideClick: false,
-                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                            confirmButtonAriaLabel: 'Thumbs up, great!',
-                            customClass: {
-                            confirmButton: 'btn btn-danger me-3'
-                            },
-                            buttonsStyling: false
-                        });
+                                title: '<strong>Excel File has empty column!</strong>',
+                                icon: 'error',
+                                html:
+                                'Excel <b>NOT SAVE! Please Review and Reupload</b> the file!',
+                                showCloseButton: true,
+                                showCancelButton: false,
+                                focusConfirm: false,
+                                confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                confirmButtonAriaLabel: 'Thumbs up, great!',
+                                customClass: {
+                                confirmButton: 'btn btn-danger me-3'
+                                },
+                                buttonsStyling: false
+                            });
                         toastr.error('Invalid', 'Error', toast_options);
                         
-
                     }
-                    else{
-                        toastr.success('Successfully save', 'Success', toast_options);
+                    else {
+                        toastr.error('Data not saved Please Contact Administrator', 'Danger', toast_options);
                     }
-
-                    $("#import-excel").modal("hide");
-                    dataTable.ajax.reload();
-
-                } 
-                else if (data.data == 'empty'){
-                    $("#import-excel").modal("hide");
-                    Swal.fire({
-                            title: '<strong>Excel File has empty column!</strong>',
-                            icon: 'error',
-                            html:
-                            'Excel <b>NOT SAVE! Please Review and Reupload</b> the file!',
-                            showCloseButton: true,
-                            showCancelButton: false,
-                            focusConfirm: false,
-                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                            confirmButtonAriaLabel: 'Thumbs up, great!',
-                            customClass: {
-                            confirmButton: 'btn btn-danger me-3'
-                            },
-                            buttonsStyling: false
-                        });
-                    toastr.error('Invalid', 'Error', toast_options);
-                    
-                }
-                else {
-                    toastr.error('Data not saved Please Contact Administrator', 'Danger', toast_options);
-                }
             });
+
+            }
+
         });
 
         search_advance_filter.on('click', function () {

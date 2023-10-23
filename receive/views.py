@@ -336,15 +336,15 @@ def checking_load(request):
             
         if FAccountNumber:
             query += " AND t.account_no = %s"
-            params.append(FStatus)
+            params.append(FAccountNumber)
 
         if FOriginalAmount:
             query += " AND t.original_amount = %s"
-            params.append(FStatus)
+            params.append(FOriginalAmount)
 
         if FFinalAmount:
             query += " AND t.final_amount = %s"
-            params.append(FStatus)
+            params.append(FFinalAmount)
 
         if EmployeeList:
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
