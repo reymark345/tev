@@ -136,6 +136,9 @@ def box_a(request):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'role_permission' : role.role_name,
+            'dv_number' : TevOutgoing.objects.filter().order_by('id'),
+            'cluster' : Cluster.objects.filter().order_by('id'),
+            'division' : Division.objects.filter().order_by('id'),
         }
         return render(request, 'transaction/box_a.html', context)
     else:
@@ -272,6 +275,7 @@ def preview_box_a(request):
             "ap_designation":outgoing['division__ap_designation']
         }
         context = {
+            'dv_number':dvno,
             'charges_list':charges_list,
             'payroll_date':box_b_in,
             'total_amount':total_final_amount,
@@ -409,25 +413,6 @@ def payroll_load(request):
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
     EmployeeList = request.GET.getlist('EmployeeList[]')
 
-   
-    print(EmployeeList)
-    print("FIdNumber"+ FIdNumber)
-    print("FTransactionCode"+ FTransactionCode)
-    print("FDateTravel"+ FDateTravel)
-
-    print("FFinalAmount"+ FFinalAmount)
-    print("FAdvancedFilter"+ FAdvancedFilter)
-
-    print("Last")
-
-    # filters = {
-    # 'code': request.GET.get('FTransactionCode'),
-    # 'date_travel': request.GET.get('FDateTravel'),
-    # 'incoming_in': request.GET.get('FIncomingIn'),
-    # 'final_amount': request.GET.get('FFinalAmount'),
-    # 'id_no': request.GET.getlist('EmployeeList[]')
-    # }
-
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
@@ -439,11 +424,6 @@ def payroll_load(request):
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if FAdvancedFilter:
-        print("thisss")
-        item_data = TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by(_order_dash + 'id')
-        
-
-
         def dictfetchall(cursor):
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -463,16 +443,20 @@ def payroll_load(request):
             params.append(FIdNumber)
 
         if FDateTravel:
-            query += " AND date_travel = %s"
-            params.append(FDateTravel)
+            query += " AND date_travel LIKE %s"
+            params.append(f'%{FDateTravel}%')
 
         if FFinalAmount:
-            query += " AND t.final_amount = %s"
+            query += " AND final_amount = %s"
             params.append(FFinalAmount)
+
+        if FIncomingIn:
+            query += " AND incoming_in LIKE %s"
+            params.append(f'%{FIncomingIn}%')
 
         if EmployeeList:
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
-            query += f" AND t.id_no IN ({placeholders})"
+            query += f" AND id_no IN ({placeholders})"
             params.extend(EmployeeList)
 
         with connection.cursor() as cursor:
@@ -483,16 +467,25 @@ def payroll_load(request):
 
     
     elif _search:
-        item_data = TevIncoming.objects.filter(status_id=4).filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
+        query = TevIncoming.objects.filter(status_id=4).filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        item_data = TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by(_order_dash + 'id')
+        query = """
+            SELECT * FROM `tev_incoming` WHERE status_id = 4
+        """
+
+        # item_data = TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by(_order_dash + 'id')
 
     # item_data = (TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by('-id').reverse())
-    total = item_data.count()
-
-
     
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            columns = [col[0] for col in cursor.description]
+            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    
+    
+    # total = item_data.count()
 
+    total = len(results)
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     if _start and _length:
@@ -500,35 +493,35 @@ def payroll_load(request):
         length = int(_length)
         page = math.ceil(start / length) + 1
         per_page = length
-        item_data = item_data[start:start + length]
+        item_data = results[start:start + length]
 
     data = []
 
-    for item in item_data: 
-        userData = AuthUser.objects.filter(id=item.user_id)
+    for item in results: 
+        userData = AuthUser.objects.filter(id=item['user_id'])
         
         full_name = userData[0].first_name + ' ' + userData[0].last_name
         
-        fname = item.first_name if item.first_name else ''
-        mname = item.middle_name if item.middle_name else ''
-        lname = item.last_name if item.last_name else ''
+        fname = item['first_name'] if item['first_name'] else ''
+        mname = item['middle_name'] if item['middle_name'] else ''
+        lname = item['last_name'] if item['last_name'] else ''
         emp_fullname = f"{fname} {mname} {lname}".strip()
 
         item = {
-            'id': item.id,
-            'code': item.code,
+            'id': item['id'],
+            'code': item['code'],
             'name': emp_fullname,
-            'middle_name': item.middle_name,
-            'last_name': item.last_name,
-            'date_travel': item.date_travel,
-            'id_no': item.id_no,
-            'original_amount': item.original_amount,
-            'final_amount': item.final_amount,
-            'incoming_in': item.incoming_in,
-            'incoming_out': item.incoming_out,
-            'slashed_out': item.incoming_out,
-            'remarks': item.remarks,
-            'status': item.status_id,
+            'middle_name': item['middle_name'],
+            'last_name': item['last_name'],
+            'date_travel': item['date_travel'],
+            'id_no': item['id_no'],
+            'original_amount': item['original_amount'],
+            'final_amount': item['final_amount'],
+            'incoming_in': item['incoming_in'],
+            'incoming_out': item['incoming_out'],
+            'slashed_out': item['incoming_out'],
+            'remarks': item['remarks'],
+            'status': item['status_id'],
             'user_id': full_name
         }
 
@@ -621,11 +614,6 @@ def box_load(request):
 
 
 def box_emp_load(request):  
-    dv_id = request.POST.get('dv_id')
-    
-    print("Testtttt")
-    print(dv_id)
-         
     item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
     total = item_data.count()
 
@@ -702,12 +690,17 @@ def item_edit(request):
 @csrf_exempt
 def update_status(request):
     id = request.POST.get('dv_id')
-    print("testadadsad")
-    print(id)
     tev_update = TevOutgoing.objects.filter(dv_no=id).update(is_print=True)
     return JsonResponse({'data': 'success'})
 
 
+
+@csrf_exempt
+def dv_number_lib(request):
+    dv_list = TevOutgoing.objects.values_list('dv_no', flat=True)
+    # dv_list = list(dv_list)
+    # print(dv_list)
+    return JsonResponse({'data': dv_list})
 
 
 
@@ -845,10 +838,6 @@ def add_existing_record(request):
     range_travel = request.POST.get('RangeTravel')
     outgoing_id = request.POST.get('FOutgoingId')
     g_code = generate_code()
-
-
-    print("travel_datesssss")
-    print(outgoing_id)
 
     if travel_date:
         travel_date = request.POST.get('DateTravel')

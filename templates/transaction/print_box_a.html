@@ -83,7 +83,7 @@
       .dvnumber {
         background-color:#c6e0b4;
         border:1.8px solid;
-        font-size: 12px;
+        font-size: 15px;
       }
       .coloredrow {
         background-color: rgb(158, 198, 255);
@@ -196,18 +196,18 @@
                   <br>
                   <b>DISBURSEMENT VOUCHER</b>
                 </td>
-                <td style="font-size: 12px;">
+                <td style="font-size: 15px;">
                   <b> Fund Cluster : <br>Cluster O1 </b>
                 </td>
               </tr>
               <tr>
-                <td style="font-size: 12px;">
+                <td style="font-size: 15px;">
                   <b>Date : </b>
                 </td>
               </tr>
               <tr>
                 <td class="dvnumber">
-                  <b> DV No. : {{ finance.0.dv_no }}</b>
+                  <b> DV No. : {{ dv_number}}</b>
                 </td>
               </tr>
               <tr>
@@ -266,7 +266,7 @@
                 <td rowspan="2">
                 </td>
                 <td>
-                    <span style="font-size: 11px; " > <b>Php  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ total_amount|floatformat:2|intcomma }}</span></b></span>
+                    <span style="font-size: 12px; " > <b>Php  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ total_amount|floatformat:2|intcomma }}</span></b></span>
                 </td>
               </tr>
               <tr>
@@ -809,7 +809,7 @@
         </div><br>
 
         <div class="container-body3">
-          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ finance.0.dv_no }} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
+          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ dv_number}} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
           <table style="font-family: Calibri, sans-serif;" >
             <thead></thead>
             <tbody>
@@ -930,7 +930,7 @@
 
         
         <div class="container-body4">
-          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ finance.0.dv_no }} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
+          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ dv_number }} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
           <table style="font-family: Calibri, sans-serif;" >
             <thead></thead>
             <tbody>

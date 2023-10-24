@@ -322,8 +322,8 @@ def checking_load(request):
             params.append(FTransactionCode)
 
         if FDateTravel:
-            query += " AND t.date_travel = %s"
-            params.append(FDateTravel)
+            query += " AND t.date_travel LIKE %s"
+            params.append(f'%{FDateTravel}%')
 
         if FIncomingIn:
             query += " AND t.incoming_in = %s"
