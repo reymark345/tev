@@ -734,6 +734,7 @@
                             let floatvalue = parseFloat(fields.final_amount);
                             let convertedAmount = 0;
                             let date_travel = fields.date_travel;
+                            let check_remarks = fields.remarks ? fields.remarks : '';
                             formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
                             status_val = fields.status;
                             let fullname = fields.first_name + " " + fields.middle_name + " " + fields.last_name
@@ -760,21 +761,13 @@
                             else if(RangeTravel){
                                 DateTravel.prop("disabled", true);
                             }
-
-                            
                             HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
-
-                            if (Remarks.indexOf("Duplicate Travel") !== -1) {
-                                // Remarks contains the value "Duplicate Travel"
-                                console.log("Remarks contain Duplicate Travel");
-                                Remarks.prop("disabled", false);
-                            } else {
-                                // Remarks does not contain the value "Duplicate Travel"
-                                console.log("Remarks do not contain Duplicate Travel");
+                            if (check_remarks.indexOf("Duplicate Travel") !== -1) {
                                 Remarks.prop("disabled", true);
+                            } else {
+                                Remarks.prop("disabled", false);
                             }
-                            
                             Remarks.val(fields.remarks);
                             DateTravel.val(formattedDates);
                             ItemID.val(pk);
@@ -899,16 +892,23 @@
                     if (result.value) {
                         var form_data = $('#item-form').serialize()
                         let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
-                    
                         var form_data = $('#item-form').serialize()
                         $.ajax({
                             type: 'POST',
                             url: post_url,
                             data: form_data,
-                        }).done(function (data) {
+                        }).done(function (data) {                
+                            function formatDate(dateString) {
+                                const [day, month, year] = dateString.split("-");
+                                const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                                const monthName = months[parseInt(month, 10) - 1];
+                                return `${monthName} ${day}, ${year}`;
+                            }
+
+                            let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
+
                             if (data.data == 'success') {
                                 dateField.clear();
-
                                 let code = data.g_code;
                                 if (code){
                                     Swal.fire({
@@ -961,8 +961,8 @@
                                 dataTable.ajax.reload();
                                 Swal.fire({
                                     icon: 'error',
-                                    title: 'Error saving!',
-                                    html:"Duplicate Travel <br><b>"+data.message+"</b>",
+                                    title: 'Duplicate Travel!',
+                                    html:"Date: <br><b>"+formattedDates+"</b>",
                                     customClass: {
                                         confirmButton: 'btn btn-success',
                                     },

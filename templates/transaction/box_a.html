@@ -1,5 +1,47 @@
+<div id="loading-screen">
+  <center>
+      <div class="col">
+          <!-- Fold -->
+          <div class="sk-fold sk-primary">
+            <div class="sk-fold-cube"></div>
+            <div class="sk-fold-cube"></div>
+            <div class="sk-fold-cube"></div>
+            <div class="sk-fold-cube"></div>
+          </div>
+        </div>  
+  </center>
+</div>
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
+<style>
+  #loading-screen {
+      position: fixed;
+      background: rgba(255, 255, 255, 0.7);
+      color: rgb(0, 0, 0);
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+  }
+  .sk-primary .sk-fold-cube {
+      width: 15px; /* Set the width of each cube */
+      height: 15px; /* Set the height of each cube */
+  }
+  .custom-file-upload {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  background-color: #f8f9fa;
+  color: #495057;
+  border-radius: 4px;
+  }
 
+  .custom-file-upload:hover {
+      background-color: #e9ecef;
+  }
+</style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -375,24 +417,29 @@
     let dv_number = '';
     let charges = '';
     let outgoing_id = 0;
+    let selectedDv = [];
     $(document).ready(function () {
-
-        const table_box_a = $('#tbl-box-a')
-        const table = $('#tbl-items')
-        const ItemFormValidation = document.getElementById('item-form'),
-            AddRecordDv = document.getElementById('add-record-dv'),
-            Remarks = jQuery(document.querySelector('[name="Remarks"]')),
-            DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
-            RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
-            FPurpose = jQuery(document.querySelector('[name="FPurpose"]')),
-            FCharges = jQuery(document.querySelector('[name="FCharges"]')),
-            FinalAmount = jQuery(document.querySelector('[name="FinalAmount"]')),
-            BoxStatus= jQuery(document.querySelector('[name="BoxStatus"]')),
-            BoxDvNo = jQuery(document.querySelector('[name="BoxDvNo"]')),
-            FBoxIn = jQuery(document.querySelector('[name="FBoxIn"]')),
-            FBoxOut= jQuery(document.querySelector('[name="FBoxOut"]')),
-            FDivision = jQuery(document.querySelector('[name="FDivision"]')),
-            FCluster = jQuery(document.querySelector('[name="FCluster"]'));
+      $('#loading-screen').hide();
+      const table_box_a = $('#tbl-box-a')
+      const table = $('#tbl-items')
+      const ItemFormValidation = document.getElementById('item-form'),
+          AddRecordDv = document.getElementById('add-record-dv'),
+          Remarks = jQuery(document.querySelector('[name="Remarks"]')),
+          DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
+          RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
+          FPurpose = jQuery(document.querySelector('[name="FPurpose"]')),
+          FCharges = jQuery(document.querySelector('[name="FCharges"]')),
+          FinalAmount = jQuery(document.querySelector('[name="FinalAmount"]')),
+          BoxStatus= jQuery(document.querySelector('[name="BoxStatus"]')),
+          BoxDvNo = jQuery(document.querySelector('[name="BoxDvNo"]')),
+          FBoxIn = jQuery(document.querySelector('[name="FBoxIn"]')),
+          FBoxOut= jQuery(document.querySelector('[name="FBoxOut"]')),
+          FDivision = jQuery(document.querySelector('[name="FDivision"]')),
+          FCluster = jQuery(document.querySelector('[name="FCluster"]')),
+          search_advance_filter = $('#search-advance-filter'),
+          FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
+          reset_advance_filter = $('#reset-advance-filter'),
+          clear_advance_filter = $('#clear-advance-filter');
         const toast_options = (toastr.options = {
             maxOpened: 1,
             autoDismiss: true,
@@ -407,12 +454,25 @@
         let dataTable = table.DataTable({
             processing: true,
             serverSide: true,
+            // ajax: {
+            //     url: "{% url 'box-load' %}",
+            //     type: "GET",
+            //     data: {
+            //         identifier: 2
+            //     }
+            // },
             ajax: {
                 url: "{% url 'box-load' %}",
-                type: "GET",
-                data: {
-                    identifier: 2
-                }
+                data: function (d) {
+                    d.FAdvancedFilter = FAdvancedFilter.val()
+                    d.BoxDvNo = BoxDvNo.val()
+                    d.FCluster = FCluster.val()
+                    d.FDivision = FDivision.val()
+                    d.FBoxIn = FBoxIn.val()
+                    d.FBoxOut = FBoxOut.val()
+                    d.BoxStatus = BoxStatus.val()
+                    d.ListDv = selectedDv;
+                },
             },
             columns: [
                 {
@@ -515,7 +575,7 @@
                       if (FDivision.length) {
                         FDivision.wrap('<div class="position-relative"></div>')
                         FDivision.select2({
-                              placeholder: 'Choose Cluster',
+                              placeholder: 'Choose Division',
                               dropdownParent: FDivision.parent(),
                               allowClear: true,
                           })
@@ -525,6 +585,14 @@
                         FCluster.select2({
                               placeholder: 'Choose Cluster',
                               dropdownParent: FCluster.parent(),
+                              allowClear: true,
+                          })
+                      }
+                      if (BoxStatus.length) {
+                        BoxStatus.wrap('<div class="position-relative"></div>')
+                        BoxStatus.select2({
+                              placeholder: 'Choose Status',
+                              dropdownParent: BoxStatus.parent(),
                               allowClear: true,
                           })
                       }
@@ -543,6 +611,8 @@
                     //     // $('#total-amount').text("₱ "+totalAmount);
                       
                       $("#advance-filter").modal("show");
+
+
                     // });
 
                       
@@ -761,14 +831,45 @@
                 }).done(function (data) {
                 })
             });
+            
 
         },
      })
     $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
         function clear_advfilter(){
-            FTransactionCode.val('');
-            fdateField.clear();
-        }
+            BoxDvNo.val('Choose').trigger('change');
+            FCluster.val('').trigger('change');
+            FDivision.val('').trigger('change');
+            FBoxIn.val('');
+            FBoxOut.val('');
+            BoxStatus.val('').trigger('change');
+      }
+
+      BoxDvNo.on('change', function() {
+        selectedDv = BoxDvNo.val();
+        console.log("byeee");
+        console.log(selectedDv);
+      });
+
+      search_advance_filter.on('click', function () {
+            FAdvancedFilter.val("true");
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            clear_advfilter();
+            toastr.success('Search successfully', 'Success', toast_options);
+      });
+
+      reset_advance_filter.on('click', function () {
+            FAdvancedFilter.val('');
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Data has been reset', 'Success', toast_options);
+      });
+
+      clear_advance_filter.on('click', function () {
+        clear_advfilter();
+        toastr.success('Clear successfully', 'Success', toast_options);
+      });
 
       function clearFlatpickr(){
         var dateField = $('#dateField').flatpickr({
@@ -792,15 +893,6 @@
                 'firstDayOfWeek': 1 // start week on Monday
             },
           });
-        var fdateField = $('#f-dateField').flatpickr({
-            mode: 'multiple',
-            allowInput: true,
-            dateFormat: 'd-m-Y',
-            locale: {
-                'firstDayOfWeek': 1 // start week on Monday
-            },
-        });
-
         $("#dateField").on("change", function() {
             if(DateTravel.val()){
                 $(".rangeTravel").prop("disabled", true);

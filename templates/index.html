@@ -754,10 +754,10 @@
                         <!-- Content -->
                         {% block content %} {% csrf_token %} {% endblock %}
                         <!-- / Content -->
-
+                      
                         <!-- Footer -->
                         <footer class="content-footer footer bg-footer-theme">
-                            <div class="container-xxl">
+                            <div class="container-fluid">
                                 <div class="footer-container d-flex align-items-center justify-content-between py-2 flex-md-row flex-column">
                                     <div>
                                         ©
@@ -848,7 +848,7 @@
         <!-- Page JS -->
         <script src="{% static 'assets/js/dashboards-analytics.js' %}"></script>
         <script src="{% static 'assets/js/forms-pickers.js' %}"></script>
-        <script src="{% static 'assets/js/forms-file-upload.js' %}"></script>
+        <!-- <script src="{% static 'assets/js/forms-file-upload.js' %}"></script> -->
 
         <!-- Custom made JS -->
         <script src="{% static 'custom/custom.js' %}"></script>

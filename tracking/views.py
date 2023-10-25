@@ -219,8 +219,6 @@ def travel_history_load(request):
     total = 0
     finance_database_alias = 'finance'
     usr_id = request.session.get('user_id', 0)
-    print("why")
-    print(usr_id)
     userData = StaffDetails.objects.filter(user_id=usr_id)
     id_number = userData[0].id_number
     query = """

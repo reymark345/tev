@@ -538,7 +538,23 @@ def payroll_load(request):
 
 
 @csrf_exempt
-def box_load(request):  
+def box_load(request):
+    adv_filter = request.GET.get('FAdvancedFilter')
+
+
+
+
+
+    # d.FAdvancedFilter = FAdvancedFilter.val()
+    # d.BoxDvNo = BoxDvNo.val()
+    # d.FCluster = FCluster.val()
+    # d.FDivision = FDivision.val()
+    # d.FBoxIn = FBoxIn.val()
+    # d.FBoxOut = FBoxOut.val()
+    # d.BoxStatus = BoxStatus.val()
+
+
+
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
@@ -553,7 +569,36 @@ def box_load(request):
     for field in search_fields:
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
-    if _search:
+    if adv_filter:
+
+        FCluster = request.GET.get('FCluster')
+        FDivision = request.GET.get('FDivision')
+        FBoxIn = request.GET.get('FBoxIn')
+        FBoxOut = request.GET.get('FBoxOut')
+        BoxStatus = request.GET.get('BoxStatus')
+        dv_list = request.GET.getlist('ListDv[]')
+
+        item_data = TevOutgoing.objects.all()
+
+        if FCluster:
+            item_data = item_data.filter(cluster=FCluster)
+
+        if FDivision:
+            item_data = item_data.filter(division_id = FDivision)
+
+        if FBoxIn:
+            item_data = item_data.filter(box_b_in__icontains=FBoxIn)
+
+        if FBoxOut:
+            item_data = item_data.filter(box_b_out__icontains=FBoxOut)
+
+        if BoxStatus:
+            item_data = item_data.filter(status_id=BoxStatus)
+
+        if dv_list:
+            item_data = item_data.filter(id__in=dv_list)
+
+    elif _search:
         item_data = TevOutgoing.objects.filter().filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
     else:
         item_data = TevOutgoing.objects.filter().select_related().distinct().order_by(_order_dash + 'id')
