@@ -28,5 +28,6 @@ urlpatterns = [
     path('delete_box_list', views.delete_box_list, name='delete-box-list'),
     
     path('update_status', views.update_status, name='update-status'),
+    path('dv_number_lib', views.dv_number_lib, name='dv-number-lib'),
     path('add_existing_record', views.add_existing_record, name='add-existing-record'),  
 ]

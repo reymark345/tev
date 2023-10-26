@@ -15,6 +15,7 @@
                             <th><input type="checkbox" id="check-all"></th>
                             <th>Transaction Code</th>
                             <th>Employee Name</th>
+                            <th>Date Travel</th>
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Incoming In</th>
@@ -28,6 +29,144 @@
         </div>
     </div>
 </div>
+
+
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="advance-filter" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center mb-4">
+            <h3 class="mb-2">Advanced Filter </h3>
+            <p class="text-muted">Filter data by filling the details below</p>
+            </div>
+            <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
+                <div class="col-12 col-md-12">
+                    <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                        <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
+                            <option></option>
+                        </select>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditUserFirstName">ID Number</label>
+                    <input
+                    type="text"
+                    id="f-id-number"
+                    name="FIdNumber"
+                    class="form-control"
+                    placeholder="16-0000"
+                    />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditUserLastName">Transaction Code</label>
+                    <input
+                    type="text"
+                    id="f-transaction-code"
+                    name="FTransactionCode"
+                    class="form-control"
+                    placeholder="23-00-00000"
+                    />
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditTaxID">Date Travel</label>
+                    <input type="text" class="form-control" name="FDateTravel" placeholder="DD-MM-YYYY" id="f-dateField" autocomplete="off"/>
+                </div>
+    
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" >Incoming In</label>
+                    <input
+                    type="date"
+                    id="f-incoming-in"
+                    name="FIncomingIn"
+                    class="form-control"
+                    />
+                </div>
+    
+                <!-- <div class="col-12 col-md-6">
+                    <label class="form-label" >Slashed out</label>
+                    <input
+                    type="date"
+                    id="f-slashed-out"
+                    name="FSLashedOut"
+                    class="form-control"
+                    />
+                </div> -->
+    
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Final Amount</label>
+                    <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input
+                        type="number"
+                        id="f-final-amount"
+                        name="FFinalAmount"
+                        class="form-control phone-number-mask"
+                        placeholder="0.00"
+                    />
+                    </div>
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalAccountNumber">Account number</label>
+                    <input
+                    type="text"
+                    id="f-account-number"
+                    name="FAccountNumber"
+                    class="form-control"
+                    placeholder="23-00-00000"
+                    />
+                </div>
+
+                    <input
+                    type="hidden"
+                    id="f-first-name"
+                    name="FFirstName"
+                    class="form-control"
+                    placeholder="Firstname"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-middle-name"
+                    name="FMiddleName"
+                    class="form-control"
+                    placeholder="Middle"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-last-name"
+                    name="FLastName"
+                    class="form-control"
+                    placeholder="Lastname"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-adv-filter"
+                    name="FAdvancedFilter"
+                    class="form-control"
+                    placeholder="AdvFilter"
+                    />
+                <div class="col-12 text-center">
+                    <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
+                    <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
+                    <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
+                
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+<!--/ Edit User Modal -->
+    
+    
 
 
 
@@ -155,15 +294,34 @@
 <script>
     let clicked_id = 0;
     let status_val =0;
+    let employeeList = [];
     $(document).ready(function () {
         let selected_tev = [];
+        var fdateField = $('#f-dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+        });
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             Charges = jQuery(document.querySelector('[name="Charges"]')),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
-            offCanvasElement = document.querySelector('#add-new-record');
+            offCanvasElement = document.querySelector('#add-new-record'),
+            FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
+            FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
+            FIdNumber= jQuery(document.querySelector('[name="FIdNumber"]')),
+            FTransactionCode= jQuery(document.querySelector('[name="FTransactionCode"]')),
+            FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
+            FIncomingIn= jQuery(document.querySelector('[name="FIncomingIn"]')),
+            FFinalAmount= jQuery(document.querySelector('[name="FFinalAmount"]')),
+            search_advance_filter = $('#search-advance-filter'),
+            reset_advance_filter = $('#reset-advance-filter'),
+            clear_advance_filter = $('#clear-advance-filter');
 
         const ItemFormAssignValidation = document.getElementById('assign-form'),
             DvNumber = jQuery(document.querySelector('[name="DvNumber"]')),
@@ -186,12 +344,25 @@
         let dataTable = table.DataTable({
             processing: true,
             serverSide: true,
+            // ajax: {
+            //     url: "{% url 'payroll-load' %}",
+            //     type: "GET",
+            //     data: {
+            //         identifier: 1
+            //     }
+            // },
+
             ajax: {
                 url: "{% url 'payroll-load' %}",
-                type: "GET",
-                data: {
-                    identifier: 1
-                }
+                data: function (d) {
+                    d.FAdvancedFilter = FAdvancedFilter.val()
+                    d.FIdNumber = FIdNumber.val()
+                    d.FTransactionCode = FTransactionCode.val()
+                    d.FDateTravel = FDateTravel.val()
+                    d.FIncomingIn = FIncomingIn.val()
+                    d.FFinalAmount = FFinalAmount.val()
+                    d.EmployeeList = employeeList
+                },
             },
             columns: [
                 {
@@ -213,6 +384,7 @@
                 },
                 { data: 'code' },
                 { data: 'name' },
+                { data: 'date_travel' },
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'incoming_in' },
@@ -230,6 +402,23 @@
                 {
                     targets: 3,
                     render: function(data) {
+                        let dates = data.split(',');
+
+                        let formattedDates = dates.map(date => {
+                            let [day, month, year] = date.split('-');
+                            let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            month = months[parseInt(month, 10) - 1];
+                            return `${month} ${day} ${year}`;
+                        });
+                        
+                        let result = formattedDates.join(', ');
+
+                        return '<span class="badge bg-label-primary">'+result+'</span>'
+                    },
+                },
+                {
+                    targets: 4,
+                    render: function(data) {
                         var floatValue = parseFloat(data);
                         if (floatValue !== 0) {
                             var convertedValue = floatValue.toFixed(2);
@@ -240,7 +429,7 @@
                     },
                 },
                 {
-                  targets: 4,
+                  targets: 5,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
@@ -295,6 +484,30 @@
                 {
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                    action: function () {
+                        employeeList = [];
+                        const $selectElement = $('#f-employee-name');
+                        $selectElement.empty();
+                        fetchEmployee($selectElement);
+                        FEmployeeName.val('').trigger('change');
+
+                        setTimeout(function() {
+                            if (FEmployeeName.length) {
+                                FEmployeeName.wrap('<div class="position-relative"></div>')
+                                FEmployeeName.select2({
+                                    placeholder: 'Choose employee',
+                                    dropdownParent: FEmployeeName.parent(),
+                                    allowClear: true,
+                                })
+                            }
+                        }, 300);
+                        
+
+
+                        
+                        $("#advance-filter").modal("show");
+                    }
+                
                 },
                 {
                     className: 'btn btn-primary',
@@ -724,7 +937,7 @@
 
         $(document).on('change', '.checkbox_data', function(event) {
             var clickedCheckbox = $(event.target);
-            var row = clickedCheckbox.closest('tr'); // Get the parent row of the clicked checkbox
+            var row = clickedCheckbox.closest('tr');
             var checkboxId = clickedCheckbox.attr('value');
             var purposeInput = row.find('input[name="Purpose"]');
             var purposeValue = purposeInput.val().trim();
@@ -735,25 +948,57 @@
             let monthDate = new Date(currentDate.getFullYear(), month);
             let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
             let year = currentDate.getFullYear();
-          
+            let travel = '';
             let defaultPurposeValue = "TE for " + monthName + " " + year;
             if (clickedCheckbox.prop('checked')) {
                 var existingItem = selected_tev.find(function(item) {
                     return item.id === checkboxId;
                 });
-              
+
+                travel = row.find('td:eq(3)').text();
+                console.log(travel);
+                console.log("gegege");
+
+                let dates = travel.split(', ').map(dateString => {
+                    let [month, day, year] = dateString.split(' ');
+                    return { month, year };
+                });
+                
+                // Group months based on years
+                let groupedMonths = {};
+                dates.forEach(date => {
+                    if (!groupedMonths[date.year]) {
+                        groupedMonths[date.year] = [];
+                    }
+                    if (!groupedMonths[date.year].includes(date.month)) {
+                        groupedMonths[date.year].push(date.month);
+                    }
+                });
+                
+                // Format output string
+                let output = Object.entries(groupedMonths).map(([year, months]) => {
+                    return `${months.join(', ')} ${year}`;
+                }).join(' and ');
+                
+                travel = "TE for " + output;
+         
+
+                
+
                 if (!existingItem) {
                     var array_id = {
                         id: stck_id,
                         code: row.find('td:eq(1)').text(),
                         name: row.find('td:eq(2)').text(),
-                        amount: row.find('td:eq(3)').text(),
-                        status: row.find('td:eq(4)').text(),
+                        date_travel: row.find('td:eq(3)').text(),
+                        amount: row.find('td:eq(4)').text(),
+                        status: row.find('td:eq(5)').text(),
                         charges: row.find('select[name="Charges"]').val(),
-                        purpose: purposeValue || defaultPurposeValue,
+                        purpose: travel,
                     };
                     selected_tev.push(array_id);
                     console.log(array_id);
+
                 } else {
                     existingItem.purpose = purposeValue;
 
@@ -763,9 +1008,9 @@
                 purposeInput.prop("disabled", false);
               
                 if (!purposeValue) {
-                    purposeInput.val(defaultPurposeValue);
+                    purposeInput.val(travel);
                 }
-            } else {
+                } else {
                 var index = selected_tev.findIndex(function(item) {
                     return item.id === checkboxId;
                 });
@@ -786,24 +1031,91 @@
                 );
             });
         });
+
+        search_advance_filter.on('click', function () {
+            FAdvancedFilter.val("true");
+            $('#f-employee-name').empty();
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            clear_advfilter();
+            toastr.success('Search successfully', 'Success', toast_options);
+        });
+
+        reset_advance_filter.on('click', function () {
+            FAdvancedFilter.val('');
+            $('#f-employee-name').empty();
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Data has been reset', 'Success', toast_options);
+        });
+
+        clear_advance_filter.on('click', function () {
+            clear_advfilter();
+            toastr.success('Clear successfully', 'Success', toast_options);
+        });
+
+        function clear_advfilter(){
+            FIdNumber.val('');
+            FTransactionCode.val('');
+            FFinalAmount.val('');
+            FIncomingIn.val('');
+            fdateField.clear();
+            FEmployeeName.val('').trigger('change');
+        }
+
+        function fetchEmployee($selectElement) {
+            const employees = JSON.parse(localStorage.getItem('employees'));
+            if (employees) {
+                $.each(employees, function (index, employee) {
+                    const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                    const $option = $('<option>', {
+                        value: employee.idNumber,
+                        text: optionText,
+                        id: employee.idNumber
+                    });
+                    $selectElement.append($option);
+                });
+            } else {
+                console.log("No employee data found in local storage.");
+            }
+        }
+
+        $('#f-employee-name').change(function() {
+             var selectedOptions = $(this).find('option:selected');
+             selectedOptions.each(function() {
+                 var optionValue = $(this).val();
+                 if (employeeList.indexOf(optionValue) === -1) {
+                    employeeList.push(optionValue);
+                 }
+             });
+             $(this).find('option:not(:selected)').each(function() {
+                 var optionValue = $(this).val();
+                 var index = employeeList.indexOf(optionValue);
+                 if (index !== -1) {
+                    employeeList.splice(index, 1);
+                 }
+             });
+             console.log("Newly added values: " + employeeList);
+        
+        });
         
         
-          $('#returned').click(function() {
+        $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
             let status = 3;
-              if (correctness_remarks === "") {
+                if (correctness_remarks === "") {
                 $("#amount_error").text("");
                 $("#remarks_error").text("Please enter Remarks for returned.");
                 $(".input-group").addClass("has-error");
                 event.preventDefault();
-              } else {
+                } else {
                 $("#remarks_error").text("");
                 $(".input-group").removeClass("has-error");
                 tev_details(final_amount,correctness_remarks,status,clicked_id);
-              }
-              
-            });
+                }
+            
+        });
 
         function tev_details(amount,remarks,status,emp_id){
             $.ajax({

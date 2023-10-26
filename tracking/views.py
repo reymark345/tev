@@ -42,8 +42,6 @@ def tracking_list(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-    
-    
 def tracking_load(request):
     total = 0
     data = []
@@ -59,7 +57,7 @@ def tracking_load(request):
         'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
         purposes=F('tevbridge__purpose'),
         dv_no=F('tevbridge__tev_outgoing__dv_no')
-    )
+    ).order_by('-id')
     
     total = len(finance_data)
     _start = request.GET.get('start')
@@ -198,6 +196,21 @@ def travel_history(request):
             'role_permission' : role.role_name,
         }
         return render(request, 'tracking/travel_history.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+@csrf_exempt
+def travel_calendar(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'tracking/travel_calendar.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
