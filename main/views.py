@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (RoleDetails, StaffDetails)
+from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing)
 
 
 def get_user_details(request):
@@ -46,7 +46,28 @@ def dashboard(request):
    
     user_details = get_user_details(request)
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+
+    uploaded = TevIncoming.objects.filter(is_upload = 1).count()
+    incoming = TevIncoming.objects.filter(status_id=1).count()
+    checking = TevIncoming.objects.filter(status_id=2).count()
+    approved = TevIncoming.objects.filter(status_id=7).count()
+    returned = TevIncoming.objects.filter(status_id=3).count()
+    payroll = TevIncoming.objects.filter(status_id=4).count()
+    outgoing = TevIncoming.objects.filter(status_id=5).count()
+    ongoing = TevIncoming.objects.filter(status_id=6).count()
+    box_a = TevOutgoing.objects.filter().count()
+
     context = {
+        'uploaded': uploaded,
+        'user_role': role.role_name,
+        'incoming': incoming,
+        'checking': checking,
+        'approved': approved,
+        'returned': returned,
+        'payroll': payroll,
+        'outgoing': outgoing,
+        'ongoing': ongoing,
+        'box_a': box_a,
         'role_permission' : role.role_name,
     }
     if role.role_name in allowed_roles:

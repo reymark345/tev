@@ -366,7 +366,7 @@
                 { data: 'status' },
                 { data: 'amt_budget' },
                 { data: 'amt_journal' },
-                { data: 'amt_certified' },
+                { data: 'approved_date' },
                 { data: 'amt_check' },
                 { data: 'id' },
 
@@ -530,27 +530,26 @@
             {
                 targets: 11,
                 render: function (data) {
-                    data = parseInt(data); 
 
-                    if (data){
-                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                    }
-                    else{
-                        return ''
-                    }
-
+                  if (data){
+                      return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                  }
+                  else{
+                      return ''
+                  }
                 },
             },
             {
                 targets: 12,
                 render: function (data) {
-                    data = parseInt(data); 
-                    if (data){
-                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                    }
-                    else{
-                        return ''
-                    }
+                  data = parseInt(data); 
+                  
+                  if (data){
+                      return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                  }
+                  else{
+                      return ''
+                  }
 
                 },
             },

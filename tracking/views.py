@@ -74,10 +74,11 @@ def tracking_load(request):
         amt_journal = ''
         amt_budget = ''
         amt_check = ''
+        approved_date = ''
         if row['dv_no']:
             
             finance_query = """
-                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount
+                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
                 FROM transactions AS ts
                 LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
             """
@@ -91,6 +92,7 @@ def tracking_load(request):
                 amt_journal = finance_results[0][2]
                 amt_budget = finance_results[0][3]
                 amt_check = finance_results[0][4]
+                approved_date = finance_results[0][5]
                 
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
@@ -114,6 +116,7 @@ def tracking_load(request):
             'amt_journal': amt_journal,
             'amt_budget': amt_budget,
             'amt_check': amt_check,
+            'approved_date': approved_date,
         }
         data.append(item)
         
