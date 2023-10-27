@@ -145,6 +145,28 @@ def employee_details(request):
     incoming = TevIncoming.objects.filter(id=idd).first()
     inc_list = TevIncoming.objects.filter(code=incoming.code).order_by('-id')
 
+    query = """
+        SELECT ti.id, ti.code, ti.id_no, ti.account_no, ti.original_amount, ti.final_amount, ti.status_id, tb.purpose, ti.remarks, ti.incoming_in,
+        t_o.dv_no, ch.name AS charges, cl.name AS cluster FROM tev_incoming AS ti 
+        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        LEFT JOIN charges AS ch ON ch.id = tb.charges_id
+        LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
+        -- LEFT JOIN trans_check AS tc ON tc.dv_no = t_o.dv_no 
+        -- LEFT JOIN trans_payeename AS tp ON tp.dv_no = t_o.dv_no
+        -- LEFT JOIN trans_number AS tn ON tn.trans_payee_id = tp.trans_payee_id
+        -- LEFT JOIN obligate AS ob ON ob.obligate_id = tn.obligate_id
+        WHERE ti.id = %s
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, [idd])
+        results = cursor.fetchall()
+
+    print("daks")
+    print(results)
+
+
     id_number = incoming.id_no
     if incoming:
         first_name = incoming.first_name or ""
