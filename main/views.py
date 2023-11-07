@@ -17,7 +17,13 @@ def index(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
     else:
-        return redirect("login")
+        return redirect("landing")
+    
+@csrf_exempt
+def landing(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+    return render(request, 'landing_page.html')
 
 
 @csrf_exempt
@@ -79,4 +85,4 @@ def dashboard(request):
 def logout(request):
     auth_logout(request)
     request.session.flush()
-    return redirect("login")
+    return redirect("landing")
