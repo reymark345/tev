@@ -52,7 +52,7 @@ def list(request):
         context = {
             'role_permission' : role.role_name,
             'cluster' : Cluster.objects.filter().order_by('name'),
-            'division' : Division.objects.filter().order_by('name'),
+            'division' : Division.objects.filter(status=0).order_by('name'),
         }
         return render(request, 'receive/list.html', context)
     else:
@@ -68,7 +68,7 @@ def list_payroll(request):
         context = {
             'charges' : Charges.objects.filter().order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
-            'division' : Division.objects.filter().order_by('name'),
+            'division' : Division.objects.filter(status=0).order_by('name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'transaction/list.html', context)
@@ -138,7 +138,7 @@ def box_a(request):
             'role_permission' : role.role_name,
             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
             'cluster' : Cluster.objects.filter().order_by('id'),
-            'division' : Division.objects.filter().order_by('id'),
+            'division' : Division.objects.filter(status=0).order_by('id'),
         }
         return render(request, 'transaction/box_a.html', context)
     else:

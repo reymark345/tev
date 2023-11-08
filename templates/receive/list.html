@@ -905,7 +905,8 @@
                                 return `${monthName} ${day}, ${year}`;
                             }
 
-                            let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
+                            console.log("testtt");
+                            console.log(data);
 
                             if (data.data == 'success') {
                                 dateField.clear();
@@ -950,6 +951,7 @@
 
                                 dataTable.ajax.reload();
                             } else {
+                                let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
                                 dateField.clear();
                                 EmployeeName.val("").trigger('change');
                                 OriginalAmount.val("");
