@@ -51,13 +51,65 @@ def tracking_load(request):
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
 
-    latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
-    finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
-        'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',
-        'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
-        purposes=F('tevbridge__purpose'),
-        dv_no=F('tevbridge__tev_outgoing__dv_no')
-    ).order_by('-id')
+    FIdNumber= request.GET.get('FIdNumber')
+    FTransactionCode = request.GET.get('FTransactionCode')
+    FDateTravel= request.GET.get('FDateTravel') 
+    FDVNumber= request.GET.get('FDVNumber') 
+    EmployeeList = request.GET.getlist('EmployeeList[]')
+    FAdvancedFilter =  request.GET.get('FAdvancedFilter')
+
+    # print("testtt")
+    # print(FAdvancedFilter)
+    # print(FTransactionCode)
+    # print(FDateTravel)
+    # print(FDVNumber)
+    # print(EmployeeList)
+    # print("endtesst")
+
+
+    if FAdvancedFilter:
+        def dictfetchall(cursor):
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        query = """
+            SELECT t.*
+            FROM tev_incoming t
+            WHERE (t.status_id = 2
+                OR t.status_id = 7
+                OR (t.status_id = 3 AND t.slashed_out IS NULL))
+        """
+        params = []
+
+        if FTransactionCode:
+            query += " AND t.code = %s"
+            params.append(FTransactionCode)
+
+        if FDateTravel:
+            query += " AND t.date_travel LIKE %s"
+            params.append(f'%{FDateTravel}%')
+        if EmployeeList:
+            placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
+            query += f" AND t.id_no IN ({placeholders})"
+            params.extend(EmployeeList)
+
+        query += " ORDER BY t.incoming_out DESC;"
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, params)
+            finance_data = dictfetchall(cursor)
+
+            print("testt")
+            print(finance_data)
+
+    else:
+        latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
+        finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
+            'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',
+            'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
+            purposes=F('tevbridge__purpose'),
+            dv_no=F('tevbridge__tev_outgoing__dv_no')
+        ).order_by('-id')
     
     total = len(finance_data)
     _start = request.GET.get('start')

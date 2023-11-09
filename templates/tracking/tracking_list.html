@@ -272,6 +272,111 @@
 </div>
 
 
+<!-- Edit User Modal -->
+<div class="modal fade" id="advance-filter" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+      <div class="modal-content p-3 p-md-5">
+      <div class="modal-body">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="text-center mb-4">
+          <h3 class="mb-2">Advanced Filter </h3>
+          <p class="text-muted">Filter data by filling the details below</p>
+          </div>
+          <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
+              <div class="col-12 col-md-12">
+                  <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                      <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
+                          <option></option>
+                      </select>
+              </div>
+              <div class="col-12 col-md-6">
+                  <label class="form-label" for="modalEditUserFirstName">ID Number</label>
+                  <input
+                  type="text"
+                  id="f-id-number"
+                  name="FIdNumber"
+                  class="form-control"
+                  placeholder="16-0000"
+                  />
+              </div>
+              <div class="col-12 col-md-6">
+                  <label class="form-label" for="modalEditUserLastName">Transaction Code</label>
+                  <input
+                  type="text"
+                  id="f-transaction-code"
+                  name="FTransactionCode"
+                  class="form-control"
+                  placeholder="23-00-00000"
+                  />
+              </div>
+  
+              <div class="col-12 col-md-6">
+                  <label class="form-label" for="modalEditTaxID">Date Travel</label>
+                  <input type="text" class="form-control" name="FDateTravel" placeholder="DD-MM-YYYY" id="dateField" autocomplete="off"/>
+              </div>
+  
+              <div class="col-12 col-md-6">
+                  <label class="form-label">DV Number</label>
+                  <div class="input-group">
+                  <input
+                      type="number"
+                      id="dv-number"
+                      name="DVNumber"
+                      class="form-control phone-number-mask"
+                      placeholder="23-00-0000"
+                  />
+                  </div>
+              </div>
+  
+  
+                  <input
+                  type="hidden"
+                  id="f-first-name"
+                  name="FFirstName"
+                  class="form-control"
+                  placeholder="Firstname"
+                  />
+  
+                  <input
+                  type="hidden"
+                  id="f-middle-name"
+                  name="FMiddleName"
+                  class="form-control"
+                  placeholder="Middle"
+                  />
+  
+                  <input
+                  type="hidden"
+                  id="f-last-name"
+                  name="FLastName"
+                  class="form-control"
+                  placeholder="Lastname"
+                  />
+  
+                  <input
+                  type="hidden"
+                  id="f-adv-filter"
+                  name="FAdvancedFilter"
+                  class="form-control"
+                  placeholder="AdvFilter"
+                  />
+          
+  
+  
+              <div class="col-12 text-center">
+                  <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
+                  <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
+                  <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
+              
+              </div>
+          </form>
+      </div>
+      </div>
+  </div>
+  </div>
+  <!--/ Edit User Modal -->
+
+
       
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
@@ -325,12 +430,30 @@
     let clicked_id = 0;
     let status_val =0;
     let dv_no_id =0;
+    let employeeList = [];
     $(document).ready(function () {
+      var dateField = $('#dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+      });
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
+            FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
+            FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
+            FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
+            FIdNumber = jQuery(document.querySelector('[name="FIdNumber"]')),
+            DVNumber = jQuery(document.querySelector('[name="DVNumber"]')),
+            FTransactionCode = jQuery(document.querySelector('[name="FTransactionCode"]')),
+            search_advance_filter = $('#search-advance-filter'),
+            reset_advance_filter = $('#reset-advance-filter'),
+            clear_advance_filter = $('#clear-advance-filter'),
             offCanvasElement = document.querySelector('#add-new-record')
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
         const toast_options = (toastr.options = {
@@ -349,10 +472,14 @@
             serverSide: true,
             ajax: {
                 url: "{% url 'tracking-load' %}",
-                type: "GET",
-                data: {
-                    identifier: 1
-                }
+                data: function (d) {
+                    d.FAdvancedFilter = FAdvancedFilter.val()
+                    d.FIdNumber = FIdNumber.val()
+                    d.FTransactionCode = FTransactionCode.val()
+                    d.FDVNumber = DVNumber.val()
+                    d.FDateTravel = FDateTravel.val()
+                    d.EmployeeList = employeeList
+                },
             },
             columns: [
                 { data: 'code' },
@@ -571,7 +698,28 @@
                 {
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
-                },
+                    action: function () {
+                        employeeList = [];
+                        const $selectElement = $('#f-employee-name');
+                        $selectElement.empty();
+                        fetchEmployee($selectElement);
+                        FEmployeeName.val('').trigger('change');
+
+                        setTimeout(function() {
+                            if (FEmployeeName.length) {
+                                FEmployeeName.wrap('<div class="position-relative"></div>')
+                                FEmployeeName.select2({
+                                    placeholder: 'Choose employee',
+                                    dropdownParent: FEmployeeName.parent(),
+                                    allowClear: true,
+                                })
+                            }
+                        }, 300);
+                        $("#advance-filter").modal("show");
+                    }
+                  },
+
+
             ],
             drawCallback: function (settings) { 
                 $('.view-data').on('click', function () {
@@ -744,6 +892,70 @@
                 $('#update-transaction').modal('show');
             })
         });
+
+      $('#f-employee-name').change(function() {
+            var selectedOptions = $(this).find('option:selected');
+            selectedOptions.each(function() {
+                var optionValue = $(this).val();
+                if (employeeList.indexOf(optionValue) === -1) {
+                  employeeList.push(optionValue);
+                }
+            });
+            $(this).find('option:not(:selected)').each(function() {
+                var optionValue = $(this).val();
+                var index = employeeList.indexOf(optionValue);
+                if (index !== -1) {
+                  employeeList.splice(index, 1);
+                }
+            });
+      });
+
+      function fetchEmployee($selectElement) {
+        const employees = JSON.parse(localStorage.getItem('employees'));
+        if (employees) {
+            $.each(employees, function (index, employee) {
+                const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                const $option = $('<option>', {
+                    value: employee.idNumber,
+                    text: optionText,
+                    id: employee.idNumber
+                });
+                $selectElement.append($option);
+            });
+        } else {
+            console.log("No employee data found in local storage.");
+        }
+    }
+
+      search_advance_filter.on('click', function () {
+        FAdvancedFilter.val("true");
+        $('#f-employee-name').empty();
+        $("#advance-filter").modal("hide");
+        dataTable.ajax.reload();
+        clear_advfilter();
+        toastr.success('Search successfully', 'Success', toast_options);
+      });
+
+      reset_advance_filter.on('click', function () {
+        FAdvancedFilter.val('');
+        $('#f-employee-name').empty();
+        $("#advance-filter").modal("hide");
+        dataTable.ajax.reload();
+        toastr.success('Data has been reset', 'Success', toast_options);
+      });
+
+      clear_advance_filter.on('click', function () {
+        clear_advfilter();
+        toastr.success('Clear successfully', 'Success', toast_options);
+      });
+
+      function clear_advfilter(){
+        FIdNumber.val('');
+        FTransactionCode.val('');
+        DVNumber.val('');
+        dateField.clear();
+        FEmployeeName.val('').trigger('change');
+      }
 
     })
 </script>
