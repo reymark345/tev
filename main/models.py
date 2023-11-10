@@ -153,6 +153,7 @@ class Division(models.Model):
     created_by = models.IntegerField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True, default=0)
 
     class Meta:
         managed = True
@@ -182,6 +183,7 @@ class Charges(models.Model):
     created_by = models.IntegerField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True, default=0)
 
     class Meta:
         managed = True

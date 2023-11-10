@@ -51,13 +51,65 @@ def tracking_load(request):
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
 
-    latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
-    finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
-        'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',
-        'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
-        purposes=F('tevbridge__purpose'),
-        dv_no=F('tevbridge__tev_outgoing__dv_no')
-    ).order_by('-id')
+    FIdNumber= request.GET.get('FIdNumber')
+    FTransactionCode = request.GET.get('FTransactionCode')
+    FDateTravel= request.GET.get('FDateTravel') 
+    FDVNumber= request.GET.get('FDVNumber') 
+    EmployeeList = request.GET.getlist('EmployeeList[]')
+    FAdvancedFilter =  request.GET.get('FAdvancedFilter')
+
+    # print("testtt")
+    # print(FAdvancedFilter)
+    # print(FTransactionCode)
+    # print(FDateTravel)
+    # print(FDVNumber)
+    # print(EmployeeList)
+    # print("endtesst")
+
+
+    if FAdvancedFilter:
+        def dictfetchall(cursor):
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        query = """
+            SELECT t.*
+            FROM tev_incoming t
+            WHERE (t.status_id = 2
+                OR t.status_id = 7
+                OR (t.status_id = 3 AND t.slashed_out IS NULL))
+        """
+        params = []
+
+        if FTransactionCode:
+            query += " AND t.code = %s"
+            params.append(FTransactionCode)
+
+        if FDateTravel:
+            query += " AND t.date_travel LIKE %s"
+            params.append(f'%{FDateTravel}%')
+        if EmployeeList:
+            placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
+            query += f" AND t.id_no IN ({placeholders})"
+            params.extend(EmployeeList)
+
+        query += " ORDER BY t.incoming_out DESC;"
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, params)
+            finance_data = dictfetchall(cursor)
+
+            print("testt")
+            print(finance_data)
+
+    else:
+        latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
+        finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
+            'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',
+            'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
+            purposes=F('tevbridge__purpose'),
+            dv_no=F('tevbridge__tev_outgoing__dv_no')
+        ).order_by('-id')
     
     total = len(finance_data)
     _start = request.GET.get('start')
@@ -74,10 +126,11 @@ def tracking_load(request):
         amt_journal = ''
         amt_budget = ''
         amt_check = ''
+        approved_date = ''
         if row['dv_no']:
             
             finance_query = """
-                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount
+                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
                 FROM transactions AS ts
                 LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
             """
@@ -91,6 +144,7 @@ def tracking_load(request):
                 amt_journal = finance_results[0][2]
                 amt_budget = finance_results[0][3]
                 amt_check = finance_results[0][4]
+                approved_date = finance_results[0][5]
                 
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
@@ -114,6 +168,7 @@ def tracking_load(request):
             'amt_journal': amt_journal,
             'amt_budget': amt_budget,
             'amt_check': amt_check,
+            'approved_date': approved_date,
         }
         data.append(item)
         
@@ -141,6 +196,28 @@ def employee_details(request):
     idd = request.POST.get('dv_id')
     incoming = TevIncoming.objects.filter(id=idd).first()
     inc_list = TevIncoming.objects.filter(code=incoming.code).order_by('-id')
+
+    query = """
+        SELECT ti.id, ti.code, ti.id_no, ti.account_no, ti.original_amount, ti.final_amount, ti.status_id, tb.purpose, ti.remarks, ti.incoming_in,
+        t_o.dv_no, ch.name AS charges, cl.name AS cluster FROM tev_incoming AS ti 
+        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        LEFT JOIN charges AS ch ON ch.id = tb.charges_id
+        LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
+        -- LEFT JOIN trans_check AS tc ON tc.dv_no = t_o.dv_no 
+        -- LEFT JOIN trans_payeename AS tp ON tp.dv_no = t_o.dv_no
+        -- LEFT JOIN trans_number AS tn ON tn.trans_payee_id = tp.trans_payee_id
+        -- LEFT JOIN obligate AS ob ON ob.obligate_id = tn.obligate_id
+        WHERE ti.id = %s
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, [idd])
+        results = cursor.fetchall()
+
+    print("daks")
+    print(results)
+
 
     id_number = incoming.id_no
     if incoming:

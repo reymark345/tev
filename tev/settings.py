@@ -100,6 +100,15 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '3306',
     },
+    # 'finance': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2023',
+    #     'USER':'fmdDeveloper',
+    #     'PASSWORD':'M@tth3w6fmd-developer',
+    #     'HOST':'172.31.240.235',
+    #     'PORT':'3306',
+    # },
+
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'finance',

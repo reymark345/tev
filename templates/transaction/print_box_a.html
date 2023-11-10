@@ -1,178 +1,201 @@
+
 {% load humanize %} 
 {% load staticfiles %}
 <html>
-
+  <div id="loading-screen">
+    <center>
+        <div class="col">
+            <!-- Fold -->
+            <div class="sk-fold sk-primary">
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+            </div>
+          </div>  
+    </center>
+  </div>
 <head>
+</head>
 <style>
+#loading-screen {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.7);
+  color: rgb(0, 0, 0);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  }
+.sk-primary .sk-fold-cube {
+    width: 15px; /* Set the width of each cube */
+    height: 15px; /* Set the height of each cube */
+}
+
+.container-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: auto;
+  padding-bottom: 50px;
+  background-color: #cccccc;
+}
+  
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 5%;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+  
+.print-button {
+  background-color: #b2c2ce;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-right: 500px;
+}
+  
+.container-body, .container-body2,.container-body3,.container-body4  {
+  width: 210mm;
+  height:auto;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: relative;
+  padding: 50px;
+}
+  .appendix {
+    position: absolute;
+    top: 65px;
+    right: 50px;
+    font-size: 14px;
+    font-style: italic;
+  }
+  
+  table {
+    border: 3px solid;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 40px;
+  }
+  
+  th,
+  td {
+    border: 1px solid #000000;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+  }
+  
+  .center-text {
+    text-align: center;
+    vertical-align: top;
+  }
+  .dvnumber {
+    background-color:#c6e0b4;
+    border:1.8px solid;
+    font-size: 15px;
+  }
+.coloredrow {
+  background-color: rgb(158, 198, 255);
+  -webkit-print-color-adjust: exact;
+}
+.align-u-left {
+  text-align: left;
+  vertical-align: top;
+}
+
+table.myClass * { /*new*/
+  border: 0;
+}
  
+@media print {
+  .container {
+  display: none;
+}
 
-    .container-wrapper {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        height: auto;
-        padding-bottom: 50px;
-        background-color: #cccccc;
-      }
-     
-      .container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        height: 5%;
-        background-color: #f0f0f0;
-        border-radius: 8px;
-        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
-        margin-bottom: 20px;
-        padding: 0 10px;
-      }
-     
-      .print-button {
-        background-color: #b2c2ce;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        padding: 8px 12px;
-        cursor: pointer;
-        margin-right: 500px;
-      }
-     
-      .container-body, .container-body2,.container-body3,.container-body4  {
-        width: 210mm;
-        height:auto;
-        background-color: #ffffff;
-        box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.5);
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-        position: relative;
-        padding: 50px;
-      }
-      .appendix {
-        position: absolute;
-        top: 65px;
-        right: 50px;
-        font-size: 14px;
-        font-style: italic;
-      }
-     
-      table {
-        border: 3px solid;
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 40px;
-      }
-     
-      th,
-      td {
-        border: 1px solid #000000;
-        text-align: left;
-        padding: 8px;
-      }
-     
-      th {
-        background-color: #f2f2f2;
-      }
-     
-      .center-text {
-        text-align: center;
-        vertical-align: top;
-      }
-      .dvnumber {
-        background-color:#c6e0b4;
-        border:1.8px solid;
-        font-size: 15px;
-      }
-      .coloredrow {
-        background-color: rgb(158, 198, 255);
-        -webkit-print-color-adjust: exact;
-      }
-      .align-u-left {
-      text-align: left;
-      vertical-align: top;
-    }
+.container-body, .container-body2,.container-body3,.container-body4{
+  background-color: #f0f0f0;
+  box-shadow: none;
+  width: 210mm;
+  height: 297mm;
+  margin-top: -30px;
+  }
 
-    table.myClass * { /*new*/
-      border: 0;
-    }
+  .container h3 {
+    color: transparent;
+  }
 
-    
-     
-      @media print {
-        .container {
-          display: none;
-        }
-     
-        .container-body, .container-body2,.container-body3,.container-body4{
-          background-color: #f0f0f0;
-          box-shadow: none;
-          width: 210mm;
-          height: 297mm;
-          margin-top: -30px;
-        }
-     
-        .container h3 {
-          color: transparent;
-        }
-     
-        .container-wrapper {
-          align-items: flex-start;
-        }
-     
-        table {
-          margin-top: 15px;
-          border: 3px solid;
-        }
-     
-        .appendix {
-          top: 45px;
-        }
-     
-        /* Adjust font size for Disbursement Voucher in print */
-        .center-text b {
-          font-size: 14px;
-        }
-        .dvnumber {
-          background-color: #c6e0b4 !important;
-          -webkit-print-color-adjust: exact;
-          color: black; /* Make sure text remains readable */
-          border: 1.8px solid;
-          font-size: 10px;
-        }
+  .container-wrapper {
+    align-items: flex-start;
+  }
 
-        .container-body2,.container-body3,.container-body4 {
-          page-break-before: always;
-        }
-        .footer {
-          margin-top: 99% !important;
-        }
-      }
-     .innerTable{
-       margin:0px;
-       border-color:white;  
-     }
-     .lastRow{
-       padding:0px;
-     }
+  table {
+    margin-top: 15px;
+    border: 3px solid;
+  }
 
-     .align-text-right{
-      text-align: right;
-     }
-     .align-text-right{
-      text-align: right;
-     }
-     .no-border{
-      border: 0;
-     }
+  .appendix {
+    top: 45px;
+  }
 
-    .footer {
-      margin-top: 99%;
-    }
+  /* Adjust font size for Disbursement Voucher in print */
+  .center-text b {
+    font-size: 14px;
+  }
+  .dvnumber {
+    background-color: #c6e0b4 !important;
+    -webkit-print-color-adjust: exact;
+    color: black; /* Make sure text remains readable */
+    border: 1.8px solid;
+    font-size: 10px;
+  }
 
+.container-body2,.container-body3,.container-body4 {
+  page-break-before: always;
+}
+.footer {
+  margin-top: 99% !important;
+}}
 
+.innerTable{
+  margin:0px;
+  border-color:white;  
+}
+.lastRow{
+  padding:0px;
+}
 
+.align-text-right{
+text-align: right;
+}
+.align-text-right{
+text-align: right;
+}
+.no-border{
+border: 0;
+}
+
+.footer {
+margin-top: 99%;
+}
 
 </style>
 </head>
@@ -1063,6 +1086,12 @@
 </body>   
 <script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
 <script type="text/javascript">
+
+
+
+$(document).ready(function () {
+  $('#loading-screen').hide();
+});
 
   function printForms(dv_number) {
       $.ajax({

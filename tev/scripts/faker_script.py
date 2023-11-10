@@ -39,7 +39,7 @@ for stat in status:
 system_configuration_db = SystemConfiguration(name='Acounting Section', transaction_code = '23-05-00000', year='2023')
 system_configuration_db.save()
 
-userdb = StaffDetails(division='Finance Management Division',section ='Accounting sectiion', position ='CMT II', sex = 'Male', address='J.P. Rizal', user_id = '1', role_id = '1')
+userdb = StaffDetails(id_number ='16-11810',division='Finance Management Division',section ='Accounting sectiion', position ='CMT II', sex = 'Male', address='J.P. Rizal', user_id = '1', role_id = '1')
 userdb.save()
 
 

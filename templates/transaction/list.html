@@ -402,18 +402,34 @@
                 {
                     targets: 3,
                     render: function(data) {
-                        let dates = data.split(',');
+                        // console.log(data);
+                        // let dates = data.split(',');
 
-                        let formattedDates = dates.map(date => {
-                            let [day, month, year] = date.split('-');
-                            let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                            month = months[parseInt(month, 10) - 1];
-                            return `${month} ${day} ${year}`;
+                        // let formattedDates = dates.map(date => {
+                        //     let [day, month, year] = date.split('-');
+                        //     let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        //     month = months[parseInt(month, 10) - 1];
+                        //     return `${month} ${day} ${year}`;
+                        // });
+                        
+                        // let result = formattedDates.join(', ');
+
+                        // return '<span class="badge bg-label-primary">'+result+'</span>'
+                        var splitValues = data.split(',');  // Split data by comma
+                        var result = '';
+                        
+                        splitValues.forEach(function(value, index) {
+                            if (index !== 0) {
+                                result += '  '; // Add a space before adding subsequent values
+                            }
+                            var dateParts = value.split('-');
+                            var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                            var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
+                            
+                            result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
                         });
                         
-                        let result = formattedDates.join(', ');
-
-                        return '<span class="badge bg-label-primary">'+result+'</span>'
+                        return result;
                     },
                 },
                 {

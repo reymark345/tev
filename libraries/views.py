@@ -10,7 +10,7 @@ from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails,
 import math
 from django.core.serializers import serialize
 from django.db import IntegrityError
-
+import datetime as date
 
 
 def get_user_details(request):
@@ -23,7 +23,7 @@ def division(request):
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
     if role.role_name in allowed_roles:
         context = {
-            'division' : Division.objects.filter().order_by('name'),
+            'division' : Division.objects.filter(status=0).order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
             'role_permission' : role.role_name,
         }
@@ -69,14 +69,17 @@ def division_update(request):
     division = request.POST.get('Division')
     acrym = request.POST.get('Acronym')
     divchief = request.POST.get('Chief')
-    chiefdesignate = request.POST.get('CDesignation')
-    apr = request.POST.get('Approval')
-    apvldesginate = request.POST.get('APDesignation')
+    c_designate = request.POST.get('CDesignation')
+    approval = request.POST.get('Approval')
+    ap_designation = request.POST.get('APDesignation')
+    user_id = request.session.get('user_id', 0)
 
-    if Division.objects.filter(name=division).exclude(id=id):
+    if Division.objects.filter(name=division, status = 0).exclude(id=id):
         return JsonResponse({'data': 'error', 'message': 'Duplicate Division'})
     else:
-        Division.objects.filter(id=id).update(name=division, acronym = acrym, chief = divchief, c_designation = chiefdesignate, approval = apr, ap_designation =apvldesginate)
+        division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id, status=0)
+        Division.objects.filter(id=id).update(updated_at =date.datetime.now(),status =1)
+        division_add.save()
         return JsonResponse({'data': 'success'})
     
     
@@ -88,7 +91,7 @@ def division_edit(request):
     
     
 def division_load(request):
-    division_data = Division.objects.select_related().order_by('-created_at').reverse()
+    division_data = Division.objects.select_related().filter(status=0).order_by('-created_at').reverse()
     total = division_data.count()
 
     _start = request.GET.get('start')
