@@ -161,6 +161,9 @@ def preview_box_a(request):
     
     userData = AuthUser.objects.filter(id=user_id)
     full_name = userData[0].first_name + ' ' + userData[0].last_name
+
+    designation = StaffDetails.objects.filter(user_id= user_id)
+    position = designation[0].position
     
     
     if outgoing_id:
@@ -284,7 +287,8 @@ def preview_box_a(request):
             'details':designation_result,
             'emp_list_code':emp_list_code,
             'emp_list_lname':emp_list_lname,
-            'user' : full_name
+            'user' : full_name,
+            'position' : position
         }
         
         return render(request, 'transaction/print_box_a.html', context)
