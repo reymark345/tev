@@ -54,62 +54,100 @@ def tracking_load(request):
     FIdNumber= request.GET.get('FIdNumber')
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
-    FDVNumber= request.GET.get('FDVNumber') 
+    NDVNumber= request.GET.get('NDVNumber') 
     EmployeeList = request.GET.getlist('EmployeeList[]')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
 
-    # print("testtt")
-    # print(FAdvancedFilter)
-    # print(FTransactionCode)
-    # print(FDateTravel)
-    # print(FDVNumber)
-    # print(EmployeeList)
-    # print("endtesst")
+
 
 
     if FAdvancedFilter:
+
+        print("testttaaawwwww")
+        print(FAdvancedFilter)
+        print(FTransactionCode)
+        print(FDateTravel)
+        print(NDVNumber)
+        print(EmployeeList)
+        print("endtesstaaa")
+
         def dictfetchall(cursor):
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
         query = """
-            SELECT t.*
-            FROM tev_incoming t
-            WHERE (t.status_id = 2
-                OR t.status_id = 7
-                OR (t.status_id = 3 AND t.slashed_out IS NULL))
+            SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
+                tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
+                tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
+                tev_incoming.incoming_out, tev_bridge.purpose AS purposes,
+                tev_outgoing.dv_no AS dv_no
+            FROM tev_incoming
+            INNER JOIN (
+                SELECT MAX(id) AS max_id
+                FROM tev_incoming
+                GROUP BY code
+            ) AS latest_ids
+            ON tev_incoming.id = latest_ids.max_id
+            LEFT JOIN tev_bridge
+            ON tev_incoming.id = tev_bridge.tev_incoming_id
+            LEFT JOIN tev_outgoing
+            ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+            WHERE tev_incoming.is_upload = 0 OR tev_incoming.is_upload = 1
         """
         params = []
 
         if FTransactionCode:
-            query += " AND t.code = %s"
+            query += " AND tev_incoming.code = %s"
             params.append(FTransactionCode)
 
         if FDateTravel:
-            query += " AND t.date_travel LIKE %s"
+            query += " AND tev_incoming.date_travel LIKE %s"
             params.append(f'%{FDateTravel}%')
+
         if EmployeeList:
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
-            query += f" AND t.id_no IN ({placeholders})"
+            query += f" AND tev_incoming.id_no IN ({placeholders})"
             params.extend(EmployeeList)
 
-        query += " ORDER BY t.incoming_out DESC;"
+        query += "ORDER BY tev_incoming.id DESC;"
 
         with connection.cursor() as cursor:
             cursor.execute(query, params)
             finance_data = dictfetchall(cursor)
 
-            print("testt")
-            print(finance_data)
+      
 
     else:
-        latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
-        finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
-            'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',
-            'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
-            purposes=F('tevbridge__purpose'),
-            dv_no=F('tevbridge__tev_outgoing__dv_no')
-        ).order_by('-id')
+        # latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
+        # finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
+        #     'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',
+        #     'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
+        #     purposes=F('tevbridge__purpose'),
+        #     dv_no=F('tevbridge__tev_outgoing__dv_no')
+        # ).order_by('-id')
+
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
+                    tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
+                    tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
+                    tev_incoming.incoming_out, tev_bridge.purpose AS purposes,
+                    tev_outgoing.dv_no AS dv_no
+                FROM tev_incoming
+                INNER JOIN (
+                    SELECT MAX(id) AS max_id
+                    FROM tev_incoming
+                    GROUP BY code
+                ) AS latest_ids
+                ON tev_incoming.id = latest_ids.max_id
+                LEFT JOIN tev_bridge
+                ON tev_incoming.id = tev_bridge.tev_incoming_id
+                LEFT JOIN tev_outgoing
+                ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                ORDER BY tev_incoming.id DESC;
+            """)
+            columns = [col[0] for col in cursor.description]
+            finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     
     total = len(finance_data)
     _start = request.GET.get('start')
