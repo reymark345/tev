@@ -1281,8 +1281,9 @@
                     } 
                     else if (data.data == 'empty'){
                         $("#import-excel").modal("hide");
+                        $('#loading-screen').hide();
                         Swal.fire({
-                                title: '<strong>Excel File has empty column!</strong>',
+                                title: '<strong>Excel File: Empty column!</strong>',
                                 icon: 'error',
                                 html:
                                 'Excel <b>NOT SAVE! Please Review and Reupload</b> the file!',
