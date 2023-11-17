@@ -401,33 +401,35 @@
                 },
                 {
                     targets: 3,
+                    
                     render: function(data) {
-                        // console.log(data);
-                        // let dates = data.split(',');
+                        console.log(data);
+                        let dates = data.split(',');
 
-                        // let formattedDates = dates.map(date => {
-                        //     let [day, month, year] = date.split('-');
-                        //     let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        //     month = months[parseInt(month, 10) - 1];
-                        //     return `${month} ${day} ${year}`;
-                        // });
-                        
-                        // let result = formattedDates.join(', ');
-
-                        // return '<span class="badge bg-label-primary">'+result+'</span>'
-                        var splitValues = data.split(',');  // Split data by comma
-                        var result = '';
-                        
-                        splitValues.forEach(function(value, index) {
-                            if (index !== 0) {
-                                result += '  '; // Add a space before adding subsequent values
-                            }
-                            var dateParts = value.split('-');
-                            var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
-                            var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
-                            
-                            result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
+                        let formattedDates = dates.map(date => {
+                            let [day, month, year] = date.split('-');
+                            let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            month = months[parseInt(month, 10) - 1];
+                            return `${month} ${day} ${year}`;
                         });
+                        
+                        let result = formattedDates.join(', ');
+                        // return '<span class="badge bg-label-primary" >'+result+'</span>'
+                        
+                        
+                        // var splitValues = data.split(',');  // Split data by comma
+                        // var result = '';
+                        
+                        // splitValues.forEach(function(value, index) {
+                        //     if (index !== 0) {
+                        //         result += '  '; // Add a space before adding subsequent values
+                        //     }
+                        //     var dateParts = value.split('-');
+                        //     var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                        //     var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
+                            
+                        //     result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
+                        // });
                         
                         return result;
                     },
@@ -473,7 +475,7 @@
                     targets: -2,
                     render: function(data, type, row) {
                         if (type === 'display') {
-                            return '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" disabled>' +
+                            return '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
                                 '<option></option>' +
                                 '{% for row in charges %}'+
                                 '<option value="{{ row.id }}">{{ row.name }}</option>'+
@@ -488,7 +490,7 @@
                     targets: -1,
                     render: function(data, type, row) {
                         if (type === 'display') {
-                            return '<input type="text" class="form-control purpose" id="basic-default-name" name="Purpose" disabled />'+
+                            return '<input type="text" class="form-control purpose" id="basic-default-name" name="Purpose" style="width:350px;" disabled  />'+
                             '<span id="purpose_error" style="color: red;"></span>';;
                         }
                         return data;

@@ -321,7 +321,7 @@
                   <input
                       type="number"
                       id="dv-number"
-                      name="DVNumber"
+                      name="NDVNumber"
                       class="form-control phone-number-mask"
                       placeholder="23-00-0000"
                   />
@@ -449,7 +449,7 @@
             FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
             FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
             FIdNumber = jQuery(document.querySelector('[name="FIdNumber"]')),
-            DVNumber = jQuery(document.querySelector('[name="DVNumber"]')),
+            NDVNumber = jQuery(document.querySelector('[name="NDVNumber"]')),
             FTransactionCode = jQuery(document.querySelector('[name="FTransactionCode"]')),
             search_advance_filter = $('#search-advance-filter'),
             reset_advance_filter = $('#reset-advance-filter'),
@@ -476,7 +476,7 @@
                     d.FAdvancedFilter = FAdvancedFilter.val()
                     d.FIdNumber = FIdNumber.val()
                     d.FTransactionCode = FTransactionCode.val()
-                    d.FDVNumber = DVNumber.val()
+                    d.NDVNumber = NDVNumber.val()
                     d.FDateTravel = FDateTravel.val()
                     d.EmployeeList = employeeList
                 },
@@ -952,7 +952,7 @@
       function clear_advfilter(){
         FIdNumber.val('');
         FTransactionCode.val('');
-        DVNumber.val('');
+        NDVNumber.val('');
         dateField.clear();
         FEmployeeName.val('').trigger('change');
       }
