@@ -177,7 +177,7 @@
                     >
                         <option></option>
                         <option value="2">For checking</option>
-                        <option value="7">Approved</option>
+                        <option value="7">For approval</option>
                         <option value="3">Returned</option>
                     </select>
                 </div>
@@ -242,7 +242,7 @@
             <h3 class="mb-2">TEV DETAILS</h3>
             <p>Correctness of amount/Returned/and Approve</p>
             </div>
-            <p>Please provide your final amount for the TEV, indicating whether it can be marked as approved or if it needs to be returned due to any issues.</p>
+            <p>Please provide your final amount for the TEV, indicating whether it can be marked as for approval or if it needs to be returned due to any issues.</p>
             <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
             <div class="col-12">
                 <label class="form-label" for="modaltevDetails">Final Amount</label>
@@ -262,7 +262,7 @@
                 <label class="form-label" for="modaltevDetails">Remarks</label>
                 
                 <div class="input-group">
-                <textarea class="form-control" placeholder="Enter remarks (optional if approved)" rows="5" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
+                <textarea class="form-control" placeholder="Enter remarks (optional if for approval)" rows="5" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
                 </div>
                 <span id="remarks_error" style="color: red;"></span>
             </div>
@@ -468,7 +468,7 @@
                         return '<span class="badge bg-label-danger">Returned</span>'
                       }
                       else if(data==7){
-                        return '<span class="badge bg-label-success">Approved</span>'
+                        return '<span class="badge bg-label-success">For approval</span>'
                       }
                       else{
                         return '<span class="badge bg-label-success">For payroll</span>'

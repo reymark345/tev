@@ -194,7 +194,7 @@
                         <li class="menu-item {% if url_name == 'box-a' %}active{% endif %}">
                             <a href="{% url 'box-a' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti-solid fa-inbox"></i>
-                                <div data-i18n="Box A">Box A</div>
+                                <div data-i18n="Payroll Printing">Payroll Printing</div>
                             </a>
                         </li>
                         {% endif %}
@@ -217,6 +217,14 @@
                                 <i class="menu-icon tf-icons ti ti-color-swatch"></i>
                               
                                 <div data-i18n="Division">Division</div>
+                            </a>
+                        </li>
+
+                        <li class="menu-item {% if url_name == 'remarks' %}active{% endif %}">
+                            <a href="{% url 'remarks' %}" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-color-swatch"></i>
+                              
+                                <div data-i18n="Remarks">Remarks</div>
                             </a>
                         </li>
                         {% endif %}

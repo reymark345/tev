@@ -20,7 +20,6 @@
                             <th>Incoming</th>
                             <th>Checking</th>
                             <th>Payroll</th>
-                            <th>Box A</th>
                             <th>Obligate</th>
                             <th>Journal</th>
                             <th>Certified</th>
@@ -488,7 +487,6 @@
                 { data: 'date_travel'},
                 { data: 'final_amount'},
                 { data: 'status'},
-                { data: 'status'},
                 { data: 'status' },
                 { data: 'status' },
                 { data: 'amt_budget' },
@@ -595,24 +593,7 @@
                 },
             },
             {
-                targets: 7,
-                render: function (data) {
-                    data = parseInt(data); 
-                    let tooltip = '';
-                    if (data==4){
-                      return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
-                    }
-                    else if (data>=4 && data!=7){
-                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                    }
-                    else{
-                        return ''
-                    }
-
-                },
-            },
-            {
-              targets: 8,
+              targets: 7,
               render: function (data) {
                   data = parseInt(data); 
                   if (data>=5 && data!=7){
@@ -627,6 +608,20 @@
           },
 
             {
+                targets: 8,
+                render: function (data) {
+                    data = parseInt(data); 
+
+                    if (data){
+                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                    }
+                    else{
+                        return ''
+                    }
+                },
+            },
+
+            {
                 targets: 9,
                 render: function (data) {
                     data = parseInt(data); 
@@ -637,25 +632,11 @@
                     else{
                         return ''
                     }
+
                 },
             },
-
             {
                 targets: 10,
-                render: function (data) {
-                    data = parseInt(data); 
-
-                    if (data){
-                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                    }
-                    else{
-                        return ''
-                    }
-
-                },
-            },
-            {
-                targets: 11,
                 render: function (data) {
 
                   if (data){
@@ -667,7 +648,7 @@
                 },
             },
             {
-                targets: 12,
+                targets: 11,
                 render: function (data) {
                   data = parseInt(data); 
                   

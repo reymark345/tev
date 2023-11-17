@@ -246,6 +246,26 @@ class Cluster(models.Model):
     class Meta:
         managed = True
         db_table = 'cluster'
+
+
+
+class RemarksLib(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'remarks_lib'
+
+class Remarks_r(models.Model):
+    remarks_lib = models.ForeignKey(RemarksLib, models.DO_NOTHING)
+    incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'remarks_r'
         
         
 

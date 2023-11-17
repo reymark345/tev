@@ -1,5 +1,5 @@
 from faker import Faker
-from main.models import SystemConfiguration, StaffDetails, RoleDetails,Cluster,Charges,Division, Status
+from main.models import SystemConfiguration, StaffDetails, RoleDetails,Cluster,Charges,Division, Status, RemarksLib
 import numpy as np
 
 fake = Faker()
@@ -10,8 +10,8 @@ cluster = ['Cluster 01','Cluster 02','Cluster 03','Cluster 04', 'Cluster 05', 'C
 charges = ['AICS','Socpen','Disaster','CCAM', '4PS']
 division = ['Finance Management Division','Pantawid','DRMD','HRRMD', 'PSD', 'PPD','ORD']
 acronym = ['FMD','PTW','DRMD','HRRMD', 'PSD', 'PPD','ORD']
-status = ['Pending','For checking','Returned','For payroll', 'Outgoing','Ongoing','Approved' ]
-
+status = ['Pending','For checking','Returned','For payroll', 'Outgoing','Ongoing','For approval' ]
+remarks = ['NO CA','NO TICKET']
 
 
 for roles in role_details:
@@ -35,6 +35,10 @@ for i in range(len(division)):
 for stat in status:
     stat = Status(name=stat)
     stat.save()
+
+for i in range(len(remarks)):
+    rem_val = RemarksLib(name=remarks[i],created_by=1)
+    rem_val.save()
 
 system_configuration_db = SystemConfiguration(name='Acounting Section', transaction_code = '23-05-00000', year='2023')
 system_configuration_db.save()
