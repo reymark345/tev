@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, RemarksLib, Remarks_r)
 import json 
 from django.core import serializers
 from datetime import date as datetime_date
@@ -57,6 +57,7 @@ def list(request):
     if role.role_name in allowed_roles:
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'remarks_list' : RemarksLib.objects.filter().order_by('name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/list.html' , context)
@@ -846,6 +847,10 @@ def item_add(request):
     remarks = request.POST.get('Remarks')
     user_id = request.session.get('user_id', 0)
     g_code = generate_code()
+    selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
+    date_values = request.POST.getlist('dateValues[]')
+
+
 
     if travel_date:
         travel_date = request.POST.get('DateTravel')
@@ -913,6 +918,19 @@ def item_add(request):
             system_config = SystemConfiguration.objects.first()
             system_config.transaction_code = g_code
             system_config.save()
+            last_added_tevincoming = TevIncoming.objects.latest('id')
+
+            for selected_value, date_value in zip(selected_values, date_values):
+                remarks_lib = Remarks_r(
+                    date=date_value,
+                    incoming_id=last_added_tevincoming.id,
+                    remarks_lib_id=selected_value
+                )
+                remarks_lib.save()
+
+        print(selected_values)
+        print(date_values)
+        print("dataassss")
 
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
 
@@ -930,6 +948,20 @@ def item_add(request):
             user_id=user_id
         )
         tev_add.save()
+
+        last_added_tevincoming = TevIncoming.objects.latest('id')
+
+        for selected_value, date_value in zip(selected_values, date_values):
+            remarks_lib = Remarks_r(
+                date=date_value,
+                incoming_id=last_added_tevincoming.id,
+                remarks_lib_id=selected_value
+            )
+            remarks_lib.save()
+
+        print(selected_values)
+        print(date_values)
+        print("dataassss")
 
         if tev_add.id:
             system_config = SystemConfiguration.objects.first()
