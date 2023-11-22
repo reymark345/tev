@@ -257,6 +257,7 @@ def item_load(request):
             'incoming_out': item['incoming_out'],
             'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
+            'lacking': item['remarks'],
             'status': item['status_id'],
             'user_id': full_name
         }

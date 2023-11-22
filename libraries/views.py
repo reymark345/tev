@@ -72,10 +72,14 @@ def division_add(request):
     approval = request.POST.get('Approval')
     c_designation = request.POST.get('CDesignation')
     user_id = request.session.get('user_id', 0)
-    division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation,created_by = user_id)
+    
     try:
-        division_add.save()
-        return JsonResponse({'data': 'success'})
+        if Division.objects.filter(name=division):
+            return JsonResponse({'data': 'error', 'message': 'Division Already Taken'})
+        else:
+            division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation,created_by = user_id)
+            division_add.save()
+            return JsonResponse({'data': 'success'})
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
     
@@ -221,23 +225,26 @@ def charges_load(request):
 
 @csrf_exempt
 def remarks_add(request):
-    charges = request.POST.get('Charges')
+    remarks = request.POST.get('Remarks')
     user_id = request.session.get('user_id', 0)
-    charges_add = RemarksLib(name=charges, created_by = user_id)
     try:
-        charges_add.save()
-        return JsonResponse({'data': 'success'})
+        if RemarksLib.objects.filter(name=remarks):
+            return JsonResponse({'data': 'error', 'message': 'Remarks Already Taken'})
+        else:
+            remarks_ = RemarksLib(name=remarks, created_by = user_id)
+            remarks_.save()
+            return JsonResponse({'data': 'success'})
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
     
 @csrf_exempt
 def remarks_update(request):
     id = request.POST.get('ItemID')
-    charges = request.POST.get('Charges')
+    charges = request.POST.get('Remarks')
 
 
     if RemarksLib.objects.filter(name=charges).exclude(id=id):
-        return JsonResponse({'data': 'error', 'message': 'Duplicate Charges'})
+        return JsonResponse({'data': 'error', 'message': 'Duplicate Remarks'})
     else:
         RemarksLib.objects.filter(id=id).update(name=charges)
         return JsonResponse({'data': 'success'})

@@ -12,7 +12,7 @@
                 <table id="tbl-items" class="table">
                     <thead>
                         <tr>
-                            <th>Charges</th>
+                            <th>Remarks</th>
                             <th>Created by</th>
                             <th>Date added</th>
                             <th>Actions</th>
@@ -35,15 +35,15 @@
         <form class="add-new-record pt-0 row g-2" id="item-form">
             <input type="hidden" id="item-id" name="ItemID" />
             <div class="col-sm-12">
-                <label class="form-label">Charges </label>
+                <label class="form-label">Remarks </label>
                 
                 <input
                   type="text"
-                  id="charges"
-                  class="form-control dt-lib-charges"
-                  name="Charges"
-                  placeholder="Enter Charges"
-                  aria-describedby="charges2"
+                  id="remarks"
+                  class="form-control dt-lib-remarks"
+                  name="Remarks"
+                  placeholder="Enter Remarks"
+                  aria-describedby="remarks2"
                 />
             </div>
 
@@ -61,7 +61,7 @@
     $(document).ready(function () {
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
-            Charges = jQuery(document.querySelector('[name="Charges"]')),
+            Remarks = jQuery(document.querySelector('[name="Remarks"]')),
             Status = jQuery(document.querySelector('[name="Status"]')),
             offCanvasElement = document.querySelector('#add-new-record');
         const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
@@ -122,17 +122,17 @@
                 $('.item-edit').on('click', function () {
                     let id = $(this).data('id');
                     
-                    $('.title-name').text('Update Charges Record');
+                    $('.title-name').text('Update Remarks Record');
                     $.ajax({
                         type: 'GET',
-                        url: "{% url 'charges-edit' %}?id=" + id,
+                        url: "{% url 'remarks-edit' %}?id=" + id,
                         dataType: 'json',
                     }).done(function (data) {
                         if (data.length > 0) {
                             let fields = data[0].fields
                             let pk = data[0].pk
-                            let charges = $('#charges')
-                            Charges.val(fields.name);
+                            let remarks = $('#remarks')
+                            Remarks.val(fields.name);
                             ItemID.val(pk)
                             offCanvasEl.show()
                         }
@@ -145,7 +145,7 @@
 
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">Charges</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0">Remarks</h5>')
 
         const newRecord = document.querySelector('.create-new')
 
@@ -155,7 +155,7 @@
                     ItemID.val(0);
                  
                     $('.title-name').text('Add Record');
-                    Charges.val('');
+                    Remarks.val('');
                     $('.form-control').val('');
          
                     offCanvasEl.show();
@@ -166,10 +166,10 @@
         // Form validation for Add new record
         const fv = FormValidation.formValidation(ItemFormValidation, {
             fields: {
-                Charges: {
+                Remarks: {
                     validators: {
                         notEmpty: {
-                            message: 'Please Enter Charges',
+                            message: 'Please Enter Remarks',
                         },
                     },
                 },
@@ -203,7 +203,7 @@
             }).then(function (result) {
                 if (result.value) {
                     var form_data = $('#item-form').serialize()
-                    let post_url = ItemID.val() != '0' ? "{% url 'charges-update' %}" : "{% url 'charges-add' %}"
+                    let post_url = ItemID.val() != '0' ? "{% url 'remarks-update' %}" : "{% url 'remarks-add' %}"
                     $.ajax({
                         type: 'POST',
                         url: post_url,
