@@ -193,15 +193,38 @@ def item_load(request):
         ]
 
     else:
+        # query = """
+        #     SELECT *
+        #     FROM tev_incoming t1
+        #     WHERE (code, id) IN (
+        #         SELECT DISTINCT code, MAX(id)
+        #         FROM tev_incoming
+        #         GROUP BY code 
+        #     ) 
+        #     AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+        #     AND (code LIKE %s
+        #     OR first_name LIKE %s
+        #     OR middle_name LIKE %s
+        #     OR last_name LIKE %s
+        #     OR id_no LIKE %s
+        #     OR account_no LIKE %s
+        #     OR date_travel LIKE %s
+        #     OR original_amount LIKE %s
+        #     OR final_amount LIKE %s
+        #     OR status_id LIKE %s
+        #     )ORDER BY id DESC;
+        # """
         query = """
-            SELECT *
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
             FROM tev_incoming t1
-            WHERE (code, id) IN (
-                SELECT DISTINCT code, MAX(id)
-                FROM tev_incoming
-                GROUP BY code 
-            ) 
-            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.code, t1.id) IN (
+                    SELECT DISTINCT code, MAX(id)
+                    FROM tev_incoming
+                    GROUP BY code 
+            )
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL)) 
             AND (code LIKE %s
             OR first_name LIKE %s
             OR middle_name LIKE %s
@@ -212,7 +235,7 @@ def item_load(request):
             OR original_amount LIKE %s
             OR final_amount LIKE %s
             OR status_id LIKE %s
-            )ORDER BY id DESC;
+            )GROUP BY t1.id ORDER BY id DESC;
         """
             
         params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
@@ -258,7 +281,7 @@ def item_load(request):
             'incoming_out': item['incoming_out'],
             'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
-            'lacking':"fasfs",
+            'lacking': item['lacking'],
             'status': item['status_id'],
             'user_id': full_name
         }
@@ -267,9 +290,24 @@ def item_load(request):
 
     all_ids = [item['id'] for item in data]
 
-# Print or use the list of ids as needed
-    print(all_ids)
-    print("testt")
+    tuple_ids = tuple(all_ids)
+    
+    print(tuple_ids)
+    print(tuple_ids)
+
+    q_remarks = """
+        SELECT DISTINCT incoming_id
+        FROM remarks_r WHERE incoming_id IN %s;
+    """
+    
+    with connection.cursor() as cursor1:
+        cursor1.execute(q_remarks, (tuple_ids,))
+        columns = [col[0] for col in cursor1.description]
+        results_remarks = [dict(zip(columns, row)) for row in cursor1.fetchall()]
+
+    print(results_remarks)
+    print("testtremarSSS")
+
  
 
     response = {

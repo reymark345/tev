@@ -58,7 +58,6 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="check-all"></th>
-                            <th>Transaction Code</th>
                             <th>Id Number</th>
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
@@ -67,8 +66,8 @@
                             <th>Status</th>
                             <th>Received</th>
                             <th>Reviewed</th>
+                            <th>Duplicate</th>
                             <th>Remarks</th>
-                            <th>Lacking</th>
                             <th>Created By</th>
                             <th>ID</th>
                         </tr>
@@ -537,7 +536,6 @@
 
                     }
                 },
-                { data: 'code' },
                 { data: 'id_no' },
                 { data: 'name' },
                 { data: 'original_amount'},
@@ -556,18 +554,23 @@
                 {
                     targets: 1,
                     render: function(data) {
-                        return '<span class="badge bg-label-primary">' + data + '</span>';
-                    
-                    },
-                },
-                {
-                    targets: 2,
-                    render: function(data) {
                         if (data){
                             return '<span class="badge bg-label-primary">' + data + '</span>';
                         }
                         else {
                             return ''
+                        }
+                    },
+                },
+                {
+                    targets: 3,
+                    render: function(data) {
+                        var floatValue = parseFloat(data);
+                        if (floatValue !== 0) {
+                            var convertedValue = floatValue.toFixed(2);
+                            return convertedValue;
+                        } else {
+                            return "";
                         }
                     },
                 },
@@ -585,18 +588,6 @@
                 },
                 {
                     targets: 5,
-                    render: function(data) {
-                        var floatValue = parseFloat(data);
-                        if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
-                        } else {
-                            return "";
-                        }
-                    },
-                },
-                {
-                    targets: 6,
                     render: function(data) {
                         var splitValues = data.split(',');  // Split data by comma
                         var result = '';
@@ -618,7 +609,7 @@
 
                 
                 {
-                  targets: 7,
+                  targets: 6,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'

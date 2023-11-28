@@ -43,7 +43,6 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="check-all"></th>
-                            <th>Transaction Code</th>
                             <th>ID number</th>
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
@@ -52,6 +51,7 @@
                             <th>Status</th>
                             <th>Forwarded</th>
                             <th>Reviewed</th>
+                            <th>Duplicate</th>
                             <th>Remarks</th>
                             <th>Created By</th>
                             <th>ID</th>
@@ -118,17 +118,7 @@
                     class="form-control"
                     />
                 </div>
-    
-                <!-- <div class="col-12 col-md-6">
-                    <label class="form-label" >Slashed out</label>
-                    <input
-                    type="date"
-                    id="f-slashed-out"
-                    name="FSLashedOut"
-                    class="form-control"
-                    />
-                </div> -->
-    
+
                 <div class="col-12 col-md-6">
                     <label class="form-label">Original Amount</label>
                     <div class="input-group">
@@ -372,7 +362,6 @@
 
                     }
                 },
-                { data: 'code' },
                 { data: 'id_no' },
                 { data: 'name' },
                 { data: 'original_amount'},
@@ -381,6 +370,7 @@
                 { data: 'status' },
                 { data: 'incoming_out' },
                 { data: 'slashed_out' },
+                { data: 'remarks' },
                 { data: 'remarks' },
                 { data: 'user_id' },
                 { data: 'id' },
@@ -400,17 +390,17 @@
                 },
 
                 {
-                    targets: 2,
+                    targets: 3,
                     render: function(data) {
-                        if (data){
-                            return '<span class="badge bg-label-primary">' + data + '</span>';
-                        }
-                        else {
-                            return ''
+                        var floatValue = parseFloat(data);
+                        if (floatValue !== 0) {
+                            var convertedValue = floatValue.toFixed(2);
+                            return convertedValue;
+                        } else {
+                            return "";
                         }
                     },
                 },
-
                 {
                     targets: 4,
                     render: function(data) {
@@ -425,18 +415,6 @@
                 },
                 {
                     targets: 5,
-                    render: function(data) {
-                        var floatValue = parseFloat(data);
-                        if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
-                        } else {
-                            return "";
-                        }
-                    },
-                },
-                {
-                    targets: 6,
                     render: function(data) {
                         var splitValues = data.split(',');  // Split data by comma
                         var result = '';
@@ -456,7 +434,7 @@
                     },
                 },
                 {
-                  targets: 7,
+                  targets: 6,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
@@ -477,13 +455,13 @@
                   },
                 },
                 {
-                    targets: -5,
+                    targets: -6,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
                 },
                 {
-                    targets: -3,
+                    targets: -4,
                     render: function (data) {
                         if (data === null || data === undefined || data === "") {
                             return ''; // Return an empty string if data is null, undefined, or empty
