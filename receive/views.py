@@ -234,6 +234,7 @@ def item_load(request):
 
     data = []
 
+
     for item in results:
         userData = AuthUser.objects.filter(id=item['user_id'])
         full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
@@ -257,12 +258,19 @@ def item_load(request):
             'incoming_out': item['incoming_out'],
             'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
-            'lacking': item['remarks'],
+            'lacking':"fasfs",
             'status': item['status_id'],
             'user_id': full_name
         }
 
         data.append(item_entry)
+
+    all_ids = [item['id'] for item in data]
+
+# Print or use the list of ids as needed
+    print(all_ids)
+    print("testt")
+ 
 
     response = {
         'data': data,
