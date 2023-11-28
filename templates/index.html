@@ -136,13 +136,13 @@
                             <a href="{% url 'receive-list' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti ti-checkbox"></i>
                               
-                                <div data-i18n="Incoming">Incoming</div>
+                                <div data-i18n="Received">Received</div>
                             </a>
                         </li>
                         <li class="menu-item {% if url_name == 'receive-checking' %}active{% endif %}">
                             <a href="{% url 'receive-checking' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti ti-layout-sidebar"></i>
-                                <div data-i18n="Checking">Checking</div>
+                                <div data-i18n="Review of Documents">Review of Documents</div>
                             </a>
                         </li>
                         {% endif %}
@@ -158,7 +158,7 @@
                             <a href="{% url 'tracking-list' %}" class="menu-link">
                                
                                 <i class="menu-icon tf-icons ti-solid fa-inbox"></i>
-                                <div data-i18n="List">List</div>
+                                <div data-i18n="Status">Status</div>
                             </a>
                         </li>
                         {% endif %}
@@ -188,13 +188,13 @@
                             <a href="{% url 'transaction-payroll' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
                                 
-                                <div data-i18n="Payroll">Payroll</div>
+                                <div data-i18n="Payroll Preparation">Payroll Preparation</div>
                             </a>
                         </li>
                         <li class="menu-item {% if url_name == 'box-a' %}active{% endif %}">
                             <a href="{% url 'box-a' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti-solid fa-inbox"></i>
-                                <div data-i18n="Box A">Box A</div>
+                                <div data-i18n="Payroll Printing">Payroll Printing</div>
                             </a>
                         </li>
                         {% endif %}
@@ -217,6 +217,14 @@
                                 <i class="menu-icon tf-icons ti ti-color-swatch"></i>
                               
                                 <div data-i18n="Division">Division</div>
+                            </a>
+                        </li>
+
+                        <li class="menu-item {% if url_name == 'remarks' %}active{% endif %}">
+                            <a href="{% url 'remarks' %}" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-color-swatch"></i>
+                              
+                                <div data-i18n="Remarks">Remarks</div>
                             </a>
                         </li>
                         {% endif %}

@@ -837,7 +837,7 @@ margin-top: 99%;
             <thead></thead>
             <tbody>
               <tr >
-                <td><b>CODE</b></td>
+                <td><b>No.</b></td>
                 <td><b>Account Number</b></td>
                 <td><b>ID NUMBER</b></td>
                 <td><b><center>NAME</center></b></td>
@@ -848,7 +848,7 @@ margin-top: 99%;
               </tr>              
               {% for emp in emp_list_code %}
               <tr>
-                <td class="align-text-right" style="padding: 2; width:12%">{{ emp.code }}</td>
+                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
                 <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
                 <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>
@@ -958,7 +958,7 @@ margin-top: 99%;
             <thead></thead>
             <tbody>
               <tr >
-                <td><b>CODE</b></td>
+                <td><b>No.</b></td>
                 <td><b>Account Number</b></td>
                 <td><b>ID NUMBER</b></td>
                 <td><b><center>NAME</center></b></td>
@@ -969,7 +969,7 @@ margin-top: 99%;
               </tr>              
               {% for emp in emp_list_lname %}
               <tr>
-                <td class="align-text-right" style="padding: 2; width:12%">{{ emp.code }}</td>
+                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
                 <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
                 <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>

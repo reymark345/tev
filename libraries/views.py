@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, RemarksLib)
 import math
 from django.core.serializers import serialize
 from django.db import IntegrityError
@@ -47,6 +47,22 @@ def charges(request):
         return render(request, 'pages/unauthorized.html')
     
     
+@login_required(login_url='login')
+def remarks(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    if role.role_name in allowed_roles:
+        context = {
+            'charges' : RemarksLib.objects.filter().order_by('name'),
+            'cluster' : Cluster.objects.filter().order_by('name'),
+            'role_permission' : role.role_name,
+        }
+        return render(request, 'libraries/remarks.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+
+
 @csrf_exempt
 def division_add(request):
     division = request.POST.get('Division')
@@ -56,10 +72,14 @@ def division_add(request):
     approval = request.POST.get('Approval')
     c_designation = request.POST.get('CDesignation')
     user_id = request.session.get('user_id', 0)
-    division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation,created_by = user_id)
+    
     try:
-        division_add.save()
-        return JsonResponse({'data': 'success'})
+        if Division.objects.filter(name=division):
+            return JsonResponse({'data': 'error', 'message': 'Division Already Taken'})
+        else:
+            division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation,created_by = user_id)
+            division_add.save()
+            return JsonResponse({'data': 'success'})
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
     
@@ -133,6 +153,7 @@ def division_load(request):
     return JsonResponse(response)
 
 
+
 @csrf_exempt
 def charges_add(request):
     charges = request.POST.get('Charges')
@@ -166,6 +187,78 @@ def charges_edit(request):
     
 def charges_load(request):
     charges_data = Charges.objects.select_related().order_by('-created_at').reverse()
+    total = charges_data.count()
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+
+        charges_data = charges_data[start:start + length]
+
+    data = []
+
+    for item in charges_data:
+        userData = AuthUser.objects.filter(id=item.created_by)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name
+        item = {
+            'id': item.id,
+            'name': item.name,
+            'created_by': full_name,
+            'created_at': item.created_at
+        }
+
+        data.append(item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+
+@csrf_exempt
+def remarks_add(request):
+    remarks = request.POST.get('Remarks')
+    user_id = request.session.get('user_id', 0)
+    try:
+        if RemarksLib.objects.filter(name=remarks):
+            return JsonResponse({'data': 'error', 'message': 'Remarks Already Taken'})
+        else:
+            remarks_ = RemarksLib(name=remarks, created_by = user_id)
+            remarks_.save()
+            return JsonResponse({'data': 'success'})
+    except IntegrityError as e:
+        return JsonResponse({'data': 'error'})
+    
+@csrf_exempt
+def remarks_update(request):
+    id = request.POST.get('ItemID')
+    charges = request.POST.get('Remarks')
+
+
+    if RemarksLib.objects.filter(name=charges).exclude(id=id):
+        return JsonResponse({'data': 'error', 'message': 'Duplicate Remarks'})
+    else:
+        RemarksLib.objects.filter(id=id).update(name=charges)
+        return JsonResponse({'data': 'success'})
+    
+    
+def remarks_edit(request):
+    id = request.GET.get('id')
+    items = RemarksLib.objects.get(pk=id)
+    data = serialize("json", [items])
+    return HttpResponse(data, content_type="application/json")
+
+
+def remarks_load(request):
+    charges_data = RemarksLib.objects.select_related().order_by('-created_at').reverse()
     total = charges_data.count()
 
     _start = request.GET.get('start')
