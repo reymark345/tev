@@ -66,7 +66,7 @@
                             <th>Status</th>
                             <th>Received</th>
                             <th>Reviewed</th>
-                            <th>Duplicate</th>
+                            <th>Duplicate Travel</th>
                             <th>Remarks</th>
                             <th>Created By</th>
                             <th>ID</th>
@@ -346,16 +346,7 @@
             </div>
 
             <div class="col-sm-12">
-                <div class="form-group">
-                    <label class="form-label" for="remarks">Remarks</label>
-                    <div class="input-group input-group-merge">
-                        <textarea class="form-control dt-sales-remarks" placeholder="Comment " rows="2" id="remarks" name="Remarks"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-sm-12">
-                <label class="form-label" >Lacking Remarks <small>(optional)</small></label>
+                <label class="form-label" >Remarks <small>(optional)</small></label>
                 <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
                     <option></option>
                     {% for row in remarks_list %}
@@ -481,7 +472,6 @@
             EmpName = jQuery(document.querySelector('[name="EmpName"]')),
             EmpMiddle = jQuery(document.querySelector('[name="EmpMiddle"]')),
             EmpLastname = jQuery(document.querySelector('[name="EmpLastname"]')),
-            Remarks = jQuery(document.querySelector('[name="Remarks"]')),
             RemarksList= jQuery(document.querySelector('[name="RemarksList"]')),
             offCanvasElement = document.querySelector('#add-new-record'),
             search_advance_filter = $('#search-advance-filter'),
@@ -774,7 +764,6 @@
                             let floatvalue = parseFloat(fields.final_amount);
                             let convertedAmount = 0;
                             let date_travel = fields.date_travel;
-                            let check_remarks = fields.remarks ? fields.remarks : '';
                             formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
                             status_val = fields.status;
                             let fullname = fields.first_name + " " + fields.middle_name + " " + fields.last_name
@@ -803,12 +792,7 @@
                             }
                             HDateTravel.val(formattedDates)
                             OriginalAmount.val(convertedAmount);
-                            if (check_remarks.indexOf("Duplicate Travel") !== -1) {
-                                Remarks.prop("disabled", true);
-                            } else {
-                                Remarks.prop("disabled", false);
-                            }
-                            Remarks.val(fields.remarks);
+
                             DateTravel.val(formattedDates);
                             ItemID.val(pk);
                             updateSelectedDates();
@@ -878,7 +862,6 @@
                     $("#dateField").prop("disabled", false);
                     $(".rangeTravel").prop("disabled", false);
                     OriginalAmount.prop("disabled", false);
-                    Remarks.prop("disabled", true);
                     $('.title-name').text('Add Tev Record');
                     EmployeeName.val('').trigger('change').prop("disabled", false);
                     $('.form-control').val('');
@@ -974,7 +957,6 @@
                             let name = EmpName.val();
                             let middle = EmpMiddle.val();
                             let lname = EmpLastname.val();
-                            let remarks = Remarks.val();
                             let hdate_travel = HDateTravel.val();
                             let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
                             let form_data = $('#item-form').serialize()
@@ -989,7 +971,6 @@
                                     EmpName: name,
                                     EmpMiddle: middle,
                                     EmpLastname: lname,
-                                    Remarks: remarks,
                                     OriginalAmount: amount,
                                     form_data: form_data,
                                     selectedValues: selectedValues,
@@ -1042,7 +1023,6 @@
                                     RemarksList.val([]).trigger("change");
                                     OriginalAmount.val("");
                                     DateTravel.val("")
-                                    Remarks.val("");
                                     RangeTravel.val("")
                                     $("#dateField").prop("disabled", false);
                                     $(".rangeTravel").prop("disabled", false);
@@ -1054,7 +1034,6 @@
                                     EmployeeName.val("").trigger('change');
                                     OriginalAmount.val("");
                                     DateTravel.val("")
-                                    Remarks.val("");
                                     RangeTravel.val("")
                                     $("#dateField").prop("disabled", false);
                                     $(".rangeTravel").prop("disabled", false);
