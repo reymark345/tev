@@ -249,23 +249,41 @@
                 <span id="amount_error" style="color: red;"></span>
             </div>
             <div class="col-12">
-                <label class="form-label" for="modaltevDetails">Remarks</label>
+                <label class="form-label" for="modaltevDetails">Duplicate Date</label>
                 
                 <div class="input-group">
-                <textarea class="form-control" placeholder="Enter remarks (optional if for approval)" rows="5" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
+                <textarea class="form-control" placeholder="Enter remarks (optional if for approval)" rows="1" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
                 </div>
                 <span id="remarks_error" style="color: red;"></span>
             </div>
+
+            <div class="col-12">
+                <label class="form-label" for="modaltevDetails">Remarks</label>
+                    <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
+                        <option></option>
+                        {% for row in remarks_list %}
+                        <option value="{{ row.id }}">{{ row.name }}</option>
+                        {% endfor %}
+                    </select>
+                <span id="amount_error" style="color: red;"></span>
+            </div>
+
+            <div class="col-sm-12">
+                <br>
+                <div id="dynamic-input-container"></div>
+            </div>
+
+
             <div class="col-12">
                 <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
                 <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
                 <button
-                type="reset"
-                class="btn btn-label-secondary"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-                >
-                Cancel
+                    type="reset"
+                    class="btn btn-label-secondary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    >
+                    Cancel
                 </button>
             </div>
             </form>
@@ -309,6 +327,7 @@
             FOriginalAmount = jQuery(document.querySelector('[name="FOriginalAmount"]')),
             FFinalAmount = jQuery(document.querySelector('[name="FFinalAmount"]')),
             FAccountNumber = jQuery(document.querySelector('[name="FAccountNumber"]')),
+            RemarksList= jQuery(document.querySelector('[name="RemarksList"]')),
             search_advance_filter = $('#search-advance-filter'),
             reset_advance_filter = $('#reset-advance-filter'),
             clear_advance_filter = $('#clear-advance-filter');
@@ -371,7 +390,7 @@
                 { data: 'incoming_out' },
                 { data: 'slashed_out' },
                 { data: 'remarks' },
-                { data: 'remarks' },
+                { data: 'lacking' },
                 { data: 'user_id' },
                 { data: 'id' },
 
@@ -464,7 +483,7 @@
                     targets: -4,
                     render: function (data) {
                         if (data === null || data === undefined || data === "") {
-                            return ''; // Return an empty string if data is null, undefined, or empty
+                            return ''; 
                         } 
                         else {
                             return '<span class="badge bg-label-danger">' + data + '</span>';
@@ -473,9 +492,14 @@
                 },
 
                 {
-                    targets: -4,
+                    targets: -3,
                     render: function (data) {
-                        return (data == null) ? '' : moment(data).format('LLL');
+                        if (data === null || data === undefined || data === "") {
+                            return ''; 
+                        } 
+                        else {
+                            return '<span class="badge bg-label-danger">' + data + '</span>';
+                        }
                     },
                 },
                 
@@ -553,6 +577,14 @@
                 });
 
                 $('.item-details').on('click', function () {
+                    if (RemarksList.length) {
+                                RemarksList.wrap('<div class="position-relative"></div>')
+                                RemarksList.select2({
+                                placeholder: 'Choose remarks',
+                                dropdownParent: RemarksList.parent(),
+                                allowClear: true,
+                        })
+                    }
                     clicked_id = $(this).data('id');
                     $.ajax({
                         type: 'POST',
@@ -563,6 +595,7 @@
                     }).done(function (data) {
                         let value = data.data.remarks;
                         let final_amount = data.data.final_amount;
+              
                         if(final_amount && final_amount !="0E-10"){
                             final_amount = data.data.final_amount;
                             console.log("halaa1");
@@ -725,35 +758,51 @@
 
 
           
-          $('#returned').click(function() {
-            let final_amount = $("#final_amount").val().trim();
-            let correctness_remarks = $("#correctness_remarks").val().trim();
-            let status = 3;
-              if (correctness_remarks === "" && final_amount === "") {
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("Please enter Remarks");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-              }
-              else if (final_amount === "" ) {
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-              }
-              else if (correctness_remarks === "" ) {
-                $("#amount_error").text("");
-                $("#remarks_error").text("Please enter Remarks");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-              }
-               else {
-                $("#remarks_error").text("");
-                $(".input-group").removeClass("has-error");
-                tev_details(final_amount,correctness_remarks,status,clicked_id);
-              }
-              
-            });
+        $('#returned').click(function() {
+        let final_amount = $("#final_amount").val().trim();
+        let correctness_remarks = $("#correctness_remarks").val().trim();
+        let status = 3;
+            if (correctness_remarks === "" && final_amount === "") {
+            $("#amount_error").text("Please enter Amount");
+            $("#remarks_error").text("Please enter Remarks");
+            $(".input-group").addClass("has-error");
+            event.preventDefault();
+            }
+            else if (final_amount === "" ) {
+            $("#amount_error").text("Please enter Amount");
+            $("#remarks_error").text("");
+            $(".input-group").addClass("has-error");
+            event.preventDefault();
+            }
+            else if (correctness_remarks === "" ) {
+            $("#amount_error").text("");
+            $("#remarks_error").text("Please enter Remarks");
+            $(".input-group").addClass("has-error");
+            event.preventDefault();
+            }
+            else {
+            $("#remarks_error").text("");
+            $(".input-group").removeClass("has-error");
+            tev_details(final_amount,correctness_remarks,status,clicked_id);
+            }
+            
+        });
+
+        $(".remarks-list").on("change", function() {
+            $("#dynamic-input-container").empty();
+            var selectedValues = $(this).val();
+            // Append input elements based on selected values
+            if (selectedValues) {
+                for (var i = 0; i < selectedValues.length; i++) {
+                    var inputId = "date-remarks-" + selectedValues[i];
+                    var selectedText = $(this).find('option[value="' + selectedValues[i] + '"]').text();
+                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" /><br>';
+                    $("#dynamic-input-container").append(inputElement);
+                }
+            }
+        });
+
+
 
         function tev_details(amount,remarks,status,emp_id){
             $.ajax({

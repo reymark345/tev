@@ -84,6 +84,7 @@ def checking(request):
     if role.role_name in allowed_roles:
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'remarks_list' : RemarksLib.objects.filter().order_by('name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/checking.html', context)
@@ -357,64 +358,71 @@ def checking_load(request):
         def dictfetchall(cursor):
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
-
         query = """
-            SELECT t.*
-            FROM tev_incoming t
-            WHERE (t.status_id = 2
-                OR t.status_id = 7
-                OR (t.status_id = 3 AND t.slashed_out IS NULL))
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
+            FROM tev_incoming t1
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.status_id = 2
+                OR t1.status_id = 7
+                OR (t1.status_id = 3 AND t1.slashed_out IS NULL))
         """
         params = []
 
         if FTransactionCode:
-            query += " AND t.code = %s"
+            query += " AND t1.code = %s"
             params.append(FTransactionCode)
 
+        if FIdNumber:
+            query += " AND t1.id_no = %s"
+            params.append(FIdNumber)
+
         if FDateTravel:
-            query += " AND t.date_travel LIKE %s"
+            query += " AND t1.date_travel LIKE %s"
             params.append(f'%{FDateTravel}%')
 
         if FIncomingIn:
-            query += " AND t.incoming_in = %s"
+            query += " AND t1.incoming_in = %s"
             params.append(FIncomingIn)
 
         if FStatus:
-            query += " AND t.status_id = %s"
+            query += " AND t1.status_id = %s"
             params.append(FStatus)
 
             
         if FAccountNumber:
-            query += " AND t.account_no = %s"
+            query += " AND t1.account_no = %s"
             params.append(FAccountNumber)
 
         if FOriginalAmount:
-            query += " AND t.original_amount = %s"
+            query += " AND t1.original_amount = %s"
             params.append(FOriginalAmount)
 
         if FFinalAmount:
-            query += " AND t.final_amount = %s"
+            query += " AND t1.final_amount = %s"
             params.append(FFinalAmount)
 
         if EmployeeList:
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
-            query += f" AND t.id_no IN ({placeholders})"
+            query += f" AND t1.id_no IN ({placeholders})"
             params.extend(EmployeeList)
 
-        query += " ORDER BY t.incoming_out DESC;"
+        query += " GROUP BY t1.id ORDER BY t1.incoming_out DESC;"
 
         with connection.cursor() as cursor:
             cursor.execute(query, params)
             results = dictfetchall(cursor)
 
     else:
-        print("third attempt")
+
         query = """
-            SELECT t.*
-            FROM tev_incoming t
-            WHERE (t.status_id = 2
-                    OR t.status_id = 7
-                    OR (t.status_id = 3 AND t.slashed_out IS NULL)
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
+            FROM tev_incoming t1
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.status_id = 2
+                            OR t1.status_id = 7
+                            OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
             )
             AND (code LIKE %s
             OR id_no LIKE %s
@@ -424,9 +432,8 @@ def checking_load(request):
             OR final_amount LIKE %s
             OR remarks LIKE %s
             OR status_id LIKE %s
-            )ORDER BY id DESC;
+            )GROUP BY t1.id ORDER BY id DESC;
         """
-            
         params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
     
     with connection.cursor() as cursor:
@@ -469,6 +476,7 @@ def checking_load(request):
             'incoming_out': item['incoming_out'],
             'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
+            'lacking': item['lacking'],
             'status': item['status_id'],
             'user_id': full_name
         }
@@ -767,11 +775,6 @@ def upload_tev(request):
 
             print("Duplicate Dates:")
             print(duplicate_dates)
-
-
-
-
-
             if id_list:
                 system_config = SystemConfiguration.objects.first()
                 system_config.transaction_code = sc_code
@@ -849,6 +852,8 @@ def upload_tev(request):
 
 def item_edit(request):
     id = request.GET.get('id')
+    print("Tesingiddd")
+    print(id)
     items = TevIncoming.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")

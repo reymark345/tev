@@ -757,6 +757,15 @@
                                 })
                             }
 
+                            if (RemarksList.length) {
+                                RemarksList.wrap('<div class="position-relative"></div>')
+                                RemarksList.select2({
+                                placeholder: 'Choose remarks',
+                                dropdownParent: RemarksList.parent(),
+                                allowClear: true,
+                                })
+                            }
+
 
                             let fields = data[0].fields
                             let pk = data[0].pk
