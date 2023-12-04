@@ -597,15 +597,30 @@
                             tev_id: clicked_id
                         }
                     }).done(function (data) {
-                        console.log(data);
-                        console.log("dataaaassv");
                         let value = data.remarks;
                         let final_amount = data.final_amount;
                         let lacking = data.lacking;
                         let date_remarks = data.date_remarks;
 
-                        console.log(date_remarks);
-                        
+
+
+                        if (lacking === null) {
+                            $('#remarks-list').val([]).trigger('change');
+                            
+                        } else {
+                            console.log("The variable 'lacking' is not null.");
+                            lacking = data.lacking.split(',').map(Number);
+                            $('#remarks-list').val([]).trigger('change');
+
+
+                            $('#remarks-list option').each(function() {
+                                let optionValue = parseInt($(this).val());
+                                if (lacking.includes(optionValue)) {
+                                    $(this).prop('selected', true);
+                                }
+                                
+                            });
+                        }
               
                         if(final_amount && final_amount !="0E-10"){
                             final_amount = data.final_amount;
@@ -617,15 +632,7 @@
                             console.log("halaa2");
                             console.log(final_amount);
                         }
-                        lacking = data.lacking.split(',').map(Number);
-                        $('#remarks-list').val([]).trigger('change');
-                        $('#remarks-list option').each(function() {
-                            let optionValue = parseInt($(this).val());
-                            if (lacking.includes(optionValue)) {
-                                $(this).prop('selected', true);
-                            }
-                            
-                        });
+
                      
                         // Trigger change event to reflect the selected options visually
                         $('#remarks-list').trigger('change');
