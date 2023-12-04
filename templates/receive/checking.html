@@ -1,0 +1,879 @@
+<div id="loading-screen">
+    <center>
+        <div class="col">
+            <!-- Fold -->
+            <div class="sk-fold sk-primary">
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+            </div>
+          </div>  
+    </center>
+</div>
+{% extends 'index.html' %} {% block content %} {% load staticfiles %}
+<style>
+    #loading-screen {
+        position: fixed;
+        background: rgba(255, 255, 255, 0.7);
+        color: rgb(0, 0, 0);
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+    .sk-primary .sk-fold-cube {
+        width: 15px; /* Set the width of each cube */
+        height: 15px; /* Set the height of each cube */
+    }
+</style>
+
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Item /</span> List</h4>
+
+        <!-- DataTable with Buttons -->
+        <div class="card">
+            <div class="card-datatable table-responsive pt-0">
+                <table id="tbl-items" class="table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="check-all"></th>
+                            <th>ID number</th>
+                            <th>Employee Name</th>
+                            <th>Actual Amount</th>
+                            <th>Final Amount</th>
+                            <th>Travel Date</th>
+                            <th>Status</th>
+                            <th>Forwarded</th>
+                            <th>Reviewed</th>
+                            <th>Duplicate</th>
+                            <th>Remarks</th>
+                            <th>Created By</th>
+                            <th>ID</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="advance-filter-checking" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center mb-4">
+            <h3 class="mb-2">Advanced Filter </h3>
+            <p class="text-muted">Filter data by filling the details below</p>
+            </div>
+            <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
+                <div class="col-12 col-md-12">
+                    <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                        <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
+                            <option></option>
+                        </select>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditUserFirstName">ID Number</label>
+                    <input
+                    type="text"
+                    id="f-id-number"
+                    name="FIdNumber"
+                    class="form-control"
+                    placeholder="16-0000"
+                    />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditUserLastName">Transaction Code</label>
+                    <input
+                    type="text"
+                    id="f-transaction-code"
+                    name="FTransactionCode"
+                    class="form-control"
+                    placeholder="23-00-00000"
+                    />
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditTaxID">Date Travel</label>
+                    <input type="text" class="form-control" name="FDateTravel" placeholder="DD-MM-YYYY" id="f-dateField" autocomplete="off"/>
+                </div>
+    
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" >Incoming In</label>
+                    <input
+                    type="date"
+                    id="f-incoming-in"
+                    name="FIncomingIn"
+                    class="form-control"
+                    />
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Original Amount</label>
+                    <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input
+                        type="number"
+                        id="f-original-amount"
+                        name="FOriginalAmount"
+                        class="form-control phone-number-mask"
+                        placeholder="0.00"
+                    />
+                    </div>
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Final Amount</label>
+                    <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input
+                        type="number"
+                        id="f-final-amount"
+                        name="FFinalAmount"
+                        class="form-control phone-number-mask"
+                        placeholder="0.00"
+                    />
+                    </div>
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalAccountNumber">Account number</label>
+                    <input
+                    type="text"
+                    id="f-account-number"
+                    name="FAccountNumber"
+                    class="form-control"
+                    placeholder="23-00-00000"
+                    />
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalFEmployeeName">Status</label>
+                    <select
+                    id="f-status"
+                    name="FStatus"
+                    class="form-select"
+                    >
+                        <option></option>
+                        <option value="2">For checking</option>
+                        <option value="7">For approval</option>
+                        <option value="3">Returned</option>
+                    </select>
+                </div>
+    
+    
+    
+                    <input
+                    type="hidden"
+                    id="f-first-name"
+                    name="FFirstName"
+                    class="form-control"
+                    placeholder="Firstname"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-middle-name"
+                    name="FMiddleName"
+                    class="form-control"
+                    placeholder="Middle"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-last-name"
+                    name="FLastName"
+                    class="form-control"
+                    placeholder="Lastname"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-adv-filter"
+                    name="FAdvancedFilter"
+                    class="form-control"
+                    placeholder="AdvFilter"
+                    />
+            
+    
+    
+                <div class="col-12 text-center">
+                    <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
+                    <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
+                    <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
+                
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+    </div>
+    <!--/ Edit User Modal -->
+    
+
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="tevDetails" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center mb-4">
+            <h3 class="mb-2">TEV DETAILS</h3>
+            <p>Correctness of amount/Returned/and Approve</p>
+            </div>
+            <p>Please provide your final amount for the TEV, indicating whether it can be marked as for approval or if it needs to be returned due to any issues.</p>
+            <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
+            <div class="col-12">
+                <label class="form-label" for="modaltevDetails">Final Amount</label>
+                <div class="input-group">
+                <span class="input-group-text">₱</span>
+                <input
+                    type="number"
+                    id="final_amount"
+                    name="FinalAmount"
+                    class="form-control phone-number-otp-mask"
+                    placeholder="0.00"
+                />
+                </div>
+                <span id="amount_error" style="color: red;"></span>
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="modaltevDetails">Duplicate Date</label>
+                
+                <div class="input-group">
+                <textarea class="form-control" placeholder="Enter remarks (optional if for approval)" rows="1" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
+                </div>
+                <span id="remarks_error" style="color: red;"></span>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label" for="modaltevDetails">Remarks</label>
+                    <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
+                        <option></option>
+                        {% for row in remarks_list %}
+                        <option value="{{ row.id }}">{{ row.name }}</option>
+                        {% endfor %}
+                    </select>
+                <span id="amount_error" style="color: red;"></span>
+            </div>
+
+            <div class="col-sm-12">
+                <br>
+                <div id="dynamic-input-container"></div>
+            </div>
+
+
+            <div class="col-12">
+                <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
+                <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
+                <button
+                    type="reset"
+                    class="btn btn-label-secondary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    >
+                    Cancel
+                </button>
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+<!--/ Enable OTP Modal -->
+{% endblock %} {% block footer_scripts %}
+<script>
+    let clicked_id = 0;
+    let status_val =0;
+    let formattedDates = ''
+    let employeeList = [];
+    
+    $(document).ready(function () {
+        $('#loading-screen').hide();
+        const table = $('#tbl-items')
+        var fdateField = $('#f-dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+        });
+        const EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
+            OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
+            Remarks = jQuery(document.querySelector('[name="Remarks"]')),
+            FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
+            FIdNumber = jQuery(document.querySelector('[name="FIdNumber"]')),
+            FIncomingBy = jQuery(document.querySelector('[name="FIncomingBy"]')),
+            FStatus = jQuery(document.querySelector('[name="FStatus"]')),
+            FDateTravel = jQuery(document.querySelector('[name="FDateTravel"]')),
+            FIncomingIn = jQuery(document.querySelector('[name="FIncomingIn"]')),
+            FTransactionCode = jQuery(document.querySelector('[name="FTransactionCode"]')),
+            FFirstName= jQuery(document.querySelector('[name="FFirstName"]')),
+            FMiddleName= jQuery(document.querySelector('[name="FMiddleName"]')),
+            FLastName= jQuery(document.querySelector('[name="FLastName"]')),
+            FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
+            FOriginalAmount = jQuery(document.querySelector('[name="FOriginalAmount"]')),
+            FFinalAmount = jQuery(document.querySelector('[name="FFinalAmount"]')),
+            FAccountNumber = jQuery(document.querySelector('[name="FAccountNumber"]')),
+            RemarksList= jQuery(document.querySelector('[name="RemarksList"]')),
+            search_advance_filter = $('#search-advance-filter'),
+            reset_advance_filter = $('#reset-advance-filter'),
+            clear_advance_filter = $('#clear-advance-filter');
+            
+        const toast_options = (toastr.options = {
+            maxOpened: 1,
+            autoDismiss: true,
+            closeButton: true,
+            newestOnTop: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            rtl: isRtl,
+      });
+        let ItemID = $('#item-id')
+
+        let dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'checking-load' %}",
+                data: function (d) {
+                    d.FAdvancedFilter = FAdvancedFilter.val()
+                    d.FIdNumber = FIdNumber.val()
+                    d.FTransactionCode = FTransactionCode.val()
+                    d.FDateTravel = FDateTravel.val()
+                    d.FIncomingIn = FIncomingIn.val()
+                    d.FOriginalAmount = FOriginalAmount.val()
+                    d.FFinalAmount = FFinalAmount.val()
+                    d.FAccountNumber = FAccountNumber.val()
+                    d.FStatus = FStatus.val()
+                    d.FFirstName = FFirstName.val()
+                    d.FMiddleName = FMiddleName.val()
+                    d.FLastName = FLastName.val()
+                    d.EmployeeList = employeeList
+                },
+
+            },
+            columns: [
+                {
+                    data: 'id', status: 'status',
+                    orderable: false, 
+                    render: function (data, type, row) {
+                        var status = row.status; // Access the 'status' value from the 'row' object
+
+                        if (status == 2) {
+                            return '<input type="checkbox" disabled="disabled">';
+                        } else {
+                            // Render a checkbox for each row with the item ID as its value
+                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
+                        }
+
+                    }
+                },
+                { data: 'id_no' },
+                { data: 'name' },
+                { data: 'original_amount'},
+                { data: 'final_amount'},
+                { data: 'date_travel'},
+                { data: 'status' },
+                { data: 'incoming_out' },
+                { data: 'slashed_out' },
+                { data: 'remarks' },
+                { data: 'lacking' },
+                { data: 'user_id' },
+                { data: 'id' },
+
+            ],
+            columnDefs: [
+                {
+                    targets: 1,
+                    render: function(data) {
+                        if (data){
+                            return '<span class="badge bg-label-primary">' + data + '</span>';
+                        }
+                        else {
+                            return ''
+                        }
+                    },
+                },
+
+                {
+                    targets: 3,
+                    render: function(data) {
+                        var floatValue = parseFloat(data);
+                        if (floatValue !== 0) {
+                            var convertedValue = floatValue.toFixed(2);
+                            return convertedValue;
+                        } else {
+                            return "";
+                        }
+                    },
+                },
+                {
+                    targets: 4,
+                    render: function(data) {
+                        var floatValue = parseFloat(data);
+                        if (floatValue !== 0) {
+                            var convertedValue = floatValue.toFixed(2);
+                            return convertedValue;
+                        } else {
+                            return "";
+                        }
+                    },
+                },
+                {
+                    targets: 5,
+                    render: function(data) {
+                        var splitValues = data.split(',');  // Split data by comma
+                        var result = '';
+                        
+                        splitValues.forEach(function(value, index) {
+                            if (index !== 0) {
+                                result += '  '; // Add a space before adding subsequent values
+                            }
+                            var dateParts = value.split('-');
+                            var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                            var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
+                            
+                            result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
+                        });
+                        
+                        return result;
+                    },
+                },
+                {
+                  targets: 6,
+                  render: function (data) {
+                      if (data==1){
+                        return '<span class="badge bg-label-warning">Pending</span>'
+                      }
+                      else if(data==2){
+                        return '<span class="badge bg-label-warning">For checking</span>'
+                      }
+                      else if(data==3){
+                        return '<span class="badge bg-label-danger">Returned</span>'
+                      }
+                      else if(data==7){
+                        return '<span class="badge bg-label-success">For approval</span>'
+                      }
+                      else{
+                        return '<span class="badge bg-label-success">For payroll</span>'
+                      }
+
+                  },
+                },
+                {
+                    targets: -6,
+                    render: function (data) {
+                        return moment(data).format('LLL')
+                    },
+                },
+                {
+                    targets: -4,
+                    render: function (data) {
+                        if (data === null || data === undefined || data === "") {
+                            return ''; 
+                        } 
+                        else {
+                            return '<span class="badge bg-label-danger">' + data + '</span>';
+                        }
+                    },
+                },
+
+                {
+                    targets: -3,
+                    render: function (data) {
+                        if (data === null || data === undefined || data === "") {
+                            return ''; 
+                        } 
+                        else {
+                            return '<span class="badge bg-label-danger">' + data + '</span>';
+                        }
+                    },
+                },
+                
+                {
+                  targets: -1,
+                  title: 'Actions',
+                  orderable: false,
+                  searchable: false,
+                  render: function (data) {
+                      return (
+                          '<a href="javascript:;" data-id="' + data + '" class="item-details text-body" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>'
+                      )
+                  },
+              },
+            ],
+            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            buttons: [
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                    action: function () {
+                        employeeList = [];
+                        const $selectElement = $('#f-employee-name');
+                        $selectElement.empty();
+                        fetchEmployee($selectElement);
+                        FEmployeeName.val('').trigger('change');
+
+                        setTimeout(function() {
+                            if (FEmployeeName.length) {
+                                FEmployeeName.wrap('<div class="position-relative"></div>')
+                                FEmployeeName.select2({
+                                    placeholder: 'Choose employee',
+                                    dropdownParent: FEmployeeName.parent(),
+                                    allowClear: true,
+                                })
+                            }
+                        }, 300);
+                        $("#advance-filter-checking").modal("show");
+                    }
+
+                },
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
+                    action: function () {
+                        // Get the IDs of checked items
+                        var selectedItems = [];
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+
+                        console.log(selectedItems);
+            
+                        if(selectedItems.length ===0){
+                            toastr.error('Select item first', 'Invalid', toast_options);
+                        }
+                        else{
+                            incoming_out(selectedItems);
+                        }
+                    }
+                },
+            ],
+            drawCallback: function (settings) {
+
+                $('#tbl-items tbody input[type="checkbox"]').change(function () {
+                    // Do something when a checkbox in the table body is changed...
+                });
+
+                $('#check-all').change(function () {
+                    // Get the checked state of the "check-all" checkbox
+                    var isChecked = $(this).is(':checked');
+        
+                    // Set the checked state of all checkboxes in the table body
+                    $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+                });
+
+                $('.item-details').on('click', function () {
+                    if (RemarksList.length) {
+                                RemarksList.wrap('<div class="position-relative"></div>')
+                                RemarksList.select2({
+                                placeholder: 'Choose remarks',
+                                dropdownParent: RemarksList.parent(),
+                                allowClear: true,
+                        })
+                    }
+                    clicked_id = $(this).data('id');
+                    var csrf_token = "{{ csrf_token }}";
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'review-details' %}",
+                        headers: {
+                            'X-CSRFToken': csrf_token
+                        },
+                        data:{
+                            tev_id: clicked_id
+                        }
+                    }).done(function (data) {
+                        console.log(data);
+                        console.log("dataaaassv");
+                        let value = data.remarks;
+                        let final_amount = data.final_amount;
+                        let lacking = data.lacking;
+                        let date_remarks = data.date_remarks;
+
+                        console.log(date_remarks);
+                        
+              
+                        if(final_amount && final_amount !="0E-10"){
+                            final_amount = data.final_amount;
+                            console.log("halaa1");
+                            console.log(final_amount);
+                        }
+                        else{
+                            final_amount = data.original_amount;
+                            console.log("halaa2");
+                            console.log(final_amount);
+                        }
+                        lacking = data.lacking.split(',').map(Number);
+                        $('#remarks-list').val([]).trigger('change');
+                        $('#remarks-list option').each(function() {
+                            let optionValue = parseInt($(this).val());
+                            if (lacking.includes(optionValue)) {
+                                $(this).prop('selected', true);
+                            }
+                            
+                        });
+                     
+                        // Trigger change event to reflect the selected options visually
+                        $('#remarks-list').trigger('change');
+
+                        let floatvalue = parseFloat(final_amount);
+                        let convertedAmount = floatvalue.toFixed(2);
+                        if (convertedAmount === "0.00") {convertedAmount =""} 
+                        $("#final_amount").val(convertedAmount);
+                        $("#correctness_remarks").val(value);
+                    })
+                });
+            },
+        })
+        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+        // Form validation for Add new record
+        function incoming_out(selected_items){
+            Swal.fire({
+                title: 'Out Tev?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, mark as out!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
+       
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'out-checking-tev' %}",
+                        data:{
+                            out_list: selected_items
+                        }
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Item has been added.',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+
+                            dataTable.ajax.reload()
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            })
+
+        }
+
+
+        function fetchEmployee($selectElement) {
+            const employees = JSON.parse(localStorage.getItem('employees'));
+            if (employees) {
+                $.each(employees, function (index, employee) {
+                    const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                    const $option = $('<option>', {
+                        value: employee.idNumber,
+                        text: optionText,
+                        id: employee.idNumber
+                    });
+                    $selectElement.append($option);
+                });
+            } else {
+                console.log("No employee data found in local storage.");
+            }
+        }
+
+
+
+        
+        search_advance_filter.on('click', function () {
+            FAdvancedFilter.val("true");
+            $('#f-employee-name').empty();
+            $("#advance-filter-checking").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Search successfully', 'Success', toast_options);
+        });
+
+        reset_advance_filter.on('click', function () {
+            FAdvancedFilter.val('');
+            $('#f-employee-name').empty();
+            $("#advance-filter-checking").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Data has been reset', 'Success', toast_options);
+        });
+
+        clear_advance_filter.on('click', function () {
+            FIdNumber.val('');
+            FTransactionCode.val('');
+            FOriginalAmount.val('');
+            FFinalAmount.val('');
+            FAccountNumber.val('');
+            FIncomingIn.val('');
+            fdateField.clear();
+            FEmployeeName.val('').trigger('change');
+            FStatus.val('').trigger('change');
+            FIncomingBy.val('').trigger('change');
+            toastr.success('Clear successfully', 'Success', toast_options);
+        });
+
+
+        $('#approved').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 7; 
+              if (final_amount === "") {  
+                $("#amount_error").text("Please enter Amount");
+                $("#remarks_error").text("");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              } else {
+                $("#amount_error").text("");
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+              }
+          });
+
+          $('#f-employee-name').change(function() {
+            var selectedOptions = $(this).find('option:selected');
+            selectedOptions.each(function() {
+                var optionValue = $(this).val();
+                if (employeeList.indexOf(optionValue) === -1) {
+                   employeeList.push(optionValue);
+                }
+            });
+            $(this).find('option:not(:selected)').each(function() {
+                var optionValue = $(this).val();
+                var index = employeeList.indexOf(optionValue);
+                if (index !== -1) {
+                   employeeList.splice(index, 1);
+                }
+            });
+            console.log("Newly added values: " + employeeList);
+       
+        });
+
+
+
+          
+        $('#returned').click(function() {
+        let final_amount = $("#final_amount").val().trim();
+        let correctness_remarks = $("#correctness_remarks").val().trim();
+        let status = 3;
+            if (correctness_remarks === "" && final_amount === "") {
+            $("#amount_error").text("Please enter Amount");
+            $("#remarks_error").text("Please enter Remarks");
+            $(".input-group").addClass("has-error");
+            event.preventDefault();
+            }
+            else if (final_amount === "" ) {
+            $("#amount_error").text("Please enter Amount");
+            $("#remarks_error").text("");
+            $(".input-group").addClass("has-error");
+            event.preventDefault();
+            }
+            else if (correctness_remarks === "" ) {
+            $("#amount_error").text("");
+            $("#remarks_error").text("Please enter Remarks");
+            $(".input-group").addClass("has-error");
+            event.preventDefault();
+            }
+            else {
+            $("#remarks_error").text("");
+            $(".input-group").removeClass("has-error");
+            tev_details(final_amount,correctness_remarks,status,clicked_id);
+            }
+            
+        });
+
+        $(".remarks-list").on("change", function() {
+            $("#dynamic-input-container").empty();
+            var selectedValues = $(this).val();
+            // Append input elements based on selected values
+            if (selectedValues) {
+                for (var i = 0; i < selectedValues.length; i++) {
+                    var inputId = "date-remarks-" + selectedValues[i];
+                    var selectedText = $(this).find('option[value="' + selectedValues[i] + '"]').text();
+                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" /><br>';
+                    $("#dynamic-input-container").append(inputElement);
+                }
+            }
+        });
+
+
+
+        function tev_details(amount,remarks,status,emp_id){
+            $.ajax({
+                type: "POST",
+                url: "{% url 'add-tev-details' %}",
+                data:{
+                    final_amount: amount,
+                    remarks: remarks,
+                    status : status,
+                    transaction_id : emp_id
+                }
+                }).done(function(data){
+                if (data.data == 'success') {
+                    $('#tevDetails').modal('hide');
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    dataTable.ajax.reload()
+                } else {
+                    toastr.danger('Data not saved', 'Danger', toast_options);
+                }
+            });
+            }
+
+        if (EmployeeName.length) {
+            EmployeeName.wrap('<div class="position-relative"></div>')
+            EmployeeName.select2({
+                placeholder: 'Choose employee',
+                dropdownParent: EmployeeName.parent(),
+                allowClear: true,
+            })
+        }
+        if (FStatus.length) {
+            FStatus.wrap('<div class="position-relative"></div>')
+            FStatus.select2({
+                placeholder: 'Choose Status',
+                dropdownParent: FStatus.parent(),
+                allowClear: true,
+            })
+        }
+
+        if (FIncomingBy.length) {
+            FIncomingBy.wrap('<div class="position-relative"></div>')
+            FIncomingBy.select2({
+                placeholder: 'Choose Incoming',
+                dropdownParent: FIncomingBy.parent(),
+                allowClear: true,
+            })
+        }
+    })
+</script>
+{% endblock footer_scripts %}

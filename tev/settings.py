@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-e&691z)oh*#_&yv(h^3sn^*=gxs09(%(5395)=xe+_im_bk^l&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -38,8 +38,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
+    'django.contrib.humanize',
     'main',
     'receive',
+    'tracking',
+    'transaction',
+    'libraries',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -94,7 +99,24 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': 'localhost',
         'PORT': '3306',
-    }
+    },
+    # 'finance': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2023',
+    #     'USER':'fmdDeveloper',
+    #     'PASSWORD':'M@tth3w6fmd-developer',
+    #     'HOST':'172.31.240.235',
+    #     'PORT':'3306',
+    # },
+
+    'finance': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'finance',
+        'USER':'root',
+        'PASSWORD':'',
+        'HOST':'localhost',
+        'PORT':'3306',
+    },
 }
 
 

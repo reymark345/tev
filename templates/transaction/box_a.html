@@ -1,0 +1,966 @@
+<div id="loading-screen">
+  <center>
+      <div class="col">
+          <!-- Fold -->
+          <div class="sk-fold sk-primary">
+            <div class="sk-fold-cube"></div>
+            <div class="sk-fold-cube"></div>
+            <div class="sk-fold-cube"></div>
+            <div class="sk-fold-cube"></div>
+          </div>
+        </div>  
+  </center>
+</div>
+{% extends 'index.html' %} {% block content %} {% load staticfiles %}
+<style>
+  #loading-screen {
+      position: fixed;
+      background: rgba(255, 255, 255, 0.7);
+      color: rgb(0, 0, 0);
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+  }
+  .sk-primary .sk-fold-cube {
+      width: 15px; /* Set the width of each cube */
+      height: 15px; /* Set the height of each cube */
+  }
+  .custom-file-upload {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  background-color: #f8f9fa;
+  color: #495057;
+  border-radius: 4px;
+  }
+
+  .custom-file-upload:hover {
+      background-color: #e9ecef;
+  }
+</style>
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Transaction /</span> Payroll Printing</h4>
+
+        <!-- DataTable with Buttons -->
+        <div class="card">
+            <div class="card-datatable table-responsive pt-0">
+                <table id="tbl-items" class="table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="check-all"></th>
+                            <th>Dv Number</th>
+                            <th>Cluster</th>
+                            <th>Division</th>
+                            <th>Division Chief</th>
+                            <th>Status</th>
+                            <th>Date In</th>
+                            <th>Date Out</th>
+                            <th>Out by</th>
+                            <th>ID</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="advance-filter" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+      <div class="modal-content p-3 p-md-5">
+      <div class="modal-body">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="text-center mb-4">
+          <h3 class="mb-2">Advanced Filter </h3>
+          <p class="text-muted">Filter data by filling the details below</p>
+          </div>
+          <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
+              <div class="col-12 col-md-12">
+                  <label class="form-label" for="modalDvNumber">DV Number</label>
+                  <select class="select2 form-select box-dv-no" name="BoxDvNo" id="box-dvno" multiple>
+                    <option></option>
+                    {% for row in dv_number %}
+                    <option value="{{ row.id }}">{{ row.dv_no }}</option>
+                    {% endfor %}
+                  </select>
+              </div>
+              <div class="col-12 col-md-6">
+                  <label class="form-label" for="modalEditUserFirstName">Cluster</label>
+                  <!-- <input
+                  type="text"
+                  id="f-id-number"
+                  name="FIdNumber"
+                  class="form-control"
+                  placeholder="16-0000"
+                  /> -->
+                  <select class="select2 form-select f-cluster" name="FCluster" id="box-cluster">
+                    <option></option>
+                    {% for row in cluster %}
+                    <option value="{{ row.id }}">{{ row.name }}</option>
+                    {% endfor %}
+                  </select>
+              </div>
+              <div class="col-12 col-md-6">
+                  <label class="form-label" for="modalEditUserLastName">Division</label>
+                  <!-- <input
+                  type="text"
+                  id="f-transaction-code"
+                  name="FTransactionCode"
+                  class="form-control"
+                  placeholder="23-00-00000"
+                  /> -->
+                  <select class="select2 form-select f-division " name="FDivision" id="box-division" >
+                    <option></option>
+                    {% for row in division %}
+                    <option value="{{ row.id }}">{{ row.name }}</option>
+                    {% endfor %}
+                  </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" >Date In</label>
+                <input
+                type="date"
+                id="f-box-in"
+                name="FBoxIn"
+                class="form-control"
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" >Date Out</label>
+                <input
+                type="date"
+                id="f-box-out"
+                name="FBoxOut"
+                class="form-control"
+                />
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="modalEditTaxID">Status</label>
+                <select class="select2 form-select f-status" name="BoxStatus" id="box-status">
+                  <option></option>
+                  <option value="5">Outgoing</option>
+                  <option value="6">Ongoing</option>
+                </select>
+              </div>
+
+                <input
+                  type="hidden"
+                  id="f-adv-filter"
+                  name="FAdvancedFilter"
+                  class="form-control"
+                  placeholder="AdvFilter"
+                  />
+              <div class="col-12 text-center">
+                  <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
+                  <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
+                  <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
+              
+              </div>
+          </form>
+      </div>
+      </div>
+  </div>
+</div>
+<!--/ Edit User Modal -->
+  
+
+
+<div class="modal fade" id="update-transaction" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="min-width: 90%; min-height: 70%;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- <h5 class="modal-title" id="exampleModalLabel4">Update Transaction</h5> -->
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <!-- Modern Vertical Wizard -->
+                <div class="col-12">
+                  <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
+                    <div class="bs-stepper-content">
+                       <div class="card-datatable table-responsive pt-0">  <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label>
+                    <table id="tbl-box-a" class="table display compact">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>Code #</th>
+                                <th>Accnt. No.</th>
+                                <th>ID Number</th>
+                                <th>Name</th>
+                                <th>Amount</th>
+                                <th>Purpose</th>
+                                <th>Charge</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>    
+                        <tbody>
+                        </tbody>               
+                    </table>
+                    </div>
+                      <form onSubmit="return false">
+                        <!-- Account Details -->
+                        <div id="account-details-modern-vertical" class="content">
+                          <div class="content-header mb-3">
+                            <h6 class="mb-0">Account Details</h6>
+                            <small>Enter Your Account Details.</small>
+                          </div>
+                          <div class="row g-3">
+                            <div class="col-sm-6">
+                              <label class="form-label" for="username-modern-vertical">Username</label>
+                              <input
+                                type="text"
+                                id="username-modern-vertical"
+                                class="form-control"
+                                placeholder="johndoe"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="email-modern-vertical">Email</label>
+                              <input
+                                type="email"
+                                id="email-modern-vertical"
+                                class="form-control"
+                                placeholder="john.doe@email.com"
+                                aria-label="john.doe"
+                              />
+                            </div>
+                            <div class="col-sm-6 form-password-toggle">
+                              <label class="form-label" for="password-modern-vertical">Password</label>
+                              <div class="input-group input-group-merge">
+                                <input
+                                  type="password"
+                                  id="password-modern-vertical"
+                                  class="form-control"
+                                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                  aria-describedby="password2-modern-vertical"
+                                />
+                                <span class="input-group-text cursor-pointer" id="password2-modern-vertical"
+                                  ><i class="ti ti-eye-off"></i
+                                ></span>
+                              </div>
+                            </div>
+                            <div class="col-sm-6 form-password-toggle">
+                              <label class="form-label" for="confirm-password-modern-vertical">Confirm Password</label>
+                              <div class="input-group input-group-merge">
+                                <input
+                                  type="password"
+                                  id="confirm-password-modern-vertical"
+                                  class="form-control"
+                                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                  aria-describedby="confirm-password-modern-vertical2"
+                                />
+                                <span class="input-group-text cursor-pointer" id="confirm-password-modern-vertical2"
+                                  ><i class="ti ti-eye-off"></i
+                                ></span>
+                              </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                              <button class="btn btn-label-secondary btn-prev" disabled>
+                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                              </button>
+                              <button class="btn btn-primary btn-next">
+                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
+                                <i class="ti ti-arrow-right"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Personal Info -->
+                        <div id="personal-info-modern-vertical" class="content">
+                          <div class="content-header mb-3">
+                            <h6 class="mb-0">Personal Info</h6>
+                            <small>Enter Your Personal Info.</small>
+                          </div>
+                          <div class="row g-3">
+                            <div class="col-sm-6">
+                              <label class="form-label" for="first-name-modern-vertical">First Name</label>
+                              <input
+                                type="text"
+                                id="first-name-modern-vertical"
+                                class="form-control"
+                                placeholder="John"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="last-name-modern-vertical">Last Name</label>
+                              <input
+                                type="text"
+                                id="last-name-modern-vertical"
+                                class="form-control"
+                                placeholder="Doe"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="country-modern-vertical">Country</label>
+                              <select class="select2" id="country-modern-vertical">
+                                <option label=" "></option>
+                                <option>UK</option>
+                                <option>USA</option>
+                                <option>Spain</option>
+                                <option>France</option>
+                                <option>Italy</option>
+                                <option>Australia</option>
+                              </select>
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="language-modern-vertical">Language</label>
+                              <select
+                                class="selectpicker w-auto"
+                                id="language-modern-vertical"
+                                data-style="btn-transparent"
+                                data-icon-base="ti"
+                                data-tick-icon="ti-check text-white"
+                                multiple
+                              >
+                                <option>English</option>
+                                <option>French</option>
+                                <option>Spanish</option>
+                              </select>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                              <button class="btn btn-label-secondary btn-prev">
+                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                              </button>
+                              <button class="btn btn-primary btn-next">
+                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
+                                <i class="ti ti-arrow-right"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Social Links -->
+                        <div id="social-links-modern-vertical" class="content">
+                          <div class="content-header mb-3">
+                            <h6 class="mb-0">Social Links</h6>
+                            <small>Enter Your Social Links.</small>
+                          </div>
+                          <div class="row g-3">
+                            <div class="col-sm-6">
+                              <label class="form-label" for="twitter-modern-vertical">Twitter</label>
+                              <input
+                                type="text"
+                                id="twitter-modern-vertical"
+                                class="form-control"
+                                placeholder="https://twitter.com/abc"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="facebook-modern-vertical">Facebook</label>
+                              <input
+                                type="text"
+                                id="facebook-modern-vertical"
+                                class="form-control"
+                                placeholder="https://facebook.com/abc"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="google-modern-vertical">Google+</label>
+                              <input
+                                type="text"
+                                id="google-modern-vertical"
+                                class="form-control"
+                                placeholder="https://plus.google.com/abc"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="linkedin-modern-vertical">LinkedIn</label>
+                              <input
+                                type="text"
+                                id="linkedin-modern-vertical"
+                                class="form-control"
+                                placeholder="https://linkedin.com/abc"
+                              />
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                              <button class="btn btn-label-secondary btn-prev">
+                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                              </button>
+                              <button class="btn btn-success btn-submit">Submit</button>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                <!-- /Modern Vertical Wizard -->
+               
+            </div>
+            <div class="modal-footer">
+                <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %} {% block footer_scripts %}
+<script>
+    let clicked_id = 0;
+    let dv_no_id =0;
+    let dv_number = '';
+    let charges = '';
+    let outgoing_id = 0;
+    let selectedDv = [];
+    $(document).ready(function () {
+      $('#loading-screen').hide();
+      const table_box_a = $('#tbl-box-a')
+      const table = $('#tbl-items')
+      const ItemFormValidation = document.getElementById('item-form'),
+          AddRecordDv = document.getElementById('add-record-dv'),
+          Remarks = jQuery(document.querySelector('[name="Remarks"]')),
+          DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
+          RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
+          FPurpose = jQuery(document.querySelector('[name="FPurpose"]')),
+          FCharges = jQuery(document.querySelector('[name="FCharges"]')),
+          FinalAmount = jQuery(document.querySelector('[name="FinalAmount"]')),
+          BoxStatus= jQuery(document.querySelector('[name="BoxStatus"]')),
+          BoxDvNo = jQuery(document.querySelector('[name="BoxDvNo"]')),
+          FBoxIn = jQuery(document.querySelector('[name="FBoxIn"]')),
+          FBoxOut= jQuery(document.querySelector('[name="FBoxOut"]')),
+          FDivision = jQuery(document.querySelector('[name="FDivision"]')),
+          FCluster = jQuery(document.querySelector('[name="FCluster"]')),
+          search_advance_filter = $('#search-advance-filter'),
+          FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
+          reset_advance_filter = $('#reset-advance-filter'),
+          clear_advance_filter = $('#clear-advance-filter');
+        const toast_options = (toastr.options = {
+            maxOpened: 1,
+            autoDismiss: true,
+            closeButton: true,
+            newestOnTop: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            rtl: isRtl,
+      });
+        let ItemID = $('#item-id')
+
+        let dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            // ajax: {
+            //     url: "{% url 'box-load' %}",
+            //     type: "GET",
+            //     data: {
+            //         identifier: 2
+            //     }
+            // },
+            ajax: {
+                url: "{% url 'box-load' %}",
+                data: function (d) {
+                    d.FAdvancedFilter = FAdvancedFilter.val()
+                    d.BoxDvNo = BoxDvNo.val()
+                    d.FCluster = FCluster.val()
+                    d.FDivision = FDivision.val()
+                    d.FBoxIn = FBoxIn.val()
+                    d.FBoxOut = FBoxOut.val()
+                    d.BoxStatus = BoxStatus.val()
+                    d.ListDv = selectedDv;
+                },
+            },
+            columns: [
+                {
+                    data: 'id', status: 'status',
+                    orderable: false, 
+                    render: function (data, type, row) {
+                        var status = row.status; // Access the 'status' value from the 'row' object
+
+                        if (status == 2) {
+                            return '<input type="checkbox" disabled="disabled">';
+                        } else {
+                            // Render a checkbox for each row with the item ID as its value
+                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
+                        }
+
+                    }
+                },
+                { data: 'dv_no' },
+                { data: 'cluster' },
+                { data: 'division_name' },
+                { data: 'division_chief' },
+                { data: 'status' },
+                { data: 'box_b_in' },
+                { data: 'box_b_out' },
+                { data: 'out_by' },
+                { data: 'id' },
+
+            ],
+            columnDefs: [
+                {
+                    targets: 1,
+                    render: function(data) {
+                        return '<span class="badge bg-label-primary">' + data + '</span>';
+                    
+                    },
+                },
+
+                {
+                    targets: 2,
+                    render: function(data) {
+                        return '<span class="badge bg-label-info">'+data+'</span>'
+                    },
+                },
+             
+              
+                {
+                  targets: 5,
+                  render: function (data) {
+                      if(data==5){
+                        return '<span class="badge bg-label-warning">Outgoing</span>'
+                      }
+                      else{
+                        return '<span class="badge bg-label-success">Ongoing</span>'
+                      }
+
+                  },
+                },
+                {
+                    targets: -3,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+                {
+                    targets: -4,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+                {
+                    targets: -1,
+                    title: 'Action',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data) {
+                        var itemId = data; // Assuming data contains the ID you want to pass
+                        return (
+                            '<a href="{% url "preview-box-a" %}?id=' + itemId + '" onclick="window.open(this.href); return false" class="text-body"><i class="text-primary fa fa-print"></i></a>' +
+                            '<a class="btn btn-sm btn-icon view-data" id="'+itemId+'"><i class="text-primary fa fa-eye"></i></a>'
+                        
+                        );
+                    },
+                },
+            ],
+            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            buttons: [
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                    action: function () {
+
+                      if (BoxDvNo.length) {
+                        BoxDvNo.wrap('<div class="position-relative"></div>')
+                        BoxDvNo.select2({
+                              placeholder: 'Choose DV',
+                              dropdownParent: BoxDvNo.parent(),
+                              allowClear: true,
+                          })
+                      }
+                      if (FDivision.length) {
+                        FDivision.wrap('<div class="position-relative"></div>')
+                        FDivision.select2({
+                              placeholder: 'Choose Division',
+                              dropdownParent: FDivision.parent(),
+                              allowClear: true,
+                          })
+                      }
+                      if (FCluster.length) {
+                        FCluster.wrap('<div class="position-relative"></div>')
+                        FCluster.select2({
+                              placeholder: 'Choose Cluster',
+                              dropdownParent: FCluster.parent(),
+                              allowClear: true,
+                          })
+                      }
+                      if (BoxStatus.length) {
+                        BoxStatus.wrap('<div class="position-relative"></div>')
+                        BoxStatus.select2({
+                              placeholder: 'Choose Status',
+                              dropdownParent: BoxStatus.parent(),
+                              allowClear: true,
+                          })
+                      }
+
+                    //   $.ajax({
+                    //     type: 'POST',
+                    //     url: "{% url 'dv-number-lib' %}"
+                    // }).done(function (data) {
+                    //     console.log(data);
+                        
+                    //     // let totalAmount = data.total_amount;
+                    //     // totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                    //     //     minimumFractionDigits: 2,
+                    //     //     maximumFractionDigits: 2
+                    //     // });
+                    //     // $('#total-amount').text("₱ "+totalAmount);
+                      
+                      $("#advance-filter").modal("show");
+
+
+                    // });
+
+                      
+                  }
+                
+                },
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
+                    action: function () {
+                        // Get the IDs of checked items
+                        var selectedItems = [];
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+
+                        console.log(selectedItems);
+            
+                        if(selectedItems.length ===0){
+                            toastr.error('Select item first', 'Invalid', toast_options);
+                        }
+                        else{
+                            incoming_out(selectedItems);
+                        }
+                    }
+                },
+            ],
+            drawCallback: function (settings) {
+                const tableId = 'tbl-box-a'; // Change this to the specific table ID you want to populate
+                const tbody = $(`#${tableId} tbody`);
+                let selectOptions = '';
+
+                $('body').on('click', '.item-edit', function () {
+                  let emp_id = $(this).attr('id');
+                  let amount = $(this).closest('tr').find('.form-control.emp-amount').val();
+                  let purpose = $(this).closest('tr').find('.form-control.emp-purpose').val();
+                  let charges = $(this).closest('tr').find('select.emp-charges').val();
+
+                  $.ajax({
+                    type: 'POST',
+                    url: "{% url 'update-box-list' %}",
+                    data:{
+                        emp_id: emp_id,
+                        amount:amount,
+                        purpose:purpose,
+                        charges:charges,
+                        dv_number: dv_number
+                    }
+                }).done(function (data) {
+                    let totalAmount = data.total_amount;
+                    totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    $('#total-amount').text("₱ "+totalAmount);
+                  toastr.success('Data Successfully Save!', 'Success', toast_options);
+
+                })
+              });
+
+              $('body').on('click', '.item-delete', function () {
+                let emp_id = $(this).attr('id');
+                Swal.fire({
+                  title: 'Are you sure?',
+                  text: "You won't be able to revert this!",
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Yes, Delete it!',
+                  customClass: {
+                      confirmButton: 'btn btn-primary me-3',
+                      cancelButton: 'btn btn-label-secondary',
+                  },
+                  buttonsStyling: false,
+              }).then(function (result) {
+                  if (result.value) {
+                      $.ajax({
+                          type: 'POST',
+                          url: "{% url 'delete-box-list' %}",
+                          data:{
+                            emp_id: emp_id,
+                            dv_number: dv_number
+                        }
+                      }).done(function (data) {
+                        $('#update-transaction').modal('hide');
+                          if (data.data == 'success') {
+                              Swal.fire({
+                                  title: '<strong>TEV Code <u>'+dv_number+'</u></strong>',
+                                  icon: 'info',
+                                  html:
+                                    'Successfully <b>Deleted!</b>',
+                                  showCloseButton: true,
+                                  showCancelButton: false,
+                                  focusConfirm: false,
+                                  confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                  confirmButtonAriaLabel: 'Thumbs up, great!',
+                                  customClass: {
+                                    confirmButton: 'btn btn-primary me-3'
+                                  },
+                                  buttonsStyling: false
+                                });
+                          } else {
+                              Swal.fire({
+                                  icon: 'error',
+                                  title: 'Error saving!',
+                                  text: data.message,
+                                  customClass: {
+                                      confirmButton: 'btn btn-success',
+                                  },
+                              })
+                          }
+                      })
+                  }
+              })
+            });
+
+            $('.view-data').on('click', function () {
+
+                const selectAllCheckbox = $(`#${tableId} #selectAll`);
+                selectAllCheckbox.on('change', function () {
+                    const isChecked = this.checked;
+                    tbody.find(':checkbox').prop('checked', isChecked);
+                });
+
+                let id = $(this).attr('id');
+                dv_no_id = id
+                
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'employee-dv' %}",
+                    data:{
+                        dv_id: id
+                    }
+                }).done(function (data) {
+                    dv_number = '';
+                    charges = '';
+                    outgoing_id = 0;
+                    dv_number = data.dv_number;
+                    charges = data.charges;
+                    outgoing_id = data.outgoing_id;
+                    $("#f-outgoing-id").val(data.outgoing_id)
+                    let is_print = data.is_print;
+                    tbody.empty();
+                    data.data.forEach(function (item) {
+                      const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                      let amountColumn = '';
+                      let editColumn = '';
+                      let deleteColumn = '';
+                      let purposeColumn = '';
+                      let chargesColumn = '';
+                      selectOptions = '';
+                      for (var i = 0; i < charges.length; i++) {
+                          var charge = charges[i];
+                          selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                      }
+                      if (is_print) {
+                        $(".create-new").prop("disabled", true);
+                        amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
+                        purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}" disabled></td>`;
+                        chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true" disabled>${selectOptions}</select></td>`;
+                        editColumn = `<a class="btn btn-sm btn-icon" id="${item.id}"><i class="text-primary ti ti-edit-off"></i></a>`;
+                        deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
+                    } else {
+                      $(".create-new").prop("disabled", false);
+                        amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                        purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+                        chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+                        editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                        deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                    }
+                      const row = `
+                          <tr>
+                              <td><input type="checkbox"></td>
+                              <td><span class="badge bg-label-primary">${item.code}</span></td>
+                              <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                              <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                              <td>${item.name}</td>
+                              ${amountColumn}
+                              ${purposeColumn}
+                              ${chargesColumn}
+                              <td>${editColumn}${deleteColumn}</td>
+                          </tr>
+                      `;
+                      tbody.append(row);
+                  });
+                  $('#emp-charges').html(selectOptions);
+                    let totalAmount = data.total_amount;
+                    totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    });
+                    $('#total-amount').text("₱ "+totalAmount);
+                    $('#update-transaction').modal('show');
+                })
+            });
+            $('#tbl-items tbody input[type="checkbox"]').change(function () {
+                // Do something when a checkbox in the table body is changed...
+            });
+
+            $('#check-all').change(function () {
+                // Get the checked state of the "check-all" checkbox
+                var isChecked = $(this).is(':checked');
+    
+                // Set the checked state of all checkboxes in the table body
+                $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+                });
+
+            $('.preview-details').on('click', function () {
+                bx_id = $(this).data('id');
+
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'preview-box-a' %}",
+                    data:{
+                        box_id: bx_id
+                    }
+                }).done(function (data) {
+                })
+            });
+            
+
+        },
+     })
+    $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
+        function clear_advfilter(){
+            BoxDvNo.val('Choose').trigger('change');
+            FCluster.val('').trigger('change');
+            FDivision.val('').trigger('change');
+            FBoxIn.val('');
+            FBoxOut.val('');
+            BoxStatus.val('').trigger('change');
+      }
+
+      BoxDvNo.on('change', function() {
+        selectedDv = BoxDvNo.val();
+        console.log("byeee");
+        console.log(selectedDv);
+      });
+
+      search_advance_filter.on('click', function () {
+            FAdvancedFilter.val("true");
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            clear_advfilter();
+            toastr.success('Search successfully', 'Success', toast_options);
+      });
+
+      reset_advance_filter.on('click', function () {
+            FAdvancedFilter.val('');
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Data has been reset', 'Success', toast_options);
+      });
+
+      clear_advance_filter.on('click', function () {
+        clear_advfilter();
+        toastr.success('Clear successfully', 'Success', toast_options);
+      });
+
+      function clearFlatpickr(){
+        var dateField = $('#dateField').flatpickr({
+          mode: 'multiple',
+          allowInput: true,
+          dateFormat: 'd-m-Y',
+          locale: {
+              'firstDayOfWeek': 1 // start week on Monday
+          },
+        });
+        
+        dateField.clear();;
+      }
+
+      function RenderFlatpickr(){
+          var dateField = $('#dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+          });
+        $("#dateField").on("change", function() {
+            if(DateTravel.val()){
+                $(".rangeTravel").prop("disabled", true);
+            }
+            else{
+                $(".rangeTravel").prop("disabled", false);
+            } 
+          });
+
+        $(".rangeTravel").on("change", function() {
+            if(RangeTravel.val()){
+                $("#dateField").prop("disabled", true);
+            }
+            else{
+                $("#dateField").prop("disabled", false);
+            } 
+          });
+      }
+
+      function incoming_out(selected_items){
+            Swal.fire({
+                title: 'Date out, Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, mark as out!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
+       
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'out-box-a' %}",
+                        data:{
+                            out_list: selected_items
+                        }
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Item has been added.',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+
+                            dataTable.ajax.reload()
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            })
+
+        }              
+    })
+</script>
+{% endblock footer_scripts %}

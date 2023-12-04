@@ -1,0 +1,1108 @@
+
+{% load humanize %} 
+{% load staticfiles %}
+<html>
+  <div id="loading-screen">
+    <center>
+        <div class="col">
+            <!-- Fold -->
+            <div class="sk-fold sk-primary">
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+            </div>
+          </div>  
+    </center>
+  </div>
+<head>
+</head>
+<style>
+#loading-screen {
+  position: fixed;
+  background: rgba(255, 255, 255, 0.7);
+  color: rgb(0, 0, 0);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  }
+.sk-primary .sk-fold-cube {
+    width: 15px; /* Set the width of each cube */
+    height: 15px; /* Set the height of each cube */
+}
+
+.container-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: auto;
+  padding-bottom: 50px;
+  background-color: #cccccc;
+}
+  
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 5%;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+  
+.print-button {
+  background-color: #b2c2ce;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-right: 500px;
+}
+  
+.container-body, .container-body2,.container-body3,.container-body4  {
+  width: 210mm;
+  height:auto;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: relative;
+  padding: 50px;
+}
+  .appendix {
+    position: absolute;
+    top: 65px;
+    right: 50px;
+    font-size: 14px;
+    font-style: italic;
+  }
+  
+  table {
+    border: 3px solid;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 40px;
+  }
+  
+  th,
+  td {
+    border: 1px solid #000000;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+  }
+  
+  .center-text {
+    text-align: center;
+    vertical-align: top;
+  }
+  .dvnumber {
+    background-color:#c6e0b4;
+    border:1.8px solid;
+    font-size: 15px;
+  }
+.coloredrow {
+  background-color: rgb(158, 198, 255);
+  -webkit-print-color-adjust: exact;
+}
+.align-u-left {
+  text-align: left;
+  vertical-align: top;
+}
+
+table.myClass * { /*new*/
+  border: 0;
+}
+ 
+@media print {
+  .container {
+  display: none;
+}
+
+.container-body, .container-body2,.container-body3,.container-body4{
+  background-color: #f0f0f0;
+  box-shadow: none;
+  width: 210mm;
+  height: 297mm;
+  margin-top: -30px;
+  }
+
+  .container h3 {
+    color: transparent;
+  }
+
+  .container-wrapper {
+    align-items: flex-start;
+  }
+
+  table {
+    margin-top: 15px;
+    border: 3px solid;
+  }
+
+  .appendix {
+    top: 45px;
+  }
+
+  /* Adjust font size for Disbursement Voucher in print */
+  .center-text b {
+    font-size: 14px;
+  }
+  .dvnumber {
+    background-color: #c6e0b4 !important;
+    -webkit-print-color-adjust: exact;
+    color: black; /* Make sure text remains readable */
+    border: 1.8px solid;
+    font-size: 10px;
+  }
+
+.container-body2,.container-body3,.container-body4 {
+  page-break-before: always;
+}
+.footer {
+  margin-top: 99% !important;
+}}
+
+.innerTable{
+  margin:0px;
+  border-color:white;  
+}
+.lastRow{
+  padding:0px;
+}
+
+.align-text-right{
+text-align: right;
+}
+.align-text-right{
+text-align: right;
+}
+.no-border{
+border: 0;
+}
+
+.footer {
+margin-top: 99%;
+}
+
+</style>
+</head>
+<body>
+    <div class="container-wrapper">
+        <div class="container">
+          <h3></h3>
+
+          <button class="print-button" onclick="printForms('{{ finance.0.dv_no }}')">Print</button>
+
+        </div>
+        <div class="container-body">
+          <span class="appendix">Appendix 32</span>
+          <table>
+            <thead></thead>
+            <tbody>
+              <tr>
+                <td colspan="5" rowspan="4" class="center-text">Department of Social Welfare and Development <br> Capitol Site, Butuan City <br>
+                  <br>
+                  <br>
+                  <br>
+                  <b>DISBURSEMENT VOUCHER</b>
+                </td>
+                <td style="font-size: 15px;">
+                  <b> Fund Cluster : <br>Cluster O1 </b>
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 15px;">
+                  <b>Date : </b>
+                </td>
+              </tr>
+              <tr>
+                <td class="dvnumber">
+                  <b> DV No. : {{ dv_number}}</b>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+              </tr>
+              <tr>
+                <td style="font-size: 12px;">
+                  <b>Mode of <br> Payment </b>
+                </td>
+                <td colspan="5">
+                  <span style="margin-right: 20px;"></span>
+                  <input type="checkbox" style="width: 20px; height: 20px;"> MDS Check <span style="margin-right: 20px;"></span>
+                  <input type="checkbox" style="width: 20px; height: 20px;"> Commercial Check <span style="margin-right: 20px;"></span>
+                  <input type="checkbox" style="width: 20px; height: 20px;"> ADA <span style="margin-right: 20px;"></span>
+                  <input type="checkbox" style="width: 20px; height: 20px;"> Others (Please specify) <br> <span style="margin-left:500px;">_____________________</span>            
+                </td>
+              </tr>
+      
+              <tr>
+                <td width="50" height="30" style="font-size: 12px;">
+                  <b>Payee</b>
+                </td>
+                <td width="150" colspan="3" style="font-size: 12px;">
+                  <b>LBP</b>
+                </td>
+                <td colspan="1" style="font-size: 12px;">TIN/Employee No.:</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td width="50" rowspan="2" height="30" colspan="1" style="font-size: 12px;">
+                  <b>Address</b>
+                </td>
+                <td colspan="3" rowspan="2" style="font-size: 12px;">
+                  <b>DSWD, CAPITOL SITE, BUTUAN CITY</b>
+                </td>
+                <td colspan="2" class="lastRow" style="font-size: 12px;">
+                  <b>Initiator:</b>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                </td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td colspan="3"><center> Particulars</center></td>
+                <td colspan="1"><center> Responsibility <br>Center</center></td>
+                <td colspan="1"><center> MFO/PAP</center></td>
+                <td><center> Amount</center></td>
+              </tr>
+              <tr>
+                <td colspan="3" style="font-size: 15px; height:80px;width:300px;">
+                  <center><b>{{ finance.0.modepayment }}</b></center><br>
+                </td>
+                <td rowspan="2">
+                </td>
+                <td rowspan="2">
+                </td>
+                <td>
+                    <span style="font-size: 12px; " > <b>Php  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ total_amount|floatformat:2|intcomma }}</span></b></span>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="3" style="font-size: 12px;">
+                  <center><b>Amount Due</b></center>
+                </td>
+                <td>
+                    <span style="font-size: 12px;" > <b>Php  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ total_amount|floatformat:2|intcomma }}</span></b></span>
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="6"  style="font-size: 12px;" >
+                    <span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;">A.</span> Certified:  Expenses/Cash Advance necessary,  lawful and  incurred under my direct supervision.<br><br><br><br>
+                    <center><u><b><span  style="font-size: 12px;">{{ details.chief|upper }}</span></b></u></center><br>
+                    <center><span  style="font-size: 12px;">{{ details.c_designation}}</span></center><br>
+
+                </td>
+
+              </tr> 
+              <tr>
+                <td colspan="6"  style="font-size: 12px; padding: 0;" > 
+                    <span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;"><b>B.</b></span> Accounting Entry:
+                </td>
+              </tr>
+
+              <tr style="font-size: 12px;">
+                <td colspan="3" style="padding: 0px;">
+                    <center>Account Title</center>
+                </td>
+                <td colspan="1"  style="padding: 0px;">
+                    <center>UACS Code</center>
+                </td>
+                <td colspan="1"  style="padding: 0px;">
+                    <center>Debit</center>
+                </td>
+                <td colspan="1"  style="padding: 0px;">
+                    <center>Credit</center>
+                </td>
+              </tr>
+
+              <tr>
+                <td colspan="3"  style="font-size: 12px;" ><br><br>
+                    <span style="margin-left:15px"><b>TE - Local</b></span><br><br><br>
+                    <span style="margin-left:30px"><b>Cash MDS</b></span><br><br><br>
+
+                    
+                </td>
+                <td colspan="1"  style="font-size: 12px;" >
+                    <center></center>
+                </td>
+                <td colspan="1"  style="font-size: 12px;" >
+                    <span style="margin-left:30px"><b>{{ total_amount|floatformat:2|intcomma }}</b></span><br><br><br>
+                </td>
+                <td colspan="1"  style="font-size: 12px;" ><br><br><br>
+                    <span style="margin-left:30px"><b>{{ total_amount|floatformat:2|intcomma }}</b></span><br><br><br>
+                </td>
+              </tr>
+
+              <tr>
+               
+                    <td colspan="4"  style="font-size: 12px;" >
+                      <b><span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;">C.</span> Certified</b>
+                    </td>
+                    <td colspan="2" style="font-size: 12px;">
+                      <b><span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;">D.</span> Approved for Payment</b>
+                    
+                    </td>     
+              </tr>
+              <tr height="100px;">
+               
+                <td colspan="4"  style="font-size: 12px;" >
+                    <input type="checkbox"> Cash available <br>
+                    <input type="checkbox">  Subject to Authority to Debit Account (when applicable) <br>
+                    <input type="checkbox"> Supporting documents complete and amount claimed proper  <br>
+                    
+                </td>
+                <td colspan="2" style="font-size: 12px;"></td>     
+              </tr>
+              <tr height="65px;" style="font-size: 12px;">
+                <td><center>Signature</center></td>
+                <td colspan="2"></td>
+                <td><center>Signature</center></td>
+                <td colspan="2"></td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td style=" padding: 1;"><center>Printed Name</center></td>
+                <td style=" padding: 1;" colspan="2"><center><b>GRETCHEN F. ESCALA</b></center></td>
+                <td style=" padding: 1;"><center>Printed Name</center></td>
+                <td style=" padding: 1;" colspan="2"><center><b>{{ details.approval|upper }}</b></center></td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td width="50" rowspan="2" height="30" colspan="1">
+                  <center>Position </center>
+                </td>
+               
+                <td colspan="2" class="lastRow" style="font-size: 12px;">
+                  <center><b>Accountatnt III</b></center>
+                </td>
+                
+                <td rowspan="2" class="lastRow"><center>Position</center></td>
+                <td colspan="2" style="font-size: 12px;"><center><b>{{ details.ap_designation }}</b></center></td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td colspan="2"><center>Head, Accounting Unit/Authorized Representative</center></td>
+                </td>
+                <td colspan="2" >
+                    <center><b>Agency Head/Authorized Representative</b></center>
+                  </td>
+              </tr>
+
+              <tr style="font-size: 12px;">
+                <td><center>Date</center></td>
+                <td></td>
+                <td colspan="2"><center>Date</center></td>
+                <td colspan="2"></td>
+              </tr>
+              <tr style="font-size: 12px;">
+                <td colspan="5" style="font-size: 12px; padding: 0;">
+                  <b><span style="display: inline-block;width: 15px;height: 15px;text-align: center;border: 1px solid black;">E.</span> Receipt of Payment</b>          
+                </td>
+                <td rowspan="2" class="align-u-left">JEV No.</td>
+              </tr>
+
+              <tr style="font-size: 12px;">
+                <td>Check/<br>ADA No.:</td>
+                <td colspan="2"></td>
+                <td class="align-u-left">Date :</td>
+                <td class="align-u-left">Bank Name & Account Number:</td>
+              </tr>
+              <tr style="font-size: 12px; height: 40px;">
+                <td>Signature:</td>
+                <td colspan="2"></td>
+                <td class="align-u-left">Date :</td>
+                <td class="align-u-left">Printed Name:</td>
+                <td rowspan="2" class="align-u-left">Date</td>
+              </tr>
+              <tr  style="font-size: 12px;">
+                <td colspan="5">Official Receipt No. & Date/Other Documents
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+        <br>
+        <div class="container-body2">
+          <span class="appendix">Appendix 11</span>
+          <table>
+            <thead></thead>
+            <tbody>
+              <tr>
+                <td colspan="7" rowspan="3" class="center-text" ><b><span style="font-size: 17px;">OBLIGATION REQUESTS AND STATUS</span></b>
+                  <br>
+                  <br>
+                  <br>
+                  <b>Department of Social Welfare and Development  <br> Entity Name</b>
+                </td>
+                <td style="font-size: 15px;border-bottom: 0;" colspan="4">
+                  Serial No. : _______________ 
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 15px; border-top: 0;border-bottom: 0;" colspan="4">
+                  Date : 
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 15px;border-top: 0;" colspan="4">
+                  Fund Cluster : ____________________ 
+                </td>
+              </tr>
+
+              <tr>
+                <td height="30" style="font-size: 13px;text-align: center;">
+                  Payee
+                </td>
+                <td width="150" colspan="10" style="font-size: 15px;">
+                  <b>LBP</b>
+                </td>
+              </tr> 
+              <tr>
+                <td width="50" height="30" style="font-size: 13px;text-align: center;">
+                  Office
+                </td>
+                <td width="150" colspan="10" style="font-size: 15px;">
+                  <b>DSWD, CAPITOL SITE, BUTUAN CITY</b>
+                </td>
+              </tr> 
+              <tr>
+                <td style="font-size: 13px;text-align: center;">
+                  Address
+                </td>
+                <td width="130" colspan="10" style="font-size: 15px;">
+                  <b>DSWD, CAPITOL SITE, BUTUAN CITY</b>
+                </td>
+              </tr> 
+      
+              <tr>
+                <td colspan="1" height="30" style="font-size: 13px;text-align: center;">
+                  Responsibility Center
+                </td>
+                <td width="150" colspan="5" style="font-size: 13px;text-align: center;">
+                  <b>Particulars</b>
+                </td>
+
+                <td width="150"  style="font-size: 13px;text-align: center;">
+                  <b>MFO/PAP</b>
+                </td>
+                <td width="150"  style="font-size: 13px;text-align: center;">
+                  <b>UACS Object Code</b>
+                </td>
+                <td width="150" colspan="3" style="font-size: 13px;text-align: center;">
+                  <b>Amount</b>
+                </td>
+              </tr>
+
+              <tr >
+                <td style="border-bottom: 0;"></td>
+                <td style="font-size: 15px;border-bottom: 0; height:150px;" colspan="5">
+                  <center><b>{{ finance.0.modepayment }}</b></center>
+                  <br><br></td>
+                <td style="border-bottom: 0;"></td>
+                <td style="border-bottom: 0;"></td>
+                <td style="font-size: 15px;border-right: 0;text-align:left;"><b>Php</b></td>
+                <td style="font-size: 15px;border-left: 0;text-align:right;" colspan="2"><b>{{ total_amount|floatformat:2|intcomma }}</b></td>
+                
+              </tr>
+
+              <tr >
+                <td style="border-top: 0;"></td>
+                <td style="font-size: 15px;text-align:right !important; border-top: 0;padding-top: 0;padding-bottom: 0;" colspan="5"><b>Total</b></td>
+                <td style="border-top: 0;"></td>
+                <td style="border-top: 0;"></td>
+                <td style="font-size: 15px;border-top: 0; text-align:left;padding-top: 0;padding-bottom: 0;border-right: 0;"><b>Php</span></b></td>
+                <td style="font-size: 15px;border-top: 0; text-align:right;padding-top: 0;padding-bottom: 0;border-left: 0;" colspan="2"><b><span>{{ total_amount|floatformat:2|intcomma }}</span></b></td>
+              </tr>
+
+              <tr style="font-size: 15px;">
+                <td colspan="6" style="border-bottom: 0;padding: 1px;">A. <b>Certified:</b> Charges to appropriation/alloment are <br> necessary, lawful and under my direct supervision;and supporting documents valid, proper and legal
+                  <br><br><br>
+
+                Signature :  <br><br>
+                </td>
+                
+                <td colspan="6" style="border-bottom: 0;padding: 1px;">B. <b>Certified:</b> Alloment available and obligated for the purpose/adjustment 
+                   necessary as indicated above<br><br><br><br>
+
+                Signature : <br><br> 
+               
+                  </td>
+              </tr>
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
+                  Printed Name 
+                </td>
+                <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
+                  <center><b>{{ details.chief|upper }} </b></center>
+
+                
+                </td>
+
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">Printed Name  
+                  
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
+                  <center><b>RYAN V. PIAMONTE</b></center>
+                </td>
+
+              </tr>
+
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
+                  Position :
+                </td>
+                <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
+                  <center>{{ details.c_designation}}</center>
+                </td>
+
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
+                  Position :
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
+                  <center>Administrative Officer V</center>
+                </td>
+
+              </tr>
+
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;">
+                
+                </td>
+                <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
+                  <center>Head, Requesting Office/Authorized Representative</center>
+                </td>
+
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;">
+              
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
+                  <center>BUDGET SECTION</center>
+                </td>
+
+              </tr>
+
+
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;">
+                  Date
+                </td>
+                <td style="border-top: 0;border-left: 0;" colspan="5">
+                  : _______________________________________
+                </td>
+
+                <td style="border-top: 0;border-right: 0;">
+                  Date
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;" colspan="4">
+                  : ________________________________
+                </td>
+
+              </tr>
+              <tr style="font-size: 15px;">
+                <td style="font-size: 13px; padding:0">
+                  <b>C.</b>
+                </td>
+                <td colspan="10" style="font-size: 13px; padding:0"><b><center>STATUS OF OBLIGATION</center></b></td>
+
+
+
+              </tr>
+              <tr>
+                <td colspan="5" style="font-size: 13px;text-align: center;padding:0" ><b>Reference</b></td>
+                <td colspan="5" style="font-size: 13px;text-align: center;padding:0"><b>Amount</b></td>
+              </tr>
+            
+              <tr>
+                <td width="140" height="30" style="font-size: 13px; text-align:center;" rowspan="3">
+                  Date
+                </td>
+                <td width="150" colspan="2" style="font-size: 13px; padding:25px" rowspan="3">
+                  Particulars
+                </td>
+
+                <td width="150" colspan="2" style="font-size: 13px;" rowspan="3">
+                  ORS/JEV/Check/<br>ADA/TRA No.
+                </td>
+                <td width="150"  style="font-size: 13px; text-align:center;" rowspan="2">
+                  Obligation
+                </td>
+                <td width="150"  style="font-size: 13px; text-align:center;" rowspan="2">
+                  Payable
+                </td>
+
+                <td width="150"  style="font-size: 13px; text-align:center;" rowspan="2">
+                  Payment
+                </td>
+                <td width="150"  style="font-size: 13px; text-align:center;" colspan="3" class="lastRow">
+                  <center>Balance</center>
+                </td>
+               
+              </tr>
+              <tr>
+                <td  width="60" style="font-size: 13px; text-align:center;">Not Yet Due
+                </td>
+                <td style="font-size: 13px; text-align:center;">Due and Demandable</td>
+              </tr>
+              <tr>
+                <td style="font-size: 13px; text-align:center; padding:0">(a)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(b)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(c)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(a-b)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(b-c)</td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+             
+            </tbody>
+          </table>
+      
+        </div><br>
+
+        <div class="container-body3">
+          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ dv_number}} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
+          <table style="font-family: Calibri, sans-serif;" >
+            <thead></thead>
+            <tbody>
+              <tr >
+                <td><b>No.</b></td>
+                <td><b>Account Number</b></td>
+                <td><b>ID NUMBER</b></td>
+                <td><b><center>NAME</center></b></td>
+                <td><b>AMOUNT</b></td>
+                <td><b>CHARGE</b></td>
+                <td><b><center>PURPOSE</center></b></td>
+              
+              </tr>              
+              {% for emp in emp_list_lname %}
+              <tr>
+                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
+                <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
+                <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>
+                <td style="padding: 4;" class="align-text-right">{{ emp.final_amount|floatformat:2|intcomma }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.charges }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.purpose }}</td>
+              </tr>
+              {% endfor %}
+              <tr >
+                <td style="padding: 0;"></td>
+                <td style="padding: 2;"><b>TOTAL</b></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 4;" class="align-text-right"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"><center><b>{{ total_count }}</b></center></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table  style="border: 0; font-family: Calibri, sans-serif;" class="myClass" cellspacing="0" cellpadding="0" width="100%">
+            <tbody>
+              <tr>
+                <td>
+                  <table style="border: 0;">
+                    <tbody>
+                      <tr>
+                        <td style="width: 0px;border:0;"></td>
+                        <td style="width: 30px;border:0;"></td>
+                        <td style="width: 100px;border:0;"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
+      
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+      
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+                        <td class="no-border" colspan="2" >
+                          <!-- <center><b><u>Janice Lamorin</u></b></center> -->
+                          <center><b><u><span contenteditable="true" id="editableName">{{ user }}</span></u></b></center>
+                        </td>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+                        <td class="no-border" colspan="2">
+                            <center><span contenteditable="true" id="editablePosition">{{ position }}</span></center>
+                        </td>
+                      </tr>
+      
+      
+                    </tbody>
+                  </table>
+                </td>
+                <td>
+                  <table style="border: 0;">
+                    <tbody>
+                      <tr>
+                        <td style="width: 140px;border:0;"></td>
+                        <td style="width:80px;border:0;"></td>
+                        <td style="width:72px;border:0;"></td>
+                        <td style="border:0;"></td>
+      
+                      </tr>
+                      <tr>
+                        <td style="font-size: 15px;background-color:rgb(158, 198, 255); padding: 0;" class="no-border coloredrow"><b>CHARGE</b></td>
+                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border coloredrow"><b>Sum of AMOUNT</b></td>
+                      </tr>
+      
+                      {% for emp in charges_list %}
+                      <tr>
+                        <td style="padding: 0;" class="no-border"> {{ emp.charges|upper }}</td>
+                        <td style="padding: 0; text-align: right;" class="no-border" colspan="2">
+                          {{ emp.final_amount|floatformat:2|intcomma }} 
+                        </td>
+      
+                      </tr>
+                      {% endfor %}
+                      
+                      
+      
+                      <tr>
+                        <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border coloredrow"><b>GRAND Total</b></td>
+                        <td style="padding: 0;background-color:rgb(158, 198, 255); text-align: right;"  class="no-border coloredrow" colspan="2"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+           
+          <div class="footer">
+            Cash Unit's Copy
+          </div>
+        </div>
+        <br>
+
+        
+        <div class="container-body4">
+          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ dv_number }} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
+          <table style="font-family: Calibri, sans-serif;" >
+            <thead></thead>
+            <tbody>
+              <tr >
+                <td><b>No.</b></td>
+                <td><b>Account Number</b></td>
+                <td><b>ID NUMBER</b></td>
+                <td><b><center>NAME</center></b></td>
+                <td><b>AMOUNT</b></td>
+                <td><b>CHARGE</b></td>
+                <td><b><center>PURPOSE</center></b></td>
+              
+              </tr>              
+              {% for emp in emp_list_lname %}
+              <tr>
+                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
+                <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
+                <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>
+                <td style="padding: 4;" class="align-text-right">{{ emp.final_amount|floatformat:2|intcomma }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.charges }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.purpose }}</td>
+              </tr>
+              {% endfor %}
+              <tr >
+                <td style="padding: 0;"></td>
+                <td style="padding: 2;"><b>TOTAL</b></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 4;" class="align-text-right"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
+                <td style="padding: 0;"></td>
+                <td style="padding: 0;"><center><b>{{ total_count }}</b></center></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <table  style="border: 0; font-family: Calibri, sans-serif;" class="myClass" cellspacing="0" cellpadding="0" width="100%">
+            <tbody>
+              <tr>
+                <td>
+                  <table style="border: 0;">
+                    <tbody>
+                      <tr>
+                        <td style="width: 0px;border:0;"></td>
+                        <td style="width: 30px;border:0;"></td>
+                        <td style="width: 100px;border:0;"></td>
+                      </tr>
+                      <tr>
+                        <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
+      
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+      
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+                        <td class="no-border" colspan="2" >
+                          <!-- <center><b><u>Janice Lamorin</u></b></center> -->
+                          <center><b><u><span contenteditable="true" id="editableName">{{ user }}</span></u></b></center>
+                        </td>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="no-border"></td>
+                        <td class="no-border" colspan="2">
+                            <center><span contenteditable="true" id="editablePosition">{{ position }}</span></center>
+                        </td>
+                      </tr>
+      
+      
+                    </tbody>
+                  </table>
+                </td>
+                <td>
+                  <table style="border: 0;">
+                    <tbody>
+                      <tr>
+                        <td style="width: 140px;border:0;"></td>
+                        <td style="width:80px;border:0;"></td>
+                        <td style="width:72px;border:0;"></td>
+                        <td style="border:0;"></td>
+      
+                      </tr>
+                      <tr>
+                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0;" class="no-border coloredrow"><b>CHARGE</b></td>
+                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border coloredrow"><b>Sum of AMOUNT</b></td>
+                      </tr>
+      
+                      {% for emp in charges_list %}
+                      <tr>
+                        <td style="padding: 0;" class="no-border"> {{ emp.charges|upper }}</td>
+                        <td style="padding: 0; text-align: right;" class="no-border" colspan="2">
+                          {{ emp.final_amount|floatformat:2|intcomma }} 
+                        </td>
+      
+                      </tr>
+                      {% endfor %}
+                      
+                      
+      
+                      <tr>
+                        <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border coloredrow"><b>GRAND Total</b></td>
+                        <td style="padding: 0;background-color:rgb(158, 198, 255); text-align: right;"  class="no-border coloredrow" colspan="2"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+           
+          <div class="footer">
+            COA's Copy
+          </div>
+        </div>
+
+        
+    
+      </div>
+
+
+      
+
+        </div>
+      </div>
+
+
+
+</body>   
+<script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
+<script type="text/javascript">
+
+
+
+$(document).ready(function () {
+  $('#loading-screen').hide();
+});
+
+  function printForms(dv_number) {
+      $.ajax({
+        type: 'POST',
+        url: "{% url 'update-status' %}",
+        data:{
+            dv_id: dv_number
+        }
+    }).done(function (data) {
+      window.print();
+    })
+  }
+</script>
+</html>

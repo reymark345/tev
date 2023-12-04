@@ -112,40 +112,164 @@ class DjangoSession(models.Model):
     class Meta:
         managed = False
         db_table = 'django_session'
-        
-        
 
-class TevList(models.Model):
-    employee_name = models.CharField(max_length=128,blank=True, null=True)
-    original_amount = models.FloatField(null=True, blank=True, default=0)
-    final_amount = models.FloatField(null=True, blank=True, default=0)
-    status = models.IntegerField(default=0,blank=True, null=True)
-    incoming_remarks = models.CharField(max_length=255, blank=True, null=True)
-    correctness_remarks = models.CharField(max_length=255, blank=True, null=True)
-    date_in = models.DateTimeField(default=datetime.now,blank=True, null=True)
-    date_out = models.DateTimeField(blank=True, null=True)
-    deleted_at = models.DateTimeField(blank=True, null=True)
-    user_id = models.BigIntegerField(blank=True, null=True)
+class Status(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'status'
+        
+class TevIncoming(models.Model):
+    code = models.CharField(max_length=128, blank=True, null=True)
+    first_name = models.CharField(max_length=128, blank=True, null=True)
+    middle_name = models.CharField(max_length=128, blank=True, null=True)
+    last_name = models.CharField(max_length=128, blank=True, null=True)
+    id_no = models.CharField(max_length=128, blank=True, null=True)
+    account_no = models.CharField(max_length=128, blank=True, null=True)
+    date_travel = models.CharField(max_length=512, blank=True, null=True)
+    original_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True, default=0)
+    final_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
+    incoming_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    incoming_out = models.DateTimeField(blank=True, null=True)
+    slashed_out = models.DateTimeField(blank=True, null=True)
+    remarks = models.TextField(blank=True, null=True)
+    status = models.ForeignKey(Status, models.DO_NOTHING,default=1)
+    user_id = models.CharField(max_length=128, blank=True, null=True)
+    is_upload = models.BooleanField(default=False)
     
     class Meta:
         managed = True
-        db_table = 'tev_list'
+        db_table = 'tev_incoming'
         
+class Division(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    acronym = models.CharField(max_length=128, blank=True, null=True)
+    chief = models.CharField(max_length=128, blank=True, null=True)
+    c_designation = models.CharField(max_length=128, blank=True, null=True)
+    approval = models.CharField(max_length=128, blank=True, null=True)
+    ap_designation = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True, default=0)
+
+    class Meta:
+        managed = True
+        db_table = 'division'
         
+class TevOutgoing(models.Model):
+    dv_no = models.CharField(max_length=128, blank=True, null=True)
+    cluster = models.CharField(max_length=128, blank=True, null=True)
+    division = models.ForeignKey(Division, models.DO_NOTHING)
+    box_date_out = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    box_b_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    box_b_out = models.DateTimeField(blank=True, null=True)
+    box_c_out = models.DateTimeField(blank=True, null=True)
+    ard_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    ard_out = models.DateTimeField(blank=True, null=True)
+    status = models.ForeignKey(Status, models.DO_NOTHING,default=5)
+    user_id = models.CharField(max_length=128, blank=True, null=True)
+    out_by = models.CharField(max_length=128, blank=True, null=True)
+    is_print = models.BooleanField(default=False)
+    
+    class Meta:
+        managed = True
+        db_table = 'tev_outgoing'
+        
+class Charges(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True, default=0)
+
+    class Meta:
+        managed = True
+        db_table = 'charges'
+        
+
+        
+class TevBridge(models.Model):
+    tev_incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)
+    tev_outgoing = models.ForeignKey(TevOutgoing, models.DO_NOTHING)
+    charges = models.ForeignKey(Charges, models.DO_NOTHING)
+    purpose = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'tev_bridge'
+        
+
+        
+class RoleDetails(models.Model):
+    role_name =  models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True, auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'role_details'
+       
 class StaffDetails(models.Model):
-    id = models.BigAutoField(primary_key=True)
+    user = models.OneToOneField(AuthUser, on_delete=models.CASCADE)
+    role = models.ForeignKey(RoleDetails, models.DO_NOTHING)
+    id_number = models.CharField(max_length=128, blank=True, null=True)
     division = models.CharField(max_length=128, blank=True, null=True)
     section = models.CharField(max_length=128, blank=True, null=True)
     position = models.CharField(max_length=128, blank=True, null=True)
     sex = models.CharField(max_length=128, blank=True, null=True)
     address = models.CharField(max_length=128, blank=True, null=True)
-    created_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
-    user_id = models.BigIntegerField(unique=True)
 
     class Meta:
-        managed = False
+        managed = True
         db_table = 'staff_details'
+        
+class SystemConfiguration(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    transaction_code = models.CharField(max_length=128, blank=True, null=True)
+    year = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True, auto_now=True)
+
+    class Meta:
+        managed = True
+        db_table = 'system_configuration'
+        
+class Cluster(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'cluster'
+
+
+
+class RemarksLib(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'remarks_lib'
+
+class Remarks_r(models.Model):
+    remarks_lib = models.ForeignKey(RemarksLib, models.DO_NOTHING)
+    incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'remarks_r'
+        
+        
+
         
         
 

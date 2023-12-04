@@ -1,0 +1,1181 @@
+{% extends 'index.html' %} {% block content %} {% load staticfiles %}
+
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Item /</span> List</h4>
+
+        <!-- DataTable with Buttons -->
+        <div class="card">
+            <div class="card-datatable table-responsive pt-0">
+                <table id="tbl-items" class="table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="check-all"></th>
+                            <th>Transaction Code</th>
+                            <th>Employee Name</th>
+                            <th>Date Travel</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Incoming In</th>
+                            <th>Charges</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="advance-filter" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center mb-4">
+            <h3 class="mb-2">Advanced Filter </h3>
+            <p class="text-muted">Filter data by filling the details below</p>
+            </div>
+            <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
+                <div class="col-12 col-md-12">
+                    <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                        <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
+                            <option></option>
+                        </select>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditUserFirstName">ID Number</label>
+                    <input
+                    type="text"
+                    id="f-id-number"
+                    name="FIdNumber"
+                    class="form-control"
+                    placeholder="16-0000"
+                    />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditUserLastName">Transaction Code</label>
+                    <input
+                    type="text"
+                    id="f-transaction-code"
+                    name="FTransactionCode"
+                    class="form-control"
+                    placeholder="23-00-00000"
+                    />
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditTaxID">Date Travel</label>
+                    <input type="text" class="form-control" name="FDateTravel" placeholder="DD-MM-YYYY" id="f-dateField" autocomplete="off"/>
+                </div>
+    
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" >Incoming In</label>
+                    <input
+                    type="date"
+                    id="f-incoming-in"
+                    name="FIncomingIn"
+                    class="form-control"
+                    />
+                </div>
+    
+                <!-- <div class="col-12 col-md-6">
+                    <label class="form-label" >Slashed out</label>
+                    <input
+                    type="date"
+                    id="f-slashed-out"
+                    name="FSLashedOut"
+                    class="form-control"
+                    />
+                </div> -->
+    
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Final Amount</label>
+                    <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input
+                        type="number"
+                        id="f-final-amount"
+                        name="FFinalAmount"
+                        class="form-control phone-number-mask"
+                        placeholder="0.00"
+                    />
+                    </div>
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalAccountNumber">Account number</label>
+                    <input
+                    type="text"
+                    id="f-account-number"
+                    name="FAccountNumber"
+                    class="form-control"
+                    placeholder="23-00-00000"
+                    />
+                </div>
+
+                    <input
+                    type="hidden"
+                    id="f-first-name"
+                    name="FFirstName"
+                    class="form-control"
+                    placeholder="Firstname"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-middle-name"
+                    name="FMiddleName"
+                    class="form-control"
+                    placeholder="Middle"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-last-name"
+                    name="FLastName"
+                    class="form-control"
+                    placeholder="Lastname"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-adv-filter"
+                    name="FAdvancedFilter"
+                    class="form-control"
+                    placeholder="AdvFilter"
+                    />
+                <div class="col-12 text-center">
+                    <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
+                    <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
+                    <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
+                
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+<!--/ Edit User Modal -->
+    
+    
+
+
+
+<!-- Add New Credit Card Modal -->
+<div class="modal fade" id="saveModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered1 modal-simple modal-add-new-cc">
+    <div class="modal-content p-3 p-md-5">
+    <div class="modal-body">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="text-center mb-4">
+        <h3 class="mb-2">Assign Details</h3>
+        <p class="text-muted">Update data to complete payroll detail</p>
+        </div>
+        <form id="assign-form" class="row g-3" onsubmit="return false">
+        <div class="col-12">
+            <label class="form-label w-100" for="modalAddCard">DV Number</label>
+            <div class="input-group input-group-merge">
+            <input
+                id="dvnumber"
+                name="DvNumber"
+                class="form-control"
+                type="text"
+                placeholder="23-07-0000"
+               
+            />
+            <span class="input-group-text cursor-pointer p-1" id="modalAddCard2"
+                ><span class="card-type"></span
+            ></span>
+            </div>
+        </div>
+
+        <div class="col-sm-12">
+            <label class="form-label" for="cluster-name">Cluster</label>
+            <select id="cluster" name="Cluster" class="form-select cluster" data-allow-clear="true">
+                <option></option>
+                {% for row in cluster %}
+                <option value="{{ row.id }}">{{ row.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-sm-12">
+            <label class="form-label" for="division-name">Division</label>
+            <select id="division" name="Division" class="form-select division" data-allow-clear="true">
+                <option></option>
+                {% for row in division %}
+                <option value="{{ row.id }}">{{ row.name }} : {{ row.chief }}</option>
+                {% endfor %}
+            </select>
+        </div>
+       
+
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+            <button
+            type="reset"
+            class="btn btn-label-secondary btn-reset"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            >
+            Cancel
+            </button>
+        </div>
+        </form>
+    </div>
+    </div>
+</div>
+</div>
+<!--/ Add New Credit Card Modal -->
+
+      
+<!-- Modal to add new record -->
+<div class="offcanvas offcanvas-end" id="add-new-record">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="exampleModalLabel"><p class="title-name">Add Record</p></h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body flex-grow-1">
+        <form class="add-new-record pt-0 row g-2" id="item-form">
+            <input type="hidden" id="item-id" name="ItemID" />
+            <div class="col-sm-12">
+                <label class="form-label" for="employee-name">Employee Name</label>
+                <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
+                    <option></option>
+                    <option value="Reymark N. Valdehueza">Reymark N. Valdehueza</option>
+                    <option value="Marwen A. Valeroso">Marwen A. Valeroso</option>
+                    <option value="Hinata Shoto">Hinata Shoto</option>
+                    <option value="Jason Go">Jason Go</option>
+                   
+                </select>
+
+
+            </div>
+
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-label" for="original-amount">Amount</label>
+                    <input id="original-amount" name="OriginalAmount" class="form-control amount"type="number"placeholder="0.00"/>
+                </div>
+            </div>
+
+
+            <div class="col-sm-12">
+                <div class="form-group">
+                    <label class="form-label" for="remarks">Remarks</label>
+                    <div class="input-group input-group-merge">
+                        <textarea class="form-control dt-sales-remarks" placeholder="Enter remarks (optional)" rows="6" id="remarks" name="Remarks"></textarea>
+                        <span class="input-group-text">
+                          <i class="ti ti-microphone cursor-pointer text-to-speech-toggle"></i>
+                        </span>
+                       
+                      </div>
+                </div>
+            </div>
+            
+            <div class="col-sm-12 mt-4">
+                <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
+                <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %} {% block footer_scripts %}
+<script>
+    let clicked_id = 0;
+    let status_val =0;
+    let employeeList = [];
+    $(document).ready(function () {
+        let selected_tev = [];
+        var fdateField = $('#f-dateField').flatpickr({
+            mode: 'multiple',
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+        });
+        const table = $('#tbl-items')
+        const ItemFormValidation = document.getElementById('item-form'),
+            Charges = jQuery(document.querySelector('[name="Charges"]')),
+            EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
+            OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
+            Remarks = jQuery(document.querySelector('[name="Remarks"]')),
+            offCanvasElement = document.querySelector('#add-new-record'),
+            FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
+            FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
+            FIdNumber= jQuery(document.querySelector('[name="FIdNumber"]')),
+            FTransactionCode= jQuery(document.querySelector('[name="FTransactionCode"]')),
+            FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
+            FIncomingIn= jQuery(document.querySelector('[name="FIncomingIn"]')),
+            FFinalAmount= jQuery(document.querySelector('[name="FFinalAmount"]')),
+            search_advance_filter = $('#search-advance-filter'),
+            reset_advance_filter = $('#reset-advance-filter'),
+            clear_advance_filter = $('#clear-advance-filter');
+
+        const ItemFormAssignValidation = document.getElementById('assign-form'),
+            DvNumber = jQuery(document.querySelector('[name="DvNumber"]')),
+            Cluster = jQuery(document.querySelector('[name="Cluster"]')),
+            Division = jQuery(document.querySelector('[name="Division"]'));
+            
+
+        const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
+        const toast_options = (toastr.options = {
+            maxOpened: 1,
+            autoDismiss: true,
+            closeButton: true,
+            newestOnTop: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            rtl: isRtl,
+      });
+        let ItemID = $('#item-id')
+
+        let dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            // ajax: {
+            //     url: "{% url 'payroll-load' %}",
+            //     type: "GET",
+            //     data: {
+            //         identifier: 1
+            //     }
+            // },
+
+            ajax: {
+                url: "{% url 'payroll-load' %}",
+                data: function (d) {
+                    d.FAdvancedFilter = FAdvancedFilter.val()
+                    d.FIdNumber = FIdNumber.val()
+                    d.FTransactionCode = FTransactionCode.val()
+                    d.FDateTravel = FDateTravel.val()
+                    d.FIncomingIn = FIncomingIn.val()
+                    d.FFinalAmount = FFinalAmount.val()
+                    d.EmployeeList = employeeList
+                },
+            },
+            columns: [
+                {
+                    data: 'id', status: 'status',
+                    orderable: false, 
+                    render: function (data, type, row) {
+                        var status = row.status; // Access the 'status' value from the 'row' object
+                        var checkboxId = row.id;
+
+                        if (status == 3) {
+                            return '<input type="checkbox" disabled="disabled">';
+                        } else {
+                            // Render a checkbox for each row with the item ID as its value
+                            return '<input type="checkbox" id="checkbox_data" class="checkbox-items checkbox_data" name = "checkboxtype" value="' + data + '">';
+                            
+                        }
+
+                    }
+                },
+                { data: 'code' },
+                { data: 'name' },
+                { data: 'date_travel' },
+                { data: 'final_amount'},
+                { data: 'status' },
+                { data: 'incoming_in' },
+                { data: null, orderable: false }, // Placeholder for charges column
+                { data: null, orderable: false }
+             
+            ],
+            columnDefs: [
+                {
+                    targets: 1,
+                    render: function(data) {
+                        return '<span class="badge bg-label-primary">'+data+'</span>'
+                    },
+                },
+                {
+                    targets: 3,
+                    
+                    render: function(data) {
+                        console.log(data);
+                        let dates = data.split(',');
+
+                        let formattedDates = dates.map(date => {
+                            let [day, month, year] = date.split('-');
+                            let months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                            month = months[parseInt(month, 10) - 1];
+                            return `${month} ${day} ${year}`;
+                        });
+                        
+                        let result = formattedDates.join(', ');
+                        // return '<span class="badge bg-label-primary" >'+result+'</span>'
+                        
+                        
+                        // var splitValues = data.split(',');  // Split data by comma
+                        // var result = '';
+                        
+                        // splitValues.forEach(function(value, index) {
+                        //     if (index !== 0) {
+                        //         result += '  '; // Add a space before adding subsequent values
+                        //     }
+                        //     var dateParts = value.split('-');
+                        //     var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                        //     var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
+                            
+                        //     result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
+                        // });
+                        
+                        return result;
+                    },
+                },
+                {
+                    targets: 4,
+                    render: function(data) {
+                        var floatValue = parseFloat(data);
+                        if (floatValue !== 0) {
+                            var convertedValue = floatValue.toFixed(2);
+                            return convertedValue;
+                        } else {
+                            return "";
+                        }
+                    },
+                },
+                {
+                  targets: 5,
+                  render: function (data) {
+                      if (data==1){
+                        return '<span class="badge bg-label-warning">Pending</span>'
+                      }
+                      else if(data==2){
+                        return '<span class="badge bg-label-warning">For checking</span>'
+                      }
+                      else if(data==3){
+                        return '<span class="badge bg-label-danger">Returned</span>'
+                      }
+                      else{
+                        return '<span class="badge bg-label-primary">For payroll</span>'
+                      }
+
+                  },
+                },
+                {
+                    targets: -3,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+
+                {
+                    targets: -2,
+                    render: function(data, type, row) {
+                        if (type === 'display') {
+                            return '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
+                                '<option></option>' +
+                                '{% for row in charges %}'+
+                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                '{% endfor %}'+
+                                '</select>'+
+                                '<span id="charges_error" style="color: red;"></span>';
+                        }
+                        return data;
+                    }
+                },
+                {
+                    targets: -1,
+                    render: function(data, type, row) {
+                        if (type === 'display') {
+                            return '<input type="text" class="form-control purpose" id="basic-default-name" name="Purpose" style="width:350px;" disabled  />'+
+                            '<span id="purpose_error" style="color: red;"></span>';;
+                        }
+                        return data;
+                    }
+                },
+            ],
+            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            buttons: [
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                    action: function () {
+                        employeeList = [];
+                        const $selectElement = $('#f-employee-name');
+                        $selectElement.empty();
+                        fetchEmployee($selectElement);
+                        FEmployeeName.val('').trigger('change');
+
+                        setTimeout(function() {
+                            if (FEmployeeName.length) {
+                                FEmployeeName.wrap('<div class="position-relative"></div>')
+                                FEmployeeName.select2({
+                                    placeholder: 'Choose employee',
+                                    dropdownParent: FEmployeeName.parent(),
+                                    allowClear: true,
+                                })
+                            }
+                        }, 300);
+                        
+
+
+                        
+                        $("#advance-filter").modal("show");
+                    }
+                
+                },
+                {
+                    className: 'btn btn-primary',
+                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Save</span>',
+                    action: function () {
+                        // Get the IDs of checked items
+                        var selectedItems = [];
+                        DvNumber.val("");
+                        Cluster.val("").trigger('change');
+                        Division.val("").trigger('change');
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+                        if(selectedItems.length ===0){
+                            toastr.error('Select item first', 'Invalid', toast_options);
+                        }
+                        else{
+                            savepayroll(selectedItems);
+                        }
+                    }
+                },
+            ],
+            drawCallback: function (settings) {
+                $('.item-edit').on('click', function () {
+                    let id = $(this).data('id')
+                    $('.title-name').text('Update TEV Record')
+                    $.ajax({
+                        type: 'GET',
+                        url: "{% url 'item-edit' %}?id=" + id,
+                        dataType: 'json',
+                    }).done(function (data) {
+                        if (data.length > 0) {
+                            let fields = data[0].fields
+                            let pk = data[0].pk
+                            let employee_name = $('#employee-name')
+                            let floatvalue = parseFloat(fields.original_amount);
+                            let convertedAmount = floatvalue.toFixed(2);
+                            status_val = fields.status;
+
+                            if(status_val ===3){
+                                EmployeeName.val(fields.name).trigger('change').prop("disabled", true);
+                                OriginalAmount.val(convertedAmount);
+                                Remarks.val(fields.remarks);
+                                ItemID.val(pk);
+                                offCanvasEl.show()
+                            }
+                            else{
+                                EmployeeName.val(fields.name).trigger('change').prop("disabled", false);
+                                OriginalAmount.val(convertedAmount);
+                                Remarks.val(fields.remarks);
+                                ItemID.val(pk);
+                                offCanvasEl.show()
+                            }
+                        }
+                    })
+                }),
+                $('#tbl-items tbody input[type="checkbox"]').change(function () {
+                });
+
+                $('#check-all').change(function () {
+                    var isChecked = $(this).is(':checked');
+                    $('.checkbox_data').prop('checked', isChecked).trigger('change');
+                });
+
+                $('.item-details').on('click', function () {
+                    clicked_id = $(this).data('id');
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'tev-details' %}",
+                        data:{
+                            tev_id: clicked_id
+                        }
+                    }).done(function (data) {
+                        let value = data.data.remarks;
+                        let final_amount = data.data.final_amount;
+                        let floatvalue = parseFloat(final_amount);
+                        let convertedAmount = floatvalue.toFixed(2);
+                        if (convertedAmount === "0.00") {convertedAmount =""} 
+                        $("#final_amount").val(convertedAmount);
+                        $("#correctness_remarks").val(value);
+                    })
+                });
+
+            },
+        })
+        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+
+        const newRecord = document.querySelector('.create-new')
+
+        setTimeout(() => {
+            if (newRecord) {
+                newRecord.addEventListener('click', function () {
+                    ItemID.val(0)
+                    $('.title-name').text('Add Tev Record')
+                    EmployeeName.val('').trigger('change')
+                    $('.form-control').val('')
+         
+                    offCanvasEl.show()
+                })
+            }
+        }, 200)
+
+        //form assign record
+            const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
+                fields: {
+                    DvNumber: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Please Select Dv number',
+                            },
+                        },
+                    },
+                    Cluster: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Please Select Cluster',
+                            },
+                        },
+                    },
+                    Division: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Please Select Division',
+                            },
+                        },
+                    },
+                },
+                plugins: {
+                    trigger: new FormValidation.plugins.Trigger(),
+                    bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                    submitButton: new FormValidation.plugins.SubmitButton(),
+                    autoFocus: new FormValidation.plugins.AutoFocus(),
+                },
+                init: (instance) => {
+                    instance.on('plugins.message.placed', function (e) {
+                        if (e.element.parentElement.classList.contains('input-group')) {
+                            e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                        }
+                    })
+                },
+            }).on('core.form.valid', function () {
+
+                $('#saveModal').modal('hide');
+                Swal.fire({
+                    title: '<strong>DV number <u>'+DvNumber.val()+'</u> <br> Cluster : 0'+Cluster.val()+' </strong>',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, save it!',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-3',
+                        cancelButton: 'btn btn-label-secondary',
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (result.value) {
+                        var form_data = $('#assign-form').serialize();
+
+                        var requestData = {
+                            form_data: form_data,
+                            selected_tev: selected_tev
+                        };
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'save-payroll' %}",
+                            data:{
+                                selected_item : JSON.stringify(selected_tev),form_data
+                              }
+                        }).done(function (data) {
+                            if (data.data == 'success') {
+    
+                                let code = data.g_code;
+                                if (code){
+                                    Swal.fire({
+                                        title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                        icon: 'info',
+                                        html:
+                                            'Successfully <b>Save!</b>',
+                                        showCloseButton: true,
+                                        showCancelButton: false,
+                                        focusConfirm: false,
+                                        confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!',
+                                        customClass: {
+                                            confirmButton: 'btn btn-primary me-3'
+                                        },
+                                        buttonsStyling: false
+                                        });
+                                }
+                                else{
+                                    offCanvasEl.hide()
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Update Successfully!',
+                                        html:
+                                        'Successfully <b>Save!</b>',
+                                        customClass: {
+                                            confirmButton: 'btn btn-success',
+                                        },
+                                    })
+                                }
+                                EmployeeName.val("").trigger('change')
+                                OriginalAmount.val("")
+                                Remarks.val("")
+                                dataTable.ajax.reload();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error saving!',
+                                    text: data.message,
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                            }
+                        })
+                    }
+                })
+            });
+
+        const chargesValidation = {
+            validators: {
+                notEmpty: {
+                    message: 'Required',
+                },
+            },
+        }
+    
+
+        // Form validation for Add new record
+        const fv = FormValidation.formValidation(ItemFormValidation, {
+            fields: {
+                EmployeeName: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Select Employee',
+                        },
+                    },
+                },
+                OriginalAmount: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Select Amount',
+                        },
+                    },
+                },
+            },
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                submitButton: new FormValidation.plugins.SubmitButton(),
+                autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: (instance) => {
+                instance.on('plugins.message.placed', function (e) {
+                    if (e.element.parentElement.classList.contains('input-group')) {
+                        e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                    }
+                })
+            },
+        }).on('core.form.valid', function () {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, save it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    var form_data = $('#item-form').serialize()
+                    let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
+                    var form_data = $('#item-form').serialize()
+                    $.ajax({
+                        type: 'POST',
+                        url: post_url,
+                        data: form_data,
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+
+                            let code = data.g_code;
+                            if (code){
+                                Swal.fire({
+                                    title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                    icon: 'info',
+                                    html:
+                                      'Successfully <b>Save!</b>',
+                                    showCloseButton: true,
+                                    showCancelButton: false,
+                                    focusConfirm: false,
+                                    confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                    confirmButtonAriaLabel: 'Thumbs up, great!',
+                                    customClass: {
+                                      confirmButton: 'btn btn-primary me-3'
+                                    },
+                                    buttonsStyling: false
+                                  });
+                            }
+                            else{
+                                offCanvasEl.hide()
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Update Successfully!',
+                                    html:
+                                    'Successfully <b>Save!</b>',
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                            }
+                            EmployeeName.val("").trigger('change')
+                            OriginalAmount.val("")
+                            Remarks.val("")
+                            dataTable.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            })
+        });
+
+        function renderCharges(data, type, row) {
+            if (type === 'display') {
+                return '<select class="form-select charges" data-allow-clear="true" disabled>' +
+                    '<option></option>' +
+                    '{% for row in charges %}' +
+                        '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                    '{% endfor %}' +
+                '</select>';
+            }
+            return data;
+        }
+        
+        function renderPurpose(data, type, row) {
+            if (type === 'display') {
+                return '<input type="text" class="form-control purpose" name="Purpose" disabled />';
+            }
+            return data;
+        }
+
+        function savepayroll(selected_items){
+            console.log(selected_tev);
+            var emptyDataExists = false;
+            $('#tbl-items tbody select.charges').each(function() {
+                var selectedValue = $(this).val();
+                var errorSpan = $(this).closest('tr').find('#charges_error');
+                if (!$(this).is(':disabled')) {
+                    if (!selectedValue) {
+                        errorSpan.text("Required");
+                        emptyDataExists = true;
+                    } else {
+                        errorSpan.text("");
+                    }
+                } else {
+                    errorSpan.text("");
+                }
+            });
+
+            $('#tbl-items tbody input.purpose').each(function() {
+                var purposeValue = $(this).val();
+                var purposeErrorSpan = $(this).closest('tr').find('#purpose_error');
+                if (!$(this).is(':disabled')) {
+        
+                    if (!purposeValue) {
+                        purposeErrorSpan.text("Required");
+                        emptyDataExists = true;
+                    } else {
+                        purposeErrorSpan.text("");
+                    }
+                } else {
+                    purposeErrorSpan.text("");
+                }
+            });
+
+            if (!emptyDataExists) {
+                $('#saveModal').modal('show');
+                const currentDate = new Date();
+                const year = currentDate.getFullYear().toString().slice(-2); 
+                const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+                DvNumber.val(`${year}-${month}-`);
+            } else {
+                toastr.error('Please Complete Required Fields', 'Invalid', toast_options);
+            }
+        }
+
+        $(document).on("change", ".purpose", function() {
+            var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
+            var purposeErrorSpan = $(this).closest('tr').find('#purpose_error');
+            var purposeValue = $(this).val();
+            var existingItem = selected_tev.find(function(item) {
+              return item.id === checkboxId;
+            });
+            purposeErrorSpan.text("");
+            if (existingItem) {
+              existingItem.purpose = purposeValue;
+            }
+        });
+          
+
+        $(document).on("change", ".charges", function() {
+            var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
+            var errorSpan = $(this).closest('tr').find('#charges_error');
+            var chargesValue = $(this).val();
+            var existingItem = selected_tev.find(function(item) {
+                return item.id === checkboxId;
+            });
+            errorSpan.text("");
+            if (existingItem) {
+                existingItem.charges = chargesValue;
+                console.log("Updated type for item with ID:", checkboxId, "New type:", chargesValue);
+            } else {
+                console.log("Item not found in the selected_tev array.");
+            }
+        });
+
+        $(document).on('change', '.checkbox_data', function(event) {
+            var clickedCheckbox = $(event.target);
+            var row = clickedCheckbox.closest('tr');
+            var checkboxId = clickedCheckbox.attr('value');
+            var purposeInput = row.find('input[name="Purpose"]');
+            var purposeValue = purposeInput.val().trim();
+            var stck_id = clickedCheckbox.val();
+           
+            let currentDate = new Date();
+            let month = currentDate.getMonth();
+            let monthDate = new Date(currentDate.getFullYear(), month);
+            let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
+            let year = currentDate.getFullYear();
+            let travel = '';
+            let defaultPurposeValue = "TE for " + monthName + " " + year;
+            if (clickedCheckbox.prop('checked')) {
+                var existingItem = selected_tev.find(function(item) {
+                    return item.id === checkboxId;
+                });
+
+                travel = row.find('td:eq(3)').text();
+                console.log(travel);
+                console.log("gegege");
+
+                let dates = travel.split(', ').map(dateString => {
+                    let [month, day, year] = dateString.split(' ');
+                    return { month, year };
+                });
+                
+                // Group months based on years
+                let groupedMonths = {};
+                dates.forEach(date => {
+                    if (!groupedMonths[date.year]) {
+                        groupedMonths[date.year] = [];
+                    }
+                    if (!groupedMonths[date.year].includes(date.month)) {
+                        groupedMonths[date.year].push(date.month);
+                    }
+                });
+                
+                // Format output string
+                let output = Object.entries(groupedMonths).map(([year, months]) => {
+                    return `${months.join(', ')} ${year}`;
+                }).join(' and ');
+                
+                travel = "TE for " + output;
+         
+
+                
+
+                if (!existingItem) {
+                    var array_id = {
+                        id: stck_id,
+                        code: row.find('td:eq(1)').text(),
+                        name: row.find('td:eq(2)').text(),
+                        date_travel: row.find('td:eq(3)').text(),
+                        amount: row.find('td:eq(4)').text(),
+                        status: row.find('td:eq(5)').text(),
+                        charges: row.find('select[name="Charges"]').val(),
+                        purpose: travel,
+                    };
+                    selected_tev.push(array_id);
+                    console.log(array_id);
+
+                } else {
+                    existingItem.purpose = purposeValue;
+
+                }
+              
+                row.find('select[name="Charges"]').prop("disabled", false);
+                purposeInput.prop("disabled", false);
+              
+                if (!purposeValue) {
+                    purposeInput.val(travel);
+                }
+                } else {
+                var index = selected_tev.findIndex(function(item) {
+                    return item.id === checkboxId;
+                });
+                if (index !== -1) {
+                    selected_tev.splice(index, 1);
+                }
+              
+                row.find('select[name="Charges"]').prop("disabled", true).val("");
+                purposeInput.prop("disabled", true).val("");
+            }
+          
+            unique_items = selected_tev.filter(function(item, index, self) {
+                return (
+                    index ===
+                    self.findIndex(function(i) {
+                        return i.id === item.id;
+                    })
+                );
+            });
+        });
+
+        search_advance_filter.on('click', function () {
+            FAdvancedFilter.val("true");
+            $('#f-employee-name').empty();
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            clear_advfilter();
+            toastr.success('Search successfully', 'Success', toast_options);
+        });
+
+        reset_advance_filter.on('click', function () {
+            FAdvancedFilter.val('');
+            $('#f-employee-name').empty();
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Data has been reset', 'Success', toast_options);
+        });
+
+        clear_advance_filter.on('click', function () {
+            clear_advfilter();
+            toastr.success('Clear successfully', 'Success', toast_options);
+        });
+
+        function clear_advfilter(){
+            FIdNumber.val('');
+            FTransactionCode.val('');
+            FFinalAmount.val('');
+            FIncomingIn.val('');
+            fdateField.clear();
+            FEmployeeName.val('').trigger('change');
+        }
+
+        function fetchEmployee($selectElement) {
+            const employees = JSON.parse(localStorage.getItem('employees'));
+            if (employees) {
+                $.each(employees, function (index, employee) {
+                    const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                    const $option = $('<option>', {
+                        value: employee.idNumber,
+                        text: optionText,
+                        id: employee.idNumber
+                    });
+                    $selectElement.append($option);
+                });
+            } else {
+                console.log("No employee data found in local storage.");
+            }
+        }
+
+        $('#f-employee-name').change(function() {
+             var selectedOptions = $(this).find('option:selected');
+             selectedOptions.each(function() {
+                 var optionValue = $(this).val();
+                 if (employeeList.indexOf(optionValue) === -1) {
+                    employeeList.push(optionValue);
+                 }
+             });
+             $(this).find('option:not(:selected)').each(function() {
+                 var optionValue = $(this).val();
+                 var index = employeeList.indexOf(optionValue);
+                 if (index !== -1) {
+                    employeeList.splice(index, 1);
+                 }
+             });
+             console.log("Newly added values: " + employeeList);
+        
+        });
+        
+        
+        $('#returned').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 3;
+                if (correctness_remarks === "") {
+                $("#amount_error").text("");
+                $("#remarks_error").text("Please enter Remarks for returned.");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+                } else {
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+                }
+            
+        });
+
+        function tev_details(amount,remarks,status,emp_id){
+            $.ajax({
+                type: "POST",
+                url: "{% url 'add-tev-details' %}",
+                data:{
+                    final_amount: amount,
+                    remarks: remarks,
+                    status : status,
+                    transaction_id : emp_id
+                }
+                }).done(function(data){
+                if (data.data == 'success') {
+                    $('#tevDetails').modal('hide');
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    offCanvasEl.hide()
+                    dataTable.ajax.reload()
+                } else {
+                    toastr.danger('Data not saved', 'Danger', toast_options);
+                }
+            });
+            }
+
+
+
+        if (Cluster.length) {
+            Cluster.wrap('<div class="position-relative"></div>')
+            Cluster.select2({
+                placeholder: 'Choose Cluster',
+                dropdownParent: Cluster.parent(),
+                allowClear: true,
+            })
+        }
+        if (Division.length) {
+            Division.wrap('<div class="position-relative"></div>')
+            Division.select2({
+                placeholder: 'Choose Division',
+                dropdownParent: Division.parent(),
+                allowClear: true,
+            })
+        }
+        
+    })
+</script>
+{% endblock footer_scripts %}
