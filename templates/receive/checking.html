@@ -586,26 +586,50 @@
                         })
                     }
                     clicked_id = $(this).data('id');
+                    var csrf_token = "{{ csrf_token }}";
                     $.ajax({
                         type: 'POST',
-                        url: "{% url 'tev-details' %}",
+                        url: "{% url 'review-details' %}",
+                        headers: {
+                            'X-CSRFToken': csrf_token
+                        },
                         data:{
                             tev_id: clicked_id
                         }
                     }).done(function (data) {
-                        let value = data.data.remarks;
-                        let final_amount = data.data.final_amount;
+                        console.log(data);
+                        console.log("dataaaassv");
+                        let value = data.remarks;
+                        let final_amount = data.final_amount;
+                        let lacking = data.lacking;
+                        let date_remarks = data.date_remarks;
+
+                        console.log(date_remarks);
+                        
               
                         if(final_amount && final_amount !="0E-10"){
-                            final_amount = data.data.final_amount;
+                            final_amount = data.final_amount;
                             console.log("halaa1");
                             console.log(final_amount);
                         }
                         else{
-                            final_amount = data.data.original_amount;
+                            final_amount = data.original_amount;
                             console.log("halaa2");
                             console.log(final_amount);
                         }
+                        lacking = data.lacking.split(',').map(Number);
+                        $('#remarks-list').val([]).trigger('change');
+                        $('#remarks-list option').each(function() {
+                            let optionValue = parseInt($(this).val());
+                            if (lacking.includes(optionValue)) {
+                                $(this).prop('selected', true);
+                            }
+                            
+                        });
+                     
+                        // Trigger change event to reflect the selected options visually
+                        $('#remarks-list').trigger('change');
+
                         let floatvalue = parseFloat(final_amount);
                         let convertedAmount = floatvalue.toFixed(2);
                         if (convertedAmount === "0.00") {convertedAmount =""} 
