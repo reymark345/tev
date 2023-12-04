@@ -43,7 +43,6 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="check-all"></th>
-                            <th>Transaction Code</th>
                             <th>ID number</th>
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
@@ -52,6 +51,7 @@
                             <th>Status</th>
                             <th>Forwarded</th>
                             <th>Reviewed</th>
+                            <th>Duplicate</th>
                             <th>Remarks</th>
                             <th>Created By</th>
                             <th>ID</th>
@@ -118,17 +118,7 @@
                     class="form-control"
                     />
                 </div>
-    
-                <!-- <div class="col-12 col-md-6">
-                    <label class="form-label" >Slashed out</label>
-                    <input
-                    type="date"
-                    id="f-slashed-out"
-                    name="FSLashedOut"
-                    class="form-control"
-                    />
-                </div> -->
-    
+
                 <div class="col-12 col-md-6">
                     <label class="form-label">Original Amount</label>
                     <div class="input-group">
@@ -259,23 +249,41 @@
                 <span id="amount_error" style="color: red;"></span>
             </div>
             <div class="col-12">
-                <label class="form-label" for="modaltevDetails">Remarks</label>
+                <label class="form-label" for="modaltevDetails">Duplicate Date</label>
                 
                 <div class="input-group">
-                <textarea class="form-control" placeholder="Enter remarks (optional if for approval)" rows="5" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
+                <textarea class="form-control" placeholder="Enter remarks (optional if for approval)" rows="1" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
                 </div>
                 <span id="remarks_error" style="color: red;"></span>
             </div>
+
+            <div class="col-12">
+                <label class="form-label" for="modaltevDetails">Remarks</label>
+                    <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
+                        <option></option>
+                        {% for row in remarks_list %}
+                        <option value="{{ row.id }}">{{ row.name }}</option>
+                        {% endfor %}
+                    </select>
+                <span id="amount_error" style="color: red;"></span>
+            </div>
+
+            <div class="col-sm-12">
+                <br>
+                <div id="dynamic-input-container"></div>
+            </div>
+
+
             <div class="col-12">
                 <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
                 <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
                 <button
-                type="reset"
-                class="btn btn-label-secondary"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-                >
-                Cancel
+                    type="reset"
+                    class="btn btn-label-secondary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    >
+                    Cancel
                 </button>
             </div>
             </form>
@@ -319,6 +327,7 @@
             FOriginalAmount = jQuery(document.querySelector('[name="FOriginalAmount"]')),
             FFinalAmount = jQuery(document.querySelector('[name="FFinalAmount"]')),
             FAccountNumber = jQuery(document.querySelector('[name="FAccountNumber"]')),
+            RemarksList= jQuery(document.querySelector('[name="RemarksList"]')),
             search_advance_filter = $('#search-advance-filter'),
             reset_advance_filter = $('#reset-advance-filter'),
             clear_advance_filter = $('#clear-advance-filter');
@@ -372,7 +381,6 @@
 
                     }
                 },
-                { data: 'code' },
                 { data: 'id_no' },
                 { data: 'name' },
                 { data: 'original_amount'},
@@ -382,6 +390,7 @@
                 { data: 'incoming_out' },
                 { data: 'slashed_out' },
                 { data: 'remarks' },
+                { data: 'lacking' },
                 { data: 'user_id' },
                 { data: 'id' },
 
@@ -400,17 +409,17 @@
                 },
 
                 {
-                    targets: 2,
+                    targets: 3,
                     render: function(data) {
-                        if (data){
-                            return '<span class="badge bg-label-primary">' + data + '</span>';
-                        }
-                        else {
-                            return ''
+                        var floatValue = parseFloat(data);
+                        if (floatValue !== 0) {
+                            var convertedValue = floatValue.toFixed(2);
+                            return convertedValue;
+                        } else {
+                            return "";
                         }
                     },
                 },
-
                 {
                     targets: 4,
                     render: function(data) {
@@ -425,18 +434,6 @@
                 },
                 {
                     targets: 5,
-                    render: function(data) {
-                        var floatValue = parseFloat(data);
-                        if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
-                        } else {
-                            return "";
-                        }
-                    },
-                },
-                {
-                    targets: 6,
                     render: function(data) {
                         var splitValues = data.split(',');  // Split data by comma
                         var result = '';
@@ -456,7 +453,7 @@
                     },
                 },
                 {
-                  targets: 7,
+                  targets: 6,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
@@ -477,16 +474,16 @@
                   },
                 },
                 {
-                    targets: -5,
+                    targets: -6,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
                 },
                 {
-                    targets: -3,
+                    targets: -4,
                     render: function (data) {
                         if (data === null || data === undefined || data === "") {
-                            return ''; // Return an empty string if data is null, undefined, or empty
+                            return ''; 
                         } 
                         else {
                             return '<span class="badge bg-label-danger">' + data + '</span>';
@@ -495,9 +492,14 @@
                 },
 
                 {
-                    targets: -4,
+                    targets: -3,
                     render: function (data) {
-                        return (data == null) ? '' : moment(data).format('LLL');
+                        if (data === null || data === undefined || data === "") {
+                            return ''; 
+                        } 
+                        else {
+                            return '<span class="badge bg-label-danger">' + data + '</span>';
+                        }
                     },
                 },
                 
@@ -575,26 +577,59 @@
                 });
 
                 $('.item-details').on('click', function () {
+                    if (RemarksList.length) {
+                                RemarksList.wrap('<div class="position-relative"></div>')
+                                RemarksList.select2({
+                                placeholder: 'Choose remarks',
+                                dropdownParent: RemarksList.parent(),
+                                allowClear: true,
+                        })
+                    }
                     clicked_id = $(this).data('id');
+                    var csrf_token = "{{ csrf_token }}";
                     $.ajax({
                         type: 'POST',
-                        url: "{% url 'tev-details' %}",
+                        url: "{% url 'review-details' %}",
+                        headers: {
+                            'X-CSRFToken': csrf_token
+                        },
                         data:{
                             tev_id: clicked_id
                         }
                     }).done(function (data) {
-                        let value = data.data.remarks;
-                        let final_amount = data.data.final_amount;
+                        console.log(data);
+                        console.log("dataaaassv");
+                        let value = data.remarks;
+                        let final_amount = data.final_amount;
+                        let lacking = data.lacking;
+                        let date_remarks = data.date_remarks;
+
+                        console.log(date_remarks);
+                        
+              
                         if(final_amount && final_amount !="0E-10"){
-                            final_amount = data.data.final_amount;
+                            final_amount = data.final_amount;
                             console.log("halaa1");
                             console.log(final_amount);
                         }
                         else{
-                            final_amount = data.data.original_amount;
+                            final_amount = data.original_amount;
                             console.log("halaa2");
                             console.log(final_amount);
                         }
+                        lacking = data.lacking.split(',').map(Number);
+                        $('#remarks-list').val([]).trigger('change');
+                        $('#remarks-list option').each(function() {
+                            let optionValue = parseInt($(this).val());
+                            if (lacking.includes(optionValue)) {
+                                $(this).prop('selected', true);
+                            }
+                            
+                        });
+                     
+                        // Trigger change event to reflect the selected options visually
+                        $('#remarks-list').trigger('change');
+
                         let floatvalue = parseFloat(final_amount);
                         let convertedAmount = floatvalue.toFixed(2);
                         if (convertedAmount === "0.00") {convertedAmount =""} 
@@ -747,35 +782,51 @@
 
 
           
-          $('#returned').click(function() {
-            let final_amount = $("#final_amount").val().trim();
-            let correctness_remarks = $("#correctness_remarks").val().trim();
-            let status = 3;
-              if (correctness_remarks === "" && final_amount === "") {
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("Please enter Remarks");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-              }
-              else if (final_amount === "" ) {
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-              }
-              else if (correctness_remarks === "" ) {
-                $("#amount_error").text("");
-                $("#remarks_error").text("Please enter Remarks");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-              }
-               else {
-                $("#remarks_error").text("");
-                $(".input-group").removeClass("has-error");
-                tev_details(final_amount,correctness_remarks,status,clicked_id);
-              }
-              
-            });
+        $('#returned').click(function() {
+        let final_amount = $("#final_amount").val().trim();
+        let correctness_remarks = $("#correctness_remarks").val().trim();
+        let status = 3;
+            if (correctness_remarks === "" && final_amount === "") {
+            $("#amount_error").text("Please enter Amount");
+            $("#remarks_error").text("Please enter Remarks");
+            $(".input-group").addClass("has-error");
+            event.preventDefault();
+            }
+            else if (final_amount === "" ) {
+            $("#amount_error").text("Please enter Amount");
+            $("#remarks_error").text("");
+            $(".input-group").addClass("has-error");
+            event.preventDefault();
+            }
+            else if (correctness_remarks === "" ) {
+            $("#amount_error").text("");
+            $("#remarks_error").text("Please enter Remarks");
+            $(".input-group").addClass("has-error");
+            event.preventDefault();
+            }
+            else {
+            $("#remarks_error").text("");
+            $(".input-group").removeClass("has-error");
+            tev_details(final_amount,correctness_remarks,status,clicked_id);
+            }
+            
+        });
+
+        $(".remarks-list").on("change", function() {
+            $("#dynamic-input-container").empty();
+            var selectedValues = $(this).val();
+            // Append input elements based on selected values
+            if (selectedValues) {
+                for (var i = 0; i < selectedValues.length; i++) {
+                    var inputId = "date-remarks-" + selectedValues[i];
+                    var selectedText = $(this).find('option[value="' + selectedValues[i] + '"]').text();
+                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" /><br>';
+                    $("#dynamic-input-container").append(inputElement);
+                }
+            }
+        });
+
+
 
         function tev_details(amount,remarks,status,emp_id){
             $.ajax({

@@ -170,19 +170,6 @@ def preview_box_a(request):
         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
         
         
-        te_code = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
-                'code',
-                'first_name',
-                'last_name',
-                'middle_name',
-                'id_no',
-                'account_no',
-                'final_amount',
-                'tevbridge__purpose',
-                'tevbridge__tev_outgoing__dv_no', 
-                'tevbridge__charges__name'  
-            ).order_by('code')
-        
         te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
                 'code',
                 'first_name',
@@ -196,9 +183,10 @@ def preview_box_a(request):
                 'tevbridge__charges__name'  
             ).order_by('last_name')
     
-        result_count = len(te_code)
+        result_count = len(te_lname)
         
         for item in te_lname:
+            total_final_amount += item['final_amount']
             final_amount = item['final_amount']
             charge_name = item['tevbridge__charges__name']
 
@@ -212,27 +200,7 @@ def preview_box_a(request):
                     "charges": charge_name,
                 }
                 charges_list.append(charges)
-                
-              
-        for item in te_code:
-            total_final_amount += item['final_amount']
-            fullname = item['last_name'] + ', '+ item['first_name']
-            list_lname = {
-                    "code": item['code'],
-                    "name": fullname,
-                    "id_no": item['id_no'],
-                    "account_no": item['account_no'],
-                    "final_amount": item['final_amount'],
-                    "purpose": item['tevbridge__purpose'],
-                    "dv_no": item['tevbridge__tev_outgoing__dv_no'],
-                    "charges": item['tevbridge__charges__name'],
-                }
-            emp_list_code.append(list_lname)
 
-            
-            
-            # emp_list_code.append(list_code)
-            
         for item in te_lname:
             fullname = item['last_name'] + ', '+ item['first_name']
             list_lname = {
@@ -285,7 +253,6 @@ def preview_box_a(request):
             'total_count':result_count,
             'finance':results,
             'details':designation_result,
-            'emp_list_code':emp_list_code,
             'emp_list_lname':emp_list_lname,
             'user' : full_name,
             'position' : position
@@ -605,7 +572,7 @@ def box_load(request):
     elif _search:
         item_data = TevOutgoing.objects.filter().filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        item_data = TevOutgoing.objects.filter().select_related().distinct().order_by(_order_dash + 'id')
+        item_data = TevOutgoing.objects.filter().select_related().distinct().order_by('-id')
 
     total = item_data.count()
 

@@ -24,6 +24,8 @@ import datetime as date_time
 from openpyxl import load_workbook
 from tablib import Dataset
 import ast
+from django.db.models import F, CharField, Value
+from django.db.models.functions import Concat
 
 
 
@@ -84,6 +86,7 @@ def checking(request):
     if role.role_name in allowed_roles:
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'remarks_list' : RemarksLib.objects.filter().order_by('name'),
             'role_permission' : role.role_name,
         }
         return render(request, 'receive/checking.html', context)
@@ -129,24 +132,46 @@ def item_load(request):
         status_txt = '1'
     id_numbers = EmployeeList if EmployeeList else []
     if FAdvancedFilter and not EmployeeList:
+        print("aaaaaaaaaa")
+        # query = """
+        #     SELECT *
+        #     FROM tev_incoming t1
+        #     WHERE (code, id) IN (
+        #         SELECT DISTINCT code, MAX(id)
+        #         FROM tev_incoming
+        #         GROUP BY code
+        #     ) 
+        #     AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+        #     AND (code LIKE %s
+        #     AND id_no LIKE %s
+        #     AND account_no LIKE %s
+        #     AND date_travel LIKE %s
+        #     AND original_amount LIKE %s
+        #     AND final_amount LIKE %s
+        #     AND incoming_in LIKE %s
+        #     AND status_id LIKE %s
+        #     )ORDER BY id DESC;
+        # """
         query = """
-            SELECT *
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
             FROM tev_incoming t1
-            WHERE (code, id) IN (
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.code, t1.id) IN (
                 SELECT DISTINCT code, MAX(id)
                 FROM tev_incoming
-                GROUP BY code
-            ) 
-            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+                GROUP BY code 
+            )
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL)) 
             AND (code LIKE %s
-                AND id_no LIKE %s
-                AND account_no LIKE %s
-                AND date_travel LIKE %s
-                AND original_amount LIKE %s
-                AND final_amount LIKE %s
-                AND incoming_in LIKE %s
-                AND status_id LIKE %s
-            )ORDER BY id DESC;
+            AND id_no LIKE %s
+            AND account_no LIKE %s
+            AND date_travel LIKE %s
+            AND original_amount LIKE %s
+            AND final_amount LIKE %s
+            AND incoming_in LIKE %s
+            AND status_id LIKE %s
+            )GROUP BY t1.id ORDER BY id DESC;
         """
 
         params = [
@@ -161,24 +186,47 @@ def item_load(request):
         ]
 
     elif FAdvancedFilter:
+        print("dakoooooooooooooooooooooo")
+        # query = """
+        #     SELECT *
+        #     FROM tev_incoming t1
+        #     WHERE (code, id) IN (
+        #         SELECT DISTINCT code, MAX(id)
+        #         FROM tev_incoming
+        #         GROUP BY code
+        #     ) 
+        #     AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+        #     AND (code LIKE %s
+        #         AND id_no IN %s
+        #         AND account_no LIKE %s
+        #         AND date_travel LIKE %s
+        #         AND original_amount LIKE %s
+        #         AND final_amount LIKE %s
+        #         AND incoming_in LIKE %s
+        #         AND status_id LIKE %s
+        #     )ORDER BY id DESC;
+        # """
+
         query = """
-            SELECT *
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
             FROM tev_incoming t1
-            WHERE (code, id) IN (
-                SELECT DISTINCT code, MAX(id)
-                FROM tev_incoming
-                GROUP BY code
-            ) 
-            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.code, t1.id) IN (
+                    SELECT DISTINCT code, MAX(id)
+                    FROM tev_incoming
+                    GROUP BY code 
+            )
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL)) 
             AND (code LIKE %s
-                AND id_no IN %s
-                AND account_no LIKE %s
-                AND date_travel LIKE %s
-                AND original_amount LIKE %s
-                AND final_amount LIKE %s
-                AND incoming_in LIKE %s
-                AND status_id LIKE %s
-            )ORDER BY id DESC;
+            AND id_no IN %s
+            AND account_no LIKE %s
+            AND date_travel LIKE %s
+            AND original_amount LIKE %s
+            AND final_amount LIKE %s
+            AND incoming_in LIKE %s
+            AND status_id LIKE %s
+            )GROUP BY t1.id ORDER BY id DESC;
         """
 
         params = [
@@ -194,14 +242,16 @@ def item_load(request):
 
     else:
         query = """
-            SELECT *
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
             FROM tev_incoming t1
-            WHERE (code, id) IN (
-                SELECT DISTINCT code, MAX(id)
-                FROM tev_incoming
-                GROUP BY code 
-            ) 
-            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.code, t1.id) IN (
+                    SELECT DISTINCT code, MAX(id)
+                    FROM tev_incoming
+                    GROUP BY code 
+            )
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL)) 
             AND (code LIKE %s
             OR first_name LIKE %s
             OR middle_name LIKE %s
@@ -212,7 +262,7 @@ def item_load(request):
             OR original_amount LIKE %s
             OR final_amount LIKE %s
             OR status_id LIKE %s
-            )ORDER BY id DESC;
+            )GROUP BY t1.id ORDER BY id DESC;
         """
             
         params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
@@ -258,19 +308,12 @@ def item_load(request):
             'incoming_out': item['incoming_out'],
             'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
-            'lacking':"fasfs",
+            'lacking': item['lacking'],
             'status': item['status_id'],
             'user_id': full_name
         }
 
         data.append(item_entry)
-
-    all_ids = [item['id'] for item in data]
-
-# Print or use the list of ids as needed
-    print(all_ids)
-    print("testt")
- 
 
     response = {
         'data': data,
@@ -317,64 +360,71 @@ def checking_load(request):
         def dictfetchall(cursor):
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
-
         query = """
-            SELECT t.*
-            FROM tev_incoming t
-            WHERE (t.status_id = 2
-                OR t.status_id = 7
-                OR (t.status_id = 3 AND t.slashed_out IS NULL))
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
+            FROM tev_incoming t1
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.status_id = 2
+                OR t1.status_id = 7
+                OR (t1.status_id = 3 AND t1.slashed_out IS NULL))
         """
         params = []
 
         if FTransactionCode:
-            query += " AND t.code = %s"
+            query += " AND t1.code = %s"
             params.append(FTransactionCode)
 
+        if FIdNumber:
+            query += " AND t1.id_no = %s"
+            params.append(FIdNumber)
+
         if FDateTravel:
-            query += " AND t.date_travel LIKE %s"
+            query += " AND t1.date_travel LIKE %s"
             params.append(f'%{FDateTravel}%')
 
         if FIncomingIn:
-            query += " AND t.incoming_in = %s"
+            query += " AND t1.incoming_in = %s"
             params.append(FIncomingIn)
 
         if FStatus:
-            query += " AND t.status_id = %s"
+            query += " AND t1.status_id = %s"
             params.append(FStatus)
 
             
         if FAccountNumber:
-            query += " AND t.account_no = %s"
+            query += " AND t1.account_no = %s"
             params.append(FAccountNumber)
 
         if FOriginalAmount:
-            query += " AND t.original_amount = %s"
+            query += " AND t1.original_amount = %s"
             params.append(FOriginalAmount)
 
         if FFinalAmount:
-            query += " AND t.final_amount = %s"
+            query += " AND t1.final_amount = %s"
             params.append(FFinalAmount)
 
         if EmployeeList:
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
-            query += f" AND t.id_no IN ({placeholders})"
+            query += f" AND t1.id_no IN ({placeholders})"
             params.extend(EmployeeList)
 
-        query += " ORDER BY t.incoming_out DESC;"
+        query += " GROUP BY t1.id ORDER BY t1.incoming_out DESC;"
 
         with connection.cursor() as cursor:
             cursor.execute(query, params)
             results = dictfetchall(cursor)
 
     else:
-        print("third attempt")
+
         query = """
-            SELECT t.*
-            FROM tev_incoming t
-            WHERE (t.status_id = 2
-                    OR t.status_id = 7
-                    OR (t.status_id = 3 AND t.slashed_out IS NULL)
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
+            FROM tev_incoming t1
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.status_id = 2
+                            OR t1.status_id = 7
+                            OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
             )
             AND (code LIKE %s
             OR id_no LIKE %s
@@ -384,9 +434,8 @@ def checking_load(request):
             OR final_amount LIKE %s
             OR remarks LIKE %s
             OR status_id LIKE %s
-            )ORDER BY id DESC;
+            )GROUP BY t1.id ORDER BY id DESC;
         """
-            
         params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
     
     with connection.cursor() as cursor:
@@ -429,6 +478,7 @@ def checking_load(request):
             'incoming_out': item['incoming_out'],
             'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
+            'lacking': item['lacking'],
             'status': item['status_id'],
             'user_id': full_name
         }
@@ -727,11 +777,6 @@ def upload_tev(request):
 
             print("Duplicate Dates:")
             print(duplicate_dates)
-
-
-
-
-
             if id_list:
                 system_config = SystemConfiguration.objects.first()
                 system_config.transaction_code = sc_code
@@ -809,6 +854,8 @@ def upload_tev(request):
 
 def item_edit(request):
     id = request.GET.get('id')
+    print("Tesingiddd")
+    print(id)
     items = TevIncoming.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
@@ -821,8 +868,7 @@ def item_update(request):
     middle = request.POST.get('EmpMiddle')
     lname = request.POST.get('EmpLastname')
     amount = request.POST.get('OriginalAmount')
-    remarks = request.POST.get('Remarks')
-    tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount,remarks=remarks)
+    tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount)
     return JsonResponse({'data': 'success'})
 
 @csrf_exempt
@@ -830,13 +876,12 @@ def item_returned(request):
     id = request.POST.get('ItemID')
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
-    remarks = request.POST.get('Remarks')
     travel_date = request.POST.get('HDateTravel')
     travel_date_stripped = travel_date.strip()
     travel_date_spaces = travel_date_stripped.replace(' ', '')
     id = request.POST.get('ItemID')
     data = TevIncoming.objects.filter(id=id).first()
-    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,remarks=remarks,user_id=data.user_id)
+    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,user_id=data.user_id)
     tev_add.save()
     return JsonResponse({'data': 'success'})
 
@@ -853,7 +898,6 @@ def item_add(request):
     name = request.POST.get('EmpName')
     middle = request.POST.get('EmpMiddle')
     lname = request.POST.get('EmpLastname')
-    remarks = request.POST.get('Remarks')
     user_id = request.session.get('user_id', 0)
     g_code = generate_code()
     selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
@@ -906,7 +950,7 @@ def item_add(request):
             return formatted_date
         formatted_dates = [format_date(date) for date in date_components]
         formatted_dates_string = ', '.join(formatted_dates)
-        formatted_dates_string = "Duplicate Travel for " + formatted_dates_string
+        formatted_dates_string = formatted_dates_string
         
 
         tev_add = TevIncoming(
@@ -953,7 +997,6 @@ def item_add(request):
             account_no=acct_no,
             date_travel=cleaned_dates,
             original_amount=amount,
-            remarks=remarks,
             user_id=user_id
         )
         tev_add.save()
@@ -1020,12 +1063,75 @@ def out_checking_tev(request):
 
 @csrf_exempt
 def tev_details(request):
+    
     tev_id = request.POST.get('tev_id')
-    tev = TevIncoming.objects.filter(id=tev_id).first()
+    print(tev_id)
+    
+    result = TevIncoming.objects.filter(id=tev_id).first()
     data = {
-        'data': model_to_dict(tev)
+        'data': model_to_dict(result)
     }
     return JsonResponse(data)
+
+
+def review_details(request):
+    tev_id = request.POST.get('tev_id')
+    with connection.cursor() as cursor:
+        query = """
+        SELECT
+            t1.code,
+            t1.first_name,
+            t1.middle_name,
+            t1.last_name,
+            t1.id_no,
+            t1.account_no,
+            t1.date_travel,
+            t1.original_amount,
+            t1.final_amount,
+            t1.incoming_in,
+            t1.incoming_out,
+            t1.slashed_out,
+            t1.remarks,
+            t1.user_id,
+            t1.status_id,
+            GROUP_CONCAT(t3.id SEPARATOR ', ') AS lacking,
+            GROUP_CONCAT(t2.date SEPARATOR ', ') AS date_remarks
+        FROM
+            tev_incoming t1
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+        WHERE
+            t1.id = %s
+        """
+        cursor.execute(query, [tev_id])
+        result = cursor.fetchone()
+
+    # Convert the result to a dictionary for JsonResponse
+    if result:
+        data = {
+            'code': result[0],
+            'first_name': result[1],
+            'middle_name': result[2],
+            'last_name': result[3],
+            'id_no': result[4],
+            'account_no': result[5],
+            'date_travel': result[6],
+            'original_amount': result[7],
+            'final_amount': result[8],
+            'incoming_in': result[9],
+            'incoming_out': result[10],
+            'slashed_out': result[11],
+            'remarks': result[12],
+            'user_id': result[13],
+            'status_id': result[14],
+            'lacking': result[15],
+            'date_remarks': result[16],
+        }
+        return JsonResponse(data)
+    else:
+        # Handle the case where no results are found
+        return JsonResponse({'error': 'No data found for the given ID'}, status=404)
+
 
 
 @csrf_exempt
