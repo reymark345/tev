@@ -248,13 +248,13 @@
                 </div>
                 <span id="amount_error" style="color: red;"></span>
             </div>
-            <div class="col-12">
+            <div class="col-12" id="dp_date">
                 <label class="form-label" for="modaltevDetails">Duplicate Date</label>
                 
                 <div class="input-group">
-                <textarea class="form-control" placeholder="Enter remarks (optional if for approval)" rows="1" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
+                <textarea class="form-control" placeholder="Date" rows="3" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
                 </div>
-                <span id="remarks_error" style="color: red;"></span>
+                
             </div>
 
             <div class="col-12">
@@ -265,7 +265,7 @@
                         <option value="{{ row.id }}">{{ row.name }}</option>
                         {% endfor %}
                     </select>
-                <span id="amount_error" style="color: red;"></span>
+                <span id="remarks_error" style="color: red;"></span>
             </div>
 
             <div class="col-sm-12">
@@ -298,6 +298,7 @@
     let status_val =0;
     let formattedDates = ''
     let employeeList = [];
+    let remarks_date = [];
     
     $(document).ready(function () {
         $('#loading-screen').hide();
@@ -597,22 +598,26 @@
                             tev_id: clicked_id
                         }
                     }).done(function (data) {
-                        let value = data.remarks;
+                        let duplicate_date = data.remarks;
                         let final_amount = data.final_amount;
                         let lacking = data.lacking;
                         let date_remarks = data.date_remarks;
 
-
-
+                        if(duplicate_date === "" || duplicate_date === null ){
+                            $("#dp_date").hide();
+                        }
+                        else{
+                            $("#dp_date").show();
+                        }
                         if (lacking === null) {
                             $('#remarks-list').val([]).trigger('change');
                             
                         } else {
                             console.log("The variable 'lacking' is not null.");
                             lacking = data.lacking.split(',').map(Number);
+                            date_remarks = date_remarks.split(", ")
+                            remarks_date = date_remarks;
                             $('#remarks-list').val([]).trigger('change');
-
-
                             $('#remarks-list option').each(function() {
                                 let optionValue = parseInt($(this).val());
                                 if (lacking.includes(optionValue)) {
@@ -637,11 +642,20 @@
                         // Trigger change event to reflect the selected options visually
                         $('#remarks-list').trigger('change');
 
+
                         let floatvalue = parseFloat(final_amount);
                         let convertedAmount = floatvalue.toFixed(2);
                         if (convertedAmount === "0.00") {convertedAmount =""} 
                         $("#final_amount").val(convertedAmount);
-                        $("#correctness_remarks").val(value);
+                        $("#correctness_remarks").val(duplicate_date);
+                        $("#correctness_remarks").prop("disabled", true);
+                        // $("#correctness_remarks").css("background-color", "#cf2732");
+
+                        $("#correctness_remarks").css({
+                            "background-color": "#cf2732",  // Yellow background color
+                            "color": "#ffffff"              // White text color
+                        });
+                       
                     })
                 });
             },
@@ -752,7 +766,7 @@
 
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();
-            let correctness_remarks = $("#correctness_remarks").val().trim();
+            // let correctness_remarks = $("#correctness_remarks").val().trim();
             let status = 7; 
               if (final_amount === "") {  
                 $("#amount_error").text("Please enter Amount");
@@ -763,7 +777,7 @@
                 $("#amount_error").text("");
                 $("#remarks_error").text("");
                 $(".input-group").removeClass("has-error");
-                tev_details(final_amount,correctness_remarks,status,clicked_id);
+                tev_details(final_amount,remarks_value,status,clicked_id);
               }
           });
 
@@ -783,38 +797,41 @@
                 }
             });
             console.log("Newly added values: " + employeeList);
-       
         });
 
 
 
           
         $('#returned').click(function() {
-        let final_amount = $("#final_amount").val().trim();
-        let correctness_remarks = $("#correctness_remarks").val().trim();
-        let status = 3;
-            if (correctness_remarks === "" && final_amount === "") {
-            $("#amount_error").text("Please enter Amount");
-            $("#remarks_error").text("Please enter Remarks");
-            $(".input-group").addClass("has-error");
-            event.preventDefault();
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let remarks_value = RemarksList.val();
+
+     
+
+            let status = 3;
+            if (remarks_value.length === 0 && final_amount === "") {
+                $("#amount_error").text("Please enter Amount");
+                $("#remarks_error").text("Please enter Remarks");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
             }
             else if (final_amount === "" ) {
-            $("#amount_error").text("Please enter Amount");
-            $("#remarks_error").text("");
-            $(".input-group").addClass("has-error");
-            event.preventDefault();
+                $("#amount_error").text("Please enter Amount");
+                $("#remarks_error").text("");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
             }
-            else if (correctness_remarks === "" ) {
-            $("#amount_error").text("");
-            $("#remarks_error").text("Please enter Remarks");
-            $(".input-group").addClass("has-error");
-            event.preventDefault();
+            else if (remarks_value.length === 0  ) {
+                $("#amount_error").text("");
+                $("#remarks_error").text("Please enter Remarks");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
             }
             else {
-            $("#remarks_error").text("");
-            $(".input-group").removeClass("has-error");
-            tev_details(final_amount,correctness_remarks,status,clicked_id);
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,remarks_value,status,clicked_id);
             }
             
         });
@@ -827,23 +844,28 @@
                 for (var i = 0; i < selectedValues.length; i++) {
                     var inputId = "date-remarks-" + selectedValues[i];
                     var selectedText = $(this).find('option[value="' + selectedValues[i] + '"]').text();
-                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" /><br>';
+                    var inputValue = remarks_date[i] || "";
+                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
                     $("#dynamic-input-container").append(inputElement);
                 }
             }
         });
 
+        function tev_details(amount,remarks_value,status,emp_id){
+            console.log("RemarksList11");
+            console.log(remarks_value);
+            console.log("remarks_value22");
+            console.log(remarks_date);
 
-
-        function tev_details(amount,remarks,status,emp_id){
             $.ajax({
                 type: "POST",
-                url: "{% url 'add-tev-details' %}",
+                url: "{% url 'update-tev-details' %}",
                 data:{
                     final_amount: amount,
-                    remarks: remarks,
                     status : status,
-                    transaction_id : emp_id
+                    transaction_id : emp_id,
+                    remarks : remarks_value,
+                    remarks_date : remarks_date
                 }
                 }).done(function(data){
                 if (data.data == 'success') {
@@ -854,7 +876,7 @@
                     toastr.danger('Data not saved', 'Danger', toast_options);
                 }
             });
-            }
+        }
 
         if (EmployeeName.length) {
             EmployeeName.wrap('<div class="position-relative"></div>')

@@ -1158,19 +1158,48 @@ def addtev(request):
     return JsonResponse({'data': 'success'})
 
 
+@csrf_exempt
+def updatetevdetails(request):
+
+    status = request.POST.get('status')
+    transaction_id = request.POST.get('transaction_id')
+    remarks = request.POST.getlist('remarks[]')
+    remarks_date = request.POST.getlist('remarks_date[]')
+
+    print("remarks") 
+    print(transaction_id)
+
+
+    
+    return JsonResponse({'data': 'success'})
+
+
 
 @csrf_exempt
 def addtevdetails(request):
+    print("remarks") 
+
+    # amount = request.POST.get('final_amount')
+    # remarks = request.POST.getlist('remarks[]')
+    # remarks_date = request.POST.getlist('remarks_date[]')  
     
-    amount = request.POST.get('final_amount')
-    remarks = request.POST.get('remarks')
-    status = request.POST.get('status')
-    transaction_id = request.POST.get('transaction_id')
+    # amount = request.POST.get('final_amount')
+    # remarks = request.POST.getlist('remarks[]')
+    # remarks_date = request.POST.getlist('remarks_date[]')  
+
+   
+    # print(remarks)  
+    # print(remarks_date)  
+
+
+
+    # status = request.POST.get('status')
+    # transaction_id = request.POST.get('transaction_id')
     
-    if amount =='':
-        amount = 0
+    # if amount =='':
+    #     amount = 0
   
-    tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,remarks=remarks,status=status)
+    # tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status)
 
     return JsonResponse({'data': 'success'})
 
