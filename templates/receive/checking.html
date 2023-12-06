@@ -28,6 +28,14 @@
         width: 15px; /* Set the width of each cube */
         height: 15px; /* Set the height of each cube */
     }
+    .has-error {
+        border: 1px solid red; /* Change the border color for the input with an error */
+    }
+
+    .error-label {
+        color: red; /* Set the text color for the error message */
+        margin-top: 5px; /* Add some space between the input and the error message */
+    }
 </style>
 
 <!-- Content wrapper -->
@@ -580,11 +588,11 @@
 
                 $('.item-details').on('click', function () {
                     if (RemarksList.length) {
-                                RemarksList.wrap('<div class="position-relative"></div>')
-                                RemarksList.select2({
-                                placeholder: 'Choose remarks',
-                                dropdownParent: RemarksList.parent(),
-                                allowClear: true,
+                            RemarksList.wrap('<div class="position-relative"></div>')
+                            RemarksList.select2({
+                            placeholder: 'Choose remarks',
+                            dropdownParent: RemarksList.parent(),
+                            allowClear: true,
                         })
                     }
                     clicked_id = $(this).data('id');
@@ -604,10 +612,6 @@
                         let lacking = data.lacking;
                         let date_remarks = data.date_remarks;
 
-                        console.log(lacking);
-                        console.log("----------");
-                        console.log(date_remarks);
-
                         if(duplicate_date === "" || duplicate_date === null ){
                             $("#dp_date").hide();
                         }
@@ -618,7 +622,6 @@
                             $('#remarks-list').val([]).trigger('change');
                             
                         } else {
-                            console.log("The variable 'lacking' is not null.");
                             lacking = data.lacking.split(',').map(Number);
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
@@ -634,16 +637,11 @@
               
                         if(final_amount && final_amount !="0E-10"){
                             final_amount = data.final_amount;
-                            console.log("halaa1");
-                            console.log(final_amount);
                         }
                         else{
                             final_amount = data.original_amount;
-                            console.log("halaa2");
-                            console.log(final_amount);
                         }
 
-                     
                         // Trigger change event to reflect the selected options visually
                         $('#remarks-list').trigger('change');
                             let floatvalue = parseFloat(final_amount);
@@ -768,6 +766,7 @@
 
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();
+            let remarks_value = RemarksList.val();
             // let correctness_remarks = $("#correctness_remarks").val().trim();
             let status = 7; 
               if (final_amount === "") {  
@@ -801,15 +800,10 @@
             console.log("Newly added values: " + employeeList);
         });
 
-
-
-          
         $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
             let remarks_value = RemarksList.val();
-
-     
 
             let status = 3;
             if (remarks_value.length === 0 && final_amount === "") {
@@ -833,19 +827,13 @@
             else {
                 $("#remarks_error").text("");
                 $(".input-group").removeClass("has-error");
-                console.log(remarks_value);
-                console.log(status);
-                console.log(remarks_date);
-                
                 tev_details(final_amount,remarks_value,status,clicked_id);
             }
-            
         });
 
         $(".remarks-list").on("change", function() {
             $("#dynamic-input-container").empty();
             selectedRemarks = $(this).val();
-            console.log(selectedRemarks);
             if (selectedRemarks) {
                 for (var i = 0; i < selectedRemarks.length; i++) {
                     var inputId = "date-remarks-" + selectedRemarks[i];
@@ -859,11 +847,25 @@
 
         function tev_details(amount,remarks_value,status,emp_id){
             let selectedDates = [];
+            var hasError = false;
             $("#dynamic-input-container input[type='date']").each(function() {
                 var dateValue = $(this).val();
                 selectedDates.push(dateValue);
+                var errorLabel = $(this).next(".error-label");
+                if (!errorLabel.length) {
+                    errorLabel = $("<label class='error-label'></label>").insertAfter($(this));
+                }
+                if (!dateValue) {
+                    hasError = true;
+                    errorLabel.text("Date is required.").show();
+                    $(this).addClass("has-error");
+                } else {
+                    errorLabel.hide().text("");
+                    $(this).removeClass("has-error");
+                }
             });
-            $.ajax({
+            if (!hasError){
+                $.ajax({
                 type: "POST",
                 url: "{% url 'update-tev-details' %}",
                 data:{
@@ -884,6 +886,7 @@
                         toastr.danger('Data not saved', 'Danger', toast_options);
                     }
                 });
+            }
         }
 
         if (EmployeeName.length) {
