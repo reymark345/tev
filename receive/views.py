@@ -1151,56 +1151,37 @@ def addtev(request):
     amount = request.POST.get('amount')
     remarks = request.POST.get('remarks')
     user_id = request.session.get('user_id', 0)
-    
     tev_add = TevIncoming(employee_name=employeename,original_amount=amount,incoming_remarks=remarks,user_id=user_id)
     tev_add.save()
-
     return JsonResponse({'data': 'success'})
 
 
 @csrf_exempt
 def updatetevdetails(request):
 
-    status = request.POST.get('status')
-    transaction_id = request.POST.get('transaction_id')
-    remarks = request.POST.getlist('remarks[]')
-    remarks_date = request.POST.getlist('remarks_date[]')
-
-    print("remarks") 
-    print(transaction_id)
-
-
+    if request.method == 'POST':
+        amount = request.POST.get('final_amount')
+        status = request.POST.get('status')
+        transaction_id = request.POST.get('transaction_id')
+        selected_remarks = request.POST.getlist('selected_remarks[]')
+        selected_dates = request.POST.getlist('selected_dates[]')
+        tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status)
+        Remarks_r.objects.filter(incoming_id=transaction_id).delete()
+        for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
+            Remarks_r.objects.create(
+                incoming_id=transaction_id,
+                remarks_lib_id=selected_remarks,
+                date=selected_dates
+        )
+        return JsonResponse({'data': 'success'})
     
-    return JsonResponse({'data': 'success'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 
 
 @csrf_exempt
 def addtevdetails(request):
-    print("remarks") 
-
-    # amount = request.POST.get('final_amount')
-    # remarks = request.POST.getlist('remarks[]')
-    # remarks_date = request.POST.getlist('remarks_date[]')  
-    
-    # amount = request.POST.get('final_amount')
-    # remarks = request.POST.getlist('remarks[]')
-    # remarks_date = request.POST.getlist('remarks_date[]')  
-
-   
-    # print(remarks)  
-    # print(remarks_date)  
-
-
-
-    # status = request.POST.get('status')
-    # transaction_id = request.POST.get('transaction_id')
-    
-    # if amount =='':
-    #     amount = 0
-  
-    # tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status)
-
     return JsonResponse({'data': 'success'})
 
 

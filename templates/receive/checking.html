@@ -299,6 +299,7 @@
     let formattedDates = ''
     let employeeList = [];
     let remarks_date = [];
+    let selectedRemarks = [];
     
     $(document).ready(function () {
         $('#loading-screen').hide();
@@ -603,6 +604,10 @@
                         let lacking = data.lacking;
                         let date_remarks = data.date_remarks;
 
+                        console.log(lacking);
+                        console.log("----------");
+                        console.log(date_remarks);
+
                         if(duplicate_date === "" || duplicate_date === null ){
                             $("#dp_date").hide();
                         }
@@ -641,21 +646,18 @@
                      
                         // Trigger change event to reflect the selected options visually
                         $('#remarks-list').trigger('change');
+                            let floatvalue = parseFloat(final_amount);
+                            let convertedAmount = floatvalue.toFixed(2);
+                            if (convertedAmount === "0.00") {convertedAmount =""} 
+                            $("#final_amount").val(convertedAmount);
+                            $("#correctness_remarks").val(duplicate_date);
+                            $("#correctness_remarks").prop("disabled", true);
+                            // $("#correctness_remarks").css("background-color", "#cf2732");
 
-
-                        let floatvalue = parseFloat(final_amount);
-                        let convertedAmount = floatvalue.toFixed(2);
-                        if (convertedAmount === "0.00") {convertedAmount =""} 
-                        $("#final_amount").val(convertedAmount);
-                        $("#correctness_remarks").val(duplicate_date);
-                        $("#correctness_remarks").prop("disabled", true);
-                        // $("#correctness_remarks").css("background-color", "#cf2732");
-
-                        $("#correctness_remarks").css({
-                            "background-color": "#cf2732",  // Yellow background color
-                            "color": "#ffffff"              // White text color
-                        });
-                       
+                            $("#correctness_remarks").css({
+                                "background-color": "#cf2732",  // Yellow background color
+                                "color": "#ffffff"              // White text color
+                            });
                     })
                 });
             },
@@ -831,6 +833,10 @@
             else {
                 $("#remarks_error").text("");
                 $(".input-group").removeClass("has-error");
+                console.log(remarks_value);
+                console.log(status);
+                console.log(remarks_date);
+                
                 tev_details(final_amount,remarks_value,status,clicked_id);
             }
             
@@ -838,12 +844,12 @@
 
         $(".remarks-list").on("change", function() {
             $("#dynamic-input-container").empty();
-            var selectedValues = $(this).val();
-            // Append input elements based on selected values
-            if (selectedValues) {
-                for (var i = 0; i < selectedValues.length; i++) {
-                    var inputId = "date-remarks-" + selectedValues[i];
-                    var selectedText = $(this).find('option[value="' + selectedValues[i] + '"]').text();
+            selectedRemarks = $(this).val();
+            console.log(selectedRemarks);
+            if (selectedRemarks) {
+                for (var i = 0; i < selectedRemarks.length; i++) {
+                    var inputId = "date-remarks-" + selectedRemarks[i];
+                    var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
                     var inputValue = remarks_date[i] || "";
                     var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
                     $("#dynamic-input-container").append(inputElement);
@@ -852,11 +858,11 @@
         });
 
         function tev_details(amount,remarks_value,status,emp_id){
-            console.log("RemarksList11");
-            console.log(remarks_value);
-            console.log("remarks_value22");
-            console.log(remarks_date);
-
+            let selectedDates = [];
+            $("#dynamic-input-container input[type='date']").each(function() {
+                var dateValue = $(this).val();
+                selectedDates.push(dateValue);
+            });
             $.ajax({
                 type: "POST",
                 url: "{% url 'update-tev-details' %}",
@@ -865,17 +871,19 @@
                     status : status,
                     transaction_id : emp_id,
                     remarks : remarks_value,
-                    remarks_date : remarks_date
+                    remarks_date : remarks_date,
+                    selected_remarks : selectedRemarks,
+                    selected_dates : selectedDates
                 }
                 }).done(function(data){
-                if (data.data == 'success') {
-                    $('#tevDetails').modal('hide');
-                    toastr.success('Successfully save', 'Success', toast_options);
-                    dataTable.ajax.reload()
-                } else {
-                    toastr.danger('Data not saved', 'Danger', toast_options);
-                }
-            });
+                    if (data.data == 'success') {
+                        $('#tevDetails').modal('hide');
+                        toastr.success('Successfully save', 'Success', toast_options);
+                        dataTable.ajax.reload()
+                    } else {
+                        toastr.danger('Data not saved', 'Danger', toast_options);
+                    }
+                });
         }
 
         if (EmployeeName.length) {
