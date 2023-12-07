@@ -71,7 +71,7 @@ def list_payroll(request):
             'division' : Division.objects.filter(status=0).order_by('name'),
             'role_permission' : role.role_name,
         }
-        return render(request, 'transaction/list.html', context)
+        return render(request, 'transaction/p_preparation.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
@@ -88,7 +88,7 @@ def assign_payroll(request):
         context = {
             'role_permission' : role.role_name,
         }
-        return render(request, 'transaction/list.html', context)
+        return render(request, 'transaction/p_preparation.html', context)
     else:
         return render(request, 'pages/unauthorized.html')    
     
@@ -140,7 +140,7 @@ def box_a(request):
             'cluster' : Cluster.objects.filter().order_by('id'),
             'division' : Division.objects.filter(status=0).order_by('id'),
         }
-        return render(request, 'transaction/box_a.html', context)
+        return render(request, 'transaction/p_printing.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
@@ -258,7 +258,7 @@ def preview_box_a(request):
             'position' : position
         }
         
-        return render(request, 'transaction/print_box_a.html', context)
+        return render(request, 'transaction/preview_print.html', context)
     else:
         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
     

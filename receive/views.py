@@ -860,6 +860,69 @@ def item_edit(request):
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
+def preview_received(request):
+    id = request.GET.get('id')
+    with connection.cursor() as cursor:
+        query = """
+        SELECT
+            t1.id,
+            t1.code,
+            t1.first_name,
+            t1.middle_name,
+            t1.last_name,
+            t1.id_no,
+            t1.account_no,
+            t1.date_travel,
+            t1.original_amount,
+            t1.final_amount,
+            t1.incoming_in,
+            t1.incoming_out,
+            t1.slashed_out,
+            t1.remarks,
+            t1.user_id,
+            t1.status_id,
+            GROUP_CONCAT(t3.id SEPARATOR ', ') AS lacking,
+            GROUP_CONCAT(t2.date SEPARATOR ', ') AS date_remarks
+        FROM
+            tev_incoming t1
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+        WHERE
+            t1.id = %s
+        """
+        cursor.execute(query, [id])
+        result = cursor.fetchone()
+
+    # Convert the result to a dictionary for JsonResponse
+    if result:
+        data = {
+            'id': result[0],
+            'code': result[1],
+            'first_name': result[2],
+            'middle_name': result[3],
+            'last_name': result[4],
+            'id_no': result[5],
+            'account_no': result[6],
+            'date_travel': result[7],
+            'original_amount': result[8],
+            'final_amount': result[9],
+            'incoming_in': result[10],
+            'incoming_out': result[11],
+            'slashed_out': result[12],
+            'remarks': result[13],
+            'user_id': result[14],
+            'status_id': result[15],
+            'lacking': result[16],
+            'date_remarks': result[17],
+        }
+        return JsonResponse(data)
+    else:
+        # Handle the case where no results are found
+        return JsonResponse({'error': 'No data found for the given ID'}, status=404)
+
+
+
+
 
 @csrf_exempt
 def item_update(request):

@@ -644,18 +644,18 @@
 
                         // Trigger change event to reflect the selected options visually
                         $('#remarks-list').trigger('change');
-                            let floatvalue = parseFloat(final_amount);
-                            let convertedAmount = floatvalue.toFixed(2);
-                            if (convertedAmount === "0.00") {convertedAmount =""} 
-                            $("#final_amount").val(convertedAmount);
-                            $("#correctness_remarks").val(duplicate_date);
-                            $("#correctness_remarks").prop("disabled", true);
-                            // $("#correctness_remarks").css("background-color", "#cf2732");
+                        let floatvalue = parseFloat(final_amount);
+                        let convertedAmount = floatvalue.toFixed(2);
+                        if (convertedAmount === "0.00") {convertedAmount =""} 
+                        $("#final_amount").val(convertedAmount);
+                        $("#correctness_remarks").val(duplicate_date);
+                        $("#correctness_remarks").prop("disabled", true);
+                        // $("#correctness_remarks").css("background-color", "#cf2732");
 
-                            $("#correctness_remarks").css({
-                                "background-color": "#cf2732",  // Yellow background color
-                                "color": "#ffffff"              // White text color
-                            });
+                        $("#correctness_remarks").css({
+                            "background-color": "#cf2732",  // Yellow background color
+                            "color": "#ffffff"              // White text color
+                        });
                     })
                 });
             },
@@ -831,10 +831,32 @@
             }
         });
 
+        // $(".remarks-list").on("change", function() {
+        //     $("#dynamic-input-container").empty();
+        //     selectedRemarks = $(this).val();
+        //     if (selectedRemarks) {
+        //         for (var i = 0; i < selectedRemarks.length; i++) {
+        //             var inputId = "date-remarks-" + selectedRemarks[i];
+        //             var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
+        //             var inputValue = remarks_date[i] || "";
+        //             var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
+        //             $("#dynamic-input-container").append(inputElement);
+        //         }
+        //     }
+        // });
+
         $(".remarks-list").on("change", function() {
             $("#dynamic-input-container").empty();
             selectedRemarks = $(this).val();
+
+            console.log($(this).val());
+            console.log("Testt");
+
+            console.log("remarks_date");
+            console.log(remarks_date);
+
             if (selectedRemarks) {
+                // Rearrange the options in the order of selection
                 for (var i = 0; i < selectedRemarks.length; i++) {
                     var inputId = "date-remarks-" + selectedRemarks[i];
                     var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
@@ -843,7 +865,7 @@
                     $("#dynamic-input-container").append(inputElement);
                 }
             }
-        });
+        })
 
         function tev_details(amount,remarks_value,status,emp_id){
             let selectedDates = [];
@@ -857,7 +879,7 @@
                 }
                 if (!dateValue) {
                     hasError = true;
-                    errorLabel.text("Date is required.").show();
+                    errorLabel.text("Required.").show();
                     $(this).addClass("has-error");
                 } else {
                     errorLabel.hide().text("");
