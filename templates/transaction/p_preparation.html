@@ -237,6 +237,80 @@
 </div>
 <!--/ Add New Credit Card Modal -->
 
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="payrollDetails" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center mb-4">
+            <h3 class="mb-2">Multiple Charges</h3>
+            <p>Select charges with their corresponding amount</p>
+            </div>
+            <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
+            
+                <!-- <div class="col-12">
+                    <label class="form-label" for="modaltevDetails">Charges</label>
+                    <div class="input-group">
+
+                    </div>
+                    <span id="amount_error" style="color: red;"></span>
+                </div> -->
+
+                <div class="col-12 col-md-12">
+                    <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                    <select id="charges-list" name="ChargesList" class="select2 form-select charges-list" multiple>
+                        <option></option>
+                        {% for row in charges %}
+                        <option value="{{ row.id }}">{{ row.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                
+                
+                
+                <div class="col-12">
+                    <label class="form-label" for="modaltevDetails">Final Amount</label>
+                    <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input
+                        type="number"
+                        id="final_amount"
+                        name="FinalAmount"
+                        class="form-control phone-number-otp-mask"
+                        placeholder="0.00"
+                    />
+                    </div>
+                    <span id="amount_error" style="color: red;"></span>
+                </div>
+
+
+
+            <div class="col-sm-12">
+                <br>
+                <div id="dynamic-input-container"></div>
+            </div>
+
+
+            <div class="col-12">
+                <button type="submit" id ="approved" class="btn btn-primary me-sm-3 me-1">Save</button>
+                <button
+                    type="reset"
+                    class="btn btn-label-secondary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    >
+                    Cancel
+                </button>
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+<!--/ Enable OTP Modal -->
+
       
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
@@ -308,6 +382,7 @@
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             Charges = jQuery(document.querySelector('[name="Charges"]')),
+            ChargesList = jQuery(document.querySelector('[name="ChargesList"]')),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
@@ -933,6 +1008,10 @@
                 }
             });
 
+
+
+
+
             if (!emptyDataExists) {
                 $('#saveModal').modal('show');
                 const currentDate = new Date();
@@ -979,6 +1058,7 @@
             var row = clickedCheckbox.closest('tr');
             var checkboxId = clickedCheckbox.attr('value');
             var purposeInput = row.find('input[name="Purpose"]');
+            var charges_multiple = row.find('button[name="MultipleCharges"]');
             var purposeValue = purposeInput.val().trim();
             var stck_id = clickedCheckbox.val();
            
@@ -988,7 +1068,6 @@
             let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
             let year = currentDate.getFullYear();
             let travel = '';
-            let defaultPurposeValue = "TE for " + monthName + " " + year;
             if (clickedCheckbox.prop('checked')) {
                 var existingItem = selected_tev.find(function(item) {
                     return item.id === checkboxId;
@@ -1021,6 +1100,7 @@
                 
                 travel = "TE for " + output;
                 if (!existingItem) {
+                    charges_multiple.prop('disabled', false);
                     var array_id = {
                         id: stck_id,
                         code: row.find('td:eq(1)').text(),
@@ -1033,6 +1113,7 @@
                     };
                     selected_tev.push(array_id);
                     console.log(array_id);
+                    console.log("testttt");
 
                 } else {
                     existingItem.purpose = purposeValue;
@@ -1041,6 +1122,7 @@
               
                 row.find('select[name="Charges"]').prop("disabled", false);
                 purposeInput.prop("disabled", false);
+                
               
                 if (!purposeValue) {
                     purposeInput.val(travel);
@@ -1055,6 +1137,7 @@
               
                 row.find('select[name="Charges"]').prop("disabled", true).val("");
                 purposeInput.prop("disabled", true).val("");
+                charges_multiple.prop('disabled', true);
             }
           
             unique_items = selected_tev.filter(function(item, index, self) {
@@ -1066,6 +1149,26 @@
                 );
             });
         });
+
+        $('#tbl-items').on('click', 'button[name="MultipleCharges"]', function() {
+        // Get the data associated with the clicked row
+            // var rowData = example.row($(this).closest('tr')).data();
+            var rowData = $('#tbl-items').DataTable().row($(this).closest('tr')).data();
+
+            // Access the ID of the clicked item (assuming the ID is stored in a property called "id")
+            var itemId = rowData.id;
+            console.log(itemId);
+            console.log("id ni");
+            $('#payrollDetails').modal('show');
+            if (ChargesList.length) {
+                ChargesList.wrap('<div class="position-relative"></div>')
+                ChargesList.select2({
+                    placeholder: 'Choose employee',
+                    dropdownParent: ChargesList.parent(),
+                    allowClear: true
+                })
+            }
+            });
 
         search_advance_filter.on('click', function () {
             FAdvancedFilter.val("true");
@@ -1192,6 +1295,7 @@
                 allowClear: true,
             })
         }
+
         
     })
 </script>
