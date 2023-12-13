@@ -308,6 +308,9 @@
     let employeeList = [];
     let remarks_date = [];
     let selectedRemarks = [];
+
+    let selectedRemarksOrder = [];
+    let remarksDateMap = {};
     
     $(document).ready(function () {
         $('#loading-screen').hide();
@@ -612,6 +615,11 @@
                         let lacking = data.lacking;
                         let date_remarks = data.date_remarks;
 
+                        console.log("start");
+                        console.log(lacking);
+                        console.log(date_remarks);
+                        console.log("end");
+
                         if(duplicate_date === "" || duplicate_date === null ){
                             $("#dp_date").hide();
                         }
@@ -626,12 +634,13 @@
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
                             $('#remarks-list').val([]).trigger('change');
+                            
                             $('#remarks-list option').each(function() {
                                 let optionValue = parseInt($(this).val());
                                 if (lacking.includes(optionValue)) {
                                     $(this).prop('selected', true);
                                 }
-                                
+                            
                             });
                         }
               
@@ -831,73 +840,23 @@
             }
         });
 
-
-        // $(".remarks-list").on("change", function() {
-        //     $("#dynamic-input-container").empty();
-        //     selectedRemarks = $(this).val();
-
-        //     console.log($(this).val());
-        //     console.log("Testt");
-
-        //     console.log("remarks_date");
-        //     console.log(selectedRemarks);
-
-        //     if (selectedRemarks) {
-        //         // Rearrange the options in the order of selection
-        //         for (var i = 0; i < selectedRemarks.length; i++) {
-        //             var inputId = "date-remarks-" + selectedRemarks[i];
-        //             var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
-        //             var inputValue = remarks_date[i] || "";
-        //             var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
-        //             $("#dynamic-input-container").append(inputElement);
-        //         }
-        //     }
-        // })
-
-        // var selectedRemarksOrder = [];
-
-        // $(".remarks-list").on("change", function() {
-        //     $("#dynamic-input-container").empty();
-        //     selectedRemarks = $(this).val();
-        //     console.log(selectedRemarks);
-
-        //     if (selectedRemarks) {
-        //         // Update the order of selection
-        //         selectedRemarksOrder = selectedRemarksOrder.filter(item => selectedRemarks.includes(item));
-        //         selectedRemarksOrder = selectedRemarksOrder.concat(selectedRemarks.filter(item => !selectedRemarksOrder.includes(item)));
-
-        //         // Generate dynamic input elements in the order of selection
-        //         for (var i = 0; i < selectedRemarksOrder.length; i++) {
-        //             var selectedRemark = selectedRemarksOrder[i];
-        //             var inputId = "date-remarks-" + selectedRemark;
-        //             var selectedText = $(this).find('option[value="' + selectedRemark + '"]').text();
-        //             var inputValue = remarks_date[selectedRemarks.indexOf(selectedRemark)] || "";
-        //             var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
-        //             $("#dynamic-input-container").append(inputElement);
-        //         }
-        //     }
-        // });
-
-        var selectedRemarksOrder = [];
-        var remarksDateMap = {};
-
         $(".remarks-list").on("change", function() {
             $("#dynamic-input-container").empty();
             selectedRemarks = $(this).val();
-
             if (selectedRemarks) {
-                // Update the order of selection
                 selectedRemarksOrder = selectedRemarksOrder.filter(item => selectedRemarks.includes(item));
                 selectedRemarksOrder = selectedRemarksOrder.concat(selectedRemarks.filter(item => !selectedRemarksOrder.includes(item)));
 
-                // Generate dynamic input elements in the order of selection
+                console.log(selectedRemarksOrder);
                 for (var i = 0; i < selectedRemarksOrder.length; i++) {
                     var selectedRemark = selectedRemarksOrder[i];
                     var inputId = "date-remarks-" + selectedRemark;
                     var selectedText = $(this).find('option[value="' + selectedRemark + '"]').text();
-                    var inputValue = remarksDateMap[selectedRemark] || "";
+
+                    var inputValue = remarks_date[i] || "";
                     var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
                     $("#dynamic-input-container").append(inputElement);
+                    
                 }
             }
         });
@@ -913,6 +872,15 @@
         function tev_details(amount,remarks_value,status,emp_id){
             let selectedDates = [];
             var hasError = false;
+
+            console.log("starthere");
+            console.log(selectedRemarks);
+            console.log("------");
+            console.log(selectedDates);
+            console.log("------");
+            console.log(selectedRemarksOrder);
+
+
             $("#dynamic-input-container input[type='date']").each(function() {
                 var dateValue = $(this).val();
                 selectedDates.push(dateValue);
@@ -939,7 +907,7 @@
                     transaction_id : emp_id,
                     remarks : remarks_value,
                     remarks_date : remarks_date,
-                    selected_remarks : selectedRemarks,
+                    selected_remarks : selectedRemarksOrder,
                     selected_dates : selectedDates
                 }
                 }).done(function(data){
