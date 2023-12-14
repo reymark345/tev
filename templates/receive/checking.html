@@ -36,6 +36,15 @@
         color: red; /* Set the text color for the error message */
         margin-top: 5px; /* Add some space between the input and the error message */
     }
+
+            /* Custom styles for expanded select and input */
+    .custom-select {
+        width: 60px;
+    }
+
+    .custom-input {
+        width: 100%;
+    }
 </style>
 
 <!-- Content wrapper -->
@@ -265,7 +274,22 @@
                 
             </div>
 
-            <div class="col-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <br>
+                        <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
+                    </div>
+                </div>
+                <div class="rows-container">
+                    <!-- Appended rows will be placed here -->
+                </div>
+            </div>
+            
+
+
+
+            <!-- <div class="col-12">
                 <label class="form-label" for="modaltevDetails">Remarks</label>
                     <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
                         <option></option>
@@ -279,10 +303,11 @@
             <div class="col-sm-12">
                 <br>
                 <div id="dynamic-input-container"></div>
-            </div>
+            </div> -->
 
-
+            
             <div class="col-12">
+                <br>
                 <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
                 <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
                 <button
@@ -307,10 +332,16 @@
     let formattedDates = ''
     let employeeList = [];
     let remarks_date = [];
+    let remarks_data = [];
     let selectedRemarks = [];
 
     let selectedRemarksOrder = [];
     let remarksDateMap = {};
+
+    let arraydetails = [];
+
+    let first_attempt = false
+    let count = 0;
     
     $(document).ready(function () {
         $('#loading-screen').hide();
@@ -590,6 +621,7 @@
                 });
 
                 $('.item-details').on('click', function () {
+                    first_attempt = true;
                     if (RemarksList.length) {
                             RemarksList.wrap('<div class="position-relative"></div>')
                             RemarksList.select2({
@@ -614,11 +646,9 @@
                         let final_amount = data.final_amount;
                         let lacking = data.lacking;
                         let date_remarks = data.date_remarks;
+                        let remarks_d = data.lacking;
 
-                        console.log("start");
-                        console.log(lacking);
-                        console.log(date_remarks);
-                        console.log("end");
+
 
                         if(duplicate_date === "" || duplicate_date === null ){
                             $("#dp_date").hide();
@@ -630,18 +660,47 @@
                             $('#remarks-list').val([]).trigger('change');
                             
                         } else {
+                            arraydetails = [];
+                            $('.rows-container').empty();
                             lacking = data.lacking.split(',').map(Number);
+
+                            remarks_d = remarks_d.split(", ");
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
-                            $('#remarks-list').val([]).trigger('change');
+                            remarks_data = remarks_d;
+
+                            for (let i = 0; i < date_remarks.length; i++) {
+                                console.log("remarks_data[" + i + "]:", remarks_d[i]);
+                                console.log("remarks_date[" + i + "]:", date_remarks[i]);
                             
-                            $('#remarks-list option').each(function() {
-                                let optionValue = parseInt($(this).val());
-                                if (lacking.includes(optionValue)) {
-                                    $(this).prop('selected', true);
+                                var newRow = $('<div class="row mt-2">' +
+                                    '<div class="col-5">' +
+                                    '<select class="form-select" id="remarks-select-'+i+'">' +
+                                    '<option></option>' +
+                                    '{% for row in remarks_list %}' +
+                                    '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                                    '{% endfor %}' +
+                                    '</select>' +
+                                    '</div>' +
+                                    '<div class="col-5">' +
+                                    '<input type="date" id="date-remarks" name="DateRemarks" class="form-control" value="' + date_remarks[i] + '" />' +
+                                    '</div>' +
+                                    '<div class="col-2">' +
+                                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                                    '</div>' +
+                                    '</div>');
+                                $('.rows-container').append(newRow);
+
+                                $(`#remarks-select-${i}`).val(remarks_d[i]).trigger('change');
+
+                                item_entry = {
+                                    'remarks': remarks_d[i],
+                                    'date': date_remarks[i]
                                 }
-                            
-                            });
+                                arraydetails.push(item_entry);
+
+                            }
+                            console.log(arraydetails);
                         }
               
                         if(final_amount && final_amount !="0E-10"){
@@ -811,62 +870,198 @@
 
         $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
-            let correctness_remarks = $("#correctness_remarks").val().trim();
-            let remarks_value = RemarksList.val();
-
-            let status = 3;
-            if (remarks_value.length === 0 && final_amount === "") {
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("Please enter Remarks");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-            }
-            else if (final_amount === "" ) {
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-            }
-            else if (remarks_value.length === 0  ) {
-                $("#amount_error").text("");
-                $("#remarks_error").text("Please enter Remarks");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-            }
-            else {
-                $("#remarks_error").text("");
-                $(".input-group").removeClass("has-error");
-                tev_details(final_amount,remarks_value,status,clicked_id);
-            }
+            console.log("Selected IDs:", selectedIDs);
         });
+
+        // $('#returned').click(function() {
+        //     let data = remarks_date.length + count;
+        //     let final_amount = $("#final_amount").val().trim();
+        //     let correctness_remarks = $("#correctness_remarks").val().trim();
+        //     let remarks_value = RemarksList.val();
+
+        //     let selectedIDs = [];
+
+        //         // Loop through each select element and collect the selected IDs
+        //     for (let i = 0; i < 4; i++) {
+        //         var selectElement = $(`#remarks-select-${i}`);
+        //         var selectedOption = selectElement.val();
+
+        //         // Check if an option is selected before pushing to the array
+        //         if (selectedOption) {
+        //             selectedIDs.push(selectedOption);
+        //         }
+        //     }
+
+        //     // Log or use the selected IDs as needed
+        //     console.log("Selected IDs:", selectedIDs);
+
+        //     let status = 3;
+        //     if (remarks_value.length === 0 && final_amount === "") {
+        //         $("#amount_error").text("Please enter Amount");
+        //         $("#remarks_error").text("Please enter Remarks");
+        //         $(".input-group").addClass("has-error");
+        //         event.preventDefault();
+        //     }
+        //     else if (final_amount === "" ) {
+        //         $("#amount_error").text("Please enter Amount");
+        //         $("#remarks_error").text("");
+        //         $(".input-group").addClass("has-error");
+        //         event.preventDefault();
+        //     }
+        //     else if (remarks_value.length === 0  ) {
+        //         $("#amount_error").text("");
+        //         $("#remarks_error").text("Please enter Remarks");
+        //         $(".input-group").addClass("has-error");
+        //         event.preventDefault();
+        //     }
+        //     else {
+        //         $("#remarks_error").text("");
+        //         $(".input-group").removeClass("has-error");
+        //         tev_details(final_amount,remarks_value,status,clicked_id);
+        //     }
+        // });
+
+
+        $('#add_remarks').click(function () {
+            count++;
+
+           
+            // Create a new row with select, input, and delete button
+            var newRow = $('<div class="row mt-2">' +
+                '<div class="col-5">' +
+                '<select class="form-select" id="select_remarks">' +
+                    '<option></option>'+
+                    '{% for row in remarks_list %}'+
+                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                    '{% endfor %}'+
+                '</select>' +
+                '</div>' +
+                '<div class="col-5">' +
+                '<input type="date" id="date-remarks" name="DateRemarks" class="form-control" value="" />'+
+                // '<input type="text" class="form-control">' +
+                '</div>' +
+                '<div class="col-2">' +
+                '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                '</div>' +
+                '</div>');
+
+            // Append the new row to the container
+            $('.rows-container').append(newRow);
+        });
+
+        // Attach click event to delete-row buttons
+        $('.container').on('click', '.delete-row', function () {
+            // Remove the parent row when delete button is clicked
+            $(this).closest('.row').remove();
+            count--;
+        });
+
+
+
 
         $(".remarks-list").on("change", function() {
             $("#dynamic-input-container").empty();
             selectedRemarks = $(this).val();
-            if (selectedRemarks) {
-                selectedRemarksOrder = selectedRemarksOrder.filter(item => selectedRemarks.includes(item));
-                selectedRemarksOrder = selectedRemarksOrder.concat(selectedRemarks.filter(item => !selectedRemarksOrder.includes(item)));
+  
+            console.log("orderedDates");
+            console.log(remarks_date);
 
-                console.log(selectedRemarksOrder);
-                for (var i = 0; i < selectedRemarksOrder.length; i++) {
-                    var selectedRemark = selectedRemarksOrder[i];
+
+            if (selectedRemarks) {
+                // Clear dates for newly selected items
+                selectedRemarks.forEach(function(selectedRemark) {
+                    remarks_date[selectedRemark] = remarks_date[selectedRemark] || "";
+                });
+                console.log("unsadiani");
+                console.log(orderedDates);
+                console.log(selectedRemarks);
+
+                // Reorder dates based on the order of selection
+                var orderedDates = selectedRemarks.map(function(selectedRemark) {
+                    return remarks_date[selectedRemark];
+                });
+
+              
+
+                for (var i = 0; i < selectedRemarks.length; i++) {
+                    var selectedRemark = selectedRemarks[i];
                     var inputId = "date-remarks-" + selectedRemark;
                     var selectedText = $(this).find('option[value="' + selectedRemark + '"]').text();
-
-                    var inputValue = remarks_date[i] || "";
+                    var inputValue = orderedDates[i] || "";
                     var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
                     $("#dynamic-input-container").append(inputElement);
-                    
                 }
+                console.log("testttt falsee");
+
+                // let date_replace = ['2023-12-01', '2023-12-02', '2023-12-03']
+
+                for (var i = 0; i < selectedRemarks.length; i++) {
+                    var inputId = "date-remarks-" + selectedRemarks[i];
+                    var replacementDate = remarks_date[i];
+                    $("#" + inputId).val(replacementDate);
+                }
+            
+
+                // if(first_attempt){
+                //     console.log("testttt trueee");
+                //     for (var i = 0; i < selectedRemarks.length; i++) {
+                //         var selectedRemark = selectedRemarks[i];
+                //         var inputId = "date-remarks-" + selectedRemark;
+                //         var selectedText = $(this).find('option[value="' + selectedRemark + '"]').text();
+                //         var inputValue = remarks_date[i] || "";
+                //         var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
+                //         $("#dynamic-input-container").append(inputElement);
+                //         first_attempt = false;
+                //     }
+                // }
+                // else{
+                //     for (var i = 0; i < selectedRemarks.length; i++) {
+                //         var selectedRemark = selectedRemarks[i];
+                //         var inputId = "date-remarks-" + selectedRemark;
+                //         var selectedText = $(this).find('option[value="' + selectedRemark + '"]').text();
+                //         var inputValue = orderedDates[i] || "";
+                //         var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
+                //         $("#dynamic-input-container").append(inputElement);
+                //     }
+                //     console.log("testttt falsee");
+                // }
+
+
             }
         });
 
-        // Update the remarksDateMap when dates are filled
         $("#dynamic-input-container").on("change", 'input[type="date"]', function() {
             var inputId = $(this).attr("id");
             var selectedRemark = inputId.replace("date-remarks-", "");
-            remarksDateMap[selectedRemark] = $(this).val();
+            var index = selectedRemarks.indexOf(selectedRemark);
+
+            if (index !== -1) {
+                remarks_date[selectedRemark] = $(this).val();
+            } else {
+                // If the remark is not found, it means it's a newly added input
+                // Set the value to blank or any default value as needed
+                remarks_date[selectedRemark] = "";
+            }
+
+            console.log("daaaa");
         });
+
+
+
+        // Update the remarks_date array when dates are filled
+        // $("#dynamic-input-container").on("change", 'input[type="date"]', function() {
+        //     var inputId = $(this).attr("id");
+        //     var selectedRemark = inputId.replace("date-remarks-", "");
+        //     remarks_date[selectedRemark] = $(this).val();
+        //     console.log("daaaa");
+        // });
+
+        // Update the remarksDateMap when dates are filled
+        // $("#dynamic-input-container").on("change", 'input[type="date"]', function() {
+        //     var inputId = $(this).attr("id");
+        //     var selectedRemark = inputId.replace("date-remarks-", "");
+        //     remarksDateMap[selectedRemark] = $(this).val();
+        // });
 
 
         function tev_details(amount,remarks_value,status,emp_id){
@@ -907,7 +1102,7 @@
                     transaction_id : emp_id,
                     remarks : remarks_value,
                     remarks_date : remarks_date,
-                    selected_remarks : selectedRemarksOrder,
+                    selected_remarks : selectedRemarks,
                     selected_dates : selectedDates
                 }
                 }).done(function(data){
