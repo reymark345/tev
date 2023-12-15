@@ -279,6 +279,7 @@
                     <div class="col-12">
                         <br>
                         <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
+                        <span id="remarks_error" style="color: red;"></span>
                     </div>
                 </div>
                 <div class="rows-container">
@@ -675,7 +676,7 @@
                             
                                 var newRow = $('<div class="row mt-2">' +
                                     '<div class="col-5">' +
-                                    '<select class="form-select" id="remarks-select-'+i+'">' +
+                                    '<select class="form-select select-remarks" id="remarks-select-'+i+'">' +
                                     '<option></option>' +
                                     '{% for row in remarks_list %}' +
                                     '<option value="{{ row.id }}">{{ row.name }}</option>' +
@@ -683,7 +684,7 @@
                                     '</select>' +
                                     '</div>' +
                                     '<div class="col-5">' +
-                                    '<input type="date" id="date-remarks" name="DateRemarks" class="form-control" value="' + date_remarks[i] + '" />' +
+                                    '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="' + date_remarks[i] + '" />' +
                                     '</div>' +
                                     '<div class="col-2">' +
                                     '<button type="button" class="btn btn-warning delete-row">-</button>' +
@@ -870,8 +871,94 @@
 
         $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
-            console.log("Selected IDs:", selectedIDs);
+            let selectedIDs = [];
+
+            // Iterate over each row within the .rows-container
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('.select_remarks');
+                let selectedValue = selectElement.val();
+                let errorLabel = selectElement.siblings(".error-label");
+
+                // Check if the selected value is not null or an empty string
+                if (selectedValue !== null && selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+
+                    // Hide the error label if a valid selection is made
+                    errorLabel.hide();
+                } else {
+                    // Show the error label if the selection is empty
+                    errorLabel.show();
+                }
+            });
+
+            // Check if at least one select has a non-null value
+            if (selectedIDs.length > 0) {
+                console.log("Final Amount:", final_amount);
+                console.log("Selected IDs:", selectedIDs);
+            } else {
+                console.log("Error: Please select at least one option in each row.");
+                // You can display a general error message or take other actions here
+            }
         });
+
+        // $('#returned').click(function() {
+        //     let final_amount = $("#final_amount").val().trim();
+
+        //     // Assuming you want to get the selected values from select elements with class 'select_remarks'
+        //     let selectedIDs = [];
+        //     let selectedDate = [];
+        //     let status = 3;
+            
+
+        //     $('.select-remarks').each(function() {
+        //         // Push the selected values to the array
+        //         selectedIDs.push($(this).val()); 
+        //     });
+
+        //     $('.input-date').each(function() {
+        //         // Push the selected values to the array
+        //         selectedDate.push($(this).val());
+        //     });
+
+                    
+        //     if (selectedDate.length === 0 && final_amount === "") {
+        //         $("#amount_error").text("Please enter Amount");
+        //         $("#remarks_error").text("Please enter Remarks");
+        //         $(".input-group").addClass("has-error");
+        //         event.preventDefault();
+
+                
+        //     }
+        //     else if (final_amount === "" ) {
+        //         $("#amount_error").text("Please enter Amount");
+        //         $("#remarks_error").text("");
+        //         $(".input-group").addClass("has-error");
+        //         event.preventDefault();
+                
+        //     }
+        //     else if (selectedDate.length === 0  ) {
+        //         $("#amount_error").text("");
+        //         $("#remarks_error").text("Please enter Remarks");
+        //         // $(".input-group").addClass("has-error");
+        //         event.preventDefault();
+                
+        //     }
+        //     else {
+        //         $("#amount_error").text("");
+        //         $("#remarks_error").text("");
+        //         $(".input-group").removeClass("has-error");
+                
+        //         // tev_details(final_amount,remarks_value,status,clicked_id);
+        //         tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+        //     }
+        //     // console.log("Final Amount:", final_amount);
+        //     // console.log("Selected IDs:", selectedIDs);
+        //     // console.log("Selected IDs:", selectedDate);
+        // });
+
+
+
+
 
         // $('#returned').click(function() {
         //     let data = remarks_date.length + count;
@@ -929,15 +1016,16 @@
             // Create a new row with select, input, and delete button
             var newRow = $('<div class="row mt-2">' +
                 '<div class="col-5">' +
-                '<select class="form-select" id="select_remarks">' +
+                '<select class="form-select select-remarks" id="select_remarks">' +
                     '<option></option>'+
                     '{% for row in remarks_list %}'+
                     '<option value="{{ row.id }}">{{ row.name }}</option>'+
                     '{% endfor %}'+
                 '</select>' +
+                '<span class="error-label">Required</span>'+
                 '</div>' +
                 '<div class="col-5">' +
-                '<input type="date" id="date-remarks" name="DateRemarks" class="form-control" value="" />'+
+                '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="" />'+
                 // '<input type="text" class="form-control">' +
                 '</div>' +
                 '<div class="col-2">' +
@@ -1046,74 +1134,82 @@
             console.log("daaaa");
         });
 
-
-
-        // Update the remarks_date array when dates are filled
-        // $("#dynamic-input-container").on("change", 'input[type="date"]', function() {
-        //     var inputId = $(this).attr("id");
-        //     var selectedRemark = inputId.replace("date-remarks-", "");
-        //     remarks_date[selectedRemark] = $(this).val();
-        //     console.log("daaaa");
-        // });
-
-        // Update the remarksDateMap when dates are filled
-        // $("#dynamic-input-container").on("change", 'input[type="date"]', function() {
-        //     var inputId = $(this).attr("id");
-        //     var selectedRemark = inputId.replace("date-remarks-", "");
-        //     remarksDateMap[selectedRemark] = $(this).val();
-        // });
-
-
-        function tev_details(amount,remarks_value,status,emp_id){
+        function tev_details(amount,selectedIDs,status,emp_id, selectedDate){
             let selectedDates = [];
             var hasError = false;
 
-            console.log("starthere");
-            console.log(selectedRemarks);
+            console.log("amount");
+            console.log(amount);
             console.log("------");
-            console.log(selectedDates);
+            console.log(selectedIDs);
             console.log("------");
-            console.log(selectedRemarksOrder);
+            console.log(status);
+            console.log("------");
+            console.log(emp_id);
+            console.log("------");
+            console.log(selectedDate);
 
 
-            $("#dynamic-input-container input[type='date']").each(function() {
-                var dateValue = $(this).val();
-                selectedDates.push(dateValue);
-                var errorLabel = $(this).next(".error-label");
-                if (!errorLabel.length) {
-                    errorLabel = $("<label class='error-label'></label>").insertAfter($(this));
-                }
-                if (!dateValue) {
-                    hasError = true;
-                    errorLabel.text("Required.").show();
-                    $(this).addClass("has-error");
+
+            $('.select_remarks').each(function() {
+                let selectedValue = $(this).val();
+                let errorLabel = $(this).next(".error-label");
+
+                // Check if the selected value is not null or an empty string
+                if (selectedValue !== null && selectedValue !== "") {
+
+                    console.log("testttt1");
+                    selectedIDs.push(selectedValue);
+                    
+                    // Hide the error label if a valid selection is made
+                    errorLabel.hide();
                 } else {
-                    errorLabel.hide().text("");
-                    $(this).removeClass("has-error");
+                    console.log("testttt2");
+                    // Show the error label if the selection is empty
+                    errorLabel.show();
                 }
             });
+
+
+            // $("#dynamic-input-container input[type='date']").each(function() {
+            //     var dateValue = $(this).val();
+            //     selectedDates.push(dateValue);
+            //     var errorLabel = $(this).next(".error-label");
+            //     if (!errorLabel.length) {
+            //         errorLabel = $("<label class='error-label'></label>").insertAfter($(this));
+            //     }
+            //     if (!dateValue) {
+            //         hasError = true;
+            //         errorLabel.text("Required.").show();
+            //         $(this).addClass("has-error");
+            //     } else {
+            //         errorLabel.hide().text("");
+            //         $(this).removeClass("has-error");
+            //     }
+            // });
+
             if (!hasError){
-                $.ajax({
-                type: "POST",
-                url: "{% url 'update-tev-details' %}",
-                data:{
-                    final_amount: amount,
-                    status : status,
-                    transaction_id : emp_id,
-                    remarks : remarks_value,
-                    remarks_date : remarks_date,
-                    selected_remarks : selectedRemarks,
-                    selected_dates : selectedDates
-                }
-                }).done(function(data){
-                    if (data.data == 'success') {
-                        $('#tevDetails').modal('hide');
-                        toastr.success('Successfully save', 'Success', toast_options);
-                        dataTable.ajax.reload()
-                    } else {
-                        toastr.danger('Data not saved', 'Danger', toast_options);
-                    }
-                });
+                // $.ajax({
+                // type: "POST",
+                // url: "{% url 'update-tev-details' %}",
+                // data:{
+                //     final_amount: amount,
+                //     status : status,
+                //     transaction_id : emp_id,
+                //     remarks : remarks_value,
+                //     remarks_date : remarks_date,
+                //     selected_remarks : selectedRemarks,
+                //     selected_dates : selectedDates
+                // }
+                // }).done(function(data){
+                //     if (data.data == 'success') {
+                //         $('#tevDetails').modal('hide');
+                //         toastr.success('Successfully save', 'Success', toast_options);
+                //         dataTable.ajax.reload()
+                //     } else {
+                //         toastr.danger('Data not saved', 'Danger', toast_options);
+                //     }
+                // });
             }
         }
 
