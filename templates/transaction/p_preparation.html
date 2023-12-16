@@ -368,6 +368,7 @@
     let clicked_id = 0;
     let status_val =0;
     let employeeList = [];
+    let pp_id = 0;
     $(document).ready(function () {
         let selected_tev = [];
         var fdateField = $('#f-dateField').flatpickr({
@@ -1155,9 +1156,9 @@
             var rowData = $('#tbl-items').DataTable().row($(this).closest('tr')).data();
             var csrf_token = "{{ csrf_token }}";
             // Access the ID of the clicked item (assuming the ID is stored in a property called "id")
-            var itemId = rowData.id;
-            console.log(itemId);
-            console.log("id ni");
+            pp_id = rowData.id;
+            // console.log(pp_id);
+            // console.log("id ni");
 
             $.ajax({
                 type: 'POST',
@@ -1166,9 +1167,12 @@
                     'X-CSRFToken': csrf_token
                 },
                 data:{
-                    payroll_id: itemId
+                    payroll_id: pp_id
                 }
             }).done(function (data) {
+                console.log(data);
+                console.log("tHIS IS iddddd");
+
                 // let duplicate_date = data.remarks;
                 // let final_amount = data.final_amount;
                 // let lacking = data.lacking;
@@ -1217,12 +1221,6 @@
                 //     "color": "#ffffff"              // White text color
                 // });
             })
-
-
-
-
-
-
 
             $('#payrollDetails').modal('show');
 
@@ -1404,15 +1402,25 @@
                 }
             });
             if (selectedIDs.length > 0 && hasError ==0) {
-                // tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
-                console.log(selectedIDs);
-                console.log(selectedAmount);
-                console.log(clicked_id);
-                console.log("selectedAmount");
+                $.ajax({
+                    type: "POST",
+                    url: "{% url 'add-multiple-charges' %}",
+                    data:{
+                        amount: selectedAmount,
+                        incoming_id: pp_id,
+                        charges_id : selectedIDs
+                    }
+                    }).done(function(data){
+                    if (data.data == 'success') {
+                        $('#payrollDetails').modal('hide');
+                        toastr.success('Successfully save', 'Success', toast_options);
+                        offCanvasEl.hide()
+                        dataTable.ajax.reload()
+                    } else {
+                        toastr.danger('Data not saved', 'Danger', toast_options);
+                    }
+                });
             }
-            // else if(selectedIDs.length == 0) {
-            //     tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
-            // }
           });
 
         function tev_details(amount,remarks,status,emp_id){

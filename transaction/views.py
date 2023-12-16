@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges)
 import json 
 from django.core import serializers
 from datetime import date, datetime, timedelta
@@ -375,8 +375,28 @@ def employee_dv(request):
 
 def multiple_charges_details(request):
     pp_id = request.POST.get('payroll_id')
+    data = []
     print(pp_id)
     print("testtt")
+
+    charges = PayrolledCharges.objects.filter(incoming_id = pp_id)
+    with connection.cursor() as cursor:
+        cursor.execute(charges)
+        columns = [col[0] for col in cursor.description]
+        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    for item in results: 
+        item = {
+            'id': item['id'],
+            'amount': item['amount'],
+            'charges_id': item['charges_id'],
+            'incoming_id': item['incoming_id']
+        }
+    response = {
+        'data': data
+    }
+    return JsonResponse(response)
+
     # with connection.cursor() as cursor:
     #     query = """
     #     SELECT
@@ -828,6 +848,25 @@ def update_box_list(request):
         'total_amount':total_amount
     }
     return JsonResponse(response)
+
+
+@csrf_exempt
+def add_multiple_charges(request):
+    if request.method == 'POST':
+        amount = request.POST.getlist('amount[]')
+        charges_id = request.POST.getlist('charges_id[]')
+        incoming_id = request.POST.get('incoming_id')
+        
+        PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
+        for amt, ch_id in zip(amount, charges_id):
+            PayrolledCharges.objects.create(
+                incoming_id=incoming_id,
+                amount=amt,
+                charges_id=ch_id
+        )
+        return JsonResponse({'data': 'success'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 @csrf_exempt
 def delete_box_list(request):
