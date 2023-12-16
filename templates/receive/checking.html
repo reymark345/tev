@@ -88,7 +88,6 @@
                             <th>Reviewed</th>
                             <th>Duplicate</th>
                             <th>Remarks</th>
-                            <th>Created By</th>
                             <th>ID</th>
                         </tr>
                     </thead>
@@ -272,14 +271,14 @@
             <div class="col-12">
                 <label class="form-label" for="modaltevDetails">Final Amount</label>
                 <div class="input-group">
-                <span class="input-group-text">₱</span>
-                <input
-                    type="number"
-                    id="final_amount"
-                    name="FinalAmount"
-                    class="form-control phone-number-otp-mask"
-                    placeholder="0.00"
-                />
+                    <span class="input-group-text">₱</span>
+                    <input
+                        type="number"
+                        id="final_amount"
+                        name="FinalAmount"
+                        class="form-control phone-number-otp-mask"
+                        placeholder="0.00"
+                    />
                 </div>
                 <span id="amount_error" style="color: red;"></span>
             </div>
@@ -440,7 +439,6 @@
                 { data: 'slashed_out' },
                 { data: 'remarks' },
                 { data: 'lacking' },
-                { data: 'user_id' },
                 { data: 'id' },
 
             ],
@@ -523,13 +521,13 @@
                   },
                 },
                 {
-                    targets: -6,
+                    targets: -5,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
                 },
                 {
-                    targets: -4,
+                    targets: -3,
                     render: function (data) {
                         if (data === null || data === undefined || data === "") {
                             return ''; 
@@ -541,7 +539,7 @@
                 },
 
                 {
-                    targets: -3,
+                    targets: -2,
                     render: function (data) {
                         if (data === null || data === undefined || data === "") {
                             return ''; 
@@ -835,22 +833,6 @@
 
 
         $('#approved').click(function() {
-            // let final_amount = $("#final_amount").val().trim();
-            // let remarks_value = RemarksList.val();
-            // // let correctness_remarks = $("#correctness_remarks").val().trim();
-            // let status = 7; 
-            //   if (final_amount === "") {  
-            //     $("#amount_error").text("Please enter Amount");
-            //     $("#remarks_error").text("");
-            //     $(".input-group").addClass("has-error");
-            //     event.preventDefault();
-            //   } else {
-            //     $("#amount_error").text("");
-            //     $("#remarks_error").text("");
-            //     $(".input-group").removeClass("has-error");
-            //     tev_details(final_amount,remarks_value,status,clicked_id);
-            //   }
-
             let final_amount = $("#final_amount").val().trim();
             let selectedIDs = [];
             let selectedDate = [];

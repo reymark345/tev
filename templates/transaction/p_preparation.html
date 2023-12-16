@@ -1,5 +1,36 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
 
+<style>
+    .has-error {
+        border: 1px solid red; /* Change the border color for the input with an error */
+    }
+
+    .error-label, .error-label-amount {
+        color: red; /* Set the text color for the error message */
+        margin-top: 5px; /* Add some space between the input and the error message */
+    }
+    
+
+    .select-charges.has-error {
+    border: 1px solid red; /* Change the border color for the input with an error */
+    }
+
+    /* Additional style for the error message */
+    .select-charges.has-error::after {
+        content: "Required"; /* Set the error message text */
+        color: red; /* Set the text color for the error message */
+        display: block; /* Display the error message as a block element */
+        margin-top: 5px; /* Add some space between the input and the error message */
+    }
+
+    /* Hide the error message when there's no error */
+    .select-charges::after {
+        content: ""; /* Empty content to hide the error message */
+        display: none;
+    }
+
+
+</style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -244,57 +275,25 @@
         <div class="modal-body">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             <div class="text-center mb-4">
-            <h3 class="mb-2">Multiple Charges</h3>
-            <p>Select charges with their corresponding amount</p>
+                <h3 class="mb-2">Multiple Charges</h3>
+                <p>Select charges with their corresponding amount</p>
             </div>
             <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
-            
-                <!-- <div class="col-12">
-                    <label class="form-label" for="modaltevDetails">Charges</label>
-                    <div class="input-group">
-
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <br>
+                        <button type="button" id="add_charges" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
+                        <span id="remarks_error" style="color: red;"></span>
                     </div>
-                    <span id="amount_error" style="color: red;"></span>
-                </div> -->
-
-                <div class="col-12 col-md-12">
-                    <label class="form-label" for="modalFEmployeeName">Employee Name</label>
-                    <select id="charges-list" name="ChargesList" class="select2 form-select charges-list" multiple>
-                        <option></option>
-                        {% for row in charges %}
-                        <option value="{{ row.id }}">{{ row.name }}</option>
-                        {% endfor %}
-                    </select>
                 </div>
-
-                
-                
-                
-                <div class="col-12">
-                    <label class="form-label" for="modaltevDetails">Final Amount</label>
-                    <div class="input-group">
-                    <span class="input-group-text">₱</span>
-                    <input
-                        type="number"
-                        id="final_amount"
-                        name="FinalAmount"
-                        class="form-control phone-number-otp-mask"
-                        placeholder="0.00"
-                    />
-                    </div>
-                    <span id="amount_error" style="color: red;"></span>
+                <div class="rows-container">
+                    <!-- Appended rows will be placed here -->
                 </div>
-
-
-
-            <div class="col-sm-12">
-                <br>
-                <div id="dynamic-input-container"></div>
-            </div>
-
-
+            </div>    
             <div class="col-12">
-                <button type="submit" id ="approved" class="btn btn-primary me-sm-3 me-1">Save</button>
+                <br>
+                <button type="submit" id ="save-multiple-charges" class="btn btn-label-primary me-sm-3 me-1">Save</button>
                 <button
                     type="reset"
                     class="btn btn-label-secondary"
@@ -1159,7 +1158,96 @@
             var itemId = rowData.id;
             console.log(itemId);
             console.log("id ni");
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'multiple-charges-details' %}",
+                headers: {
+                    'X-CSRFToken': csrf_token
+                },
+                data:{
+                    payroll_id: itemId
+                }
+            }).done(function (data) {
+                // let duplicate_date = data.remarks;
+                // let final_amount = data.final_amount;
+                // let lacking = data.lacking;
+                // let date_remarks = data.date_remarks;
+                // let remarks_d = data.lacking;
+
+                // if(duplicate_date === "" || duplicate_date === null ){
+                //     $("#dp_date").hide();
+                // }
+                // else{
+                //     $("#dp_date").show();
+                // }
+                // if (lacking === null) {
+                //     $('#remarks-list').val([]).trigger('change');
+                    
+                // } else {
+                //     arraydetails = [];
+                //     $('.rows-container').empty();
+                //     lacking = data.lacking.split(',').map(Number);
+
+                //     remarks_d = remarks_d.split(", ");
+                //     date_remarks = date_remarks.split(", ")
+                //     remarks_date = date_remarks;
+                //     remarks_data = remarks_d;
+                // }
+        
+                // if(final_amount && final_amount !="0E-10"){
+                //     final_amount = data.final_amount;
+                // }
+                // else{
+                //     final_amount = data.original_amount;
+                // }
+
+                // // Trigger change event to reflect the selected options visually
+                // $('#remarks-list').trigger('change');
+                // let floatvalue = parseFloat(final_amount);
+                // let convertedAmount = floatvalue.toFixed(2);
+                // if (convertedAmount === "0.00") {convertedAmount =""} 
+                // $("#final_amount").val(convertedAmount);
+                // $("#correctness_remarks").val(duplicate_date);
+                // $("#correctness_remarks").prop("disabled", true);
+                // // $("#correctness_remarks").css("background-color", "#cf2732");
+
+                // $("#correctness_remarks").css({
+                //     "background-color": "#cf2732",  // Yellow background color
+                //     "color": "#ffffff"              // White text color
+                // });
+            })
+
+
+
+
+
+
+
             $('#payrollDetails').modal('show');
+
+            var newRow = $('<div class="row mt-2">' +
+                '<div class="col-5">' +
+                '<select class="form-select select-charges" id="select_remarks">' +
+                    '<option></option>'+
+                    '{% for row in charges %}'+
+                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                    '{% endfor %}'+
+                '</select>' +
+                '<span class="error-label">Required</span>'+
+                '</div>' +
+                '<div class="col-5">' +
+                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                '<span class="error-label-amount">Required</span>'+
+                '</div>' +
+                '<div class="col-2">' +
+                '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                '</div>' +
+                '</div>');
+                newRow.find('.error-label, .error-label-amount').hide();
+            $('.rows-container').append(newRow);
+
+            
             if (ChargesList.length) {
                 ChargesList.wrap('<div class="position-relative"></div>')
                 ChargesList.select2({
@@ -1236,6 +1324,32 @@
              console.log("Newly added values: " + employeeList);
         
         });
+
+        $('#add_charges').click(function () {     
+            var newRow = $('<div class="row mt-2">' +
+                '<div class="col-5">' +
+                '<select class="form-select select-charges" id="select_remarks">' +
+                    '<option></option>'+
+                    '{% for row in charges %}'+
+                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                    '{% endfor %}'+
+                '</select>' +
+                '<span class="error-label">Required</span>'+
+                '</div>' +
+                '<div class="col-5">' +
+                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                '<span class="error-label-amount">Required</span>'+
+                '</div>' +
+                '<div class="col-2">' +
+                '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                '</div>' +
+                '</div>');
+                newRow.find('.error-label, .error-label-amount').hide();
+            $('.rows-container').append(newRow);
+        });
+        $('.container').on('click', '.delete-row', function () {
+            $(this).closest('.row').remove();
+        });
         
         
         $('#returned').click(function() {
@@ -1254,6 +1368,52 @@
                 }
             
         });
+
+        $('#save-multiple-charges').click(function() {
+            let selectedIDs = [];
+            let selectedAmount = [];
+            let status = 7;
+            let hasError = 0;
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('.select-charges');
+                let selectElementDate = $(this).find('.select-charges');
+                let selectedValue = selectElement.val();
+                let selectErrorLabel = selectElement.siblings(".error-label");
+
+                let inputElement = $(this).find('.input-date');
+                let inputValue = inputElement.val();
+                let inputErrorLabel = inputElement.siblings(".error-label-amount");
+
+                if (selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+                    selectElement.removeClass('has-error');
+                    selectErrorLabel.hide();
+                } else {
+                    hasError++;
+                    selectElement.addClass('has-error');
+                    selectErrorLabel.show();
+                }
+                if (inputValue !== "") {
+                    selectedAmount.push(inputValue);
+                    inputElement.removeClass('has-error');
+                    inputErrorLabel.hide();
+                } else {
+                    hasError++;
+                    inputElement.addClass('has-error');
+                    inputErrorLabel.show();
+                }
+            });
+            if (selectedIDs.length > 0 && hasError ==0) {
+                // tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+                console.log(selectedIDs);
+                console.log(selectedAmount);
+                console.log(clicked_id);
+                console.log("selectedAmount");
+            }
+            // else if(selectedIDs.length == 0) {
+            //     tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            // }
+          });
 
         function tev_details(amount,remarks,status,emp_id){
             $.ajax({
