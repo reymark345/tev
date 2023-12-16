@@ -1153,7 +1153,7 @@
         // Get the data associated with the clicked row
             // var rowData = example.row($(this).closest('tr')).data();
             var rowData = $('#tbl-items').DataTable().row($(this).closest('tr')).data();
-
+            var csrf_token = "{{ csrf_token }}";
             // Access the ID of the clicked item (assuming the ID is stored in a property called "id")
             var itemId = rowData.id;
             console.log(itemId);
