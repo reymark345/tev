@@ -32,9 +32,36 @@
         border: 1px solid red; /* Change the border color for the input with an error */
     }
 
-    .error-label {
+    .error-label, .error-label-date {
         color: red; /* Set the text color for the error message */
         margin-top: 5px; /* Add some space between the input and the error message */
+    }
+    
+
+    .select-remarks.has-error {
+    border: 1px solid red; /* Change the border color for the input with an error */
+    }
+
+    /* Additional style for the error message */
+    .select-remarks.has-error::after {
+        content: "Required"; /* Set the error message text */
+        color: red; /* Set the text color for the error message */
+        display: block; /* Display the error message as a block element */
+        margin-top: 5px; /* Add some space between the input and the error message */
+    }
+
+    /* Hide the error message when there's no error */
+    .select-remarks::after {
+        content: ""; /* Empty content to hide the error message */
+        display: none;
+    }
+            /* Custom styles for expanded select and input */
+    .custom-select {
+        width: 60px;
+    }
+
+    .custom-input {
+        width: 100%;
     }
 </style>
 
@@ -61,7 +88,6 @@
                             <th>Reviewed</th>
                             <th>Duplicate</th>
                             <th>Remarks</th>
-                            <th>Created By</th>
                             <th>ID</th>
                         </tr>
                     </thead>
@@ -245,14 +271,14 @@
             <div class="col-12">
                 <label class="form-label" for="modaltevDetails">Final Amount</label>
                 <div class="input-group">
-                <span class="input-group-text">₱</span>
-                <input
-                    type="number"
-                    id="final_amount"
-                    name="FinalAmount"
-                    class="form-control phone-number-otp-mask"
-                    placeholder="0.00"
-                />
+                    <span class="input-group-text">₱</span>
+                    <input
+                        type="number"
+                        id="final_amount"
+                        name="FinalAmount"
+                        class="form-control phone-number-otp-mask"
+                        placeholder="0.00"
+                    />
                 </div>
                 <span id="amount_error" style="color: red;"></span>
             </div>
@@ -265,24 +291,27 @@
                 
             </div>
 
+            <div class="container">
+                <div class="row">
+                    <!-- <div class="col-12">
+                        <br>
+                        <div class="d-flex justify-content-end"> 
+                            <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-primary me-sm-3 me-2">+</button>
+                            <span id="remarks_error" style="color: red;"></span>
+                        </div>
+                    </div> -->
+                    <div class="col-12">
+                        <br>
+                        <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
+                        <span id="remarks_error" style="color: red;"></span>
+                    </div>
+                </div>
+                <div class="rows-container">
+                    <!-- Appended rows will be placed here -->
+                </div>
+            </div>    
             <div class="col-12">
-                <label class="form-label" for="modaltevDetails">Remarks</label>
-                    <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
-                        <option></option>
-                        {% for row in remarks_list %}
-                        <option value="{{ row.id }}">{{ row.name }}</option>
-                        {% endfor %}
-                    </select>
-                <span id="remarks_error" style="color: red;"></span>
-            </div>
-
-            <div class="col-sm-12">
                 <br>
-                <div id="dynamic-input-container"></div>
-            </div>
-
-
-            <div class="col-12">
                 <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
                 <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
                 <button
@@ -307,7 +336,16 @@
     let formattedDates = ''
     let employeeList = [];
     let remarks_date = [];
+    let remarks_data = [];
     let selectedRemarks = [];
+
+    let selectedRemarksOrder = [];
+    let remarksDateMap = {};
+
+    let arraydetails = [];
+
+    let first_attempt = false
+    let count = 0;
     
     $(document).ready(function () {
         $('#loading-screen').hide();
@@ -401,7 +439,6 @@
                 { data: 'slashed_out' },
                 { data: 'remarks' },
                 { data: 'lacking' },
-                { data: 'user_id' },
                 { data: 'id' },
 
             ],
@@ -484,13 +521,13 @@
                   },
                 },
                 {
-                    targets: -6,
+                    targets: -5,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
                 },
                 {
-                    targets: -4,
+                    targets: -3,
                     render: function (data) {
                         if (data === null || data === undefined || data === "") {
                             return ''; 
@@ -502,7 +539,7 @@
                 },
 
                 {
-                    targets: -3,
+                    targets: -2,
                     render: function (data) {
                         if (data === null || data === undefined || data === "") {
                             return ''; 
@@ -587,6 +624,7 @@
                 });
 
                 $('.item-details').on('click', function () {
+                    first_attempt = true;
                     if (RemarksList.length) {
                             RemarksList.wrap('<div class="position-relative"></div>')
                             RemarksList.select2({
@@ -611,6 +649,9 @@
                         let final_amount = data.final_amount;
                         let lacking = data.lacking;
                         let date_remarks = data.date_remarks;
+                        let remarks_d = data.lacking;
+
+
 
                         if(duplicate_date === "" || duplicate_date === null ){
                             $("#dp_date").hide();
@@ -622,17 +663,44 @@
                             $('#remarks-list').val([]).trigger('change');
                             
                         } else {
+                            arraydetails = [];
+                            $('.rows-container').empty();
                             lacking = data.lacking.split(',').map(Number);
+
+                            remarks_d = remarks_d.split(", ");
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
-                            $('#remarks-list').val([]).trigger('change');
-                            $('#remarks-list option').each(function() {
-                                let optionValue = parseInt($(this).val());
-                                if (lacking.includes(optionValue)) {
-                                    $(this).prop('selected', true);
+                            remarks_data = remarks_d;
+
+                            for (let i = 0; i < date_remarks.length; i++) {                            
+                                var newRow = $('<div class="row mt-2">' +
+                                    '<div class="col-5">' +
+                                    '<select class="form-select select-remarks" id="remarks-select-'+i+'">' +
+                                    '<option></option>' +
+                                    '{% for row in remarks_list %}' +
+                                    '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                                    '{% endfor %}' +
+                                    '</select>' +
+                                    '</div>' +
+                                    '<div class="col-5">' +
+                                    '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="' + date_remarks[i] + '" />' +
+                                    '</div>' +
+                                    '<div class="col-2">' +
+                                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                                    '</div>' +
+                                    '</div>');
+                                $('.rows-container').append(newRow);
+
+                                $(`#remarks-select-${i}`).val(remarks_d[i]).trigger('change');
+
+                                item_entry = {
+                                    'remarks': remarks_d[i],
+                                    'date': date_remarks[i]
                                 }
-                                
-                            });
+                                arraydetails.push(item_entry);
+
+                            }
+                            console.log(arraydetails);
                         }
               
                         if(final_amount && final_amount !="0E-10"){
@@ -644,18 +712,18 @@
 
                         // Trigger change event to reflect the selected options visually
                         $('#remarks-list').trigger('change');
-                            let floatvalue = parseFloat(final_amount);
-                            let convertedAmount = floatvalue.toFixed(2);
-                            if (convertedAmount === "0.00") {convertedAmount =""} 
-                            $("#final_amount").val(convertedAmount);
-                            $("#correctness_remarks").val(duplicate_date);
-                            $("#correctness_remarks").prop("disabled", true);
-                            // $("#correctness_remarks").css("background-color", "#cf2732");
+                        let floatvalue = parseFloat(final_amount);
+                        let convertedAmount = floatvalue.toFixed(2);
+                        if (convertedAmount === "0.00") {convertedAmount =""} 
+                        $("#final_amount").val(convertedAmount);
+                        $("#correctness_remarks").val(duplicate_date);
+                        $("#correctness_remarks").prop("disabled", true);
+                        // $("#correctness_remarks").css("background-color", "#cf2732");
 
-                            $("#correctness_remarks").css({
-                                "background-color": "#cf2732",  // Yellow background color
-                                "color": "#ffffff"              // White text color
-                            });
+                        $("#correctness_remarks").css({
+                            "background-color": "#cf2732",  // Yellow background color
+                            "color": "#ffffff"              // White text color
+                        });
                     })
                 });
             },
@@ -766,20 +834,55 @@
 
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();
-            let remarks_value = RemarksList.val();
-            // let correctness_remarks = $("#correctness_remarks").val().trim();
-            let status = 7; 
-              if (final_amount === "") {  
+            let selectedIDs = [];
+            let selectedDate = [];
+            let status = 7;
+            let hasError = 0;
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('.select-remarks');
+                let selectElementDate = $(this).find('.select-remarks');
+                let selectedValue = selectElement.val();
+                let selectErrorLabel = selectElement.siblings(".error-label");
+
+                let inputElement = $(this).find('.input-date');
+                let inputValue = inputElement.val();
+                let inputErrorLabel = inputElement.siblings(".error-label-date");
+
+                if (selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+                    selectElement.removeClass('has-error');
+                    selectErrorLabel.hide();
+                } else {
+                    hasError++;
+                    selectElement.addClass('has-error');
+                    selectErrorLabel.show();
+                }
+                if (inputValue !== "") {
+                    selectedDate.push(inputValue);
+                    inputElement.removeClass('has-error');
+                    inputErrorLabel.hide();
+                } else {
+                    hasError++;
+                    inputElement.addClass('has-error');
+                    inputErrorLabel.show();
+                }
+            });
+
+            if (final_amount === "") {  
+                hasError++;
                 $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("");
                 $(".input-group").addClass("has-error");
                 event.preventDefault();
-              } else {
+            } else {
                 $("#amount_error").text("");
-                $("#remarks_error").text("");
                 $(".input-group").removeClass("has-error");
-                tev_details(final_amount,remarks_value,status,clicked_id);
-              }
+
+            }
+            if (selectedIDs.length > 0 && hasError ==0) {
+                tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            } else if(selectedIDs.length == 0) {
+                tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            }
           });
 
           $('#f-employee-name').change(function() {
@@ -799,94 +902,98 @@
             });
             console.log("Newly added values: " + employeeList);
         });
-
         $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
-            let correctness_remarks = $("#correctness_remarks").val().trim();
-            let remarks_value = RemarksList.val();
-
+            let selectedIDs = [];
+            let selectedDate = [];
             let status = 3;
-            if (remarks_value.length === 0 && final_amount === "") {
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("Please enter Remarks");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-            }
-            else if (final_amount === "" ) {
-                $("#amount_error").text("Please enter Amount");
-                $("#remarks_error").text("");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-            }
-            else if (remarks_value.length === 0  ) {
-                $("#amount_error").text("");
-                $("#remarks_error").text("Please enter Remarks");
-                $(".input-group").addClass("has-error");
-                event.preventDefault();
-            }
-            else {
-                $("#remarks_error").text("");
-                $(".input-group").removeClass("has-error");
-                tev_details(final_amount,remarks_value,status,clicked_id);
-            }
-        });
+            let hasError = 0;
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('.select-remarks');
+                let selectElementDate = $(this).find('.select-remarks');
+                let selectedValue = selectElement.val();
+                let selectErrorLabel = selectElement.siblings(".error-label");
 
-        $(".remarks-list").on("change", function() {
-            $("#dynamic-input-container").empty();
-            selectedRemarks = $(this).val();
-            if (selectedRemarks) {
-                for (var i = 0; i < selectedRemarks.length; i++) {
-                    var inputId = "date-remarks-" + selectedRemarks[i];
-                    var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
-                    var inputValue = remarks_date[i] || "";
-                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
-                    $("#dynamic-input-container").append(inputElement);
-                }
-            }
-        });
+                let inputElement = $(this).find('.input-date');
+                let inputValue = inputElement.val();
+                let inputErrorLabel = inputElement.siblings(".error-label-date");
 
-        function tev_details(amount,remarks_value,status,emp_id){
-            let selectedDates = [];
-            var hasError = false;
-            $("#dynamic-input-container input[type='date']").each(function() {
-                var dateValue = $(this).val();
-                selectedDates.push(dateValue);
-                var errorLabel = $(this).next(".error-label");
-                if (!errorLabel.length) {
-                    errorLabel = $("<label class='error-label'></label>").insertAfter($(this));
-                }
-                if (!dateValue) {
-                    hasError = true;
-                    errorLabel.text("Date is required.").show();
-                    $(this).addClass("has-error");
+                if (selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+                    selectElement.removeClass('has-error');
+                    selectErrorLabel.hide();
                 } else {
-                    errorLabel.hide().text("");
-                    $(this).removeClass("has-error");
+                    hasError++;
+                    selectElement.addClass('has-error');
+                    selectErrorLabel.show();
+                }
+                if (inputValue !== "") {
+                    selectedDate.push(inputValue);
+                    inputElement.removeClass('has-error');
+                    inputErrorLabel.hide();
+                } else {
+                    hasError++;
+                    inputElement.addClass('has-error');
+                    inputErrorLabel.show();
                 }
             });
-            if (!hasError){
-                $.ajax({
-                type: "POST",
-                url: "{% url 'update-tev-details' %}",
-                data:{
-                    final_amount: amount,
-                    status : status,
-                    transaction_id : emp_id,
-                    remarks : remarks_value,
-                    remarks_date : remarks_date,
-                    selected_remarks : selectedRemarks,
-                    selected_dates : selectedDates
-                }
-                }).done(function(data){
-                    if (data.data == 'success') {
-                        $('#tevDetails').modal('hide');
-                        toastr.success('Successfully save', 'Success', toast_options);
-                        dataTable.ajax.reload()
-                    } else {
-                        toastr.danger('Data not saved', 'Danger', toast_options);
-                    }
-                });
+            if (selectedIDs.length > 0 && hasError ==0) {
+                tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            } else if(selectedIDs.length == 0) {
+                toastr.error('Please filled details at least one Remarks', 'Invalid Save!', toast_options);
             }
+        });
+
+        $('#add_remarks').click(function () {     
+            var newRow = $('<div class="row mt-2">' +
+                '<div class="col-5">' +
+                '<select class="form-select select-remarks" id="select_remarks">' +
+                    '<option></option>'+
+                    '{% for row in remarks_list %}'+
+                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                    '{% endfor %}'+
+                '</select>' +
+                '<span class="error-label">Required</span>'+
+                '</div>' +
+                '<div class="col-5">' +
+                '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="" />'+
+                '<span class="error-label-date">Required</span>'+
+                '</div>' +
+                '<div class="col-2">' +
+                '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                '</div>' +
+                '</div>');
+                newRow.find('.error-label, .error-label-date').hide();
+            $('.rows-container').append(newRow);
+        });
+        $('.container').on('click', '.delete-row', function () {
+            $(this).closest('.row').remove();
+        });
+
+        function tev_details(amount,selectedRemarks,status,emp_id, selectedDates){
+            var hasError = false;
+            $.ajax({
+            type: "POST",
+            url: "{% url 'update-tev-details' %}",
+            data:{
+                final_amount: amount,
+                status : status,
+                transaction_id : emp_id,
+                remarks : remarks_data,
+                remarks_date : remarks_date,
+                selected_remarks : selectedRemarks,
+                selected_dates : selectedDates
+            }
+            }).done(function(data){
+                if (data.data == 'success') {
+                    $('#tevDetails').modal('hide');
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    dataTable.ajax.reload()
+                } else {
+                    toastr.danger('Data not saved', 'Danger', toast_options);
+                }
+            });
+            
         }
 
         if (EmployeeName.length) {

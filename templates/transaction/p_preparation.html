@@ -1,5 +1,36 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
 
+<style>
+    .has-error {
+        border: 1px solid red; /* Change the border color for the input with an error */
+    }
+
+    .error-label, .error-label-amount {
+        color: red; /* Set the text color for the error message */
+        margin-top: 5px; /* Add some space between the input and the error message */
+    }
+    
+
+    .select-charges.has-error {
+    border: 1px solid red; /* Change the border color for the input with an error */
+    }
+
+    /* Additional style for the error message */
+    .select-charges.has-error::after {
+        content: "Required"; /* Set the error message text */
+        color: red; /* Set the text color for the error message */
+        display: block; /* Display the error message as a block element */
+        margin-top: 5px; /* Add some space between the input and the error message */
+    }
+
+    /* Hide the error message when there's no error */
+    .select-charges::after {
+        content: ""; /* Empty content to hide the error message */
+        display: none;
+    }
+
+
+</style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -237,6 +268,48 @@
 </div>
 <!--/ Add New Credit Card Modal -->
 
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="payrollDetails" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center mb-4">
+                <h3 class="mb-2">Multiple Charges</h3>
+                <p>Select charges with their corresponding amount</p>
+            </div>
+            <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <br>
+                        <button type="button" id="add_charges" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
+                        <span id="remarks_error" style="color: red;"></span>
+                    </div>
+                </div>
+                <div class="rows-container">
+                    <!-- Appended rows will be placed here -->
+                </div>
+            </div>    
+            <div class="col-12">
+                <br>
+                <button type="submit" id ="save-multiple-charges" class="btn btn-label-primary me-sm-3 me-1">Save</button>
+                <button
+                    type="reset"
+                    class="btn btn-label-secondary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    >
+                    Cancel
+                </button>
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+<!--/ Enable OTP Modal -->
+
       
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
@@ -308,6 +381,7 @@
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             Charges = jQuery(document.querySelector('[name="Charges"]')),
+            ChargesList = jQuery(document.querySelector('[name="ChargesList"]')),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
@@ -471,21 +545,42 @@
                     },
                 },
 
+                // {
+                //     targets: -2,
+                //     render: function(data, type, row) {
+                //         if (type === 'display') {
+                //             return '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
+                //                 '<option></option>' +
+                //                 '{% for row in charges %}'+
+                //                 '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                //                 '{% endfor %}'+
+                //                 '</select>'+
+                //                 '<span id="charges_error" style="color: red;"></span>'+
+                //                 '<button type="button" class="btn btn-info waves-effect waves-light">+</button>';
+                //         }
+                //         return data;
+                //     }
+                // },
                 {
                     targets: -2,
                     render: function(data, type, row) {
                         if (type === 'display') {
-                            return '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
-                                '<option></option>' +
-                                '{% for row in charges %}'+
-                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                '{% endfor %}'+
+                            return '<div style="display: inline-block;">' +
+                                '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
+                                    '<option></option>' +
+                                    '{% for row in charges %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endfor %}'+
                                 '</select>'+
-                                '<span id="charges_error" style="color: red;"></span>';
+                                '<span id="charges_error" style="color: red;"></span>'+
+                                '</div>'+
+                                '<button type="button" class="btn btn-info waves-effect waves-light" id="multiple_charges" name="MultipleCharges" style="margin-left: 10px; height:37px;" disabled>+</button>';
                         }
                         return data;
                     }
                 },
+
+
                 {
                     targets: -1,
                     render: function(data, type, row) {
@@ -912,6 +1007,10 @@
                 }
             });
 
+
+
+
+
             if (!emptyDataExists) {
                 $('#saveModal').modal('show');
                 const currentDate = new Date();
@@ -958,6 +1057,7 @@
             var row = clickedCheckbox.closest('tr');
             var checkboxId = clickedCheckbox.attr('value');
             var purposeInput = row.find('input[name="Purpose"]');
+            var charges_multiple = row.find('button[name="MultipleCharges"]');
             var purposeValue = purposeInput.val().trim();
             var stck_id = clickedCheckbox.val();
            
@@ -967,7 +1067,6 @@
             let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
             let year = currentDate.getFullYear();
             let travel = '';
-            let defaultPurposeValue = "TE for " + monthName + " " + year;
             if (clickedCheckbox.prop('checked')) {
                 var existingItem = selected_tev.find(function(item) {
                     return item.id === checkboxId;
@@ -999,11 +1098,8 @@
                 }).join(' and ');
                 
                 travel = "TE for " + output;
-         
-
-                
-
                 if (!existingItem) {
+                    charges_multiple.prop('disabled', false);
                     var array_id = {
                         id: stck_id,
                         code: row.find('td:eq(1)').text(),
@@ -1016,6 +1112,7 @@
                     };
                     selected_tev.push(array_id);
                     console.log(array_id);
+                    console.log("testttt");
 
                 } else {
                     existingItem.purpose = purposeValue;
@@ -1024,6 +1121,7 @@
               
                 row.find('select[name="Charges"]').prop("disabled", false);
                 purposeInput.prop("disabled", false);
+                
               
                 if (!purposeValue) {
                     purposeInput.val(travel);
@@ -1038,6 +1136,7 @@
               
                 row.find('select[name="Charges"]').prop("disabled", true).val("");
                 purposeInput.prop("disabled", true).val("");
+                charges_multiple.prop('disabled', true);
             }
           
             unique_items = selected_tev.filter(function(item, index, self) {
@@ -1049,6 +1148,115 @@
                 );
             });
         });
+
+        $('#tbl-items').on('click', 'button[name="MultipleCharges"]', function() {
+        // Get the data associated with the clicked row
+            // var rowData = example.row($(this).closest('tr')).data();
+            var rowData = $('#tbl-items').DataTable().row($(this).closest('tr')).data();
+
+            // Access the ID of the clicked item (assuming the ID is stored in a property called "id")
+            var itemId = rowData.id;
+            console.log(itemId);
+            console.log("id ni");
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'multiple-charges-details' %}",
+                headers: {
+                    'X-CSRFToken': csrf_token
+                },
+                data:{
+                    payroll_id: itemId
+                }
+            }).done(function (data) {
+                // let duplicate_date = data.remarks;
+                // let final_amount = data.final_amount;
+                // let lacking = data.lacking;
+                // let date_remarks = data.date_remarks;
+                // let remarks_d = data.lacking;
+
+                // if(duplicate_date === "" || duplicate_date === null ){
+                //     $("#dp_date").hide();
+                // }
+                // else{
+                //     $("#dp_date").show();
+                // }
+                // if (lacking === null) {
+                //     $('#remarks-list').val([]).trigger('change');
+                    
+                // } else {
+                //     arraydetails = [];
+                //     $('.rows-container').empty();
+                //     lacking = data.lacking.split(',').map(Number);
+
+                //     remarks_d = remarks_d.split(", ");
+                //     date_remarks = date_remarks.split(", ")
+                //     remarks_date = date_remarks;
+                //     remarks_data = remarks_d;
+                // }
+        
+                // if(final_amount && final_amount !="0E-10"){
+                //     final_amount = data.final_amount;
+                // }
+                // else{
+                //     final_amount = data.original_amount;
+                // }
+
+                // // Trigger change event to reflect the selected options visually
+                // $('#remarks-list').trigger('change');
+                // let floatvalue = parseFloat(final_amount);
+                // let convertedAmount = floatvalue.toFixed(2);
+                // if (convertedAmount === "0.00") {convertedAmount =""} 
+                // $("#final_amount").val(convertedAmount);
+                // $("#correctness_remarks").val(duplicate_date);
+                // $("#correctness_remarks").prop("disabled", true);
+                // // $("#correctness_remarks").css("background-color", "#cf2732");
+
+                // $("#correctness_remarks").css({
+                //     "background-color": "#cf2732",  // Yellow background color
+                //     "color": "#ffffff"              // White text color
+                // });
+            })
+
+
+
+
+
+
+
+            $('#payrollDetails').modal('show');
+
+            var newRow = $('<div class="row mt-2">' +
+                '<div class="col-5">' +
+                '<select class="form-select select-charges" id="select_remarks">' +
+                    '<option></option>'+
+                    '{% for row in charges %}'+
+                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                    '{% endfor %}'+
+                '</select>' +
+                '<span class="error-label">Required</span>'+
+                '</div>' +
+                '<div class="col-5">' +
+                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                '<span class="error-label-amount">Required</span>'+
+                '</div>' +
+                '<div class="col-2">' +
+                '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                '</div>' +
+                '</div>');
+                newRow.find('.error-label, .error-label-amount').hide();
+            $('.rows-container').append(newRow);
+
+            
+            if (ChargesList.length) {
+                ChargesList.wrap('<div class="position-relative"></div>')
+                ChargesList.select2({
+                    placeholder: 'Choose employee',
+                    dropdownParent: ChargesList.parent(),
+                    allowClear: true
+                })
+            }
+            });
 
         search_advance_filter.on('click', function () {
             FAdvancedFilter.val("true");
@@ -1116,6 +1324,32 @@
              console.log("Newly added values: " + employeeList);
         
         });
+
+        $('#add_charges').click(function () {     
+            var newRow = $('<div class="row mt-2">' +
+                '<div class="col-5">' +
+                '<select class="form-select select-charges" id="select_remarks">' +
+                    '<option></option>'+
+                    '{% for row in charges %}'+
+                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                    '{% endfor %}'+
+                '</select>' +
+                '<span class="error-label">Required</span>'+
+                '</div>' +
+                '<div class="col-5">' +
+                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                '<span class="error-label-amount">Required</span>'+
+                '</div>' +
+                '<div class="col-2">' +
+                '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                '</div>' +
+                '</div>');
+                newRow.find('.error-label, .error-label-amount').hide();
+            $('.rows-container').append(newRow);
+        });
+        $('.container').on('click', '.delete-row', function () {
+            $(this).closest('.row').remove();
+        });
         
         
         $('#returned').click(function() {
@@ -1134,6 +1368,52 @@
                 }
             
         });
+
+        $('#save-multiple-charges').click(function() {
+            let selectedIDs = [];
+            let selectedAmount = [];
+            let status = 7;
+            let hasError = 0;
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('.select-charges');
+                let selectElementDate = $(this).find('.select-charges');
+                let selectedValue = selectElement.val();
+                let selectErrorLabel = selectElement.siblings(".error-label");
+
+                let inputElement = $(this).find('.input-date');
+                let inputValue = inputElement.val();
+                let inputErrorLabel = inputElement.siblings(".error-label-amount");
+
+                if (selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+                    selectElement.removeClass('has-error');
+                    selectErrorLabel.hide();
+                } else {
+                    hasError++;
+                    selectElement.addClass('has-error');
+                    selectErrorLabel.show();
+                }
+                if (inputValue !== "") {
+                    selectedAmount.push(inputValue);
+                    inputElement.removeClass('has-error');
+                    inputErrorLabel.hide();
+                } else {
+                    hasError++;
+                    inputElement.addClass('has-error');
+                    inputErrorLabel.show();
+                }
+            });
+            if (selectedIDs.length > 0 && hasError ==0) {
+                // tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+                console.log(selectedIDs);
+                console.log(selectedAmount);
+                console.log(clicked_id);
+                console.log("selectedAmount");
+            }
+            // else if(selectedIDs.length == 0) {
+            //     tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            // }
+          });
 
         function tev_details(amount,remarks,status,emp_id){
             $.ajax({
@@ -1175,6 +1455,7 @@
                 allowClear: true,
             })
         }
+
         
     })
 </script>
