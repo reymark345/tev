@@ -145,20 +145,206 @@ def box_a(request):
         return render(request, 'pages/unauthorized.html')
     
 
+# @login_required(login_url='login')
+# def preview_box_a(request):
+#     finance_database_alias = 'finance'    
+#     outgoing_id = request.GET.get('id')
+#     user_id = request.session.get('user_id', 0)
+
+
+    
+#     results = []
+#     total_final_amount = 0
+#     emp_list_code = []
+#     emp_list_lname = []
+#     charges_list = []
+#     data_result = []
+    
+#     userData = AuthUser.objects.filter(id=user_id)
+#     full_name = userData[0].first_name + ' ' + userData[0].last_name
+
+#     designation = StaffDetails.objects.filter(user_id= user_id)
+#     position = designation[0].position
+    
+    
+#     if outgoing_id:
+#         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
+
+#         query = """
+#             SELECT
+#                 tev_incoming.id,
+#                 tev_incoming.first_name,
+#                 tev_incoming.last_name,
+#                 tev_incoming.middle_name,
+#                 tev_incoming.id_no,
+#                 tev_incoming.account_no,
+#                 tev_incoming.final_amount,
+#                 tev_bridge.purpose,
+#                 tev_outgoing.dv_no,
+#                 charges.name AS name,
+#                 charges2.name AS charges_name,
+#                 payrolled_charges.amount AS charges_amount
+#             FROM
+#                 tev_incoming
+#             JOIN
+#                 tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+#             LEFT JOIN
+#                 tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+#             LEFT JOIN
+#                 charges ON charges.id = tev_bridge.charges_id
+#             LEFT JOIN
+#                 payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+#             LEFT JOIN
+#                 charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+#             WHERE
+#                 tev_incoming.id IN %s
+#             ORDER BY
+#                 tev_incoming.last_name;
+#         """
+
+#         with connection.cursor() as cursor:
+#             cursor.execute(query, [tuple(tev_incoming_ids)])
+#             rows = cursor.fetchall()
+#             for row in rows:
+#                 data_dict = {
+#                     "id": row[0],
+#                     "first_name": row[1],
+#                     "last_name": row[2],
+#                     "middle_name": row[3],
+#                     "id_no": row[4],
+#                     "account_no": row[5],
+#                     "final_amount": row[6],
+#                     "purpose": row[7],
+#                     "dv_no": row[8],
+#                     "name": row[9],
+#                     "charges_name": row[10],
+#                     "charges_amount": row[11]
+#                 }
+#                 data_result.append(data_dict)
+        
+#         outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__chief','division__c_designation','division__approval','division__ap_designation').first()
+#         dvno = outgoing['dv_no']
+
+
+        
+#         te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
+#                 'code',
+#                 'first_name',
+#                 'last_name',
+#                 'middle_name',
+#                 'id_no',
+#                 'account_no',
+#                 'final_amount',
+#                 'tevbridge__purpose',
+#                 'tevbridge__tev_outgoing__dv_no', 
+#                 'tevbridge__charges__name'  
+#             ).order_by('last_name')
+    
+#         result_count = len(te_lname)
+        
+#         for item in te_lname:
+#             total_final_amount += item['final_amount']
+#             final_amount = item['final_amount']
+#             charge_name = item['tevbridge__charges__name']
+
+#             existing_charge = next((charge for charge in charges_list if charge['charges'] == charge_name), None)
+#             if existing_charge:
+#                 # If it exists, accumulate the final_amount
+#                 existing_charge['final_amount'] += final_amount
+#             else:
+#                 charges = {
+#                     "final_amount": final_amount,
+#                     "charges": charge_name,
+#                 }
+#                 charges_list.append(charges)
+
+#         for item in te_lname:
+#             fullname = item['last_name'] + ', '+ item['first_name']
+#             list_lname = {
+#                     "code": item['code'],
+#                     "name": fullname,
+#                     "id_no": item['id_no'],
+#                     "account_no": item['account_no'],
+#                     "final_amount": item['final_amount'],
+#                     "purpose": item['tevbridge__purpose'],
+#                     "dv_no": item['tevbridge__tev_outgoing__dv_no'],
+#                     "charges": item['tevbridge__charges__name'],
+#                 }
+#             emp_list_lname.append(list_lname)
+            
+
+        
+        
+#         box_b_in  = outgoing['box_b_in']
+        
+#         query = """
+#             SELECT dv_no,dv_date,payee, modepayment
+#             FROM transactions
+#             WHERE dv_no = %s
+#         """
+
+#         with connections[finance_database_alias].cursor() as cursor:
+#             cursor.execute(query, (dvno,))
+#             rows = cursor.fetchall()
+#             for row in rows:
+#                 result_dict = {
+#                     "dv_no": row[0],
+#                     "dv_date": row[1],
+#                     "payee": row[2],
+#                     "modepayment": row[3]
+#                 }
+#                 results.append(result_dict)
+                
+#         designation_result = {
+#             "chief":outgoing['division__chief'],
+#             "c_designation":outgoing['division__c_designation'],
+#             "approval":outgoing['division__approval'],
+#             "ap_designation":outgoing['division__ap_designation']
+#         }
+
+#         # context = {
+#         #     'dv_number':dvno,
+#         #     'charges_list':charges_list,
+#         #     'payroll_date':box_b_in,
+#         #     'total_amount':total_final_amount,
+#         #     'total_count':result_count,
+#         #     'finance':results,
+#         #     'details':designation_result,
+#         #     'emp_list_lname':emp_list_lname,
+#         #     'user' : full_name,
+#         #     'position' : position
+#         # }
+
+#         context = {
+#             'data' : data_result,
+#             'dv_number':'',
+#             'charges_list':'',
+#             'payroll_date':'',
+#             'total_amount':'',
+#             'total_count':'',
+#             'finance':'',
+#             'details':'',
+#             'emp_list_lname':'',
+#             'user' : '',
+#             'position' : ''
+#         }
+        
+#         return render(request, 'transaction/preview_print.html', context)
+#     else:
+#         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
+
+
 @login_required(login_url='login')
 def preview_box_a(request):
     finance_database_alias = 'finance'    
     outgoing_id = request.GET.get('id')
     user_id = request.session.get('user_id', 0)
-
-
     
     results = []
     total_final_amount = 0
     emp_list_code = []
     emp_list_lname = []
     charges_list = []
-    data_result = []
     
     userData = AuthUser.objects.filter(id=user_id)
     full_name = userData[0].first_name + ' ' + userData[0].last_name
@@ -169,62 +355,6 @@ def preview_box_a(request):
     
     if outgoing_id:
         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
-
-        query = """
-            SELECT
-            tev_incoming.id,
-            tev_incoming.first_name,
-            tev_incoming.last_name,
-            tev_incoming.middle_name,
-            tev_incoming.id_no,
-            tev_incoming.account_no,
-            tev_incoming.final_amount,
-            tev_bridge.purpose,
-            tev_outgoing.dv_no,
-            charges.name AS name,
-            charges2.name AS charges_name,
-            payrolled_charges.amount AS charges_amount
-        FROM
-            tev_incoming
-        JOIN
-            tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
-        LEFT JOIN
-            tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-        LEFT JOIN
-            charges ON charges.id = tev_bridge.charges_id
-        LEFT JOIN
-            payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
-        LEFT JOIN
-            charges AS charges2 ON payrolled_charges.charges_id = charges2.id
-        WHERE
-            tev_incoming.id IN %s
-        ORDER BY
-            tev_incoming.last_name;
-        """
-
-        with connection.cursor() as cursor:
-            cursor.execute(query, [tuple(tev_incoming_ids)])
-            rows = cursor.fetchall()
-            for row in rows:
-                data_dict = {
-                    "id": row[0],
-                    "first_name": row[1],
-                    "last_name": row[2],
-                    "middle_name": row[3],
-                    "id_no": row[4],
-                    "account_no": row[5],
-                    "final_amount": row[6],
-                    "purpose": row[7],
-                    "dv_no": row[8],
-                    "name": row[9],
-                    "charges_name": row[10],
-                    "charges_amount": row[11]
-                }
-                data_result.append(data_dict)
-        
-
-        print(data_result)
-        print("Testaaa")
         
         
         te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
@@ -302,152 +432,22 @@ def preview_box_a(request):
             "approval":outgoing['division__approval'],
             "ap_designation":outgoing['division__ap_designation']
         }
-
-        # context = {
-        #     'dv_number':dvno,
-        #     'charges_list':charges_list,
-        #     'payroll_date':box_b_in,
-        #     'total_amount':total_final_amount,
-        #     'total_count':result_count,
-        #     'finance':results,
-        #     'details':designation_result,
-        #     'emp_list_lname':emp_list_lname,
-        #     'user' : full_name,
-        #     'position' : position
-        # }
-
         context = {
-            'dv_number':'',
-            'charges_list':'',
-            'payroll_date':'',
-            'total_amount':'',
-            'total_count':'',
-            'finance':'',
-            'details':'',
-            'emp_list_lname':'',
-            'user' : '',
-            'position' : ''
+            'dv_number':dvno,
+            'charges_list':charges_list,
+            'payroll_date':box_b_in,
+            'total_amount':total_final_amount,
+            'total_count':result_count,
+            'finance':results,
+            'details':designation_result,
+            'emp_list_lname':emp_list_lname,
+            'user' : full_name,
+            'position' : position
         }
         
         return render(request, 'transaction/preview_print.html', context)
     else:
         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
-
-
-# @login_required(login_url='login')
-# def preview_box_a(request):
-#     finance_database_alias = 'finance'    
-#     outgoing_id = request.GET.get('id')
-#     user_id = request.session.get('user_id', 0)
-    
-#     results = []
-#     total_final_amount = 0
-#     emp_list_code = []
-#     emp_list_lname = []
-#     charges_list = []
-    
-#     userData = AuthUser.objects.filter(id=user_id)
-#     full_name = userData[0].first_name + ' ' + userData[0].last_name
-
-#     designation = StaffDetails.objects.filter(user_id= user_id)
-#     position = designation[0].position
-    
-    
-#     if outgoing_id:
-#         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
-        
-        
-#         te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
-#                 'code',
-#                 'first_name',
-#                 'last_name',
-#                 'middle_name',
-#                 'id_no',
-#                 'account_no',
-#                 'final_amount',
-#                 'tevbridge__purpose',
-#                 'tevbridge__tev_outgoing__dv_no', 
-#                 'tevbridge__charges__name'  
-#             ).order_by('last_name')
-    
-#         result_count = len(te_lname)
-        
-#         for item in te_lname:
-#             total_final_amount += item['final_amount']
-#             final_amount = item['final_amount']
-#             charge_name = item['tevbridge__charges__name']
-
-#             existing_charge = next((charge for charge in charges_list if charge['charges'] == charge_name), None)
-#             if existing_charge:
-#                 # If it exists, accumulate the final_amount
-#                 existing_charge['final_amount'] += final_amount
-#             else:
-#                 charges = {
-#                     "final_amount": final_amount,
-#                     "charges": charge_name,
-#                 }
-#                 charges_list.append(charges)
-
-#         for item in te_lname:
-#             fullname = item['last_name'] + ', '+ item['first_name']
-#             list_lname = {
-#                     "code": item['code'],
-#                     "name": fullname,
-#                     "id_no": item['id_no'],
-#                     "account_no": item['account_no'],
-#                     "final_amount": item['final_amount'],
-#                     "purpose": item['tevbridge__purpose'],
-#                     "dv_no": item['tevbridge__tev_outgoing__dv_no'],
-#                     "charges": item['tevbridge__charges__name'],
-#                 }
-#             emp_list_lname.append(list_lname)
-            
-#         outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__chief','division__c_designation','division__approval','division__ap_designation').first()
-#         dvno = outgoing['dv_no']
-        
-        
-#         box_b_in  = outgoing['box_b_in']
-        
-#         query = """
-#             SELECT dv_no,dv_date,payee, modepayment
-#             FROM transactions
-#             WHERE dv_no = %s
-#         """
-
-#         with connections[finance_database_alias].cursor() as cursor:
-#             cursor.execute(query, (dvno,))
-#             rows = cursor.fetchall()
-#             for row in rows:
-#                 result_dict = {
-#                     "dv_no": row[0],
-#                     "dv_date": row[1],
-#                     "payee": row[2],
-#                     "modepayment": row[3]
-#                 }
-#                 results.append(result_dict)
-                
-#         designation_result = {
-#             "chief":outgoing['division__chief'],
-#             "c_designation":outgoing['division__c_designation'],
-#             "approval":outgoing['division__approval'],
-#             "ap_designation":outgoing['division__ap_designation']
-#         }
-#         context = {
-#             'dv_number':dvno,
-#             'charges_list':charges_list,
-#             'payroll_date':box_b_in,
-#             'total_amount':total_final_amount,
-#             'total_count':result_count,
-#             'finance':results,
-#             'details':designation_result,
-#             'emp_list_lname':emp_list_lname,
-#             'user' : full_name,
-#             'position' : position
-#         }
-        
-#         return render(request, 'transaction/preview_print.html', context)
-#     else:
-#         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
     
 @login_required(login_url='login')
 def checking(request):

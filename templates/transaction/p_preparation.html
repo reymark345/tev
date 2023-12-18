@@ -51,7 +51,7 @@
                             <th>Status</th>
                             <th>Incoming In</th>
                             <th>Charges</th>
-                            <th>Add Charges</th>
+                            <th style="width:240px;">Add Charges</th>
                             <th>Purpose</th>
                         </tr>
                     </thead>
@@ -377,6 +377,7 @@
     let status_val =0;
     let employeeList = [];
     let pp_id = 0;
+    let formattedAmount = 0;
     $(document).ready(function () {
         let selected_tev = [];
         var fdateField = $('#f-dateField').flatpickr({
@@ -1144,7 +1145,7 @@
                 $('.rows-container').empty();
 
                 var originalAmount = parseFloat(data.amount); 
-                var formattedAmount = originalAmount.toFixed(2);
+                formattedAmount = originalAmount;
                 $('#current_amount').text("₱" +formattedAmount);
                 chargesList = data.data.map(item => item.charges_id);
                 amountList = data.data.map(item => item.amount);
@@ -1321,6 +1322,12 @@
         $('#save-multiple-charges').click(function() {
             let selectedIDs = [];
             let selectedAmount = [];
+            // console.log(selectedAmount);
+            // console.log("formattedAmount");
+            // console.log(formattedAmount);
+
+
+            
             let status = 7;
             let hasError = 0;
             $('.rows-container .row').each(function() {
@@ -1352,25 +1359,43 @@
                     inputErrorLabel.show();
                 }
             });
+            let amountsAsNumbers = selectedAmount.map(amount => parseFloat(amount));
+            let totalAmount = amountsAsNumbers.reduce((total, amount) => total + amount, 0);
             if (selectedIDs.length > 0 && hasError ==0) {
-                $.ajax({
-                    type: "POST",
-                    url: "{% url 'add-multiple-charges' %}",
-                    data:{
-                        amount: selectedAmount,
-                        incoming_id: pp_id,
-                        charges_id : selectedIDs
-                    }
-                    }).done(function(data){
-                    if (data.data == 'success') {
-                        $('#payrollDetails').modal('hide');
-                        toastr.success('Successfully save', 'Success', toast_options);
-                        offCanvasEl.hide()
-                        dataTable.ajax.reload()
-                    } else {
-                        toastr.danger('Data not saved', 'Danger', toast_options);
-                    }
-                });
+                let selectedAmountNumber = parseFloat(selectedAmount[0]); 
+                console.log(formattedAmount + " selected amt");
+                console.log(totalAmount +" total amt");
+
+                if( formattedAmount > totalAmount){
+                    toastr.error('Amount Lacking', 'Invalid', toast_options);
+                }
+                else if ( formattedAmount < totalAmount){
+                    toastr.error('Amount Exceeds', 'Invalid', toast_options);
+                }
+                else{
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'add-multiple-charges' %}",
+                        data:{
+                            amount: selectedAmount,
+                            incoming_id: pp_id,
+                            charges_id : selectedIDs
+                        }
+                        }).done(function(data){
+                            if (data.data == 'success') {
+                                $('#payrollDetails').modal('hide');
+                                toastr.success('Successfully save', 'Success', toast_options);
+                                offCanvasEl.hide()
+                                dataTable.ajax.reload()
+                                toastr.error('Successfully save', 'Invalid', toast_options);
+                            }
+                            else {
+                                toastr.danger('Data not saved', 'Danger', toast_options);
+                            }
+                    });
+                    
+                }
+
             }
           });
 
