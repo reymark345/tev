@@ -31,5 +31,6 @@ urlpatterns = [
     path('dv_number_lib', views.dv_number_lib, name='dv-number-lib'),
     path('add_existing_record', views.add_existing_record, name='add-existing-record'),
     path('multiple_charges_details', views.multiple_charges_details, name='multiple-charges-details'),
+    path('add_multiple_charges', views.add_multiple_charges, name='add-multiple-charges'),
     
 ]

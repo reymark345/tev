@@ -248,8 +248,8 @@ class Cluster(models.Model):
         db_table = 'cluster'
 
 class PayrolledCharges(models.Model):
+    incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)
     amount = models.CharField(max_length=128, blank=True, null=True)
-    tev_bridge = models.ForeignKey(TevBridge, models.DO_NOTHING)
     charges = models.ForeignKey(Charges, models.DO_NOTHING)
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)
