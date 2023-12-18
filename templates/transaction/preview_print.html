@@ -172,7 +172,7 @@ table.myClass * { /*new*/
   page-break-before: always;
 }
 .footer {
-  margin-top: 99% !important;
+  margin-top: 95% !important;
 }}
 
 .innerTable{
@@ -815,17 +815,6 @@ margin-top: 99%;
                 <td style="padding: 13px;"></td>
                 <td style="padding: 13px;"></td>
               </tr>
-              <tr>
-                <td  style="padding: 13px;"></td>
-                <td colspan="2" style="padding: 13px;"></td>
-                <td colspan="2" style="padding: 13px;"></td>
-                <td style="padding: 13px;"></td>
-                <td style="padding: 13px;"></td>
-                <td style="padding: 13px;"></td>
-                <td style="padding: 13px;"></td>
-                <td style="padding: 13px;"></td>
-              </tr>
-             
             </tbody>
           </table>
       
@@ -846,14 +835,14 @@ margin-top: 99%;
                 <td><b><center>PURPOSE</center></b></td>
               
               </tr>              
-              {% for emp in emp_list_lname %}
+              {% for emp in data %}
               <tr>
                 <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
                 <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
-                <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>
-                <td style="padding: 4;" class="align-text-right">{{ emp.final_amount|floatformat:2|intcomma }}</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.charges }}</td>
+                <td  class="align-text-left" style="padding: 4;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
+                <td style="padding: 4;" class="align-text-right">{{ emp.charges_amount|floatformat:2|intcomma }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.charges_name }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.purpose }}</td>
               </tr>
               {% endfor %}
@@ -967,17 +956,19 @@ margin-top: 99%;
                 <td><b><center>PURPOSE</center></b></td>
               
               </tr>              
-              {% for emp in emp_list_lname %}
+              {% for emp in data %}
               <tr>
                 <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
                 <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
-                <td  class="align-text-left" style="padding: 4;">{{ emp.name }}</td>
-                <td style="padding: 4;" class="align-text-right">{{ emp.final_amount|floatformat:2|intcomma }}</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.charges }}</td>
+                <td  class="align-text-left" style="padding: 4;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
+                <td style="padding: 4;" class="align-text-right">{{ emp.charges_amount|floatformat:2|intcomma }}</td>
+                <td class="align-text-left" style="padding: 4;">{{ emp.charges_name }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.purpose }}</td>
               </tr>
               {% endfor %}
+
+
               <tr >
                 <td style="padding: 0;"></td>
                 <td style="padding: 2;"><b>TOTAL</b></td>
