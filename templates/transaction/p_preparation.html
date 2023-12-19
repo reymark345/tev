@@ -548,12 +548,12 @@
                     render: function(data, type, row) {
                         if (type === 'display') {
                             return '<div style="display: inline-block;">' +
-                                // '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
-                                //     '<option></option>' +
-                                //     '{% for row in charges %}'+
-                                //         '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                //     '{% endfor %}'+
-                                // '</select>'+
+                                '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
+                                    '<option></option>' +
+                                    '{% for row in charges %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endfor %}'+
+                                '</select>'+
                                 '<span id="charges_error" style="color: red;"></span>'+
                                 '</div>'+
                                 '<button type="button" class="btn btn-info waves-effect waves-light" id="multiple_charges" name="MultipleCharges" style="margin-left: 10px; height:37px;" disabled>+</button>';

@@ -536,20 +536,44 @@ def employee_dv(request):
     if dv_no is not None:
         dvno = dv_no['dv_no']
 
-    query = """
-        SELECT ti.id, code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no, ch.name, cl.name FROM tev_incoming AS ti 
-        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        LEFT JOIN charges AS ch ON ch.id = tb.charges_id
-        LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
-        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
+    # query = """
+    #     SELECT ti.id, code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no, ch.name, cl.name FROM tev_incoming AS ti 
+    #     LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+    #     LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+    #     LEFT JOIN charges AS ch ON ch.id = tb.charges_id
+    #     LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
+    #     WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
+    # """
+    query = """ 
+    SELECT 
+        ti.id, 
+        code, 
+        first_name, 
+        middle_name, 
+        last_name,
+        id_no,
+        account_no, 
+        final_amount, 
+        MAX(tb.purpose) AS purpose,  -- Using an aggregate function
+        dv_no, 
+        cl.name as cluster, 
+        GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
+    FROM tev_incoming AS ti 
+    LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+    LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+    LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
+    LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = ti.id
+    LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+    WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s 
+    GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
+    ORDER BY ti.incoming_out DESC;   
     """
 
     with connection.cursor() as cursor:
         cursor.execute(query, (dvno,))
         results = cursor.fetchall()
         
-    column_names = ['id','code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no','charges','cluster']
+    column_names = ['id','code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no','cluster','multiple_charges']
     data_result = []
 
     for finance_row in results:
@@ -558,8 +582,11 @@ def employee_dv(request):
 
     data = []  
     
-    
+    print(data_result)
+    print("data_result")
     for row in data_result:
+
+        
         
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
@@ -577,10 +604,9 @@ def employee_dv(request):
             'final_amount': row['final_amount'],
             'purpose': row['purpose'],
             'dv_no': row['dv_no'],
-            'charge':row['charges'],
             'cluster':row['cluster'],
+            'multiple_charges':row['multiple_charges'],
             'total':total_amount,
-            
         }
         data.append(item)
         

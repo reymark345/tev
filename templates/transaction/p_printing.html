@@ -175,6 +175,8 @@
   </div>
 </div>
 <!--/ Edit User Modal -->
+
+
   
 
 
@@ -203,6 +205,7 @@
                                 <th>Amount</th>
                                 <th>Purpose</th>
                                 <th>Charge</th>
+                                <th>Multiple Charges</th>
                                 <th>Action</th>
                             </tr>
                         </thead>    
@@ -409,6 +412,56 @@
         </div>
     </div>
 </div>
+
+
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="payrollUpdate" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+      <div class="modal-content p-3 p-md-5">
+      <div class="modal-body">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="text-center mb-4">
+              <h3 class="mb-2">Multiple Charges</h3>
+              <p>Select charges with their corresponding amount</p>
+          </div>
+
+          <div class="alert alert-warning" role="alert">
+              <h6 class="alert-heading mb-2">Amount</h6>
+                  <span id ="current_amount">₱ 0</span>
+              </div>
+
+
+          <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
+          <div class="container">
+              <div class="row">
+                  <div class="col-12">
+                      <br>
+                      <button type="button" id="add_charges" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
+                      <span id="remarks_error" style="color: red;"></span>
+                  </div>
+              </div>
+              <div class="rows-container">
+                  <!-- Appended rows will be placed here -->
+              </div>
+          </div>    
+          <div class="col-12">
+              <br>
+              <button type="submit" id ="save-multiple-charges" class="btn btn-label-primary me-sm-3 me-1">Save</button>
+              <button
+                  type="reset"
+                  class="btn btn-label-secondary"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  >
+                  Cancel
+              </button>
+          </div>
+          </form>
+      </div>
+      </div>
+  </div>
+</div>
+<!--/ Enable OTP Modal -->
 
 {% endblock %} {% block footer_scripts %}
 <script>
@@ -673,6 +726,25 @@
                 })
               });
 
+              $('body').on('click', '.item-update', function () {
+                $("#payrollUpdate").modal("show");
+
+                //   $.ajax({
+                //     type: 'POST',
+                //     url: "{% url 'update-box-list' %}",
+                //     data:{
+                //         emp_id: emp_id,
+                //         amount:amount,
+                //         purpose:purpose,
+                //         charges:charges,
+                //         dv_number: dv_number
+                //     }
+                // }).done(function (data) {
+                  
+
+                // })
+              });
+
               $('body').on('click', '.item-delete', function () {
                 let emp_id = $(this).attr('id');
                 Swal.fire({
@@ -746,6 +818,8 @@
                         dv_id: id
                     }
                 }).done(function (data) {
+                    console.log(data);
+                    console.log("data");
                     dv_number = '';
                     charges = '';
                     outgoing_id = 0;
@@ -753,12 +827,12 @@
                     charges = data.charges;
                     outgoing_id = data.outgoing_id;
                     $("#f-outgoing-id").val(data.outgoing_id)
-                    let is_print = data.is_print;
                     tbody.empty();
                     data.data.forEach(function (item) {
                       const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
                       let amountColumn = '';
                       let editColumn = '';
+                      let updateColumn = '';
                       let deleteColumn = '';
                       let purposeColumn = '';
                       let chargesColumn = '';
@@ -767,21 +841,15 @@
                           var charge = charges[i];
                           selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
                       }
-                      if (is_print) {
-                        $(".create-new").prop("disabled", true);
-                        amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
-                        purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}" disabled></td>`;
-                        chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true" disabled>${selectOptions}</select></td>`;
-                        editColumn = `<a class="btn btn-sm btn-icon" id="${item.id}"><i class="text-primary ti ti-edit-off"></i></a>`;
-                        deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
-                    } else {
-                      $(".create-new").prop("disabled", false);
+                      // $(".create-new").prop("disabled", false);
                         amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
                         purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
                         chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
                         editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                        updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
                         deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
-                    }
+                        
+              
                       const row = `
                           <tr>
                               <td><input type="checkbox"></td>
@@ -792,7 +860,8 @@
                               ${amountColumn}
                               ${purposeColumn}
                               ${chargesColumn}
-                              <td>${editColumn}${deleteColumn}</td>
+                              <td>${item.multiple_charges}</td>
+                              <td>${editColumn}${updateColumn}${deleteColumn}</td>
                           </tr>
                       `;
                       tbody.append(row);
@@ -810,7 +879,6 @@
             $('#tbl-items tbody input[type="checkbox"]').change(function () {
                 // Do something when a checkbox in the table body is changed...
             });
-
             $('#check-all').change(function () {
                 // Get the checked state of the "check-all" checkbox
                 var isChecked = $(this).is(':checked');
