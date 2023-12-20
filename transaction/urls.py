@@ -32,5 +32,7 @@ urlpatterns = [
     path('add_existing_record', views.add_existing_record, name='add-existing-record'),
     path('multiple_charges_details', views.multiple_charges_details, name='multiple-charges-details'),
     path('add_multiple_charges', views.add_multiple_charges, name='add-multiple-charges'),
+    path('check_charges', views.check_charges, name='check-charges'),
+    path('remove_charges', views.remove_charges, name='remove-charges'),
     
 ]

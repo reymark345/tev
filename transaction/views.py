@@ -523,7 +523,11 @@ def employee_dv(request):
     charges_list = []
     
     idd = request.POST.get('dv_id')
-    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','is_print','id').first()
+    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','id').first()
+
+
+    print("noooooo")
+    print(dv_no)
 
     charges = Charges.objects.filter().order_by('name')
     for charge in charges:
@@ -621,12 +625,15 @@ def employee_dv(request):
     #     per_page = length
     #     results = results[start:start + length]
                     
-    total = len(data)    
+    total = len(data)  
+    print(dv_no) 
+    print(dv_no['id'])  
+    print(dv_no['dv_no'])  
+    print("thiss")  
           
     response = {
         'data': data,
         'charges': charges_list,
-        'is_print': dv_no['is_print'],
         'dv_number':dv_no['dv_no'],
         'outgoing_id':dv_no['id'],
         'recordsTotal': total,
@@ -1003,7 +1010,7 @@ def item_edit(request):
 @csrf_exempt
 def update_status(request):
     id = request.POST.get('dv_id')
-    tev_update = TevOutgoing.objects.filter(dv_no=id).update(is_print=True)
+    # tev_update = TevOutgoing.objects.filter(dv_no=id).update(is_print=True)
     return JsonResponse({'data': 'success'})
 
 
@@ -1085,6 +1092,32 @@ def add_multiple_charges(request):
         return JsonResponse({'data': 'success'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+@csrf_exempt
+def check_charges(request):
+    if request.method == 'POST':
+        incoming_id = request.POST.get('incoming_id')
+        try:
+            data_exists = PayrolledCharges.objects.filter(incoming_id=incoming_id).exists()
+            return JsonResponse({'data': data_exists})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+@csrf_exempt
+def remove_charges(request):
+    if request.method == 'POST':
+        incoming_id = request.POST.get('incoming_id')
+        try:
+            PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
+            return JsonResponse({'data': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
 
 @csrf_exempt
 def delete_box_list(request):

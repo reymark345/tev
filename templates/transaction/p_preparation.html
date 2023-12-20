@@ -555,8 +555,8 @@
                                     '{% endfor %}'+
                                 '</select>'+
                                 '<span id="charges_error" style="color: red;"></span>'+
-                                '</div>'+
-                                '<button type="button" class="btn btn-info waves-effect waves-light" id="multiple_charges" name="MultipleCharges" style="margin-left: 10px; height:37px;" disabled>+</button>';
+                                '</div>'
+                                // '<button type="button" class="btn btn-info waves-effect waves-light" id="multiple_charges" name="MultipleCharges" style="margin-left: 10px; height:37px;" disabled>+</button>';
                         }
                         return data;
                     }
@@ -1016,12 +1016,61 @@
           
 
         $(document).on("change", ".charges", function() {
+            var csrf_token = "{{ csrf_token }}";
             var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
             var errorSpan = $(this).closest('tr').find('#charges_error');
             var chargesValue = $(this).val();
             var existingItem = selected_tev.find(function(item) {
                 return item.id === checkboxId;
             });
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'check-charges' %}",
+                headers: {
+                    'X-CSRFToken': csrf_token
+                },
+                data:{
+                    incoming_id: checkboxId
+                }
+            }).done(function (data) {
+
+                if(data.data){
+                    Swal.fire({
+                        title: 'Are you sure to Change Charges?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, change it!',
+                        customClass: {
+                            confirmButton: 'btn btn-primary me-3',
+                            cancelButton: 'btn btn-label-secondary',
+                        },
+                        buttonsStyling: false,
+                    }).then(function (result) {
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'remove-charges' %}",
+                            data: {
+                                incoming_id: checkboxId
+                            }
+                            // data: form_data,
+                        }).done(function (data) { 
+                            console.log(data);
+                            console.log("data");
+
+                        })
+                    });
+                }
+                console.log(data);
+                console.log("dataa_check_charges");
+
+
+
+
+            });
+
+
             errorSpan.text("");
             if (existingItem) {
                 existingItem.charges = chargesValue;
@@ -1029,6 +1078,97 @@
             } else {
                 console.log("Item not found in the selected_tev array.");
             }
+
+            if (chargesValue ==6){
+                
+                pp_id = checkboxId;
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'multiple-charges-details' %}",
+                    headers: {
+                        'X-CSRFToken': csrf_token
+                    },
+                    data:{
+                        payroll_id: checkboxId
+                    }
+                }).done(function (data) {
+                    let totalAmount = 0;
+                    let amountList = [];
+                    let chargesList = [];
+                    let preview_amt = [];
+                    let preview_charges = [];
+                    $('.rows-container').empty();
+
+                    var originalAmount = parseFloat(data.amount); 
+                    formattedAmount = originalAmount;
+                    $('#current_amount').text("₱" +formattedAmount);
+                    chargesList = data.data.map(item => item.charges_id);
+                    amountList = data.data.map(item => item.amount);
+                    if (data.data.length > 0) {
+                        for (let i = 0; i < data.data.length; i++) {
+                            var newRow = $('<div class="row mt-2">' +
+                            '<div class="col-5">' +
+                            '<select class="form-select select-charges" id="select-charges-'+i+'">' +
+                                '<option></option>'+
+                                '{% for row in charges %}'+
+                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                '{% endfor %}'+
+                            '</select>' +
+                            '<span class="error-label">Required</span>'+
+                            '</div>' +
+                            '<div class="col-5">' +
+                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+                            '<span class="error-label-amount">Required</span>'+
+                            '</div>' +
+                            '<div class="col-2">' +
+                            '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                            '</div>' +
+                            '</div>');
+                            newRow.find('.error-label, .error-label-amount').hide();
+                            $('.rows-container').append(newRow);
+                            $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
+                        }
+                    } else {
+                        var newRow = $('<div class="row mt-2">' +
+                        '<div class="col-5">' +
+                        '<select class="form-select select-charges" id="select-charges">' +
+                            '<option></option>'+
+                            '{% for row in charges %}'+
+                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                            '{% endfor %}'+
+                        '</select>' +
+                        '<span class="error-label">Required</span>'+
+                        '</div>' +
+                        '<div class="col-5">' +
+                        '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                        '<span class="error-label-amount">Required</span>'+
+                        '</div>' +
+                        '<div class="col-2">' +
+                        '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                        '</div>' +
+                        '</div>');
+                        newRow.find('.error-label, .error-label-amount').hide();
+                        $('.rows-container').append(newRow);
+                    }
+                });
+                $('#payrollDetails').modal('show');
+                if (ChargesList.length) {
+                    ChargesList.wrap('<div class="position-relative"></div>')
+                    ChargesList.select2({
+                        placeholder: 'Choose employee',
+                        dropdownParent: ChargesList.parent(),
+                        allowClear: true
+                    })
+                }
+            }
+            else{
+                console.log("notttt");
+            }
+
+            
+
+
+
         });
 
         $(document).on('change', '.checkbox_data', function(event) {
@@ -1122,6 +1262,10 @@
                 );
             });
         });
+
+
+
+
 
         $('#tbl-items').on('click', 'button[name="MultipleCharges"]', function() {
             var rowData = $('#tbl-items').DataTable().row($(this).closest('tr')).data();
@@ -1321,13 +1465,7 @@
 
         $('#save-multiple-charges').click(function() {
             let selectedIDs = [];
-            let selectedAmount = [];
-            // console.log(selectedAmount);
-            // console.log("formattedAmount");
-            // console.log(formattedAmount);
-
-
-            
+            let selectedAmount = [];  
             let status = 7;
             let hasError = 0;
             $('.rows-container .row').each(function() {
@@ -1373,6 +1511,13 @@
                     toastr.error('Amount Exceeds', 'Invalid', toast_options);
                 }
                 else{
+                    console.log("tesstttingggg start");
+
+                    console.log(selectedAmount);
+                    console.log(pp_id);
+                    console.log(selectedIDs);
+
+                    console.log("tesstttingggg enddd");
                     $.ajax({
                         type: "POST",
                         url: "{% url 'add-multiple-charges' %}",
@@ -1397,7 +1542,7 @@
                 }
 
             }
-          });
+        });
 
         function tev_details(amount,remarks,status,emp_id){
             $.ajax({
