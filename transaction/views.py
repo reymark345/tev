@@ -139,6 +139,8 @@ def box_a(request):
             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
             'cluster' : Cluster.objects.filter().order_by('id'),
             'division' : Division.objects.filter(status=0).order_by('id'),
+            'charges' : Charges.objects.filter().order_by('name')
+
         }
         return render(request, 'transaction/p_printing.html', context)
     else:
@@ -642,13 +644,17 @@ def employee_dv(request):
     }
     return JsonResponse(response)
 
+@csrf_exempt
 def multiple_charges_details(request):
     pp_id = request.POST.get('payroll_id')
     data = []
 
     charges = PayrolledCharges.objects.filter(incoming_id=pp_id)
     incoming_amount= TevIncoming.objects.filter(id=pp_id).first()
-    amount = incoming_amount.final_amount
+    # amount = incoming_amount.final_amount
+    amount = round(incoming_amount.final_amount, 2)
+
+    full_name = incoming_amount.first_name + " " + incoming_amount.middle_name + " " + incoming_amount.last_name
 
     for charge in charges:  # Use a different variable name here
         charge_data = {
@@ -660,7 +666,8 @@ def multiple_charges_details(request):
         data.append(charge_data)  # Append the dictionary to the data list
     response = {
         'data': data,
-        'amount' : amount
+        'amount' : amount,
+        'full_name' : full_name
     }
     return JsonResponse(response)
 
@@ -1094,6 +1101,25 @@ def add_multiple_charges(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
 @csrf_exempt
+def update_multiple_charges(request):
+    if request.method == 'POST':
+        amount = request.POST.getlist('amount[]')
+        charges_id = request.POST.getlist('charges_id[]')
+        incoming_id = request.POST.get('incoming_id')
+        amt_issued = request.POST.get('amt_issued')
+        TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt_issued)
+        PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
+        for amt, ch_id in zip(amount, charges_id):
+            PayrolledCharges.objects.create(
+                incoming_id=incoming_id,
+                amount=amt,
+                charges_id=ch_id
+        )
+        return JsonResponse({'data': 'success'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+@csrf_exempt
 def check_charges(request):
     if request.method == 'POST':
         incoming_id = request.POST.get('incoming_id')
@@ -1116,6 +1142,8 @@ def remove_charges(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
     
 
 

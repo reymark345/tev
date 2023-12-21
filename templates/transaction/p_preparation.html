@@ -1511,13 +1511,6 @@
                     toastr.error('Amount Exceeds', 'Invalid', toast_options);
                 }
                 else{
-                    console.log("tesstttingggg start");
-
-                    console.log(selectedAmount);
-                    console.log(pp_id);
-                    console.log(selectedIDs);
-
-                    console.log("tesstttingggg enddd");
                     $.ajax({
                         type: "POST",
                         url: "{% url 'add-multiple-charges' %}",
