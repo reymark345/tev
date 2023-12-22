@@ -7,7 +7,7 @@ Faker.seed(313)
 middle_name = ['N','A','A','B']
 role_details = ['Admin','Incoming staff','Validating staff','Payroll staff', 'Certified staff','End user']
 cluster = ['Cluster 01','Cluster 02','Cluster 03','Cluster 04', 'Cluster 05', 'Cluster 06', 'Cluster 07']
-charges = ['AICS','Socpen','Disaster','CCAM', '4PS']
+charges = ['AICS','Socpen','Disaster','CCAM', '4PS', 'Multiple']
 division = ['Finance Management Division','Pantawid','DRMD','HRRMD', 'PSD', 'PPD','ORD']
 acronym = ['FMD','PTW','DRMD','HRRMD', 'PSD', 'PPD','ORD']
 status = ['Pending','For checking','Returned','For payroll', 'Outgoing','Ongoing','For approval' ]
