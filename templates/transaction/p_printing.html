@@ -1253,6 +1253,79 @@
             $(this).closest('.row').remove();
         });
 
+
+        function data_printing(id){
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'employee-dv' %}",
+                data:{
+                    dv_id: id
+                }
+            }).done(function (data) {
+                const tableId = 'tbl-box-a';
+                const tbody = $(`#${tableId} tbody`);
+                console.log(data);
+                console.log("data");
+                dv_number = '';
+                charges = '';
+                outgoing_id = 0;
+                dv_number = data.dv_number;
+                charges = data.charges;
+                outgoing_id = data.outgoing_id;
+                $("#f-outgoing-id").val(data.outgoing_id)
+                tbody.empty();
+                data.data.forEach(function (item) {
+                  const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                  let amountColumn = '';
+                  let editColumn = '';
+                  let updateColumn = '';
+                  let deleteColumn = '';
+                  let purposeColumn = '';
+                  let chargesColumn = '';
+                  selectOptions = '';
+                  for (var i = 0; i < charges.length; i++) {
+                      var charge = charges[i];
+                      selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                  }
+                  // $(".create-new").prop("disabled", false);
+                    amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                    purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+                    chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+                    editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                    updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
+                    deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                    
+          
+                  const row = `
+                      <tr>
+                          <td><input type="checkbox"></td>
+                          <td><span class="badge bg-label-primary">${item.code}</span></td>
+                          <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                          <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                          <td>${item.name}</td>
+                          ${amountColumn}
+                          ${purposeColumn}
+                          ${chargesColumn}
+                          <td>${item.multiple_charges}</td>
+                          <td>${editColumn}${updateColumn}${deleteColumn}</td>
+                      </tr>
+                  `;
+                  tbody.append(row);
+                });
+                $('#emp-charges').html(selectOptions);
+                  let totalAmount = data.total_amount;
+                  totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                  });
+                  $('#total-amount').text("₱ "+totalAmount);
+                  $('#update-transaction').modal('show');
+              })
+
+          }
+
+
+
         $('#save-multiple-charges').click(function() {
             let selectedIDs = [];
             let selectedAmount = [];  
@@ -1308,6 +1381,11 @@
                     console.log(totalAmount +" total amt");
                     console.log(temp_id +" iddddd");
 
+                    console.log(outgoing_id +" outtgoingg");
+
+
+
+
                     $.ajax({
                         type: "POST",
                         url: "{% url 'update-multiple-charges' %}",
@@ -1320,7 +1398,8 @@
                         }).done(function(data){
                             if (data.data == 'success') {
                               $('#payrollDetails').modal('hide');
-                              updateTransaction(temp_id);
+                              data_printing(outgoing_id);
+                              $("#payrollUpdate").modal("hide");
                               toastr.success('Successfully save', 'Success', toast_options);
                             }
                             else {
