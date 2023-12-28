@@ -527,7 +527,7 @@ def employee_dv(request):
     idd = request.POST.get('dv_id')
     dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','id').first()
 
-
+    print(idd)
     print("noooooo")
     print(dv_no)
 
@@ -744,7 +744,23 @@ def payroll_load(request):
 
     
     elif _search:
-        query = TevIncoming.objects.filter(status_id=4).filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
+        with connection.cursor() as cursor:
+            query = """
+                SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges, t1.user_id
+                FROM `tev_incoming` t1 
+                LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = t1.id
+                LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+                WHERE t1.status_id = 4
+                AND (
+                    t1.code LIKE %s
+                    OR t1.first_name LIKE %s
+                )
+                GROUP BY t1.id ORDER BY t1.incoming_out DESC;
+            """
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%'])
+            columns = [col[0] for col in cursor.description]
+            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        
     else:
         query = """
             SELECT t1.*,GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
@@ -753,11 +769,6 @@ def payroll_load(request):
             LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
             WHERE t1.status_id = 4 GROUP BY t1.id ORDER BY t1.incoming_out DESC;
         """
-
-        # item_data = TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by(_order_dash + 'id')
-
-    # item_data = (TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by('-id').reverse())
-    
         with connection.cursor() as cursor:
             cursor.execute(query)
             columns = [col[0] for col in cursor.description]
@@ -765,8 +776,8 @@ def payroll_load(request):
     
     
     # total = item_data.count()
-
     total = len(results)
+
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     if _start and _length:
