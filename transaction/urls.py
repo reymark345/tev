@@ -36,6 +36,8 @@ urlpatterns = [
     path('check_charges', views.check_charges, name='check-charges'),
     path('remove_charges', views.remove_charges, name='remove-charges'),
 
+    path('add_dv', views.add_dv, name='add-dv'),
+
     
     
 ]

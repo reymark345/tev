@@ -1155,6 +1155,40 @@ def remove_charges(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
 
+@csrf_exempt
+def add_dv(request):
+    if request.method == 'POST':
+        user_id = request.session.get('user_id', 0)
+
+    
+        dv_number = request.POST.get('DvNumber')
+        cluster_id = request.POST.get('Cluster')
+        div_id = request.POST.get('Division')
+
+        print(div_id)
+        print("selected_tev")
+        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_id,box_b_in=date_time.datetime.now(),user_id=user_id, division_id = div_id)
+        outgoing.save()
+        
+        return JsonResponse({'data': 'success'})
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+        # selected_tev = json.loads(request.POST.get('selected_item'))
+        # outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_name,box_b_in=date_time.datetime.now(),user_id=user_id, division_id = div_id)
+        # outgoing.save()
+        # latest_outgoing = TevOutgoing.objects.latest('id')
+        # for item in selected_tev:
+        #     tev_update = TevIncoming.objects.filter(id=item['id']).update(status_id=5)
+        #     obj, was_created_bool = TevBridge.objects.get_or_create(
+        #         tev_incoming_id=item['id'],
+        #         tev_outgoing_id=latest_outgoing.id,
+        #         purpose=item['purpose'],
+        #         charges_id=item['charges']
+        #     )
+                
+        # return JsonResponse({'data': 'success'})
     
 
 
