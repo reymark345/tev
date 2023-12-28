@@ -270,11 +270,11 @@
 <!--/ Add New Credit Card Modal -->
 
 <!-- Enable OTP Modal -->
-<div class="modal fade" id="payrollDetails" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="payrollDetails" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
         <div class="modal-content p-3 p-md-5">
         <div class="modal-body">
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
             <div class="text-center mb-4">
                 <h3 class="mb-2">Multiple Charges</h3>
                 <p>Select charges with their corresponding amount</p>
@@ -455,15 +455,7 @@
                     render: function (data, type, row) {
                         var status = row.status; // Access the 'status' value from the 'row' object
                         var checkboxId = row.id;
-
-                        if (status == 3) {
-                            return '<input type="checkbox" disabled="disabled">';
-                        } else {
-                            // Render a checkbox for each row with the item ID as its value
-                            return '<input type="checkbox" id="checkbox_data" class="checkbox-items checkbox_data" name = "checkboxtype" value="' + data + '">';
-                            
-                        }
-
+                        return '<input type="checkbox" id="checkbox_data" class="checkbox-items checkbox_data" name = "checkboxtype" value="' + data + '">';
                     }
                 },
                 { data: 'code' },
@@ -1062,12 +1054,8 @@
                         })
                     });
                 }
-                console.log(data);
                 console.log("dataa_check_charges");
-
-
-
-
+                console.log(selected_tev);
             });
 
 
@@ -1161,17 +1149,11 @@
                     })
                 }
             }
-            else{
-                console.log("notttt");
-            }
-
-            
-
-
-
         });
 
         $(document).on('change', '.checkbox_data', function(event) {
+            console.log(selected_tev);
+            console.log("selected_tev");
             var clickedCheckbox = $(event.target);
             var row = clickedCheckbox.closest('tr');
             var checkboxId = clickedCheckbox.attr('value');

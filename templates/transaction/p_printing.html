@@ -822,7 +822,9 @@
                           '<select class="form-select select-charges" id="select-charges-'+i+'">' +
                               '<option></option>'+
                               '{% for row in charges %}'+
-                              '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                 '{% if row.name != "Multiple" %}'+
+                                     '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                  '{% endif %}'+
                               '{% endfor %}'+
                           '</select>' +
                           '<span class="error-label">Required</span>'+
@@ -1039,7 +1041,7 @@
                           <td><span class="badge bg-label-warning">${item.account_no}</span></td>
                           <td><span class="badge bg-label-primary">${item.id_no}</span></td>
                           <td>${item.name}</td>
-                          ${amountColumn}
+                          <td>${formattedFinalAmount}</td>
                           ${purposeColumn}
                           ${chargesColumn}
                           <td>${item.multiple_charges}</td>
@@ -1303,7 +1305,7 @@
                           <td><span class="badge bg-label-warning">${item.account_no}</span></td>
                           <td><span class="badge bg-label-primary">${item.id_no}</span></td>
                           <td>${item.name}</td>
-                          ${amountColumn}
+                          <td>${formattedFinalAmount}</td>
                           ${purposeColumn}
                           ${chargesColumn}
                           <td>${item.multiple_charges}</td>
