@@ -208,7 +208,7 @@ def preview_box_a(request):
             cursor.execute(query, [tuple(tev_incoming_ids)])
             rows = cursor.fetchall()
             for row in rows:
-                total_final_amount += float(row[11])
+                total_final_amount += Decimal(row[11]) if row[11] is not None else Decimal('0.0')
                 data_dict = {
                     "id": row[0],
                     "first_name": row[1],
@@ -269,7 +269,8 @@ def preview_box_a(request):
 
         for item in data_result:
             charges_name = item['charges_name']
-            charges_amount = Decimal(item['charges_amount'])
+            # charges_amount = Decimal(item['charges_amount'])
+            charges_amount = Decimal(item['charges_amount']) if item['charges_amount'] is not None else 0.0
 
             if charges_name in charges_dict:
                 charges_dict[charges_name] += charges_amount
@@ -1134,9 +1135,26 @@ def update_multiple_charges(request):
 def check_charges(request):
     if request.method == 'POST':
         incoming_id = request.POST.get('incoming_id')
+        
+    
+        amt = TevIncoming.objects.filter(id=incoming_id).values_list('final_amount', flat=True).first()
         try:
             data_exists = PayrolledCharges.objects.filter(incoming_id=incoming_id).exists()
-            return JsonResponse({'data': data_exists})
+            return JsonResponse({'data': data_exists,'amt': amt})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+@csrf_exempt
+def payroll_add_charges(request):
+    if request.method == 'POST':
+        incoming_id = request.POST.get('incoming_id')
+        amt = request.POST.get('amt')
+        charge_id = request.POST.get('charge_id')
+        try:
+            PayrolledCharges(amount=amt,charges_id=charge_id,incoming_id=incoming_id).save()
+            return JsonResponse({'data': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     else:
@@ -1146,8 +1164,11 @@ def check_charges(request):
 def remove_charges(request):
     if request.method == 'POST':
         incoming_id = request.POST.get('incoming_id')
+        charge_id = request.POST.get('charge_id')
+        amt = request.POST.get('amt')
         try:
             PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
+            PayrolledCharges(amount=amt,charges_id=charge_id,incoming_id =incoming_id).save()
             return JsonResponse({'data': 'success'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
