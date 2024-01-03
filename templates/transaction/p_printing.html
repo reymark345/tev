@@ -450,6 +450,10 @@
             rtl: isRtl,
       });
         let ItemID = $('#item-id')
+
+        let dataTable2 = $('#tbl-box-a').DataTable({
+
+        });
         
 
         let dataTable = table.DataTable({
@@ -840,7 +844,7 @@
                 let purposeColumn = '';
                 let chargesColumn = '';
                 let multipleChargesColumn = '';
-                selectOptions = '';
+                selectOptions = '<option></option>'; 
                 for (var i = 0; i < charges.length; i++) {
                     var charge = charges[i];
                     selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
@@ -862,7 +866,7 @@
                 deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
 
                 const row = `
-                    <tr data-row-id="${item.id}"> <!-- Assuming 'item.id' is the unique identifier for each row -->
+                    <tr data-row-id="${item.id}">
                         <td><input type="checkbox"></td>
                         <td><span class="badge bg-label-primary">${item.code}</span></td>
                         <td><span class="badge bg-label-warning">${item.account_no}</span></td>
@@ -996,22 +1000,23 @@
                               buttonsStyling: false,
                           }).then(function (result) {
                             if (result.value) {
-                              console.log("afterr:"+ temp_id);
-                              $.ajax({
-                                  type: 'POST',
-                                  url: "{% url 'remove-charges' %}",
-                                  data: {
-                                      incoming_id: temp_id,
-                                      charge_id:chargeId,
-                                      amt:amount
-                                  }
-                              }).done(function (data) {
-                                dataTable.ajax.reload();
-                                console.log(data);
-                                console.log("data");
-                              })
-                            }
-                          });
+                                
+                                console.log("afterr:"+ temp_id);
+                                $.ajax({
+                                    type: 'POST',
+                                    url: "{% url 'remove-charges' %}",
+                                    data: {
+                                        incoming_id: temp_id,
+                                        charge_id:chargeId,
+                                        amt:amount
+                                    }
+                                }).done(function (data) {
+                                    dataTable.ajax.reload(null, false);
+                                    console.log(data);
+                                    console.log("data");
+                                })
+                                }
+                            });
                             
                         }
                         else{
