@@ -525,7 +525,11 @@ def employee_dv(request):
     total_amount = 0
     charges_list = []
     
-    idd = request.POST.get('dv_id')
+    # idd = request.POST.get('dv_id')
+
+    idd = request.GET.get('dv_id')
+
+
     dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','id').first()
 
     print(idd)
@@ -542,15 +546,6 @@ def employee_dv(request):
     
     if dv_no is not None:
         dvno = dv_no['dv_no']
-
-    # query = """
-    #     SELECT ti.id, code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no, ch.name, cl.name FROM tev_incoming AS ti 
-    #     LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-    #     LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-    #     LEFT JOIN charges AS ch ON ch.id = tb.charges_id
-    #     LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
-    #     WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
-    # """
     query = """ 
     SELECT 
         ti.id, 
@@ -592,9 +587,6 @@ def employee_dv(request):
     print(data_result)
     print("data_result")
     for row in data_result:
-
-        
-        
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
         last_name = row['last_name'] if row['last_name'] else ''
@@ -630,8 +622,6 @@ def employee_dv(request):
                     
     total = len(data)  
     print(dv_no) 
-    print(dv_no['id'])  
-    print(dv_no['dv_no'])  
     print("thiss")  
           
     response = {
