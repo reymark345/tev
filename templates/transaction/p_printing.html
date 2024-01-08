@@ -68,6 +68,9 @@
       content: ""; /* Empty content to hide the error message */
       display: none;
   }
+  .blur-modal-backdrop {
+    backdrop-filter: blur(5px); /* Adjust the blur value as needed */
+}
 </style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -300,8 +303,8 @@
                                 <th>Name</th>
                                 <th>Amount</th>
                                 <th>Purpose</th>
-                                <th>Charge</th>
-                                <th>Multiple Charges</th>
+                                <th>Assign Charges</th>
+                                <th>Charges</th>
                                 <th>Action</th>
 
                                 
@@ -415,6 +418,8 @@
     let temp_id = 0;
     let data_clicked = false;
     let dataTable2;
+    var new_id;
+    let chargeId = 0;
     $(document).ready(function () {
       $('#loading-screen').hide();
       const table_box_a = $('#tbl-box-a')
@@ -781,11 +786,11 @@
               $('body').on('click', '.item-delete', function () {
                 let emp_id = $(this).attr('id');
                 Swal.fire({
-                  title: 'Are you sure?',
+                  title: 'Are you sure Remove from list?',
                   text: "You won't be able to revert this!",
                   icon: 'warning',
                   showCancelButton: true,
-                  confirmButtonText: 'Yes, Delete it!',
+                  confirmButtonText: 'Yes, Remove it!',
                   customClass: {
                       confirmButton: 'btn btn-primary me-3',
                       cancelButton: 'btn btn-label-secondary',
@@ -833,232 +838,233 @@
               })
         });
  
-      function updateTransaction(id) {
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'employee-dv' %}",
-            data: {
-                dv_id: id
-            }
-        }).done(function (data) {
-            console.log(data);
-            console.log("data");
-            dv_number = '';
-            charges = '';
-            outgoing_id = 0;
-            dv_number = data.dv_number;
-            charges = data.charges;
-            outgoing_id = data.outgoing_id;
-            $("#f-outgoing-id").val(data.outgoing_id)
-            tbody.empty();
-            data.data.forEach(function (item) {
-                const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
-                let amountColumn = '';
-                let editColumn = '';
-                let updateColumn = '';
-                let deleteColumn = '';
-                let purposeColumn = '';
-                let chargesColumn = '';
-                let multipleChargesColumn = '';
-                selectOptions = '<option></option>'; 
-                for (var i = 0; i < charges.length; i++) {
-                    var charge = charges[i];
-                    selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
-                }
+    //   function updateTransaction(id) {
+    //     $.ajax({
+    //         type: 'POST',
+    //         url: "{% url 'employee-dv' %}",
+    //         data: {
+    //             dv_id: id
+    //         }
+    //     }).done(function (data) {
+    //         console.log(data);
+    //         console.log("data");
+    //         dv_number = '';
+    //         charges = '';
+    //         outgoing_id = 0;
+    //         dv_number = data.dv_number;
+    //         charges = data.charges;
+    //         outgoing_id = data.outgoing_id;
+    //         $("#f-outgoing-id").val(data.outgoing_id)
+    //         tbody.empty();
+    //         data.data.forEach(function (item) {
+    //             const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+    //             let amountColumn = '';
+    //             let editColumn = '';
+    //             let updateColumn = '';
+    //             let deleteColumn = '';
+    //             let purposeColumn = '';
+    //             let chargesColumn = '';
+    //             let multipleChargesColumn = '';
+    //             selectOptions = '<option></option>'; 
+    //             for (var i = 0; i < charges.length; i++) {
+    //                 var charge = charges[i];
+    //                 selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+    //             }
 
                 
-                if (item.multiple_charges !== null && item.multiple_charges !== '') {
-                    multipleChargesColumn = `<td>${item.multiple_charges}</td>`;
-                } else {
-                    multipleChargesColumn = `<td></td>`;  // Return a blank column if multiple_charges is null or empty
-                }
+    //             if (item.multiple_charges !== null && item.multiple_charges !== '') {
+    //                 multipleChargesColumn = `<td>${item.multiple_charges}</td>`;
+    //             } else {
+    //                 multipleChargesColumn = `<td></td>`;  // Return a blank column if multiple_charges is null or empty
+    //             }
 
 
-                amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
-                purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
-                chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
-                editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
-                updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
-                deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+    //             amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+    //             purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+    //             chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+    //             editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+    //             updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
+    //             deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
 
-                const row = `
-                    <tr data-row-id="${item.id}">
-                        <td><input type="checkbox"></td>
-                        <td><span class="badge bg-label-primary">${item.code}</span></td>
-                        <td><span class="badge bg-label-warning">${item.account_no}</span></td>
-                        <td><span class="badge bg-label-primary">${item.id_no}</span></td>
-                        <td>${item.name}</td>
-                        <td>${formattedFinalAmount}</td>
-                        ${purposeColumn}
-                        ${chargesColumn}
-                        ${multipleChargesColumn}
-                        <td>${deleteColumn}</td>
-                    </tr>
-                `;
-                tbody.append(row);
-            });
+    //             const row = `
+    //                 <tr>
+    //                     <td><input type="checkbox"></td>
+    //                     <td><span class="badge bg-label-primary">${item.code}</span></td>
+    //                     <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+    //                     <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+    //                     <td>${item.name}</td>
+    //                     <td>${formattedFinalAmount}</td>
+    //                     ${purposeColumn}
+    //                     ${chargesColumn}
+    //                     ${multipleChargesColumn}
+    //                     <td>${deleteColumn}</td>
+    //                 </tr>
+    //             `;
+    //             tbody.append(row);
+    //         });
 
-            $('#emp-charges').html(selectOptions);
-            let totalAmount = data.total_amount;
-            totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
-            $('#total-amount').text("₱ " + totalAmount);
-            $('#update-transaction').modal('show');
+    //         $('#emp-charges').html(selectOptions);
+    //         let totalAmount = data.total_amount;
+    //         totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+    //             minimumFractionDigits: 2,
+    //             maximumFractionDigits: 2
+    //         });
+    //         $('#total-amount').text("₱ " + totalAmount);
+    //         $('#update-transaction').modal('show');
             
-            $(document).on("change", ".emp-charges", function () {
-                var selectedOption = $(this).find(":selected");
-                if (selectedOption.length > 0) {
-                    var chargeId = selectedOption.val();
-                    var chargeText = selectedOption.text(); 
-                    var tableRow = $(this).closest("tr");
-                    temp_id = tableRow.data("row-id");
+    //         // $(document).on("change", ".emp-charges", function () {
+    //         //     let selectedOption = $(this).find(":selected");
+    //         //     chargeId = selectedOption.val();
+    //         //     console.log("ngano wala man");
+    //         //     console.log(chargeId);
+    //         //     let chargeText = selectedOption.text(); 
+    //         //     let tableRow = $(this).closest("tr");
+    //         //     temp_id = tableRow.data("row-id");
+    //         //     if (selectedOption.length > 0) {
+    //         //         if (chargeText=== "Multiple") {
+    //         //           $("#payrollUpdate").modal("show");
+    //         //           $('.modal-backdrop').addClass('blur-modal-backdrop');
 
-                    console.log("before:"+ temp_id);
+    //         //           $.ajax({
+    //         //               type: 'POST',
+    //         //               url: "{% url 'multiple-charges-details' %}",
+    //         //               data:{
+    //         //                 payroll_id: temp_id
+    //         //               }
+    //         //           }).done(function (data) {
+    //         //             dataTable2.ajax.reload();
+    //         //             let totalAmount = 0;
+    //         //             let amountList = [];
+    //         //             let chargesList = [];
+    //         //             let preview_amt = [];
+    //         //             let preview_charges = [];
 
-                    if (chargeText=== "Multiple") {
-                      $("#payrollUpdate").modal("show");
+    //         //             let full_name = data.full_name;
+    //         //             let amount = data.amount;
+    //         //             FName.val(full_name);
+    //         //             AmountIssued.val(amount);
+    //         //             $('.rows-container').empty();
 
-                      $.ajax({
-                          type: 'POST',
-                          url: "{% url 'multiple-charges-details' %}",
-                          data:{
-                            payroll_id: temp_id
-                          }
-                      }).done(function (data) {
-
-                        let totalAmount = 0;
-                        let amountList = [];
-                        let chargesList = [];
-                        let preview_amt = [];
-                        let preview_charges = [];
-
-                        let full_name = data.full_name;
-                        let amount = data.amount;
-                        FName.val(full_name);
-                        AmountIssued.val(amount);
-                        $('.rows-container').empty();
-
-                        chargesList = data.data.map(item => item.charges_id);
-                        amountList = data.data.map(item => item.amount);
-                        if (data.data.length > 0) {
-                            for (let i = 0; i < data.data.length; i++) {
-                                var newRow = $('<div class="row mt-2">' +
-                                '<div class="col-5">' +
-                                '<select class="form-select select-charges" id="select-charges-'+i+'">' +
-                                    '<option></option>'+
-                                    '{% for row in charges %}'+
-                                      '{% if row.name != "Multiple" %}'+
-                                          '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                        '{% endif %}'+
-                                    '{% endfor %}'+
-                                '</select>' +
-                                '<span class="error-label">Required</span>'+
-                                '</div>' +
-                                '<div class="col-5">' +
-                                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
-                                '<span class="error-label-amount">Required</span>'+
-                                '</div>' +
-                                '<div class="col-2">' +
-                                '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                                '</div>' +
-                                '</div>');
-                                newRow.find('.error-label, .error-label-amount').hide();
-                                $('.rows-container').append(newRow);
-                                $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
-                            }
-                        } else {
-                            var newRow = $('<div class="row mt-2">' +
-                            '<div class="col-5">' +
-                            '<select class="form-select select-charges" id="select-charges">' +
-                                '<option></option>'+
-                                '{% for row in charges %}'+
-                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                '{% endfor %}'+
-                            '</select>' +
-                            '<span class="error-label">Required</span>'+
-                            '</div>' +
-                            '<div class="col-5">' +
-                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
-                            '<span class="error-label-amount">Required</span>'+
-                            '</div>' +
-                            '<div class="col-2">' +
-                            '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                            '</div>' +
-                            '</div>');
-                            newRow.find('.error-label, .error-label-amount').hide();
-                            $('.rows-container').append(newRow);
-                        }
-                      });
-                    }
-                    else{
-                      $.ajax({
-                          type: 'POST',
-                          url: "{% url 'check-charges' %}",
-                          data:{
-                              incoming_id: temp_id
-                          }
-                      }).done(function (data) {
-                        let amount = data.amt;
-                        if(data.data){
+    //         //             chargesList = data.data.map(item => item.charges_id);
+    //         //             amountList = data.data.map(item => item.amount);
+    //         //             if (data.data.length > 0) {
+    //         //                 for (let i = 0; i < data.data.length; i++) {
+    //         //                     var newRow = $('<div class="row mt-2">' +
+    //         //                     '<div class="col-5">' +
+    //         //                     '<select class="form-select select-charges" id="select-charges-'+i+'">' +
+    //         //                         '<option></option>'+
+    //         //                         '{% for row in charges %}'+
+    //         //                           '{% if row.name != "Multiple" %}'+
+    //         //                               '<option value="{{ row.id }}">{{ row.name }}</option>'+
+    //         //                             '{% endif %}'+
+    //         //                         '{% endfor %}'+
+    //         //                     '</select>' +
+    //         //                     '<span class="error-label">Required</span>'+
+    //         //                     '</div>' +
+    //         //                     '<div class="col-5">' +
+    //         //                     '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+    //         //                     '<span class="error-label-amount">Required</span>'+
+    //         //                     '</div>' +
+    //         //                     '<div class="col-2">' +
+    //         //                     '<button type="button" class="btn btn-warning delete-row">-</button>' +
+    //         //                     '</div>' +
+    //         //                     '</div>');
+    //         //                     newRow.find('.error-label, .error-label-amount').hide();
+    //         //                     $('.rows-container').append(newRow);
+    //         //                     $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
+    //         //                 }
+    //         //             } else {
+    //         //                 var newRow = $('<div class="row mt-2">' +
+    //         //                 '<div class="col-5">' +
+    //         //                 '<select class="form-select select-charges" id="select-charges">' +
+    //         //                     '<option></option>'+
+    //         //                     '{% for row in charges %}'+
+    //         //                     '<option value="{{ row.id }}">{{ row.name }}</option>'+
+    //         //                     '{% endfor %}'+
+    //         //                 '</select>' +
+    //         //                 '<span class="error-label">Required</span>'+
+    //         //                 '</div>' +
+    //         //                 '<div class="col-5">' +
+    //         //                 '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+    //         //                 '<span class="error-label-amount">Required</span>'+
+    //         //                 '</div>' +
+    //         //                 '<div class="col-2">' +
+    //         //                 '<button type="button" class="btn btn-warning delete-row">-</button>' +
+    //         //                 '</div>' +
+    //         //                 '</div>');
+    //         //                 newRow.find('.error-label, .error-label-amount').hide();
+    //         //                 $('.rows-container').append(newRow);
+    //         //             }
+    //         //           });
+    //         //         }
+    //         //         else{
+    //         //           $.ajax({
+    //         //               type: 'POST',
+    //         //               url: "{% url 'check-charges' %}",
+    //         //               data:{
+    //         //                   incoming_id: temp_id
+    //         //               }
+    //         //           }).done(function (data) {
+    //         //             let amount = data.amt;
+    //         //             if(data.data){
                           
-                          Swal.fire({
-                              title: 'Are you sure to Change Charges?',
-                              text: "You won't be able to revert this!",
-                              icon: 'warning',
-                              showCancelButton: true,
-                              confirmButtonText: 'Yes, change it!',
-                              customClass: {
-                                  confirmButton: 'btn btn-primary me-3',
-                                  cancelButton: 'btn btn-label-secondary',
-                              },
-                              buttonsStyling: false,
-                          }).then(function (result) {
-                            if (result.value) {
+    //         //               Swal.fire({
+    //         //                   title: 'Are you sure to Change Charges?',
+    //         //                   text: "You won't be able to revert this!",
+    //         //                   icon: 'warning',
+    //         //                   showCancelButton: true,
+    //         //                   confirmButtonText: 'Yes, change it!',
+    //         //                   customClass: {
+    //         //                       confirmButton: 'btn btn-primary me-3',
+    //         //                       cancelButton: 'btn btn-label-secondary',
+    //         //                   },
+    //         //                   buttonsStyling: false,
+    //         //               }).then(function (result) {
+    //         //                 if (result.value) {
                                 
-                                console.log("afterr:"+ temp_id);
-                                $.ajax({
-                                    type: 'POST',
-                                    url: "{% url 'remove-charges' %}",
-                                    data: {
-                                        incoming_id: temp_id,
-                                        charge_id:chargeId,
-                                        amt:amount
-                                    }
-                                }).done(function (data) {
-                                    dataTable.ajax.reload(null, false);
-                                    console.log(data);
-                                    console.log("data");
-                                })
-                                }
-                            });
+    //         //                     console.log("afterr:"+ temp_id);
+    //         //                     $.ajax({
+    //         //                         type: 'POST',
+    //         //                         url: "{% url 'remove-charges' %}",
+    //         //                         data: {
+    //         //                             incoming_id: temp_id,
+    //         //                             charge_id:chargeId,
+    //         //                             amt:amount
+    //         //                         }
+    //         //                     }).done(function (data) {
+    //         //                         dataTable.ajax.reload(null, false);
+    //         //                         console.log(data);
+    //         //                         console.log("data");
+    //         //                     })
+    //         //                     }
+    //         //                 });
                             
-                        }
-                        else{
-                          $.ajax({
-                            type: 'POST',
-                            url: "{% url 'payroll-add-charges' %}",
-                            data:{
-                                incoming_id: temp_id,
-                                charge_id:chargeId,
-                                amt:amount
-                              }
-                            }).done(function (data) {
-                              console.log(data);
-                              dataTable.ajax.reload();
-                          });
+    //         //             }
+    //         //             else{
+    //         //               $.ajax({
+    //         //                 type: 'POST',
+    //         //                 url: "{% url 'payroll-add-charges' %}",
+    //         //                 data:{
+    //         //                     incoming_id: temp_id,
+    //         //                     charge_id:chargeId,
+    //         //                     amt:amount
+    //         //                   }
+    //         //                 }).done(function (data) {
+    //         //                   console.log(data);
+    //         //                   dataTable.ajax.reload();
+    //         //               });
 
-                        }
+    //         //             }
 
-                      });
-                    }
-                } else {
-                    alert("No charge selected");
-                }
-            });
-        });
-    }
+    //         //           });
+    //         //         }
+    //         //     } else {
+    //         //         alert("No charge selected");
+    //         //     }
+    //         // });
+        
+    //     });
+    // }
       const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
                 fields: {
                     MDvNumber: {
@@ -1197,7 +1203,7 @@
             })
         });
         $('#cancel-multiple-charges').click(function() {
-        updateTransaction(dv_no_id);
+        // updateTransaction(dv_no_id);
         });
     
 
@@ -1230,17 +1236,16 @@
                 { data: 'purpose' },
                 { data: 'dv_no' },
                 { data: 'multiple_charges' },
-                { data: 'total' },
+                { data: 'total_amount' },
             ],
             columnDefs: [
-                {
+                 {   
                     targets: 0,
                     render: function(data, type, row, meta) {
-                        return '<td data-row-id="' + row.id + '"><input type="checkbox"></td>';
+                       
+                        // Set the data-row-id attribute on the <tr> element
+                        return '<tr data-row-id="' + row.id + '"><td><input type="checkbox"></td></tr>';
                     },
-                    // render: function(data) {
-                    //     return '<td><input type="checkbox"></td>'
-                    // },
                 },
                 {
                     targets: 1,
@@ -1296,175 +1301,167 @@
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [],
             drawCallback: function (settings) {
+                var myDataTable = $('#tbl-box-a').DataTable();
+                var totalValue = myDataTable.row(0).data().total;
+                $('#total-amount').text("₱ "+totalValue);
 
-                $(document).on("change", ".emp-charges", function () {
+                //heres
 
-                        // Get the selected value from the dropdown
-                    var selectedChargeId = $(this).val();
+            //     $(document).on("change", ".emp-charges", function () {
+                
+                    
+            //     let dataTable = $('#tbl-box-a').DataTable();
+            //     let closestRow = dataTable.row($(this).closest('tr'));
+            //     let rowData = closestRow.data();
+            //     let new_id = rowData.id;
+            //     let empChargesValue = $(this).val();
+            //     let empChargesText =  $(this).find(':selected').text();
 
-                    // Traverse up the DOM to find the parent row
-                    var parentRow = $(this).closest('tr');
+            //     console.log("new_id1:", new_id);
+            //     console.log("empChargesValue:", empChargesText);
 
-                    // Extract the row ID (assuming it's stored as a data attribute, e.g., data-row-id)
-                    var rowId = parentRow.data('row-id');
+            //     let selectedOption = $(this).find(":selected");
+            //     if (selectedOption.length > 0) {
+            //         temp_id = rowData.id;
+            //         if (empChargesText=== "Multiple") {
+            //             $("#payrollUpdate").modal("show");
+            //             $.ajax({
+            //                 type: 'POST',
+            //                 url: "{% url 'multiple-charges-details' %}",
+            //                 data:{
+            //                     payroll_id: temp_id
+            //                 }
+            //             }).done(function (data) {
 
-                    // Now you have both the selected charge ID and the row ID
-                    console.log("Selected Charge ID:", selectedChargeId);
-                    console.log("Row ID:", rowId);
+            //                 let totalAmount = 0;
+            //                 let amountList = [];
+            //                 let chargesList = [];
+            //                 let preview_amt = [];
+            //                 let preview_charges = [];
 
+            //                 let full_name = data.full_name;
+            //                 let amount = data.amount;
+            //                 FName.val(full_name);
+            //                 AmountIssued.val(amount);
+            //                 $('.rows-container').empty();
 
-
-
-
-                    var selectedOption = $(this).find(":selected");
-                    if (selectedOption.length > 0) {
-                        var chargeId = selectedOption.val();
-                        var chargeText = selectedOption.text(); 
-                        var tableRow = $(this).closest("tr");
-                        temp_id = tableRow.data("row-id");
-
-                        console.log("before:"+ temp_id);
-
-                        if (chargeText=== "Multiple") {
-                        $("#payrollUpdate").modal("show");
-
-                        $.ajax({
-                            type: 'POST',
-                            url: "{% url 'multiple-charges-details' %}",
-                            data:{
-                                payroll_id: temp_id
-                            }
-                        }).done(function (data) {
-
-                            let totalAmount = 0;
-                            let amountList = [];
-                            let chargesList = [];
-                            let preview_amt = [];
-                            let preview_charges = [];
-
-                            let full_name = data.full_name;
-                            let amount = data.amount;
-                            FName.val(full_name);
-                            AmountIssued.val(amount);
-                            $('.rows-container').empty();
-
-                            chargesList = data.data.map(item => item.charges_id);
-                            amountList = data.data.map(item => item.amount);
-                            if (data.data.length > 0) {
-                                for (let i = 0; i < data.data.length; i++) {
-                                    var newRow = $('<div class="row mt-2">' +
-                                    '<div class="col-5">' +
-                                    '<select class="form-select select-charges" id="select-charges-'+i+'">' +
-                                        '<option></option>'+
-                                        '{% for row in charges %}'+
-                                        '{% if row.name != "Multiple" %}'+
-                                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                            '{% endif %}'+
-                                        '{% endfor %}'+
-                                    '</select>' +
-                                    '<span class="error-label">Required</span>'+
-                                    '</div>' +
-                                    '<div class="col-5">' +
-                                    '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
-                                    '<span class="error-label-amount">Required</span>'+
-                                    '</div>' +
-                                    '<div class="col-2">' +
-                                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                                    '</div>' +
-                                    '</div>');
-                                    newRow.find('.error-label, .error-label-amount').hide();
-                                    $('.rows-container').append(newRow);
-                                    $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
-                                }
-                            } else {
-                                var newRow = $('<div class="row mt-2">' +
-                                '<div class="col-5">' +
-                                '<select class="form-select select-charges" id="select-charges">' +
-                                    '<option></option>'+
-                                    '{% for row in charges %}'+
-                                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                    '{% endfor %}'+
-                                '</select>' +
-                                '<span class="error-label">Required</span>'+
-                                '</div>' +
-                                '<div class="col-5">' +
-                                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
-                                '<span class="error-label-amount">Required</span>'+
-                                '</div>' +
-                                '<div class="col-2">' +
-                                '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                                '</div>' +
-                                '</div>');
-                                newRow.find('.error-label, .error-label-amount').hide();
-                                $('.rows-container').append(newRow);
-                            }
-                        });
-                        }
-                        else{
-                        $.ajax({
-                            type: 'POST',
-                            url: "{% url 'check-charges' %}",
-                            data:{
-                                incoming_id: temp_id
-                            }
-                        }).done(function (data) {
-                            let amount = data.amt;
-                            if(data.data){
-                            
-                            Swal.fire({
-                                title: 'Are you sure to Change Charges?',
-                                text: "You won't be able to revert this!",
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonText: 'Yes, change it!',
-                                customClass: {
-                                    confirmButton: 'btn btn-primary me-3',
-                                    cancelButton: 'btn btn-label-secondary',
-                                },
-                                buttonsStyling: false,
-                            }).then(function (result) {
-                                if (result.value) {
-                                    
-                                    console.log("afterr:"+ temp_id);
-                                    $.ajax({
-                                        type: 'POST',
-                                        url: "{% url 'remove-charges' %}",
-                                        data: {
-                                            incoming_id: temp_id,
-                                            charge_id:chargeId,
-                                            amt:amount
-                                        }
-                                    }).done(function (data) {
-                                        dataTable.ajax.reload(null, false);
-                                        console.log(data);
-                                        console.log("data");
-                                    })
-                                    }
-                                });
+            //                 chargesList = data.data.map(item => item.charges_id);
+            //                 amountList = data.data.map(item => item.amount);
+            //                 if (data.data.length > 0) {
+            //                     for (let i = 0; i < data.data.length; i++) {
+            //                         var newRow = $('<div class="row mt-2">' +
+            //                         '<div class="col-5">' +
+            //                         '<select class="form-select select-charges" id="select-charges-'+i+'">' +
+            //                             '<option></option>'+
+            //                             '{% for row in charges %}'+
+            //                             '{% if row.name != "Multiple" %}'+
+            //                                 '<option value="{{ row.id }}">{{ row.name }}</option>'+
+            //                                 '{% endif %}'+
+            //                             '{% endfor %}'+
+            //                         '</select>' +
+            //                         '<span class="error-label">Required</span>'+
+            //                         '</div>' +
+            //                         '<div class="col-5">' +
+            //                         '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+            //                         '<span class="error-label-amount">Required</span>'+
+            //                         '</div>' +
+            //                         '<div class="col-2">' +
+            //                         '<button type="button" class="btn btn-warning delete-row">-</button>' +
+            //                         '</div>' +
+            //                         '</div>');
+            //                         newRow.find('.error-label, .error-label-amount').hide();
+            //                         $('.rows-container').append(newRow);
+            //                         $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
+            //                     }
+            //                 } else {
+            //                     var newRow = $('<div class="row mt-2">' +
+            //                     '<div class="col-5">' +
+            //                     '<select class="form-select select-charges" id="select-charges">' +
+            //                         '<option></option>'+
+            //                         '{% for row in charges %}'+
+            //                         '<option value="{{ row.id }}">{{ row.name }}</option>'+
+            //                         '{% endfor %}'+
+            //                     '</select>' +
+            //                     '<span class="error-label">Required</span>'+
+            //                     '</div>' +
+            //                     '<div class="col-5">' +
+            //                     '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+            //                     '<span class="error-label-amount">Required</span>'+
+            //                     '</div>' +
+            //                     '<div class="col-2">' +
+            //                     '<button type="button" class="btn btn-warning delete-row">-</button>' +
+            //                     '</div>' +
+            //                     '</div>');
+            //                     newRow.find('.error-label, .error-label-amount').hide();
+            //                     $('.rows-container').append(newRow);
+            //                 }
+            //             });
+            //         }
+            //         else{
+            //         $.ajax({
+            //             type: 'POST',
+            //             url: "{% url 'check-charges' %}",
+            //             data:{
+            //                 incoming_id: temp_id
+            //             }
+            //         }).done(function (data) {
+            //             let amount = data.amt;
+            //             if(data.data){
+                        
+            //             Swal.fire({
+            //                 title: 'Are you sure to Change Charges?',
+            //                 text: "You won't be able to revert this!",
+            //                 icon: 'warning',
+            //                 showCancelButton: true,
+            //                 confirmButtonText: 'Yes, change it!',
+            //                 customClass: {
+            //                     confirmButton: 'btn btn-primary me-3',
+            //                     cancelButton: 'btn btn-label-secondary',
+            //                 },
+            //                 buttonsStyling: false,
+            //             }).then(function (result) {
+            //                 if (result.value) {
                                 
-                            }
-                            else{
-                            $.ajax({
-                                type: 'POST',
-                                url: "{% url 'payroll-add-charges' %}",
-                                data:{
-                                    incoming_id: temp_id,
-                                    charge_id:chargeId,
-                                    amt:amount
-                                }
-                                }).done(function (data) {
-                                console.log(data);
-                                dataTable.ajax.reload();
-                            });
+            //                     console.log("afterr:"+ temp_id);
+            //                     $.ajax({
+            //                         type: 'POST',
+            //                         url: "{% url 'remove-charges' %}",
+            //                         data: {
+            //                             incoming_id: temp_id,
+            //                             charge_id:empChargesValue,
+            //                             amt:amount
+            //                         }
+            //                     }).done(function (data) {
+            //                         dataTable.ajax.reload(null, false);
+            //                         console.log(data);
+            //                         console.log("data");
+            //                     })
+            //                     }
+            //                 });
+                            
+            //             }
+            //             else{
+            //             $.ajax({
+            //                 type: 'POST',
+            //                 url: "{% url 'payroll-add-charges' %}",
+            //                 data:{
+            //                     incoming_id: temp_id,
+            //                     charge_id:empChargesValue,
+            //                     amt:amount
+            //                 }
+            //                 }).done(function (data) {
+            //                 console.log(data);
+            //                 dataTable.ajax.reload();
+            //             });
 
-                            }
+            //             }
 
-                        });
-                        }
-                    } else {
-                        alert("No charge selected");
-                    }
-                });
+            //         });
+            //         }
+            //     } else {
+            //         alert("No charge selected");
+            //     }
+            // });
 
 
             }
@@ -1705,6 +1702,162 @@
           }
 
 
+                
+          $(document).on("change", ".emp-charges", function () {
+                let dataTable = $('#tbl-box-a').DataTable();
+                let closestRow = dataTable.row($(this).closest('tr'));
+                let rowData = closestRow.data();
+                let new_id = rowData.id;
+                let empChargesValue = $(this).val();
+                let empChargesText =  $(this).find(':selected').text();
+
+                console.log("new_id1:", new_id);
+                console.log("empChargesValue:", empChargesText);
+
+                let selectedOption = $(this).find(":selected");
+                if (selectedOption.length > 0) {
+                    temp_id = rowData.id;
+                    if (empChargesText=== "Multiple") {
+                        $("#payrollUpdate").modal("show");
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'multiple-charges-details' %}",
+                            data:{
+                                payroll_id: temp_id
+                            }
+                        }).done(function (data) {
+
+                            let totalAmount = 0;
+                            let amountList = [];
+                            let chargesList = [];
+                            let preview_amt = [];
+                            let preview_charges = [];
+
+                            let full_name = data.full_name;
+                            let amount = data.amount;
+                            FName.val(full_name);
+                            AmountIssued.val(amount);
+                            $('.rows-container').empty();
+
+                            chargesList = data.data.map(item => item.charges_id);
+                            amountList = data.data.map(item => item.amount);
+                            if (data.data.length > 0) {
+                                for (let i = 0; i < data.data.length; i++) {
+                                    var newRow = $('<div class="row mt-2">' +
+                                    '<div class="col-5">' +
+                                    '<select class="form-select select-charges" id="select-charges-'+i+'">' +
+                                        '<option></option>'+
+                                        '{% for row in charges %}'+
+                                        '{% if row.name != "Multiple" %}'+
+                                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                            '{% endif %}'+
+                                        '{% endfor %}'+
+                                    '</select>' +
+                                    '<span class="error-label">Required</span>'+
+                                    '</div>' +
+                                    '<div class="col-5">' +
+                                    '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+                                    '<span class="error-label-amount">Required</span>'+
+                                    '</div>' +
+                                    '<div class="col-2">' +
+                                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                                    '</div>' +
+                                    '</div>');
+                                    newRow.find('.error-label, .error-label-amount').hide();
+                                    $('.rows-container').append(newRow);
+                                    $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
+                                }
+                            } else {
+                                var newRow = $('<div class="row mt-2">' +
+                                '<div class="col-5">' +
+                                '<select class="form-select select-charges" id="select-charges">' +
+                                    '<option></option>'+
+                                    '{% for row in charges %}'+
+                                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endfor %}'+
+                                '</select>' +
+                                '<span class="error-label">Required</span>'+
+                                '</div>' +
+                                '<div class="col-5">' +
+                                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                                '<span class="error-label-amount">Required</span>'+
+                                '</div>' +
+                                '<div class="col-2">' +
+                                '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                                '</div>' +
+                                '</div>');
+                                newRow.find('.error-label, .error-label-amount').hide();
+                                $('.rows-container').append(newRow);
+                            }
+                        });
+                    }
+                    else{
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'check-charges' %}",
+                        data:{
+                            incoming_id: temp_id
+                        }
+                    }).done(function (data) {
+                        let amount = data.amt;
+                        if(data.data){
+                        
+                        Swal.fire({
+                            title: 'Are you sure to Change Charges?',
+                            text: "You won't be able to revert this!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, change it!',
+                            customClass: {
+                                confirmButton: 'btn btn-primary me-3',
+                                cancelButton: 'btn btn-label-secondary',
+                            },
+                            buttonsStyling: false,
+                        }).then(function (result) {
+                            if (result.value) {
+                                
+                                console.log("afterr:"+ temp_id);
+                                $.ajax({
+                                    type: 'POST',
+                                    url: "{% url 'remove-charges' %}",
+                                    data: {
+                                        incoming_id: temp_id,
+                                        charge_id:empChargesValue,
+                                        amt:amount
+                                    }
+                                }).done(function (data) {
+                                    dataTable.ajax.reload(null, false);
+                                    console.log(data);
+                                    console.log("data");
+                                })
+                                }
+                            });
+                            
+                        }
+                        else{
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'payroll-add-charges' %}",
+                            data:{
+                                incoming_id: temp_id,
+                                charge_id:empChargesValue,
+                                amt:amount
+                            }
+                            }).done(function (data) {
+                            console.log(data);
+                            dataTable.ajax.reload();
+                        });
+
+                        }
+
+                    });
+                    }
+                } else {
+                    alert("No charge selected");
+                }
+            });
+
+
 
         $('#save-multiple-charges').click(function() {
             let selectedIDs = [];
@@ -1778,8 +1931,9 @@
                         }).done(function(data){
                             if (data.data == 'success') {
                               $('#payrollDetails').modal('hide');
-                              data_printing(outgoing_id);
+                            //   data_printing(outgoing_id);
                               $("#payrollUpdate").modal("hide");
+                              dataTable2.ajax.reload();
                               toastr.success('Successfully save', 'Success', toast_options);
                             }
                             else {
