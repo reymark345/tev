@@ -428,10 +428,10 @@ def employee_dv(request):
             'total':final_amount,
         }
         data.append(item)
-
-
-    payrolled_list = TevIncoming.objects.filter(status_id = 4).order_by('first_name')
-    payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))
+        
+    # payrolled_list = TevIncoming.objects.filter(status_id = 4).order_by('first_name')
+    payrolled_list = list(TevIncoming.objects.filter(status_id=4).order_by('first_name').values('id','code','first_name','middle_name','last_name','id_no','account_no','date_travel','original_amount','final_amount','incoming_in','slashed_out','remarks','user_id','is_upload','status_id'))
+    # payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))
 
                     
     total = len(data)  

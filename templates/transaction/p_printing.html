@@ -1243,6 +1243,7 @@
                 { data: 'multiple_charges' },
                 { data: 'total', name: 'total' },
             ],
+        
             columnDefs: [
                  {   
                     targets: 0,
@@ -1310,34 +1311,32 @@
                         return '<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>';
                     },
                 },
+                
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [],
             drawCallback: function (settings) {
                 let myDataTable = $('#tbl-box-a').DataTable();
-                let totalAmount = 0;
-
-
-                myDataTable.column(9, { search: 'applied' }).data().each(function (value) {
-                    totalAmount += parseFloat(value);
-                });
-
-                let dvNoValue = myDataTable.row(0).data().dv_no;
-                dv_number = dvNoValue;
-                PayrollName.val('').trigger('change');
-                if (PayrollName.length) {
-                    PayrollName.wrap('<div class="position-relative"></div>')
-                    PayrollName.select2({
-                        placeholder: 'Choose Employee',
-                        dropdownParent: PayrollName.parent(),
-                        allowClear: true,
-                    })
+                let payrolledListData = [];
+                $('#payroll-name').empty();
+            
+                // Add an empty option
+                $('#payroll-name').append('<option></option>');
+            
+                // Populate options based on payrolled_list data
+                for (let i = 0; i < payrolledListData.length; i++) {
+                    $('#payroll-name').append('<option value="' + payrolledListData[i].id + '">' + payrolledListData[i].name + '</option>');
                 }
-                
-                $('#dv-number').text(dvNoValue);
-                $('#total-amount').text("₱ " + totalAmount.toFixed(2));
-
-                
+            
+                // Initialize Select2
+                if ($('#payroll-name').length) {
+                    $('#payroll-name').wrap('<div class="position-relative"></div>');
+                    $('#payroll-name').select2({
+                        placeholder: 'Choose Employee',
+                        dropdownParent: $('#payroll-name').parent(),
+                        allowClear: true,
+                    });
+                }
             }
         });
     }
