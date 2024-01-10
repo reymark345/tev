@@ -351,12 +351,7 @@ def employee_dv(request):
     dvno = ''
     total_amount = 0       
     charges_list = []
-    
-    # idd = request.POST.get('dv_id')
-
     idd = request.GET.get('dv_id')
-
-
     dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','id').first()
 
     charges = Charges.objects.filter().order_by('name')
@@ -370,28 +365,28 @@ def employee_dv(request):
     if dv_no is not None:
         dvno = dv_no['dv_no']
     query = """ 
-    SELECT 
-        ti.id, 
-        code, 
-        first_name, 
-        middle_name, 
-        last_name,
-        id_no,
-        account_no, 
-        final_amount, 
-        MAX(tb.purpose) AS purpose,  -- Using an aggregate function
-        dv_no, 
-        cl.name as cluster, 
-        GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
-    FROM tev_incoming AS ti 
-    LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-    LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-    LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
-    LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = ti.id
-    LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
-    WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s 
-    GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
-    ORDER BY ti.incoming_out DESC;   
+        SELECT 
+            ti.id, 
+            code, 
+            first_name, 
+            middle_name, 
+            last_name,
+            id_no,
+            account_no, 
+            final_amount, 
+            MAX(tb.purpose) AS purpose,  -- Using an aggregate function
+            dv_no, 
+            cl.name as cluster, 
+            GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
+        FROM tev_incoming AS ti 
+        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
+        LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = ti.id
+        LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s 
+        GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
+        ORDER BY ti.incoming_out DESC;   
     """
 
     with connection.cursor() as cursor:
@@ -414,11 +409,8 @@ def employee_dv(request):
         last_name = row['last_name'] if row['last_name'] else ''
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
         
-        # final_amount = float(row['final_amount'])
         final_amount_str = row['final_amount']
         final_amount = Decimal(final_amount_str).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        
-        print("thisisamount")
         
 
         total_amount += final_amount
@@ -433,33 +425,25 @@ def employee_dv(request):
             'dv_no': row['dv_no'],
             'cluster':row['cluster'],
             'multiple_charges':row['multiple_charges'],
-            'total':total_amount,
+            'total':final_amount,
         }
         data.append(item)
-        
 
-    #     _start = request.GET.get('start') if request.GET.get('start') else 0
-    #     _length = request.GET.get('length') if request.GET.get('length') else 0
-        
-    # if _start and _length:
-    #     start = int(_start)
-    #     length = int(_length)
-    #     page = math.ceil(start / length) + 1
-    #     per_page = length
-    #     results = results[start:start + length]
+
+    payrolled_list = TevIncoming.objects.filter(status_id = 4).order_by('first_name')
+    payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))
+
                     
     total = len(data)  
-    print(total_amount) 
-    print("thiss")  
-          
+ 
     response = {
         'data': data,
         'charges': charges_list,
         'dv_number':dv_no['dv_no'],
         'outgoing_id':dv_no['id'],
+        'payrolled_list': payrolled_list,
         'recordsTotal': total,
-        'recordsFiltered': total,
-        'total_amount':total_amount
+        'recordsFiltered': total
     }
     return JsonResponse(response)
 
@@ -1000,21 +984,6 @@ def add_dv(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
-        # selected_tev = json.loads(request.POST.get('selected_item'))
-        # outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_name,box_b_in=date_time.datetime.now(),user_id=user_id, division_id = div_id)
-        # outgoing.save()
-        # latest_outgoing = TevOutgoing.objects.latest('id')
-        # for item in selected_tev:
-        #     tev_update = TevIncoming.objects.filter(id=item['id']).update(status_id=5)
-        #     obj, was_created_bool = TevBridge.objects.get_or_create(
-        #         tev_incoming_id=item['id'],
-        #         tev_outgoing_id=latest_outgoing.id,
-        #         purpose=item['purpose'],
-        #         charges_id=item['charges']
-        #     )
-                
-        # return JsonResponse({'data': 'success'})
-    
 
 
 @csrf_exempt
@@ -1023,7 +992,7 @@ def delete_box_list(request):
     dv_no = request.POST.get('dv_number')
     
     deleteBridge, _ = TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
-    delete, _ = TevIncoming.objects.filter(id=incoming_id).delete()
+    # delete, _ = TevIncoming.objects.filter(id=incoming_id).delete()
 
     response = {
         'data': 'success'
