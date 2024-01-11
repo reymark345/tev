@@ -1381,7 +1381,8 @@
                                 amt:amount
                             }
                             }).done(function (data) {
-                            console.log(data);
+                            console.log("wewewewewewe");
+                            employee_list();
                             dataTable.ajax.reload();
                         });
                     }
@@ -1395,19 +1396,20 @@
 
                 
         $(document).on("change", ".payroll-name", function () {
-            let empChargesValue = $(this).val();
-            let empChargesText =  $(this).find(':selected').text();
-            console.log("empChargesValue:", empChargesValue);
+            let inc_id = $(this).val();
+            console.log("empChargesValue:", inc_id);
+            console.log("Dv Number:", dv_number);
 
             $.ajax({
                 type: 'POST',
                 url: "{% url 'add-emp-dv' %}",
                 data:{
-                    tev_id: empChargesValue
+                    tev_id: inc_id,
+                    dv_no: dv_number
                 }
             }).done(function (data) {
                 console.log(data);
-                dataTable.ajax.reload();
+                dataTable2.ajax.reload();
             });
         });
 

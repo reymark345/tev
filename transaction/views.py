@@ -972,17 +972,15 @@ def add_emp_dv(request):
     if request.method == 'POST':
         user_id = request.session.get('user_id', 0)
         tev_id = request.POST.get('tev_id')
+        dv_no = request.POST.get('dv_no')
 
+        box_b = TevIncoming.objects.filter(id=tev_id).update(status_id=6)
 
-        # tev_add = TevIncoming(code=g_code,first_name=fname,middle_name = mname, last_name = lname, id_no = idno, account_no = acctno,date_travel = cleaned_dates,original_amount=amount,final_amount = amount,incoming_out = date_time.datetime.now(),slashed_out = date_time.datetime.now(),remarks=remarks,status_id = 5,user_id=user_id)
-        # tev_add.save()
-
-        # bridge = TevBridge(purpose = purpose,charges_id = charges_id, tev_incoming_id = max_id, tev_outgoing_id = outgoing_id)
-        # bridge.save()
-
-
-        # saveEmployee = TevBridge(charges_id = 1,tev_incoming_id =tev_id, )
-        # saveEmployee.save()
+        outgoing_obj = TevOutgoing.objects.filter(dv_no=dv_no).first()
+        outgoing_id = outgoing_obj.id
+        
+        bridge = TevBridge(purpose = "TE",charges_id = 1, tev_incoming_id = tev_id, tev_outgoing_id = outgoing_id)
+        bridge.save()
         
         return JsonResponse({'data': 'success'})
 
