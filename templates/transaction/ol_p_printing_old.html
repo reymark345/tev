@@ -68,9 +68,6 @@
       content: ""; /* Empty content to hide the error message */
       display: none;
   }
-  .blur-modal-backdrop {
-    backdrop-filter: blur(5px); /* Adjust the blur value as needed */
-}
 </style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -195,6 +192,13 @@
               </div>
               <div class="col-12 col-md-6">
                   <label class="form-label" for="modalEditUserFirstName">Cluster</label>
+                  <!-- <input
+                  type="text"
+                  id="f-id-number"
+                  name="FIdNumber"
+                  class="form-control"
+                  placeholder="16-0000"
+                  /> -->
                   <select class="select2 form-select f-cluster" name="FCluster" id="box-cluster">
                     <option></option>
                     {% for row in cluster %}
@@ -204,6 +208,13 @@
               </div>
               <div class="col-12 col-md-6">
                   <label class="form-label" for="modalEditUserLastName">Division</label>
+                  <!-- <input
+                  type="text"
+                  id="f-transaction-code"
+                  name="FTransactionCode"
+                  class="form-control"
+                  placeholder="23-00-00000"
+                  /> -->
                   <select class="select2 form-select f-division " name="FDivision" id="box-division" >
                     <option></option>
                     {% for row in division %}
@@ -278,7 +289,7 @@
                 <div class="col-12">
                   <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
                     <div class="bs-stepper-content">
-                       <div class="card-datatable table-responsive pt-0">  <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label> <span id="dv-number" class="badge bg-label-primary"><i></i></span>
+                       <div class="card-datatable table-responsive pt-0">  <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label>
                     <table id="tbl-box-a" class="table display compact">
                         <thead>
                             <tr>
@@ -289,22 +300,201 @@
                                 <th>Name</th>
                                 <th>Amount</th>
                                 <th>Purpose</th>
-                                <th>Assign Charges</th>
-                                <th>Charges</th>
+                                <th>Charge</th>
+                                <th>Multiple Charges</th>
                                 <th>Action</th>
                             </tr>
                         </thead>    
                         <tbody>
-                        </tbody> 
-                        <tfoot>
-                            <br><br>
-                            <div style="width:40%;">
-                                <label class="form-label" for="modalFEmployeeName"><i>Add Employee</i></label>
-                                <select id="payroll-name" name="PayrollName" class="form-select employee" data-allow-clear="true" ><option></option></select>
-                            </div>
-                        </tfoot>              
+                        </tbody>               
                     </table>
-                   
+                    </div>
+                      <form onSubmit="return false">
+                        <!-- Account Details -->
+                        <div id="account-details-modern-vertical" class="content">
+                          <div class="content-header mb-3">
+                            <h6 class="mb-0">Account Details</h6>
+                            <small>Enter Your Account Details.</small>
+                          </div>
+                          <div class="row g-3">
+                            <div class="col-sm-6">
+                              <label class="form-label" for="username-modern-vertical">Username</label>
+                              <input
+                                type="text"
+                                id="username-modern-vertical"
+                                class="form-control"
+                                placeholder="johndoe"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="email-modern-vertical">Email</label>
+                              <input
+                                type="email"
+                                id="email-modern-vertical"
+                                class="form-control"
+                                placeholder="john.doe@email.com"
+                                aria-label="john.doe"
+                              />
+                            </div>
+                            <div class="col-sm-6 form-password-toggle">
+                              <label class="form-label" for="password-modern-vertical">Password</label>
+                              <div class="input-group input-group-merge">
+                                <input
+                                  type="password"
+                                  id="password-modern-vertical"
+                                  class="form-control"
+                                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                  aria-describedby="password2-modern-vertical"
+                                />
+                                <span class="input-group-text cursor-pointer" id="password2-modern-vertical"
+                                  ><i class="ti ti-eye-off"></i
+                                ></span>
+                              </div>
+                            </div>
+                            <div class="col-sm-6 form-password-toggle">
+                              <label class="form-label" for="confirm-password-modern-vertical">Confirm Password</label>
+                              <div class="input-group input-group-merge">
+                                <input
+                                  type="password"
+                                  id="confirm-password-modern-vertical"
+                                  class="form-control"
+                                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                                  aria-describedby="confirm-password-modern-vertical2"
+                                />
+                                <span class="input-group-text cursor-pointer" id="confirm-password-modern-vertical2"
+                                  ><i class="ti ti-eye-off"></i
+                                ></span>
+                              </div>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                              <button class="btn btn-label-secondary btn-prev" disabled>
+                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                              </button>
+                              <button class="btn btn-primary btn-next">
+                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
+                                <i class="ti ti-arrow-right"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Personal Info -->
+                        <div id="personal-info-modern-vertical" class="content">
+                          <div class="content-header mb-3">
+                            <h6 class="mb-0">Personal Info</h6>
+                            <small>Enter Your Personal Info.</small>
+                          </div>
+                          <div class="row g-3">
+                            <div class="col-sm-6">
+                              <label class="form-label" for="first-name-modern-vertical">First Name</label>
+                              <input
+                                type="text"
+                                id="first-name-modern-vertical"
+                                class="form-control"
+                                placeholder="John"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="last-name-modern-vertical">Last Name</label>
+                              <input
+                                type="text"
+                                id="last-name-modern-vertical"
+                                class="form-control"
+                                placeholder="Doe"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="country-modern-vertical">Country</label>
+                              <select class="select2" id="country-modern-vertical">
+                                <option label=" "></option>
+                                <option>UK</option>
+                                <option>USA</option>
+                                <option>Spain</option>
+                                <option>France</option>
+                                <option>Italy</option>
+                                <option>Australia</option>
+                              </select>
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="language-modern-vertical">Language</label>
+                              <select
+                                class="selectpicker w-auto"
+                                id="language-modern-vertical"
+                                data-style="btn-transparent"
+                                data-icon-base="ti"
+                                data-tick-icon="ti-check text-white"
+                                multiple
+                              >
+                                <option>English</option>
+                                <option>French</option>
+                                <option>Spanish</option>
+                              </select>
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                              <button class="btn btn-label-secondary btn-prev">
+                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                              </button>
+                              <button class="btn btn-primary btn-next">
+                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
+                                <i class="ti ti-arrow-right"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <!-- Social Links -->
+                        <div id="social-links-modern-vertical" class="content">
+                          <div class="content-header mb-3">
+                            <h6 class="mb-0">Social Links</h6>
+                            <small>Enter Your Social Links.</small>
+                          </div>
+                          <div class="row g-3">
+                            <div class="col-sm-6">
+                              <label class="form-label" for="twitter-modern-vertical">Twitter</label>
+                              <input
+                                type="text"
+                                id="twitter-modern-vertical"
+                                class="form-control"
+                                placeholder="https://twitter.com/abc"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="facebook-modern-vertical">Facebook</label>
+                              <input
+                                type="text"
+                                id="facebook-modern-vertical"
+                                class="form-control"
+                                placeholder="https://facebook.com/abc"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="google-modern-vertical">Google+</label>
+                              <input
+                                type="text"
+                                id="google-modern-vertical"
+                                class="form-control"
+                                placeholder="https://plus.google.com/abc"
+                              />
+                            </div>
+                            <div class="col-sm-6">
+                              <label class="form-label" for="linkedin-modern-vertical">LinkedIn</label>
+                              <input
+                                type="text"
+                                id="linkedin-modern-vertical"
+                                class="form-control"
+                                placeholder="https://linkedin.com/abc"
+                              />
+                            </div>
+                            <div class="col-12 d-flex justify-content-between">
+                              <button class="btn btn-label-secondary btn-prev">
+                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
+                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
+                              </button>
+                              <button class="btn btn-success btn-submit">Submit</button>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
                     </div>
                   </div>
                 </div>
@@ -407,15 +597,10 @@
     let outgoing_id = 0;
     let selectedDv = [];
     let temp_id = 0;
-    let data_clicked = false;
-    let dataTable2;
-    var new_id;
-    let chargeId = 0;
     $(document).ready(function () {
       $('#loading-screen').hide();
       const table_box_a = $('#tbl-box-a')
-      const table = $('#tbl-items');
-      
+      const table = $('#tbl-items')
       const ItemFormValidation = document.getElementById('item-form'),
           AddRecordDv = document.getElementById('add-record-dv'),
           Remarks = jQuery(document.querySelector('[name="Remarks"]')),
@@ -437,7 +622,6 @@
           MDvNumber = jQuery(document.querySelector('[name="MDvNumber"]')),
           search_advance_filter = $('#search-advance-filter'),
           FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
-          PayrollName = jQuery(document.querySelector('[name="PayrollName"]')),
           reset_advance_filter = $('#reset-advance-filter'),
           clear_advance_filter = $('#clear-advance-filter');
 
@@ -451,11 +635,18 @@
             positionClass: 'toast-top-right',
             rtl: isRtl,
       });
-        let ItemID = $('#item-id');
-        
+        let ItemID = $('#item-id')
+
         let dataTable = table.DataTable({
             processing: true,
             serverSide: true,
+            // ajax: {
+            //     url: "{% url 'box-load' %}",
+            //     type: "GET",
+            //     data: {
+            //         identifier: 2
+            //     }
+            // },
             ajax: {
                 url: "{% url 'box-load' %}",
                 data: function (d) {
@@ -479,6 +670,7 @@
                         if (status == 2) {
                             return '<input type="checkbox" disabled="disabled">';
                         } else {
+                            // Render a checkbox for each row with the item ID as its value
                             return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
                         }
 
@@ -500,6 +692,7 @@
                     targets: 1,
                     render: function(data) {
                         return '<span class="badge bg-label-primary">' + data + '</span>';
+                    
                     },
                 },
 
@@ -589,8 +782,25 @@
                               allowClear: true,
                           })
                       }
-                      $("#advance-filter").modal("show");   
+
+                    //   $.ajax({
+                    //     type: 'POST',
+                    //     url: "{% url 'dv-number-lib' %}"
+                    // }).done(function (data) {
+                    //     console.log(data);
+                        
+                    //     // let totalAmount = data.total_amount;
+                    //     // totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                    //     //     minimumFractionDigits: 2,
+                    //     //     maximumFractionDigits: 2
+                    //     // });
+                    //     // $('#total-amount').text("₱ "+totalAmount);
                       
+                      $("#advance-filter").modal("show");
+
+
+                    // });
+
                       
                   }
                 
@@ -650,54 +860,36 @@
                 const tbody = $(`#${tableId} tbody`);
                 let selectOptions = '';
 
-                $('.view-data').on('click', function () {
-                    // alert("fasfasf");
-                    const selectAllCheckbox = $(`#${tableId} #selectAll`);
-                    selectAllCheckbox.on('change', function () {
-                        const isChecked = this.checked;
-                        tbody.find(':checkbox').prop('checked', isChecked);
+                $('body').on('click', '.item-edit', function () {
+                  let emp_id = $(this).attr('id');
+                  let amount = $(this).closest('tr').find('.form-control.emp-amount').val();
+                  let purpose = $(this).closest('tr').find('.form-control.emp-purpose').val();
+                  let charges = $(this).closest('tr').find('select.emp-charges').val();
+
+                  $.ajax({
+                    type: 'POST',
+                    url: "{% url 'update-box-list' %}",
+                    data:{
+                        emp_id: emp_id,
+                        amount:amount,
+                        purpose:purpose,
+                        charges:charges,
+                        dv_number: dv_number
+                    }
+                }).done(function (data) {
+                    let totalAmount = data.total_amount;
+                    totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
                     });
-                    let id = $(this).attr('id');
-                    dv_no_id = id
-                    data_clicked = true;
-                    
-                    $('#update-transaction').modal('show');
-                    table_m();
-                    dataTable2.ajax.reload();
-                    //   updat eTransaction(dv_no_id);
-                });
+                    $('#total-amount').text("₱ "+totalAmount);
+                  toastr.success('Data Successfully Save!', 'Success', toast_options);
 
-            //     $('body').on('click', '.item-edit', function () {
-            //       let emp_id = $(this).attr('id');
-            //       let amount = $(this).closest('tr').find('.form-control.emp-amount').val();
-            //       let purpose = $(this).closest('tr').find('.form-control.emp-purpose').val();
-            //       let charges = $(this).closest('tr').find('select.emp-charges').val();
-
-            //       $.ajax({
-            //         type: 'POST',
-            //         url: "{% url 'update-box-list' %}",
-            //         data:{
-            //             emp_id: emp_id,
-            //             amount:amount,
-            //             purpose:purpose,
-            //             charges:charges,
-            //             dv_number: dv_number
-            //         }
-            //     }).done(function (data) {
-            //         let totalAmount = data.total_amount;
-            //         totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
-            //             minimumFractionDigits: 2,
-            //             maximumFractionDigits: 2
-            //         });
-            //         $('#total-amount').text("₱ "+totalAmount);
-            //       toastr.success('Data Successfully Save!', 'Success', toast_options);
-
-            //     })
-            //   });
+                })
+              });
 
               $('body').on('click', '.item-update', function () {
                 temp_id = $(this).attr('id');
-                console.log("matches" + temp_id);
                 $('#update-transaction').modal('hide');
                 $("#payrollUpdate").modal("show");
 
@@ -774,23 +966,94 @@
                       newRow.find('.error-label, .error-label-amount').hide();
                       $('.rows-container').append(newRow);
                   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  // var chargesIds = data.data.map(function(item) {
+                  //   return item.charges_id.toString();
+                  // });
+                  // var amountIds = data.data.map(function(item) {
+                  //   return item.amount.toString();
+                  // });
+
+
+                  // console.log(data);
+                  // console.log(chargesIds);
+          
+                  // console.log("datasssssngii");
+
+                  // let full_name = data.full_name;
+                  // let amount = data.amount;
+                  // FName.val(full_name);
+                  // AmountIssued.val(amount);
+
+                  // arraydetails = [];
+                  // $('.rows-container').empty();
+                  // // lacking = data.lacking.split(',').map(Number);
+
+                  // // chargesIds = chargesIds.split(", ");
+                  // // date_remarks = date_remarks.split(", ")
+                  // // remarks_date = date_remarks;
+                  // // charges_data = chargesIds;
+
+                  // for (let i = 0; i < chargesIds.length; i++) {                            
+                  //     var newRow = $('<div class="row mt-2">' +
+                  //         '<div class="col-5">' +
+                  //         '<select class="form-select select-remarks" id="remarks-select-'+i+'">' +
+                  //         '<option></option>' +
+                  //         '{% for row in remarks_list %}' +
+                  //         '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                  //         '{% endfor %}' +
+                  //         '</select>' +
+                  //         '</div>' +
+                  //         '<div class="col-5">' +
+                  //         '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="' + amountIds[i] + '" />' +
+                  //         '</div>' +
+                  //         '<div class="col-2">' +
+                  //         '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                  //         '</div>' +
+                  //         '</div>');
+                  //     $('.rows-container').append(newRow);
+
+                  //     $(`#remarks-select-${i}`).val(chargesIds[i]).trigger('change');
+
+                  //     item_entry = {
+                  //         'remarks': chargesIds[i],
+                  //         'amount': amountIds[i]
+                  //     }
+                  //     arraydetails.push(item_entry);
+
+                  // }
+                  // console.log(arraydetails);
+
+
+
                 })
               });
 
               $('body').on('click', '.item-delete', function () {
                 let emp_id = $(this).attr('id');
-
-                let dataTable = $('#tbl-box-a').DataTable();
-                let closestRow = dataTable.row($(this).closest('tr'));
-                let rowData = closestRow.data();
-                let p_id = rowData.id;
-
                 Swal.fire({
-                  title: 'Are you sure Remove from list?',
+                  title: 'Are you sure?',
                   text: "You won't be able to revert this!",
                   icon: 'warning',
                   showCancelButton: true,
-                  confirmButtonText: 'Yes, Remove it!',
+                  confirmButtonText: 'Yes, Delete it!',
                   customClass: {
                       confirmButton: 'btn btn-primary me-3',
                       cancelButton: 'btn btn-label-secondary',
@@ -798,264 +1061,115 @@
                   buttonsStyling: false,
               }).then(function (result) {
                   if (result.value) {
-                    
-                    console.log("id");
-                    console.log(p_id);
-                    console.log("dv_no value for all rows: " + dv_number);
-
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'delete-box-list' %}",
-                        data:{
-                        emp_id: p_id,
-                        dv_number: dv_number
-                    }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            dataTable2.ajax.reload();
-                            toastr.success('Removed Successfully', 'Success', toast_options);
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
+                      $.ajax({
+                          type: 'POST',
+                          url: "{% url 'delete-box-list' %}",
+                          data:{
+                            emp_id: emp_id,
+                            dv_number: dv_number
                         }
-                    })
+                      }).done(function (data) {
+                        $('#update-transaction').modal('hide');
+                          if (data.data == 'success') {
+                              Swal.fire({
+                                  title: '<strong>TEV Code <u>'+dv_number+'</u></strong>',
+                                  icon: 'info',
+                                  html:
+                                    'Successfully <b>Deleted!</b>',
+                                  showCloseButton: true,
+                                  showCancelButton: false,
+                                  focusConfirm: false,
+                                  confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                  confirmButtonAriaLabel: 'Thumbs up, great!',
+                                  customClass: {
+                                    confirmButton: 'btn btn-primary me-3'
+                                  },
+                                  buttonsStyling: false
+                                });
+                          } else {
+                              Swal.fire({
+                                  icon: 'error',
+                                  title: 'Error saving!',
+                                  text: data.message,
+                                  customClass: {
+                                      confirmButton: 'btn btn-success',
+                                  },
+                              })
+                          }
+                      })
                   }
               })
-        });
- 
-    //   function updateTransaction(id) {
-    //     $.ajax({
-    //         type: 'POST',
-    //         url: "{% url 'employee-dv' %}",
-    //         data: {
-    //             dv_id: id
-    //         }
-    //     }).done(function (data) {
-    //         console.log(data);
-    //         console.log("data");
-    //         dv_number = '';
-    //         charges = '';
-    //         outgoing_id = 0;
-    //         dv_number = data.dv_number;
-    //         charges = data.charges;
-    //         outgoing_id = data.outgoing_id;
-    //         $("#f-outgoing-id").val(data.outgoing_id)
-    //         tbody.empty();
-    //         data.data.forEach(function (item) {
-    //             const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
-    //             let amountColumn = '';
-    //             let editColumn = '';
-    //             let updateColumn = '';
-    //             let deleteColumn = '';
-    //             let purposeColumn = '';
-    //             let chargesColumn = '';
-    //             let multipleChargesColumn = '';
-    //             selectOptions = '<option></option>'; 
-    //             for (var i = 0; i < charges.length; i++) {
-    //                 var charge = charges[i];
-    //                 selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
-    //             }
-
-                
-    //             if (item.multiple_charges !== null && item.multiple_charges !== '') {
-    //                 multipleChargesColumn = `<td>${item.multiple_charges}</td>`;
-    //             } else {
-    //                 multipleChargesColumn = `<td></td>`;  // Return a blank column if multiple_charges is null or empty
-    //             }
-
-
-    //             amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
-    //             purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
-    //             chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
-    //             editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
-    //             updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
-    //             deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
-
-    //             const row = `
-    //                 <tr>
-    //                     <td><input type="checkbox"></td>
-    //                     <td><span class="badge bg-label-primary">${item.code}</span></td>
-    //                     <td><span class="badge bg-label-warning">${item.account_no}</span></td>
-    //                     <td><span class="badge bg-label-primary">${item.id_no}</span></td>
-    //                     <td>${item.name}</td>
-    //                     <td>${formattedFinalAmount}</td>
-    //                     ${purposeColumn}
-    //                     ${chargesColumn}
-    //                     ${multipleChargesColumn}
-    //                     <td>${deleteColumn}</td>
-    //                 </tr>
-    //             `;
-    //             tbody.append(row);
-    //         });
-
-    //         $('#emp-charges').html(selectOptions);
-    //         let totalAmount = data.total_amount;
-    //         totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
-    //             minimumFractionDigits: 2,
-    //             maximumFractionDigits: 2
-    //         });
-    //         $('#total-amount').text("₱ " + totalAmount);
-    //         $('#update-transaction').modal('show');
+            });
             
-    //         // $(document).on("change", ".emp-charges", function () {
-    //         //     let selectedOption = $(this).find(":selected");
-    //         //     chargeId = selectedOption.val();
-    //         //     console.log("ngano wala man");
-    //         //     console.log(chargeId);
-    //         //     let chargeText = selectedOption.text(); 
-    //         //     let tableRow = $(this).closest("tr");
-    //         //     temp_id = tableRow.data("row-id");
-    //         //     if (selectedOption.length > 0) {
-    //         //         if (chargeText=== "Multiple") {
-    //         //           $("#payrollUpdate").modal("show");
-    //         //           $('.modal-backdrop').addClass('blur-modal-backdrop');
 
-    //         //           $.ajax({
-    //         //               type: 'POST',
-    //         //               url: "{% url 'multiple-charges-details' %}",
-    //         //               data:{
-    //         //                 payroll_id: temp_id
-    //         //               }
-    //         //           }).done(function (data) {
-    //         //             dataTable2.ajax.reload();
-    //         //             let totalAmount = 0;
-    //         //             let amountList = [];
-    //         //             let chargesList = [];
-    //         //             let preview_amt = [];
-    //         //             let preview_charges = [];
+      function updateTransaction(id){
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'employee-dv' %}",
+            data:{
+                dv_id: id
+            }
+        }).done(function (data) {
+            console.log(data);
+            console.log("data");
+            dv_number = '';
+            charges = '';
+            outgoing_id = 0;
+            dv_number = data.dv_number;
+            charges = data.charges;
+            outgoing_id = data.outgoing_id;
+            $("#f-outgoing-id").val(data.outgoing_id)
+            tbody.empty();
+            data.data.forEach(function (item) {
+              const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+              let amountColumn = '';
+              let editColumn = '';
+              let updateColumn = '';
+              let deleteColumn = '';
+              let purposeColumn = '';
+              let chargesColumn = '';
+              selectOptions = '';
+              for (var i = 0; i < charges.length; i++) {
+                  var charge = charges[i];
+                  selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+              }
+              // $(".create-new").prop("disabled", false);
+                amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+                chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+                editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
+                deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                
+      
+              const row = `
+                  <tr>
+                      <td><input type="checkbox"></td>
+                      <td><span class="badge bg-label-primary">${item.code}</span></td>
+                      <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                      <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                      <td>${item.name}</td>
+                      <td>${formattedFinalAmount}</td>
+                      ${purposeColumn}
+                      ${chargesColumn}
+                      <td>${item.multiple_charges}</td>
+                      <td>${editColumn}${updateColumn}${deleteColumn}</td>
+                  </tr>
+              `;
+              tbody.append(row);
+            });
+            $('#emp-charges').html(selectOptions);
+              let totalAmount = data.total_amount;
+              totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+              });
+              $('#total-amount').text("₱ "+totalAmount);
+              $('#update-transaction').modal('show');
+          })
 
-    //         //             let full_name = data.full_name;
-    //         //             let amount = data.amount;
-    //         //             FName.val(full_name);
-    //         //             AmountIssued.val(amount);
-    //         //             $('.rows-container').empty();
+      }
 
-    //         //             chargesList = data.data.map(item => item.charges_id);
-    //         //             amountList = data.data.map(item => item.amount);
-    //         //             if (data.data.length > 0) {
-    //         //                 for (let i = 0; i < data.data.length; i++) {
-    //         //                     var newRow = $('<div class="row mt-2">' +
-    //         //                     '<div class="col-5">' +
-    //         //                     '<select class="form-select select-charges" id="select-charges-'+i+'">' +
-    //         //                         '<option></option>'+
-    //         //                         '{% for row in charges %}'+
-    //         //                           '{% if row.name != "Multiple" %}'+
-    //         //                               '<option value="{{ row.id }}">{{ row.name }}</option>'+
-    //         //                             '{% endif %}'+
-    //         //                         '{% endfor %}'+
-    //         //                     '</select>' +
-    //         //                     '<span class="error-label">Required</span>'+
-    //         //                     '</div>' +
-    //         //                     '<div class="col-5">' +
-    //         //                     '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
-    //         //                     '<span class="error-label-amount">Required</span>'+
-    //         //                     '</div>' +
-    //         //                     '<div class="col-2">' +
-    //         //                     '<button type="button" class="btn btn-warning delete-row">-</button>' +
-    //         //                     '</div>' +
-    //         //                     '</div>');
-    //         //                     newRow.find('.error-label, .error-label-amount').hide();
-    //         //                     $('.rows-container').append(newRow);
-    //         //                     $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
-    //         //                 }
-    //         //             } else {
-    //         //                 var newRow = $('<div class="row mt-2">' +
-    //         //                 '<div class="col-5">' +
-    //         //                 '<select class="form-select select-charges" id="select-charges">' +
-    //         //                     '<option></option>'+
-    //         //                     '{% for row in charges %}'+
-    //         //                     '<option value="{{ row.id }}">{{ row.name }}</option>'+
-    //         //                     '{% endfor %}'+
-    //         //                 '</select>' +
-    //         //                 '<span class="error-label">Required</span>'+
-    //         //                 '</div>' +
-    //         //                 '<div class="col-5">' +
-    //         //                 '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
-    //         //                 '<span class="error-label-amount">Required</span>'+
-    //         //                 '</div>' +
-    //         //                 '<div class="col-2">' +
-    //         //                 '<button type="button" class="btn btn-warning delete-row">-</button>' +
-    //         //                 '</div>' +
-    //         //                 '</div>');
-    //         //                 newRow.find('.error-label, .error-label-amount').hide();
-    //         //                 $('.rows-container').append(newRow);
-    //         //             }
-    //         //           });
-    //         //         }
-    //         //         else{
-    //         //           $.ajax({
-    //         //               type: 'POST',
-    //         //               url: "{% url 'check-charges' %}",
-    //         //               data:{
-    //         //                   incoming_id: temp_id
-    //         //               }
-    //         //           }).done(function (data) {
-    //         //             let amount = data.amt;
-    //         //             if(data.data){
-                          
-    //         //               Swal.fire({
-    //         //                   title: 'Are you sure to Change Charges?',
-    //         //                   text: "You won't be able to revert this!",
-    //         //                   icon: 'warning',
-    //         //                   showCancelButton: true,
-    //         //                   confirmButtonText: 'Yes, change it!',
-    //         //                   customClass: {
-    //         //                       confirmButton: 'btn btn-primary me-3',
-    //         //                       cancelButton: 'btn btn-label-secondary',
-    //         //                   },
-    //         //                   buttonsStyling: false,
-    //         //               }).then(function (result) {
-    //         //                 if (result.value) {
-                                
-    //         //                     console.log("afterr:"+ temp_id);
-    //         //                     $.ajax({
-    //         //                         type: 'POST',
-    //         //                         url: "{% url 'remove-charges' %}",
-    //         //                         data: {
-    //         //                             incoming_id: temp_id,
-    //         //                             charge_id:chargeId,
-    //         //                             amt:amount
-    //         //                         }
-    //         //                     }).done(function (data) {
-    //         //                         dataTable.ajax.reload(null, false);
-    //         //                         console.log(data);
-    //         //                         console.log("data");
-    //         //                     })
-    //         //                     }
-    //         //                 });
-                            
-    //         //             }
-    //         //             else{
-    //         //               $.ajax({
-    //         //                 type: 'POST',
-    //         //                 url: "{% url 'payroll-add-charges' %}",
-    //         //                 data:{
-    //         //                     incoming_id: temp_id,
-    //         //                     charge_id:chargeId,
-    //         //                     amt:amount
-    //         //                   }
-    //         //                 }).done(function (data) {
-    //         //                   console.log(data);
-    //         //                   dataTable.ajax.reload();
-    //         //               });
-
-    //         //             }
-
-    //         //           });
-    //         //         }
-    //         //     } else {
-    //         //         alert("No charge selected");
-    //         //     }
-    //         // });
-        
-    //     });
-    // }
       const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
                 fields: {
                     MDvNumber: {
@@ -1154,189 +1268,47 @@
           })
       });
 
-    // $('.view-data').on('click', function () {
-    //     alert("fasfasf");
+      $('.view-data').on('click', function () {
 
-    //     const selectAllCheckbox = $(`#${tableId} #selectAll`);
-    //     selectAllCheckbox.on('change', function () {
-    //         const isChecked = this.checked;
-    //         tbody.find(':checkbox').prop('checked', isChecked);
-    //     });
-    //     let id = $(this).attr('id');
-    //     dv_no_id = id
-    //     data_clicked = true;
-    //     $('#update-transaction').modal('show');
-    // //   dataTable2.ajax.reload();
-    // //   updateTransaction(dv_no_id);
-    //     });
+          const selectAllCheckbox = $(`#${tableId} #selectAll`);
+          selectAllCheckbox.on('change', function () {
+              const isChecked = this.checked;
+              tbody.find(':checkbox').prop('checked', isChecked);
+          });
+          let id = $(this).attr('id');
+          dv_no_id = id
+          updateTransaction(dv_no_id);
+      });
+      $('#tbl-items tbody input[type="checkbox"]').change(function () {
+          // Do something when a checkbox in the table body is changed...
+      });
+      $('#check-all').change(function () {
+          // Get the checked state of the "check-all" checkbox
+          var isChecked = $(this).is(':checked');
 
-        $('#tbl-items tbody input[type="checkbox"]').change(function () {
-            // Do something when a checkbox in the table body is changed...
-        });
-        $('#check-all').change(function () {
-            // Get the checked state of the "check-all" checkbox
-            var isChecked = $(this).is(':checked');
+          // Set the checked state of all checkboxes in the table body
+          $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+          });
 
-            // Set the checked state of all checkboxes in the table body
-            $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
-            });
+      $('.preview-details').on('click', function () {
+          bx_id = $(this).data('id');
 
-        $('.preview-details').on('click', function () {
-            bx_id = $(this).data('id');
-
-            $.ajax({
-                type: 'POST',
-                url: "{% url 'preview-box-a' %}",
-                data:{
-                    box_id: bx_id
-                }
-            }).done(function (data) {
-            })
-        });
-        $('#cancel-multiple-charges').click(function() {
-        // updateTransaction(dv_no_id);
-        });
-    
+          $.ajax({
+              type: 'POST',
+              url: "{% url 'preview-box-a' %}",
+              data:{
+                  box_id: bx_id
+              }
+          }).done(function (data) {
+          })
+      });
+      $('#cancel-multiple-charges').click(function() {
+        updateTransaction(dv_no_id);
+      });
+        
 
     },
-        })
-
-    function table_m (){
-        const table2 = $('#tbl-box-a');
-
-        if ($.fn.DataTable.isDataTable('#tbl-box-a')) {
-        table2.DataTable().destroy();
-        }
-
-        dataTable2 = table2.DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{% url 'employee-dv' %}",
-                data: function (d) {
-                    d.dv_id = dv_no_id;
-                },
-            },
-            columns: [
-                { data: 'id' },
-                { data: 'code' },
-                { data: 'account_no' },
-                { data: 'id_no' },
-                { data: 'name' },
-                { data: 'final_amount' },
-                { data: 'purpose' },
-                { data: 'dv_no', name: 'dv_no' },
-                { data: 'multiple_charges' },
-                { data: 'total', name: 'total' },
-            ],
-        
-            columnDefs: [
-                 {   
-                    targets: 0,
-                    render: function(data, type, row, meta) {
-                       
-                        // Set the data-row-id attribute on the <tr> element
-                        return '<tr data-row-id="' + row.id + '"><td><input type="checkbox"></td></tr>';
-                    },
-                },
-                {
-                    targets: 1,
-                    render: function(data) {
-                        return data
-                    },
-                },
-                {
-                    targets: 2,
-                    render: function(data) {
-                        console.log(data);
-                        return (!data && data !== 0) ? '' : '<span class="badge bg-label-warning">' + data + '</span>';
-                    },
-                },
-                {
-                    targets: 3,
-                    render: function(data) {
-                        return '<span class="badge bg-label-primary">' + data + '<span>'
-                    },
-                },
-
-                
-                {
-                    targets: 5,
-                    render: function (data) {
-                        return data
-
-                    },
-                },
-                {
-                    targets: 6,
-                    render: function (data) {
-                        
-                        return '<td><input type="text" class="form-control emp-purpose" value="'+data+'"></td>'
-
-                    },
-                },
-                {
-                    targets: 7,
-                    render: function (data) {
-                        let charges =  '<select class="form-select emp-charges" id="emp-charges">' +
-                        '<option></option>'+
-                        '{% for row in charges %}'+
-                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                        '{% endfor %}'+
-                        '</select>';
-                        return charges
-                    },
-                },
-                {
-                    targets: -1,
-                    title: 'Action',
-                    orderable: false,
-                    searchable: false,
-                    render: function (data) {
-                        var itemId = data;
-                        return '<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>';
-                    },
-                },
-                
-            ],
-            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-            buttons: [],
-            drawCallback: function (settings) {
-                let myDataTable = $('#tbl-box-a').DataTable();
-                let totalAmount = 0;
-                myDataTable.column(9, { search: 'applied' }).data().each(function (value) {
-                    totalAmount += parseFloat(value);
-                });
-                $('#total-input').remove();
-                $('#tbl-box-a').append('<input type="text" class="form-control" id="total-input" value="' + totalAmount.toFixed(2) + '" disabled>');
-                $('#total-amount').text("₱ " + totalAmount.toFixed(2));
-                
-                // let myDataTable = $('#tbl-box-a').DataTable();
-                // let payrolledListData = [];
-                // $('#payroll-name').empty();
-            
-                // // Add an empty option
-                // $('#payroll-name').append('<option></option>');
-            
-                // // Populate options based on payrolled_list data
-                // for (let i = 0; i < payrolledListData.length; i++) {
-                //     $('#payroll-name').append('<option value="' + payrolledListData[i].id + '">' + payrolledListData[i].name + '</option>');
-                // }
-            
-                // // Initialize Select2
-                // if ($('#payroll-name').length) {
-                //     $('#payroll-name').wrap('<div class="position-relative"></div>');
-                //     $('#payroll-name').select2({
-                //         placeholder: 'Choose Employee',
-                //         dropdownParent: $('#payroll-name').parent(),
-                //         allowClear: true,
-                //     });
-                // }
-            }
-        });
-    }
- 
-
+     })
     $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
         function clear_advfilter(){
             BoxDvNo.val('Choose').trigger('change');
@@ -1490,238 +1462,75 @@
         });
 
 
-        // function data_printing(id){
-        //     $.ajax({
-        //         type: 'POST',
-        //         url: "{% url 'employee-dv' %}",
-        //         data:{
-        //             dv_id: id
-        //         }
-        //     }).done(function (data) {
-        //         const tableId = 'tbl-box-a';
-        //         const tbody = $(`#${tableId} tbody`);
-        //         console.log(data);
-        //         console.log("data");
-        //         dv_number = '';
-        //         charges = '';
-        //         outgoing_id = 0;
-        //         dv_number = data.dv_number;
-        //         charges = data.charges;
-        //         outgoing_id = data.outgoing_id;
-        //         $("#f-outgoing-id").val(data.outgoing_id)
-        //         tbody.empty();
-        //         data.data.forEach(function (item) {
-        //           const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
-        //           let amountColumn = '';
-        //           let editColumn = '';
-        //           let updateColumn = '';
-        //           let deleteColumn = '';
-        //           let purposeColumn = '';
-        //           let chargesColumn = '';
-        //           let multipleChargesColumn = '';
-        //           selectOptions = '';
-        //           for (var i = 0; i < charges.length; i++) {
-        //               var charge = charges[i];
-        //               selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
-        //           }
-        //           // $(".create-new").prop("disabled", false);
-        //             amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
-        //             purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
-        //             chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
-        //             editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
-        //             updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
-        //             deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
-                    
-        //             if (item.multiple_charges !== null && item.multiple_charges !== '') {
-        //                 multipleChargesColumn = `<td>${item.multiple_charges}</td>`;
-        //             } else {
-        //                 multipleChargesColumn = `<td></td>`; 
-        //             }
-          
-        //           const row = `
-        //               <tr>
-        //                   <td><input type="checkbox"></td>
-        //                   <td><span class="badge bg-label-primary">${item.code}</span></td>
-        //                   <td><span class="badge bg-label-warning">${item.account_no}</span></td>
-        //                   <td><span class="badge bg-label-primary">${item.id_no}</span></td>
-        //                   <td>${item.name}</td>
-        //                   <td>${formattedFinalAmount}</td>
-        //                   ${purposeColumn}
-        //                   ${chargesColumn}
-        //                   ${multipleChargesColumn}
-        //                   <td>${item.multiple_charges}</td>
-        //                   <td>${deleteColumn}</td>
-        //               </tr>
-        //           `;
-        //           tbody.append(row);
-        //         });
-        //         $('#emp-charges').html(selectOptions);
-        //           let totalAmount = data.total_amount;
-        //           totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
-        //               minimumFractionDigits: 2,
-        //               maximumFractionDigits: 2
-        //           });
-        //         //   $('#total-amount').text("₱ "+totalAmount);
-        //           $('#update-transaction').modal('show');
-        //       })
-
-        //   }
-
-
-                
-          $(document).on("change", ".emp-charges", function () {
-                let dataTable = $('#tbl-box-a').DataTable();
-                let closestRow = dataTable.row($(this).closest('tr'));
-                let rowData = closestRow.data();
-                let new_id = rowData.id;
-                let empChargesValue = $(this).val();
-                let empChargesText =  $(this).find(':selected').text();
-
-                console.log("new_id1:", new_id);
-                console.log("empChargesValue:", empChargesText);
-
-                let selectedOption = $(this).find(":selected");
-                if (selectedOption.length > 0) {
-                    temp_id = rowData.id;
-                    if (empChargesText=== "Multiple") {
-                        $("#payrollUpdate").modal("show");
-                        $.ajax({
-                            type: 'POST',
-                            url: "{% url 'multiple-charges-details' %}",
-                            data:{
-                                payroll_id: temp_id
-                            }
-                        }).done(function (data) {
-
-                            let totalAmount = 0;
-                            let amountList = [];
-                            let chargesList = [];
-                            let preview_amt = [];
-                            let preview_charges = [];
-
-                            let full_name = data.full_name;
-                            let amount = data.amount;
-                            FName.val(full_name);
-                            AmountIssued.val(amount);
-                            $('.rows-container').empty();
-
-                            chargesList = data.data.map(item => item.charges_id);
-                            amountList = data.data.map(item => item.amount);
-                            if (data.data.length > 0) {
-                                for (let i = 0; i < data.data.length; i++) {
-                                    var newRow = $('<div class="row mt-2">' +
-                                    '<div class="col-5">' +
-                                    '<select class="form-select select-charges" id="select-charges-'+i+'">' +
-                                        '<option></option>'+
-                                        '{% for row in charges %}'+
-                                        '{% if row.name != "Multiple" %}'+
-                                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                            '{% endif %}'+
-                                        '{% endfor %}'+
-                                    '</select>' +
-                                    '<span class="error-label">Required</span>'+
-                                    '</div>' +
-                                    '<div class="col-5">' +
-                                    '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
-                                    '<span class="error-label-amount">Required</span>'+
-                                    '</div>' +
-                                    '<div class="col-2">' +
-                                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                                    '</div>' +
-                                    '</div>');
-                                    newRow.find('.error-label, .error-label-amount').hide();
-                                    $('.rows-container').append(newRow);
-                                    $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
-                                }
-                            } else {
-                                var newRow = $('<div class="row mt-2">' +
-                                '<div class="col-5">' +
-                                '<select class="form-select select-charges" id="select-charges">' +
-                                    '<option></option>'+
-                                    '{% for row in charges %}'+
-                                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                    '{% endfor %}'+
-                                '</select>' +
-                                '<span class="error-label">Required</span>'+
-                                '</div>' +
-                                '<div class="col-5">' +
-                                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
-                                '<span class="error-label-amount">Required</span>'+
-                                '</div>' +
-                                '<div class="col-2">' +
-                                '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                                '</div>' +
-                                '</div>');
-                                newRow.find('.error-label, .error-label-amount').hide();
-                                $('.rows-container').append(newRow);
-                            }
-                        });
-                    }
-                    else{
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'check-charges' %}",
-                        data:{
-                            incoming_id: temp_id
-                        }
-                    }).done(function (data) {
-                        let amount = data.amt;
-                        if(data.data){
-                        
-                        Swal.fire({
-                            title: 'Are you sure to Change Charges?',
-                            text: "You won't be able to revert this!",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Yes, change it!',
-                            customClass: {
-                                confirmButton: 'btn btn-primary me-3',
-                                cancelButton: 'btn btn-label-secondary',
-                            },
-                            buttonsStyling: false,
-                        }).then(function (result) {
-                            if (result.value) {
-                                
-                                console.log("afterr:"+ temp_id);
-                                $.ajax({
-                                    type: 'POST',
-                                    url: "{% url 'remove-charges' %}",
-                                    data: {
-                                        incoming_id: temp_id,
-                                        charge_id:empChargesValue,
-                                        amt:amount
-                                    }
-                                }).done(function (data) {
-                                    dataTable.ajax.reload(null, false);
-                                    console.log(data);
-                                    console.log("data");
-                                })
-                                }
-                            });
-                            
-                        }
-                        else{
-                        $.ajax({
-                            type: 'POST',
-                            url: "{% url 'payroll-add-charges' %}",
-                            data:{
-                                incoming_id: temp_id,
-                                charge_id:empChargesValue,
-                                amt:amount
-                            }
-                            }).done(function (data) {
-                            console.log(data);
-                            dataTable.ajax.reload();
-                        });
-
-                        }
-
-                    });
-                    }
-                } else {
-                    alert("No charge selected");
+        function data_printing(id){
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'employee-dv' %}",
+                data:{
+                    dv_id: id
                 }
-            });
+            }).done(function (data) {
+                const tableId = 'tbl-box-a';
+                const tbody = $(`#${tableId} tbody`);
+                console.log(data);
+                console.log("data");
+                dv_number = '';
+                charges = '';
+                outgoing_id = 0;
+                dv_number = data.dv_number;
+                charges = data.charges;
+                outgoing_id = data.outgoing_id;
+                $("#f-outgoing-id").val(data.outgoing_id)
+                tbody.empty();
+                data.data.forEach(function (item) {
+                  const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                  let amountColumn = '';
+                  let editColumn = '';
+                  let updateColumn = '';
+                  let deleteColumn = '';
+                  let purposeColumn = '';
+                  let chargesColumn = '';
+                  selectOptions = '';
+                  for (var i = 0; i < charges.length; i++) {
+                      var charge = charges[i];
+                      selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                  }
+                  // $(".create-new").prop("disabled", false);
+                    amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                    purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+                    chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+                    editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                    updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
+                    deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                    
+          
+                  const row = `
+                      <tr>
+                          <td><input type="checkbox"></td>
+                          <td><span class="badge bg-label-primary">${item.code}</span></td>
+                          <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                          <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                          <td>${item.name}</td>
+                          <td>${formattedFinalAmount}</td>
+                          ${purposeColumn}
+                          ${chargesColumn}
+                          <td>${item.multiple_charges}</td>
+                          <td>${editColumn}${updateColumn}${deleteColumn}</td>
+                      </tr>
+                  `;
+                  tbody.append(row);
+                });
+                $('#emp-charges').html(selectOptions);
+                  let totalAmount = data.total_amount;
+                  totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                  });
+                  $('#total-amount').text("₱ "+totalAmount);
+                  $('#update-transaction').modal('show');
+              })
+
+          }
 
 
 
@@ -1797,9 +1606,8 @@
                         }).done(function(data){
                             if (data.data == 'success') {
                               $('#payrollDetails').modal('hide');
-                            //   data_printing(outgoing_id);
+                              data_printing(outgoing_id);
                               $("#payrollUpdate").modal("hide");
-                              dataTable2.ajax.reload();
                               toastr.success('Successfully save', 'Success', toast_options);
                             }
                             else {

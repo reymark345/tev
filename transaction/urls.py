@@ -35,6 +35,8 @@ urlpatterns = [
     path('update_multiple_charges', views.update_multiple_charges, name='update-multiple-charges'),
     path('check_charges', views.check_charges, name='check-charges'),
     path('remove_charges', views.remove_charges, name='remove-charges'),
+    path('payroll_add_charges', views.payroll_add_charges, name='payroll-add-charges'),
+    path('add_dv', views.add_dv, name='add-dv'),
 
     
     
