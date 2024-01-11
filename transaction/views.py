@@ -22,6 +22,7 @@ from django.db.models import Q, Max
 import datetime as date_time
 from decimal import Decimal
 from decimal import Decimal, ROUND_HALF_UP
+from django.utils import timezone
 
 
 def get_user_details(request):
@@ -428,9 +429,6 @@ def employee_dv(request):
             'total':final_amount,
         }
         data.append(item)
-        
-    # payrolled_list = TevIncoming.objects.filter(status_id = 4).order_by('first_name')
-    # payrolled_list = list(TevIncoming.objects.filter(status_id=4).order_by('first_name').values('id','code','first_name','middle_name','last_name','id_no','account_no','date_travel','original_amount','final_amount','incoming_in','slashed_out','remarks','user_id','is_upload','status_id'))
     payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))
 
                     
@@ -957,14 +955,9 @@ def remove_charges(request):
 def add_dv(request):
     if request.method == 'POST':
         user_id = request.session.get('user_id', 0)
-
-    
         dv_number = request.POST.get('DvNumber')
         cluster_id = request.POST.get('Cluster')
         div_id = request.POST.get('Division')
-
-        print(div_id)
-        print("selected_tev")
         outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_id,box_b_in=date_time.datetime.now(),user_id=user_id, division_id = div_id)
         outgoing.save()
         
@@ -972,7 +965,65 @@ def add_dv(request):
 
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
+  
+
+@csrf_exempt
+def add_emp_dv(request):
+    if request.method == 'POST':
+        user_id = request.session.get('user_id', 0)
+        tev_id = request.POST.get('tev_id')
+
+
+        # tev_add = TevIncoming(code=g_code,first_name=fname,middle_name = mname, last_name = lname, id_no = idno, account_no = acctno,date_travel = cleaned_dates,original_amount=amount,final_amount = amount,incoming_out = date_time.datetime.now(),slashed_out = date_time.datetime.now(),remarks=remarks,status_id = 5,user_id=user_id)
+        # tev_add.save()
+
+        # bridge = TevBridge(purpose = purpose,charges_id = charges_id, tev_incoming_id = max_id, tev_outgoing_id = outgoing_id)
+        # bridge.save()
+
+
+        # saveEmployee = TevBridge(charges_id = 1,tev_incoming_id =tev_id, )
+        # saveEmployee.save()
+        
+        return JsonResponse({'data': 'success'})
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+  
+
+@csrf_exempt
+def retrieve_employee(request):
+    data = []
+    list_employee = TevIncoming.objects.filter(status_id=4).order_by('first_name')
+
+    for row in list_employee:
+        date_travel_str = row.date_travel
+        # Split the comma-separated dates and convert each to a datetime object
+        date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=timezone.utc) for date_str in date_travel_str.split(',')]
+
+        # Format each date and join them with a comma
+        date_travel_formatted = ', '.join(date_travel.strftime("%b. %d %Y") for date_travel in date_travel_list)
+
+        first_name = row.first_name if row.first_name else ''
+        middle_name = row.middle_name if row.middle_name else ''
+        last_name = row.last_name if row.last_name else ''
+        final_amount = row.final_amount if row.final_amount else ''
+        final_amount = ": Amount: " + f"{Decimal(final_amount):,.2f}"
+
+        emp_fullname = f"{first_name} {middle_name} {last_name} {final_amount} : Date Travel: {date_travel_formatted}".strip()
+
+        item = {
+            'id': row.id,
+            'name': emp_fullname
+        }
+        data.append(item)
+
+    response = {
+        'data': data,
+    }
+
+    return JsonResponse(response)
+
+
 
 
 @csrf_exempt
