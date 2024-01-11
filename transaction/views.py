@@ -803,17 +803,6 @@ def item_edit(request):
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
-
-# @csrf_exempt
-# def item_update(request):
-#     id = request.POST.get('ItemID')
-#     emp_name = request.POST.get('EmployeeName')
-#     amount = request.POST.get('OriginalAmount')
-#     remarks = request.POST.get('Remarks')
-#     tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
-#     return JsonResponse({'data': 'success'})
-
-
 @csrf_exempt
 def update_status(request):
     id = request.POST.get('dv_id')
