@@ -195,13 +195,6 @@
               </div>
               <div class="col-12 col-md-6">
                   <label class="form-label" for="modalEditUserFirstName">Cluster</label>
-                  <!-- <input
-                  type="text"
-                  id="f-id-number"
-                  name="FIdNumber"
-                  class="form-control"
-                  placeholder="16-0000"
-                  /> -->
                   <select class="select2 form-select f-cluster" name="FCluster" id="box-cluster">
                     <option></option>
                     {% for row in cluster %}
@@ -211,13 +204,6 @@
               </div>
               <div class="col-12 col-md-6">
                   <label class="form-label" for="modalEditUserLastName">Division</label>
-                  <!-- <input
-                  type="text"
-                  id="f-transaction-code"
-                  name="FTransactionCode"
-                  class="form-control"
-                  placeholder="23-00-00000"
-                  /> -->
                   <select class="select2 form-select f-division " name="FDivision" id="box-division" >
                     <option></option>
                     {% for row in division %}
@@ -1317,26 +1303,35 @@
             buttons: [],
             drawCallback: function (settings) {
                 let myDataTable = $('#tbl-box-a').DataTable();
-                let payrolledListData = [];
-                $('#payroll-name').empty();
+                let totalAmount = 0;
+                myDataTable.column(9, { search: 'applied' }).data().each(function (value) {
+                    totalAmount += parseFloat(value);
+                });
+                $('#total-input').remove();
+                $('#tbl-box-a').append('<input type="text" class="form-control" id="total-input" value="' + totalAmount.toFixed(2) + '" disabled>');
+                $('#total-amount').text("₱ " + totalAmount.toFixed(2));
+                
+                // let myDataTable = $('#tbl-box-a').DataTable();
+                // let payrolledListData = [];
+                // $('#payroll-name').empty();
             
-                // Add an empty option
-                $('#payroll-name').append('<option></option>');
+                // // Add an empty option
+                // $('#payroll-name').append('<option></option>');
             
-                // Populate options based on payrolled_list data
-                for (let i = 0; i < payrolledListData.length; i++) {
-                    $('#payroll-name').append('<option value="' + payrolledListData[i].id + '">' + payrolledListData[i].name + '</option>');
-                }
+                // // Populate options based on payrolled_list data
+                // for (let i = 0; i < payrolledListData.length; i++) {
+                //     $('#payroll-name').append('<option value="' + payrolledListData[i].id + '">' + payrolledListData[i].name + '</option>');
+                // }
             
-                // Initialize Select2
-                if ($('#payroll-name').length) {
-                    $('#payroll-name').wrap('<div class="position-relative"></div>');
-                    $('#payroll-name').select2({
-                        placeholder: 'Choose Employee',
-                        dropdownParent: $('#payroll-name').parent(),
-                        allowClear: true,
-                    });
-                }
+                // // Initialize Select2
+                // if ($('#payroll-name').length) {
+                //     $('#payroll-name').wrap('<div class="position-relative"></div>');
+                //     $('#payroll-name').select2({
+                //         placeholder: 'Choose Employee',
+                //         dropdownParent: $('#payroll-name').parent(),
+                //         allowClear: true,
+                //     });
+                // }
             }
         });
     }
