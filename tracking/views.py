@@ -63,14 +63,6 @@ def tracking_load(request):
 
     if FAdvancedFilter:
 
-        print("testttaaawwwww")
-        print(FAdvancedFilter)
-        print(FTransactionCode)
-        print(FDateTravel)
-        print(NDVNumber)
-        print(EmployeeList)
-        print("endtesstaaa")
-
         def dictfetchall(cursor):
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
@@ -118,14 +110,6 @@ def tracking_load(request):
       
 
     else:
-        # latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
-        # finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
-        #     'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',
-        #     'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
-        #     purposes=F('tevbridge__purpose'),
-        #     dv_no=F('tevbridge__tev_outgoing__dv_no')
-        # ).order_by('-id')
-
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,

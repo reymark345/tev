@@ -132,26 +132,6 @@ def item_load(request):
         status_txt = '1'
     id_numbers = EmployeeList if EmployeeList else []
     if FAdvancedFilter and not EmployeeList:
-        print("aaaaaaaaaa")
-        # query = """
-        #     SELECT *
-        #     FROM tev_incoming t1
-        #     WHERE (code, id) IN (
-        #         SELECT DISTINCT code, MAX(id)
-        #         FROM tev_incoming
-        #         GROUP BY code
-        #     ) 
-        #     AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
-        #     AND (code LIKE %s
-        #     AND id_no LIKE %s
-        #     AND account_no LIKE %s
-        #     AND date_travel LIKE %s
-        #     AND original_amount LIKE %s
-        #     AND final_amount LIKE %s
-        #     AND incoming_in LIKE %s
-        #     AND status_id LIKE %s
-        #     )ORDER BY id DESC;
-        # """
         query = """
             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
             FROM tev_incoming t1
@@ -186,27 +166,6 @@ def item_load(request):
         ]
 
     elif FAdvancedFilter:
-        print("dakoooooooooooooooooooooo")
-        # query = """
-        #     SELECT *
-        #     FROM tev_incoming t1
-        #     WHERE (code, id) IN (
-        #         SELECT DISTINCT code, MAX(id)
-        #         FROM tev_incoming
-        #         GROUP BY code
-        #     ) 
-        #     AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL))
-        #     AND (code LIKE %s
-        #         AND id_no IN %s
-        #         AND account_no LIKE %s
-        #         AND date_travel LIKE %s
-        #         AND original_amount LIKE %s
-        #         AND final_amount LIKE %s
-        #         AND incoming_in LIKE %s
-        #         AND status_id LIKE %s
-        #     )ORDER BY id DESC;
-        # """
-
         query = """
             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
             FROM tev_incoming t1
@@ -533,113 +492,6 @@ def read_excel_file(excel_file):
     else:
         return excel_data
 
-
-# def read_excel_file(excel_file):
-#     workbook = load_workbook(excel_file, data_only=True)
-#     worksheet = workbook.active
-
-#     excel_data = []
-#     for row in worksheet.iter_rows(min_row=2, values_only=True):
-#         id_no, amount, date_travel = row
-
-#         # print("testttdattt")
-#         # print(date_travel)
-#         dates = [date.strip() for date in date_travel.split(',')]
-#         excel_data.append({
-#             'id_no': id_no,
-#             'amount': amount,
-#             'date_travel': dates,  # Store dates as a list of strings
-#         })
-    
-#     print("excel_data")
-#     print(excel_data)
-
-#     return excel_data
-
-# def read_excel_file(excel_file):
-#     workbook = load_workbook(excel_file, data_only=True)
-#     worksheet = workbook.active
-
-#     excel_data = []
-#     for row in worksheet.iter_rows(min_row=2, values_only=True):
-#         id_no, amount, date_travel = row
-        
-#         # Handle empty or missing values in the "AMOUNT" column
-#         if amount is None:
-#             amount = 0
-        
-#         dates = []
-#         # Split dates and convert them into datetime objects
-#         if date_travel and isinstance(date_travel, str):
-#             date_list = date_travel.split(',')
-#             for date_str in date_list:
-#                 date_obj = datetime.strptime(date_str.strip(), '%d-%m-%Y')
-#                 dates.append(date_obj.strftime('%d-%m-%Y'))  # Store dates as strings or use date_obj if you need datetime objects
-        
-#         # Handle empty or None date_travel values
-#         if not dates:
-#             dates.append('')  # Append an empty string if date_travel is empty or None
-        
-#         excel_data.append({
-#             'id_no': id_no,
-#             'amount': amount,
-#             'date_travel': dates,
-#         })
-
-#     empty_date_travel_ids = [data['id_no'] for data in excel_data if not data['date_travel'][0]]
-#     formatted_ids = ",".join(empty_date_travel_ids)
-
-#     if formatted_ids:
-#         response_data = {
-#             'data': 'empty',
-#             'empty_id_no': formatted_ids
-#         }
-#         return JsonResponse(response_data) 
-#     else:
-#         return excel_data
-
-# def read_excel_file(excel_file):
-#     workbook = load_workbook(excel_file, data_only=True)
-#     worksheet = workbook.active
-
-#     excel_data = []
-#     for row in worksheet.iter_rows(min_row=2, values_only=True):
-#         id_no, amount, date_travel = row
-        
-#         # Handle empty or missing values in the "AMOUNT" column
-#         if amount is None:
-#             amount = 0
-        
-#         dates = []
-#         # Split dates and convert them into datetime objects
-#         if date_travel and isinstance(date_travel, str):
-#             date_list = date_travel.split(',')
-#             for date_str in date_list:
-#                 date_obj = datetime.strptime(date_str.strip(), '%d-%m-%Y')
-#                 dates.append(date_obj.strftime('%d-%m-%Y'))  # Store dates as strings or use date_obj if you need datetime objects
-        
-#         # Handle empty or None date_travel values
-#         if not dates:
-#             dates.append('')  # Append an empty string if date_travel is empty or None
-        
-#         excel_data.append({
-#             'id_no': id_no,
-#             'amount': amount,
-#             'date_travel': dates,
-#         })
-
-#     empty_date_travel_ids = [data['id_no'] for data in excel_data if not data['date_travel'][0]]
-#     formatted_ids = ",".join(empty_date_travel_ids)
-    
-#     if formatted_ids:
-#         # print("diriiaaaa11")
-#         return formatted_ids
-#     else:
-#         print("diriiaaaa222")
-#         print(excel_data)
-#         return excel_data
-
-
 @csrf_exempt
 def upload_tev(request):
     user_id = request.session.get('user_id', 0)
@@ -687,10 +539,6 @@ def upload_tev(request):
                         duplicate_dates[id_no].append(date)
                     seen_dates[id_no].add(date)
                 
-
-
-        
-
                 id_number_value = None
                 formatted_date_travel = ', '.join(date_travel).replace(', ', ',')
                 for employee in employees_data:
@@ -701,10 +549,6 @@ def upload_tev(request):
                         first_name_value = employee.get('firstName')
                         middle_initial_value = employee.get('middleInitial')
                         last_name_value = employee.get('lastName')
-
-
-
-                # results = TevIncoming.objects.filter(id_no=id_number_value,date_travel__contains=formatted_date_travel).first()
 
                 dates_to_check = formatted_date_travel.split(',')
                 duplicate_records = {}
@@ -730,25 +574,6 @@ def upload_tev(request):
                             'travel': date
                         })
                         
-                # print(duplicate_te)
-                # print("testtttdup")
-                # print(id_no)
-
-                # id = "16-11810"
-                # duplicate_te = [{'id_no': '16-11810', 'travel': '08-10-2023'}, {'id_no': '16-11810', 'travel': '18-11-2023'}, {'id_no': '16-11810', 'travel': '15-11-2023'}, {'id_no': '16-11810', 'travel': '15-11-2023'}, {'id_no': '16-11588', 'travel': '17-10-2023'}, {'id_no': '16-11588', 'travel': '18-10-2023'}, {'id_no': '16-11588', 'travel': '19-10-2023'}, {'id_no': '16-11588', 'travel': '20-10-2023'}]
-                # result = "Duplicate Travel for "+ "08-10-2023,18-11-2023,15-11-2023,15-11-2023"
-
-                # duplicate_travels = [record['travel'] for record in duplicate_te if record['id_no'] == id_no]
-                
-                # formatted_dates = [
-                #     datetime.strptime(record['travel'], '%d-%m-%Y').strftime('%b. %d %Y') 
-                #     for record in duplicate_te if record['id_no'] == id_no
-                # ]
-
-                # print("test")
-                # print(id_no)
-                # print(formatted_date_travel)
-
                 if results:
                     # duplicate_travel.append(formatted_date_travel)
                     duplicate_travel.append({
@@ -774,9 +599,6 @@ def upload_tev(request):
 
                 else:
                     id_list.append(id_no)
-
-            print("Duplicate Dates:")
-            print(duplicate_dates)
             if id_list:
                 system_config = SystemConfiguration.objects.first()
                 system_config.transaction_code = sc_code
@@ -801,8 +623,6 @@ def upload_tev(request):
                 return JsonResponse(response_data) 
 
             elif duplicate_travel:
-                # print("test")
-                # print(duplicate_travel)
                 response_data = {
                     'data': 'success',
                     'duplicate_travel': duplicate_travel
@@ -829,16 +649,7 @@ def upload_tev(request):
                     
                     TevIncoming.objects.bulk_create(tev_incoming_instances)
                     return JsonResponse({'data': 'success'})
-                
-                    # if duplicate_travel:
-                    #     response_data = {
-                    #         'data': 'success',
-                    #         'duplicate_id_no':unique_id_no_count
-                    #         # 'id_no': duplicate_travel
-                    #     }
-                    #     return JsonResponse(response_data) 
-                    # else:
-                    #     
+        
             
                 except json.JSONDecodeError as e:
                    print(f"Error decoding JSON: {e}")
