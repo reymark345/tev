@@ -282,7 +282,7 @@
                     <table id="tbl-box-a" class="table display compact">
                         <thead>
                             <tr>
-                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>ID</th>
                                 <th>Code #</th>
                                 <th>Accnt. No.</th>
                                 <th>ID Number</th>
@@ -604,8 +604,6 @@
                         $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
                             selectedItems.push($(this).val());
                         });
-
-                        console.log(selectedItems);
             
                         if(selectedItems.length ===0){
                             toastr.error('Select item first', 'Invalid', toast_options);
@@ -652,11 +650,11 @@
 
                 $('.view-data').on('click', function () {
                     // alert("fasfasf");
-                    const selectAllCheckbox = $(`#${tableId} #selectAll`);
-                    selectAllCheckbox.on('change', function () {
-                        const isChecked = this.checked;
-                        tbody.find(':checkbox').prop('checked', isChecked);
-                    });
+                    // const selectAllCheckbox = $(`#${tableId} #selectAll`);
+                    // selectAllCheckbox.on('change', function () {
+                    //     const isChecked = this.checked;
+                    //     tbody.find(':checkbox').prop('checked', isChecked);
+                    // });
                     let id = $(this).attr('id');
                     dv_no_id = id
                     data_clicked = true;
@@ -675,7 +673,6 @@
 
               $('body').on('click', '.item-update', function () {
                 temp_id = $(this).attr('id');
-                console.log("matches" + temp_id);
                 $('#update-transaction').modal('hide');
                 $("#payrollUpdate").modal("show");
 
@@ -776,11 +773,6 @@
                   buttonsStyling: false,
               }).then(function (result) {
                   if (result.value) {
-                    
-                    console.log("id");
-                    console.log(p_id);
-                    console.log("dv_no value for all rows: " + dv_number);
-
                     $.ajax({
                         type: 'POST',
                         url: "{% url 'delete-box-list' %}",
@@ -790,6 +782,7 @@
                     }
                     }).done(function (data) {
                         if (data.data == 'success') {
+                            employee_list();
                             dataTable2.ajax.reload();
                             toastr.success('Removed Successfully', 'Success', toast_options);
                         } else {
@@ -939,11 +932,17 @@
         })
 
     function employee_list(){
-
         $.ajax({
             type: 'POST',
             url: "{% url 'retrieve-employee' %}",
+            data:{
+                dv_no_id: dv_no_id
+            }  
         }).done(function (data) {
+            let dv_no = data.dv_no;
+            dv_number = dv_no;
+            $('#dv-number').text("DV NUMBER: "+dv_no);
+
             var selectElement = $("#payroll-name");
             selectElement.empty();
             selectElement.append($('<option></option>'));
@@ -963,7 +962,6 @@
                     allowClear: true,
                 });
             }
-            console.log("wewewewewewe");
         });
     }
 
@@ -997,12 +995,19 @@
             ],
         
             columnDefs: [
-                 {   
+                {
                     targets: 0,
                     render: function(data, type, row, meta) {
-                       
-                        // Set the data-row-id attribute on the <tr> element
-                        return '<tr data-row-id="' + row.id + '"><td><input type="checkbox"></td></tr>';
+                        // Assuming meta.row is the 0-based index of the current row
+                        return meta.row + 1;
+                    },
+                },
+
+                {
+                    targets: 0,
+                    render: function(data, type, row, meta) {
+                        // Assuming meta.row is the 0-based index of the current row
+                        return meta.row + 1;
                     },
                 },
                 {
@@ -1014,7 +1019,6 @@
                 {
                     targets: 2,
                     render: function(data) {
-                        console.log(data);
                         return (!data && data !== 0) ? '' : '<span class="badge bg-label-warning">' + data + '</span>';
                     },
                 },
@@ -1073,16 +1077,17 @@
                 myDataTable.column(9, { search: 'applied' }).data().each(function (value) {
                     totalAmount += parseFloat(value);
                 });
-                // $('#total-input').remove();
-                // $('#tbl-box-a').append('<input type="text" class="form-control" id="total-input" value="' + totalAmount.toFixed(2) + '" disabled>');
-                $('#total-amount').text("₱ " + totalAmount.toFixed(2));
+                let formattedTotalAmount = totalAmount.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+                $('#total-amount').text("₱ " + formattedTotalAmount);
+                // let dvNoValue = myDataTable.row(0).data().dv_no;
+                // dv_number = dvNoValue;
 
-                let dvNoValue = myDataTable.row(0).data().dv_no;
-                dv_number = dvNoValue;
-
-                $('#dv-number').text(dvNoValue);
+                // $('#dv-number').text(dvNoValue);
                 
-                console.log("dv_no value for all rows: " + dvNoValue);
+                // console.log("dv_no value for all rows: " + dvNoValue);
             }
         });
     }
@@ -1100,8 +1105,6 @@
 
       BoxDvNo.on('change', function() {
         selectedDv = BoxDvNo.val();
-        console.log("byeee");
-        console.log(selectedDv);
       });
 
       search_advance_filter.on('click', function () {
@@ -1249,9 +1252,6 @@
             let empChargesValue = $(this).val();
             let empChargesText =  $(this).find(':selected').text();
 
-            console.log("new_id1:", new_id);
-            console.log("empChargesValue:", empChargesText);
-
             let selectedOption = $(this).find(":selected");
             if (selectedOption.length > 0) {
                 temp_id = rowData.id;
@@ -1354,7 +1354,7 @@
                     }).then(function (result) {
                         if (result.value) {
                             
-                            console.log("afterr:"+ temp_id);
+
                             $.ajax({
                                 type: 'POST',
                                 url: "{% url 'remove-charges' %}",
@@ -1365,8 +1365,6 @@
                                 }
                             }).done(function (data) {
                                 dataTable.ajax.reload(null, false);
-                                console.log(data);
-                                console.log("data");
                             })
                             }
                         });
@@ -1396,9 +1394,6 @@
                 
         $(document).on("change", ".payroll-name", function () {
             let inc_id = $(this).val();
-            console.log("empChargesValue:", inc_id);
-            console.log("Dv Number:", dv_number);
-
             $.ajax({
                 type: 'POST',
                 url: "{% url 'add-emp-dv' %}",
@@ -1407,8 +1402,9 @@
                     dv_no: dv_number
                 }
             }).done(function (data) {
-                console.log(data);
+                employee_list();
                 dataTable2.ajax.reload();
+                toastr.success('Added Successfully ', 'Success', toast_options);
             });
         });
 
@@ -1463,19 +1459,6 @@
                     toastr.error('Amount Exceeds', 'Invalid', toast_options);
                 }
                 else{
-                    console.log("tesstttingggg start");
-                    console.log(selectedAmount);
-                    console.log(selectedIDs);
-                    console.log("tesstttingggg enddd");
-                    console.log(amt_issued + " selected amt");
-                    console.log(totalAmount +" total amt");
-                    console.log(temp_id +" iddddd");
-
-                    console.log(outgoing_id +" outtgoingg");
-
-
-
-
                     $.ajax({
                         type: "POST",
                         url: "{% url 'update-multiple-charges' %}",

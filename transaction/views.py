@@ -981,6 +981,7 @@ def add_emp_dv(request):
         
         bridge = TevBridge(purpose = "TE",charges_id = 1, tev_incoming_id = tev_id, tev_outgoing_id = outgoing_id)
         bridge.save()
+        PayrolledCharges.objects.filter(incoming_id=tev_id).delete()
         
         return JsonResponse({'data': 'success'})
 
@@ -990,7 +991,12 @@ def add_emp_dv(request):
 
 @csrf_exempt
 def retrieve_employee(request):
+    dv_no_id = request.POST.get('dv_no_id')
+
     data = []
+
+    dv_number = TevOutgoing.objects.filter(id=dv_no_id).first()
+
     list_employee = TevIncoming.objects.filter(status_id=4).order_by('first_name')
 
     for row in list_employee:
@@ -1017,6 +1023,7 @@ def retrieve_employee(request):
 
     response = {
         'data': data,
+        'dv_no' : dv_number.dv_no
     }
 
     return JsonResponse(response)
@@ -1029,8 +1036,8 @@ def delete_box_list(request):
     incoming_id = request.POST.get('emp_id')
     dv_no = request.POST.get('dv_number')
     
-    deleteBridge, _ = TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
-    # delete, _ = TevIncoming.objects.filter(id=incoming_id).delete()
+    TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
+    TevIncoming.objects.filter(id=incoming_id).update(status_id=4)
 
     response = {
         'data': 'success'
