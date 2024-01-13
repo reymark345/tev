@@ -230,8 +230,6 @@ def preview_box_a(request):
         outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__chief','division__c_designation','division__approval','division__ap_designation').first()
         dvno = outgoing['dv_no']
 
-
-        
         te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
                 'code',
                 'first_name',
@@ -244,18 +242,13 @@ def preview_box_a(request):
                 'tevbridge__tev_outgoing__dv_no', 
                 'tevbridge__charges__name'  
             ).order_by('last_name')
-    
         result_count = len(te_lname)
-
-        print(data_result)
-        print("data_result")
 
         final_charges_amount = Decimal('0')
         charges_dict = {}
 
         for item in data_result:
             charges_name = item['charges_name']
-            # charges_amount = Decimal(item['charges_amount'])
             charges_amount = Decimal(item['charges_amount']) if item['charges_amount'] is not None else 0.0
 
             if charges_name in charges_dict:
@@ -263,7 +256,6 @@ def preview_box_a(request):
             else:
                 charges_dict[charges_name] = charges_amount
 
-        # Convert the dictionary to a list of dictionaries
         charges_list = [{'charges': name, 'final_amount': amount} for name, amount in charges_dict.items()]
 
         print(charges_list)
@@ -952,6 +944,20 @@ def remove_charges(request):
     
 
 @csrf_exempt
+def update_purpose(request):
+    if request.method == 'POST':
+        te_id = request.POST.get('te_id')
+        purpose = request.POST.get('value')
+        try:
+            TevBridge.objects.filter(tev_incoming_id=te_id).update(purpose=purpose)
+            return JsonResponse({'data': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
+@csrf_exempt
 def add_dv(request):
     if request.method == 'POST':
         user_id = request.session.get('user_id', 0)
@@ -973,16 +979,60 @@ def add_emp_dv(request):
         user_id = request.session.get('user_id', 0)
         tev_id = request.POST.get('tev_id')
         dv_no = request.POST.get('dv_no')
-
         box_b = TevIncoming.objects.filter(id=tev_id).update(status_id=6)
+        month_mapping = {
+            '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
+            '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Aug',
+            '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'
+        }
+        tev_incoming_object = TevIncoming.objects.get(id=tev_id)
+        travel_dates_str = tev_incoming_object.date_travel
+        travel_dates_list = travel_dates_str.split(',')
+        unique_months_by_year = {}
 
+        for date in travel_dates_list:
+            parts = date.split('-')
+            if len(parts) == 3:
+                year = parts[2]
+                month_abbr = month_mapping.get(parts[1])
+                if month_abbr:
+                    if year not in unique_months_by_year:
+                        unique_months_by_year[year] = set()
+                    unique_months_by_year[year].add(month_abbr)
+
+        ordered_years = sorted(unique_months_by_year.keys())
+
+        def month_order(month_abbr):
+            month_mapping_order = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+            return month_mapping_order.get(month_abbr, 0)
+
+        formatted_result = ', '.join([f"{', '.join(sorted(unique_months_by_year[year], key=month_order))} {year}" for year in ordered_years])
+        # tev_incoming_object = TevIncoming.objects.get(id=tev_id)
+        # travel_dates_str = tev_incoming_object.date_travel
+        # travel_dates_list = travel_dates_str.split(',')
+        # unique_months_by_year = {}
+
+        # for date in travel_dates_list:
+        #     parts = date.split('-')
+        #     if len(parts) == 3:
+        #         year = parts[2]
+        #         month_abbr = month_mapping.get(parts[1])
+        #         if month_abbr:
+        #             if year not in unique_months_by_year:
+        #                 unique_months_by_year[year] = set()
+        #             unique_months_by_year[year].add(month_abbr)
+
+
+        # ordered_years = sorted(unique_months_by_year.keys())
+        # formatted_result = ', '.join([f"{', '.join(unique_months_by_year[year])} {year}" for year in ordered_years])
+        
+        purpose = "TE for "+ formatted_result
         outgoing_obj = TevOutgoing.objects.filter(dv_no=dv_no).first()
         outgoing_id = outgoing_obj.id
-        
-        bridge = TevBridge(purpose = "TE",charges_id = 1, tev_incoming_id = tev_id, tev_outgoing_id = outgoing_id)
+
+        bridge = TevBridge(purpose = purpose,charges_id = 1, tev_incoming_id = tev_id, tev_outgoing_id = outgoing_id)
         bridge.save()
         PayrolledCharges.objects.filter(incoming_id=tev_id).delete()
-        
         return JsonResponse({'data': 'success'})
 
     else:
@@ -992,9 +1042,7 @@ def add_emp_dv(request):
 @csrf_exempt
 def retrieve_employee(request):
     dv_no_id = request.POST.get('dv_no_id')
-
     data = []
-
     dv_number = TevOutgoing.objects.filter(id=dv_no_id).first()
 
     list_employee = TevIncoming.objects.filter(status_id=4).order_by('first_name')

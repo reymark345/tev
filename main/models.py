@@ -196,6 +196,7 @@ class TevBridge(models.Model):
     tev_outgoing = models.ForeignKey(TevOutgoing, models.DO_NOTHING)
     charges = models.ForeignKey(Charges, models.DO_NOTHING)
     purpose = models.CharField(max_length=255, blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
 
     class Meta:
         managed = True

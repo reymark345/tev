@@ -760,44 +760,29 @@
                 let rowData = closestRow.data();
                 let p_id = rowData.id;
 
-                Swal.fire({
-                  title: 'Are you sure Remove from list?',
-                  text: "You won't be able to revert this!",
-                  icon: 'warning',
-                  showCancelButton: true,
-                  confirmButtonText: 'Yes, Remove it!',
-                  customClass: {
-                      confirmButton: 'btn btn-primary me-3',
-                      cancelButton: 'btn btn-label-secondary',
-                  },
-                  buttonsStyling: false,
-              }).then(function (result) {
-                  if (result.value) {
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'delete-box-list' %}",
-                        data:{
-                        emp_id: p_id,
-                        dv_number: dv_number
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'delete-box-list' %}",
+                    data:{
+                    emp_id: p_id,
+                    dv_number: dv_number
+                }
+                }).done(function (data) {
+                    if (data.data == 'success') {
+                        employee_list();
+                        dataTable2.ajax.reload();
+                        toastr.success('Removed Successfully', 'Success', toast_options);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error saving!',
+                            text: data.message,
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        })
                     }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            employee_list();
-                            dataTable2.ajax.reload();
-                            toastr.success('Removed Successfully', 'Success', toast_options);
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                  }
-              })
+                })
         });
  
       const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
@@ -924,6 +909,7 @@
             })
         });
         $('#cancel-multiple-charges').click(function() {
+            dataTable2.ajax.reload();
         // updateTransaction(dv_no_id);
         });
     
@@ -973,6 +959,7 @@
         }
 
         dataTable2 = table2.DataTable({
+            autoWidth: true,
             processing: true,
             serverSide: true,
             ajax: {
@@ -995,14 +982,6 @@
             ],
         
             columnDefs: [
-                {
-                    targets: 0,
-                    render: function(data, type, row, meta) {
-                        // Assuming meta.row is the 0-based index of the current row
-                        return meta.row + 1;
-                    },
-                },
-
                 {
                     targets: 0,
                     render: function(data, type, row, meta) {
@@ -1041,7 +1020,7 @@
                     targets: 6,
                     render: function (data) {
                         
-                        return '<td><input type="text" class="form-control emp-purpose" value="'+data+'"></td>'
+                        return '<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="'+data+'" style="width:500px; margin-right: -150px !important;" ></td>'
 
                     },
                 },
@@ -1239,8 +1218,34 @@
                 newRow.find('.error-label, .error-label-amount').hide();
             $('.rows-container').append(newRow);
         });
+
         $('.container').on('click', '.delete-row', function () {
             $(this).closest('.row').remove();
+        });
+
+        $(document).on("change", ".emp-purpose", function () {
+            let dataTable = $('#tbl-box-a').DataTable();
+            let closestRow = dataTable.row($(this).closest('tr'));
+            let rowData = closestRow.data();
+            let tev_id = rowData.id;
+            let purpose = $(this).val();
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'update-purpose' %}",
+                data:{
+                    te_id: tev_id,
+                    value: purpose
+                }
+            }).done(function (data) {
+                if (data.data == 'success') {
+                    toastr.success('Purpose Added Successfully ', 'Success', toast_options);
+                }
+                else{
+                    toastr.error('Cannot Saved Please Contact IT Administrator', 'Invalid', toast_options);
+                }
+            });
+
         });
 
         
@@ -1340,35 +1345,34 @@
                     let amount = data.amt;
                     if(data.data){
                     
-                    Swal.fire({
-                        title: 'Are you sure to Change Charges?',
-                        text: "You won't be able to revert this!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, change it!',
-                        customClass: {
-                            confirmButton: 'btn btn-primary me-3',
-                            cancelButton: 'btn btn-label-secondary',
-                        },
-                        buttonsStyling: false,
-                    }).then(function (result) {
-                        if (result.value) {
-                            
+                        Swal.fire({
+                            title: 'Are you sure to Change Charges?',
+                            text: "You won't be able to revert this!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Yes, change it!',
+                            customClass: {
+                                confirmButton: 'btn btn-primary me-3',
+                                cancelButton: 'btn btn-label-secondary',
+                            },
+                            buttonsStyling: false,
+                        }).then(function (result) {
+                            if (result.value) {
+                                
 
-                            $.ajax({
-                                type: 'POST',
-                                url: "{% url 'remove-charges' %}",
-                                data: {
-                                    incoming_id: temp_id,
-                                    charge_id:empChargesValue,
-                                    amt:amount
+                                $.ajax({
+                                    type: 'POST',
+                                    url: "{% url 'remove-charges' %}",
+                                    data: {
+                                        incoming_id: temp_id,
+                                        charge_id:empChargesValue,
+                                        amt:amount
+                                    }
+                                }).done(function (data) {
+                                    dataTable.ajax.reload(null, false);
+                                })
                                 }
-                            }).done(function (data) {
-                                dataTable.ajax.reload(null, false);
-                            })
-                            }
-                        });
-                        
+                            });
                     }
                     else{
                         $.ajax({
@@ -1471,7 +1475,6 @@
                         }).done(function(data){
                             if (data.data == 'success') {
                               $('#payrollDetails').modal('hide');
-                            //   data_printing(outgoing_id);
                               $("#payrollUpdate").modal("hide");
                               dataTable2.ajax.reload();
                               toastr.success('Successfully save', 'Success', toast_options);
