@@ -379,7 +379,7 @@ def employee_dv(request):
         LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
         WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s 
         GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
-        ORDER BY ti.incoming_out DESC;   
+        ORDER BY ti.updated_at DESC;  
     """
 
     with connection.cursor() as cursor:
@@ -979,7 +979,7 @@ def add_emp_dv(request):
         user_id = request.session.get('user_id', 0)
         tev_id = request.POST.get('tev_id')
         dv_no = request.POST.get('dv_no')
-        box_b = TevIncoming.objects.filter(id=tev_id).update(status_id=6)
+        box_b = TevIncoming.objects.filter(id=tev_id).update(status_id=6, updated_at = date_time.datetime.now())
         month_mapping = {
             '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
             '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Aug',
