@@ -32,19 +32,38 @@ from django.db.models.functions import Concat
 def get_user_details(request):
     return StaffDetails.objects.filter(user_id=request.user.id).first()
 
+# def generate_code():
+#     trans_code = SystemConfiguration.objects.values_list(
+#         'transaction_code', flat=True).first()
+    
+#     last_code = trans_code.split('-')
+#     sampleDate = datetime_date.today()
+#     year = sampleDate.strftime("%y")
+#     month = sampleDate.strftime("%m")
+#     series = 1
+
+#     if last_code[1] == month:
+#         series = int(last_code[2]) + 1
+
+#     code = year + '-' + month + '-' + f'{series:05d}'
+
+#     return code
+
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
-        'transaction_code', flat=True).first()
-    
+        'transaction_code', flat=True
+    ).first()
+
     last_code = trans_code.split('-')
-    sampleDate = datetime_date.today()
-    year = sampleDate.strftime("%y")
-    month = sampleDate.strftime("%m")
-    series = 1
+    sample_date = datetime_date.today()
+    year = sample_date.strftime("%y")
+    month = sample_date.strftime("%m")
+    day = sample_date.strftime("%d")
 
-    if last_code[1] == month:
+    if last_code[0] == year:
         series = int(last_code[2]) + 1
-
+    else:
+        series = 1
     code = year + '-' + month + '-' + f'{series:05d}'
 
     return code
