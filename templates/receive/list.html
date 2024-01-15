@@ -25,8 +25,8 @@
         z-index: 9999;
     }
     .sk-primary .sk-fold-cube {
-        width: 15px; /* Set the width of each cube */
-        height: 15px; /* Set the height of each cube */
+        width: 15px; 
+        height: 15px;
     }
     .custom-file-upload {
     border: 1px solid #ccc;
@@ -43,6 +43,14 @@
     }
     .error-message {
         color: red;
+    }
+    .has-error {
+        border: 1px solid red; 
+    }
+
+    .error-label {
+        color: red; 
+        margin-top: 5px; 
     }
 </style>
 <!-- Content wrapper -->
@@ -133,16 +141,6 @@
                 class="form-control"
                 />
             </div>
-
-            <!-- <div class="col-12 col-md-6">
-                <label class="form-label" >Slashed out</label>
-                <input
-                type="date"
-                id="f-slashed-out"
-                name="FSLashedOut"
-                class="form-control"
-                />
-            </div> -->
 
             <div class="col-12 col-md-6">
                 <label class="form-label">Original Amount</label>
@@ -260,7 +258,6 @@
     <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
         <div class="modal-header">
-            <!-- <span class="badge rounded-pill bg-primary bg-glow">Upload Excel File <small>(xlsx)</small></span></center> -->
         <h5 class="modal-title" id="modalToggleLabel">Upload Excel File <small>(xlsx)</small></h5>
         <button
             type="button"
@@ -381,6 +378,8 @@
     let status_val =0;
     let formattedDates = ''
     let employeeList = [];
+    let remarks_date = [];
+    let selectedRemarks = [];
 
     $(document).ready(function () {
         employeelist();
@@ -425,20 +424,19 @@
                 $("#dateField").prop("disabled", false);
             } 
         });
-
         $(".remarks-list").on("change", function() {
             $("#dynamic-input-container").empty();
-            var selectedValues = $(this).val();
-            // Append input elements based on selected values
-            if (selectedValues) {
-                for (var i = 0; i < selectedValues.length; i++) {
-                    var inputId = "date-remarks-" + selectedValues[i];
-                    var selectedText = $(this).find('option[value="' + selectedValues[i] + '"]').text();
-                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" /><br>';
+            selectedRemarks = $(this).val();
+            if (selectedRemarks) {
+                for (var i = 0; i < selectedRemarks.length; i++) {
+                    var inputId = "date-remarks-" + selectedRemarks[i];
+                    var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
+                    var inputValue = remarks_date[i] || "";
+                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
                     $("#dynamic-input-container").append(inputElement);
                 }
             }
-        });
+        })
 
 
         
@@ -579,12 +577,12 @@
                 {
                     targets: 5,
                     render: function(data) {
-                        var splitValues = data.split(',');  // Split data by comma
+                        var splitValues = data.split(','); 
                         var result = '';
                         
                         splitValues.forEach(function(value, index) {
                             if (index !== 0) {
-                                result += '  '; // Add a space before adding subsequent values
+                                result += '  '; 
                             }
                             var dateParts = value.split('-');
                             var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
@@ -741,72 +739,93 @@
                     $('.title-name').text('Update TEV Record')
                     $.ajax({
                         type: 'GET',
-                        url: "{% url 'item-edit' %}?id=" + id,
+                        url: "{% url 'preview-received' %}?id=" + id,
                         dataType: 'json',
                     }).done(function (data) {
-                        if (data.length > 0) {
-                            const $selectElement1 = $('#employee-name');
-                            $selectElement1.empty();
-                            fetchEmployee($selectElement1);
-                            if (EmployeeName.length) {
-                                EmployeeName.wrap('<div class="position-relative"></div>')
-                                EmployeeName.select2({
-                                placeholder: 'Choose employee',
-                                dropdownParent: EmployeeName.parent(),
-                                allowClear: true,
-                                })
-                            }
-
-                            if (RemarksList.length) {
-                                RemarksList.wrap('<div class="position-relative"></div>')
-                                RemarksList.select2({
-                                placeholder: 'Choose remarks',
-                                dropdownParent: RemarksList.parent(),
-                                allowClear: true,
-                                })
-                            }
 
 
-                            let fields = data[0].fields
-                            let pk = data[0].pk
-                            let employee_name = $('#employee-name');
-                            let floatvalue = parseFloat(fields.final_amount);
-                            let convertedAmount = 0;
-                            let date_travel = fields.date_travel;
-                            formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
-                            status_val = fields.status;
-                            let fullname = fields.first_name + " " + fields.middle_name + " " + fields.last_name
-                            let id_no = fields.id_no;
-                            if(status_val ===3){
-                                EmployeeName.val(id_no).trigger('change').prop("disabled", true);
-                                convertedAmount = floatvalue.toFixed(2);
-                                OriginalAmount.prop("disabled", true);
-                                DateTravel.prop("disabled", true);
-                                RangeTravel.prop("disabled", true);
-                            }
-                            else{
-                                EmployeeName.val(id_no).trigger('change').prop("disabled", false);
-                                let original_amt = parseFloat(fields.original_amount)
-                                convertedAmount = original_amt.toFixed(2);
-                                OriginalAmount.prop("disabled", false);
-                                DateTravel.prop("disabled", false);
-                                RangeTravel.prop("disabled", false);
-                            }
 
-                            if (DateTravel){
-                                RangeTravel.prop("disabled", true);
-                            }
-                            else if(RangeTravel){
-                                DateTravel.prop("disabled", true);
-                            }
-                            HDateTravel.val(formattedDates)
-                            OriginalAmount.val(convertedAmount);
-
-                            DateTravel.val(formattedDates);
-                            ItemID.val(pk);
-                            updateSelectedDates();
-                            offCanvasEl.show()
+                        const $selectElement1 = $('#employee-name');
+                        $selectElement1.empty();
+                        fetchEmployee($selectElement1);
+                        if (EmployeeName.length) {
+                            EmployeeName.wrap('<div class="position-relative"></div>')
+                            EmployeeName.select2({
+                            placeholder: 'Choose employee',
+                            dropdownParent: EmployeeName.parent(),
+                            allowClear: true,
+                            })
                         }
+
+                        if (RemarksList.length) {
+                            RemarksList.wrap('<div class="position-relative"></div>')
+                            RemarksList.select2({
+                            placeholder: 'Choose remarks',
+                            dropdownParent: RemarksList.parent(),
+                            allowClear: true,
+                            })
+                        }
+
+                        let pk = data.id
+                        let employee_name = $('#employee-name');
+                        let floatvalue = parseFloat(data.final_amount);
+                        let convertedAmount = 0;
+                        let date_travel = data.date_travel;
+                        formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
+                        status_val = data.status;
+                        let fullname = data.first_name + " " + data.middle_name + " " + data.last_name
+                        let id_no = data.id_no;
+                        let date_remarks = data.date_remarks;
+                        let lacking = data.lacking;
+                        
+                        
+                        if (date_remarks){
+                            date_remarks = date_remarks.split(", ")
+                            remarks_date = date_remarks;
+                            $('#remarks-list').val([]).trigger('change');
+                            $('#remarks-list option').each(function() {
+                                let optionValue = parseInt($(this).val());
+                                if (lacking.includes(optionValue)) {
+                                    $(this).prop('selected', true);
+                                } 
+                            });
+                            $('#remarks-list').trigger('change');
+
+                        }
+                        else{
+                            $('#remarks-list').val([]).trigger('change');
+                        }
+
+                        if(status_val ===3){
+                            EmployeeName.val(id_no).trigger('change').prop("disabled", true);
+                            convertedAmount = floatvalue.toFixed(2);
+                            OriginalAmount.prop("disabled", true);
+                            DateTravel.prop("disabled", true);
+                            RangeTravel.prop("disabled", true);
+                        }
+                        else{
+                            EmployeeName.val(id_no).trigger('change').prop("disabled", false);
+                            let original_amt = parseFloat(data.original_amount)
+                            convertedAmount = original_amt.toFixed(2);
+                            OriginalAmount.prop("disabled", false);
+                            DateTravel.prop("disabled", false);
+                            RangeTravel.prop("disabled", false);
+                        }
+
+                        if (DateTravel){
+                            RangeTravel.prop("disabled", true);
+                        }
+                        else if(RangeTravel){
+                            DateTravel.prop("disabled", true);
+                        }
+                        HDateTravel.val(formattedDates)
+                        OriginalAmount.val(convertedAmount);
+
+                        DateTravel.val(formattedDates);
+                        ItemID.val(pk);
+                        updateSelectedDates();
+                        offCanvasEl.show()
+                        
                     })
                 }),
 
@@ -987,7 +1006,6 @@
                                     HDateTravel: hdate_travel,
                                     ItemID:ItemID.val()
                                 }
-                            // data: form_data,
                             }).done(function (data) {                
                                 function formatDate(dateString) {
                                     const [day, month, year] = dateString.split("-");
@@ -999,22 +1017,7 @@
                                     dateField.clear();
                                     let code = data.g_code;
                                     if (code){
-                                        Swal.fire({
-                                            title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
-                                            icon: 'info',
-                                            html:
-                                            'Successfully <b>Save!</b>',
-                                            showCloseButton: true,
-                                            showCancelButton: false,
-                                            focusConfirm: false,
-                                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                                            confirmButtonAriaLabel: 'Thumbs up, great!',
-                                            customClass: {
-                                            confirmButton: 'btn btn-primary me-3'
-                                            },
-                                            buttonsStyling: false
-                                        });
-
+                                        toastr.success('Save Successfully', 'Success', toast_options);
                                     }
                                     else{
                                         offCanvasEl.hide()

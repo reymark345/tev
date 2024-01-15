@@ -58,18 +58,13 @@ def tracking_load(request):
     EmployeeList = request.GET.getlist('EmployeeList[]')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
 
+    search_fields = ['code', 'first_name', 'last_name', 'dv_no'] 
+    filter_conditions = Q()
 
-
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if FAdvancedFilter:
-
-        print("testttaaawwwww")
-        print(FAdvancedFilter)
-        print(FTransactionCode)
-        print(FDateTravel)
-        print(NDVNumber)
-        print(EmployeeList)
-        print("endtesstaaa")
 
         def dictfetchall(cursor):
             columns = [col[0] for col in cursor.description]
@@ -115,17 +110,36 @@ def tracking_load(request):
             cursor.execute(query, params)
             finance_data = dictfetchall(cursor)
 
-      
+    elif _search:
+        with connection.cursor() as cursor:
+            query = """
+                SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
+                    tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
+                    tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
+                    tev_incoming.incoming_out, tev_bridge.purpose AS purposes,
+                    tev_outgoing.dv_no AS dv_no
+                FROM tev_incoming
+                INNER JOIN (
+                    SELECT MAX(id) AS max_id
+                    FROM tev_incoming
+                    GROUP BY code
+                ) AS latest_ids
+                ON tev_incoming.id = latest_ids.max_id
+                LEFT JOIN tev_bridge
+                ON tev_incoming.id = tev_bridge.tev_incoming_id
+                LEFT JOIN tev_outgoing
+                ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                WHERE tev_incoming.code LIKE %s 
+                      OR tev_incoming.first_name LIKE %s
+                      OR tev_incoming.last_name LIKE %s 
+                      OR tev_outgoing.dv_no LIKE %s
+                      ORDER BY tev_incoming.id DESC;
+            """
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%'])
+            columns = [col[0] for col in cursor.description]
+            finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
     else:
-        # latest_ids = TevIncoming.objects.values('code').annotate(max_id=Max('id')).values('max_id')
-        # finance_data = TevIncoming.objects.filter(id__in=Subquery(latest_ids)).values(
-        #     'id','code', 'first_name', 'middle_name', 'last_name', 'date_travel', 'status_id',
-        #     'original_amount', 'final_amount', 'incoming_in', 'incoming_out',
-        #     purposes=F('tevbridge__purpose'),
-        #     dv_no=F('tevbridge__tev_outgoing__dv_no')
-        # ).order_by('-id')
-
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
@@ -144,6 +158,7 @@ def tracking_load(request):
                 ON tev_incoming.id = tev_bridge.tev_incoming_id
                 LEFT JOIN tev_outgoing
                 ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                           
                 ORDER BY tev_incoming.id DESC;
             """)
             columns = [col[0] for col in cursor.description]
@@ -329,30 +344,68 @@ def travel_calendar(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-
 def travel_history_load(request):
     total = 0
     finance_database_alias = 'finance'
     usr_id = request.session.get('user_id', 0)
     userData = StaffDetails.objects.filter(user_id=usr_id)
     id_number = userData[0].id_number
-    query = """
-        SELECT code,first_name,middle_name,last_name,date_travel,ti.status_id,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no, ti.user_id FROM tev_incoming AS ti 
-        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        WHERE ti.id_no = %s AND
-        (ti.status_id IN (1, 2, 4, 5 ,6, 7) 
-        OR (ti.status_id = 3 AND 
-                (
-                        SELECT COUNT(*)
-                        FROM tev_incoming
-                        WHERE code = ti.code
-                ) = 1
-        ));
-        """
-    with connection.cursor() as cursor:
-        cursor.execute(query, [id_number])
-        results = cursor.fetchall()
+
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
+
+    search_fields = ['code', 'dv_no'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+
+    if _search:
+        with connection.cursor() as cursor:
+            query = """
+                SELECT code,first_name,middle_name,last_name,date_travel,ti.status_id,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no, ti.user_id FROM tev_incoming AS ti 
+                LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+                LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+                WHERE ti.id_no = %s AND ti.code LIKE %s
+                AND t_o.dv_no LIKE %s AND
+                (ti.status_id IN (1, 2, 4, 5 ,6, 7) 
+                OR (ti.status_id = 3 AND 
+                                (
+                                                SELECT COUNT(*)
+                                                FROM tev_incoming
+                                                WHERE code = ti.code
+                                ) = 1
+                ));
+            """
+            cursor.execute(query, [f'{id_number}', f'%{_search}%', f'%{_search}%'])
+            columns = [col[0] for col in cursor.description]
+            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    
+        # with connection.cursor() as cursor:
+        #     cursor.execute(query, [id_number])
+        #     results = cursor.fetchall()
+
+    else:
+        query = """
+            SELECT code,first_name,middle_name,last_name,date_travel,ti.status_id,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no, ti.user_id FROM tev_incoming AS ti 
+            LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+            LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+            WHERE ti.id_no = %s AND
+            (ti.status_id IN (1, 2, 4, 5 ,6, 7) 
+            OR (ti.status_id = 3 AND 
+                    (
+                            SELECT COUNT(*)
+                            FROM tev_incoming
+                            WHERE code = ti.code
+                    ) = 1
+            ));
+            """
+        with connection.cursor() as cursor:
+            cursor.execute(query, [id_number])
+            results = cursor.fetchall()
         
     column_names = ['code', 'first_name','middle_name','last_name', 'date_travel','status','original_amount', 'final_amount', 'incoming_in', 'incoming_out', 'purpose','dv_no']
     finance_data = []

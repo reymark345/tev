@@ -138,6 +138,7 @@ class TevIncoming(models.Model):
     status = models.ForeignKey(Status, models.DO_NOTHING,default=1)
     user_id = models.CharField(max_length=128, blank=True, null=True)
     is_upload = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     
     class Meta:
         managed = True
@@ -247,7 +248,15 @@ class Cluster(models.Model):
         managed = True
         db_table = 'cluster'
 
-
+class PayrolledCharges(models.Model):
+    incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)
+    amount = models.CharField(max_length=128, blank=True, null=True)
+    charges = models.ForeignKey(Charges, models.DO_NOTHING)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'payrolled_charges'
 
 class RemarksLib(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)

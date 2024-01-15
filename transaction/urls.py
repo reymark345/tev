@@ -29,5 +29,17 @@ urlpatterns = [
     
     path('update_status', views.update_status, name='update-status'),
     path('dv_number_lib', views.dv_number_lib, name='dv-number-lib'),
-    path('add_existing_record', views.add_existing_record, name='add-existing-record'),  
+    path('add_existing_record', views.add_existing_record, name='add-existing-record'),
+    path('multiple_charges_details', views.multiple_charges_details, name='multiple-charges-details'),
+    path('add_multiple_charges', views.add_multiple_charges, name='add-multiple-charges'),
+    path('update_multiple_charges', views.update_multiple_charges, name='update-multiple-charges'),
+    path('check_charges', views.check_charges, name='check-charges'),
+    path('remove_charges', views.remove_charges, name='remove-charges'),
+    path('payroll_add_charges', views.payroll_add_charges, name='payroll-add-charges'),
+    path('add_dv', views.add_dv, name='add-dv'),  
+    path('retrieve_employee', views.retrieve_employee, name='retrieve-employee'),  
+    path('add_emp_dv', views.add_emp_dv, name='add-emp-dv'),  
+    path('update_purpose', views.update_purpose , name='update-purpose'),  
+
+     
 ]

@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges)
 import json 
 from django.core import serializers
 from datetime import date, datetime, timedelta
@@ -20,7 +20,9 @@ from django.db import connections
 from django.db import IntegrityError, connection
 from django.db.models import Q, Max
 import datetime as date_time
-
+from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
+from django.utils import timezone
 
 
 def get_user_details(request):
@@ -28,17 +30,19 @@ def get_user_details(request):
 
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
-        'transaction_code', flat=True).first()
-    
+        'transaction_code', flat=True
+    ).first()
+
     last_code = trans_code.split('-')
-    sampleDate = date.today()
-    year = sampleDate.strftime("%y")
-    month = sampleDate.strftime("%m")
-    series = 1
+    sample_date = date.today()
+    year = sample_date.strftime("%y")
+    month = sample_date.strftime("%m")
+    day = sample_date.strftime("%d")
 
-    if last_code[1] == month:
+    if last_code[0] == year:
         series = int(last_code[2]) + 1
-
+    else:
+        series = 1
     code = year + '-' + month + '-' + f'{series:05d}'
 
     return code
@@ -71,7 +75,7 @@ def list_payroll(request):
             'division' : Division.objects.filter(status=0).order_by('name'),
             'role_permission' : role.role_name,
         }
-        return render(request, 'transaction/list.html', context)
+        return render(request, 'transaction/p_preparation.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
@@ -88,7 +92,7 @@ def assign_payroll(request):
         context = {
             'role_permission' : role.role_name,
         }
-        return render(request, 'transaction/list.html', context)
+        return render(request, 'transaction/p_preparation.html', context)
     else:
         return render(request, 'pages/unauthorized.html')    
     
@@ -139,25 +143,28 @@ def box_a(request):
             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
             'cluster' : Cluster.objects.filter().order_by('id'),
             'division' : Division.objects.filter(status=0).order_by('id'),
+            'charges' : Charges.objects.filter().order_by('name')
+
         }
-        return render(request, 'transaction/box_a.html', context)
+        return render(request, 'transaction/p_printing.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
-    
-
 
 @login_required(login_url='login')
 def preview_box_a(request):
     finance_database_alias = 'finance'    
     outgoing_id = request.GET.get('id')
     user_id = request.session.get('user_id', 0)
+
+
     
     results = []
-    total_final_amount = 0
+    total_final_amount = 0.0
     emp_list_code = []
     emp_list_lname = []
     charges_list = []
+    data_result = []
     
     userData = AuthUser.objects.filter(id=user_id)
     full_name = userData[0].first_name + ' ' + userData[0].last_name
@@ -168,8 +175,63 @@ def preview_box_a(request):
     
     if outgoing_id:
         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
+
+        query = """
+            SELECT
+                tev_incoming.id,
+                tev_incoming.first_name,
+                tev_incoming.last_name,
+                tev_incoming.middle_name,
+                tev_incoming.id_no,
+                tev_incoming.account_no,
+                tev_incoming.final_amount,
+                tev_bridge.purpose,
+                tev_outgoing.dv_no,
+                charges.name AS name,
+                charges2.name AS charges_name,
+                payrolled_charges.amount AS charges_amount
+            FROM
+                tev_incoming
+            JOIN
+                tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+            LEFT JOIN
+                tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+            LEFT JOIN
+                charges ON charges.id = tev_bridge.charges_id
+            LEFT JOIN
+                payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+            LEFT JOIN
+                charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+            WHERE
+                tev_incoming.id IN %s
+            ORDER BY
+                tev_incoming.last_name;
+        """
+        total_final_amount = 0
+        with connection.cursor() as cursor:
+            cursor.execute(query, [tuple(tev_incoming_ids)])
+            rows = cursor.fetchall()
+            for row in rows:
+                total_final_amount += Decimal(row[11]) if row[11] is not None else Decimal('0.0')
+                data_dict = {
+                    "id": row[0],
+                    "first_name": row[1],
+                    "last_name": row[2],
+                    "middle_name": row[3],
+                    "id_no": row[4],
+                    "account_no": row[5],
+                    "final_amount": row[6],
+                    "purpose": row[7],
+                    "dv_no": row[8],
+                    "name": row[9],
+                    "charges_name": row[10],
+                    "charges_amount": row[11]
+                }
+                data_result.append(data_dict)
         
-        
+        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__chief','division__c_designation','division__approval','division__ap_designation').first()
+        dvno = outgoing['dv_no']
+
         te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
                 'code',
                 'first_name',
@@ -182,24 +244,21 @@ def preview_box_a(request):
                 'tevbridge__tev_outgoing__dv_no', 
                 'tevbridge__charges__name'  
             ).order_by('last_name')
-    
         result_count = len(te_lname)
-        
-        for item in te_lname:
-            total_final_amount += item['final_amount']
-            final_amount = item['final_amount']
-            charge_name = item['tevbridge__charges__name']
 
-            existing_charge = next((charge for charge in charges_list if charge['charges'] == charge_name), None)
-            if existing_charge:
-                # If it exists, accumulate the final_amount
-                existing_charge['final_amount'] += final_amount
+        final_charges_amount = Decimal('0')
+        charges_dict = {}
+
+        for item in data_result:
+            charges_name = item['charges_name']
+            charges_amount = Decimal(item['charges_amount']) if item['charges_amount'] is not None else 0.0
+
+            if charges_name in charges_dict:
+                charges_dict[charges_name] += charges_amount
             else:
-                charges = {
-                    "final_amount": final_amount,
-                    "charges": charge_name,
-                }
-                charges_list.append(charges)
+                charges_dict[charges_name] = charges_amount
+
+        charges_list = [{'charges': name, 'final_amount': amount} for name, amount in charges_dict.items()]
 
         for item in te_lname:
             fullname = item['last_name'] + ', '+ item['first_name']
@@ -215,8 +274,7 @@ def preview_box_a(request):
                 }
             emp_list_lname.append(list_lname)
             
-        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__chief','division__c_designation','division__approval','division__ap_designation').first()
-        dvno = outgoing['dv_no']
+
         
         
         box_b_in  = outgoing['box_b_in']
@@ -245,23 +303,24 @@ def preview_box_a(request):
             "approval":outgoing['division__approval'],
             "ap_designation":outgoing['division__ap_designation']
         }
+
         context = {
+            'data' : data_result,
             'dv_number':dvno,
             'charges_list':charges_list,
             'payroll_date':box_b_in,
             'total_amount':total_final_amount,
-            'total_count':result_count,
+            'total_count':'',
             'finance':results,
             'details':designation_result,
-            'emp_list_lname':emp_list_lname,
-            'user' : full_name,
+            'emp_list_lname':'',
+            'user' : full_name  ,
             'position' : position
         }
         
-        return render(request, 'transaction/print_box_a.html', context)
+        return render(request, 'transaction/preview_print.html', context)
     else:
         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
-    
 @login_required(login_url='login')
 def checking(request):
     user_details = get_user_details(request)
@@ -283,11 +342,10 @@ def employee_dv(request):
     user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     dvno = ''
-    total_amount = 0
+    total_amount = 0       
     charges_list = []
-    
-    idd = request.POST.get('dv_id')
-    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','is_print','id').first()
+    idd = request.GET.get('dv_id')
+    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','id').first()
 
     charges = Charges.objects.filter().order_by('name')
     for charge in charges:
@@ -299,21 +357,36 @@ def employee_dv(request):
     
     if dv_no is not None:
         dvno = dv_no['dv_no']
-
-    query = """
-        SELECT ti.id, code, first_name, middle_name, last_name,id_no,account_no, final_amount, tb.purpose, dv_no, ch.name, cl.name FROM tev_incoming AS ti 
+    query = """ 
+        SELECT 
+            ti.id, 
+            code, 
+            first_name, 
+            middle_name, 
+            last_name,
+            id_no,
+            account_no, 
+            final_amount, 
+            MAX(tb.purpose) AS purpose,  -- Using an aggregate function
+            dv_no, 
+            cl.name as cluster, 
+            GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
+        FROM tev_incoming AS ti 
         LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
         LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        LEFT JOIN charges AS ch ON ch.id = tb.charges_id
         LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
-        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s    
+        LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = ti.id
+        LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s 
+        GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
+        ORDER BY ti.updated_at DESC;  
     """
 
     with connection.cursor() as cursor:
         cursor.execute(query, (dvno,))
         results = cursor.fetchall()
         
-    column_names = ['id','code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no','charges','cluster']
+    column_names = ['id','code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no','cluster','multiple_charges']
     data_result = []
 
     for finance_row in results:
@@ -322,15 +395,17 @@ def employee_dv(request):
 
     data = []  
     
-    
+
     for row in data_result:
-        
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
         last_name = row['last_name'] if row['last_name'] else ''
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
         
-        final_amount = float(row['final_amount'])
+        final_amount_str = row['final_amount']
+        final_amount = Decimal(final_amount_str).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        
+
         total_amount += final_amount
         item = {
             'id': row['id'],
@@ -338,41 +413,56 @@ def employee_dv(request):
             'name': emp_fullname,
             'id_no': row['id_no'],
             'account_no': row['account_no'],
-            'final_amount': row['final_amount'],
+            'final_amount': final_amount,
             'purpose': row['purpose'],
             'dv_no': row['dv_no'],
-            'charge':row['charges'],
             'cluster':row['cluster'],
-            'total':total_amount,
-            
+            'multiple_charges':row['multiple_charges'],
+            'total':final_amount,
         }
         data.append(item)
-        
+    payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))
 
-    #     _start = request.GET.get('start') if request.GET.get('start') else 0
-    #     _length = request.GET.get('length') if request.GET.get('length') else 0
-        
-    # if _start and _length:
-    #     start = int(_start)
-    #     length = int(_length)
-    #     page = math.ceil(start / length) + 1
-    #     per_page = length
-    #     results = results[start:start + length]
                     
-    total = len(data)    
-          
+    total = len(data)  
+ 
     response = {
         'data': data,
         'charges': charges_list,
-        'is_print': dv_no['is_print'],
         'dv_number':dv_no['dv_no'],
         'outgoing_id':dv_no['id'],
+        'payrolled_list': payrolled_list,
         'recordsTotal': total,
-        'recordsFiltered': total,
-        'total_amount':total_amount
+        'recordsFiltered': total
     }
     return JsonResponse(response)
 
+@csrf_exempt
+def multiple_charges_details(request):
+    pp_id = request.POST.get('payroll_id')
+    data = []
+    charges = PayrolledCharges.objects.filter(incoming_id=pp_id)
+    incoming_amount= TevIncoming.objects.filter(id=pp_id).first()
+    amount = round(incoming_amount.final_amount, 2)
+
+    full_name = incoming_amount.first_name + " " + incoming_amount.middle_name + " " + incoming_amount.last_name
+
+    for charge in charges:
+        amount_ = Decimal(charge.amount).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        amount_ = int(amount_)
+        charge_data = {
+            'id': charge.id,
+            'amount': amount_,
+            'charges_id': charge.charges_id,
+            'incoming_id': charge.incoming_id
+        }
+        data.append(charge_data)
+    response = {
+        'data': data,
+        'amount' : amount,
+        'full_name' : full_name
+    }
+    return JsonResponse(response)
 
 def payroll_load(request):  
 
@@ -399,8 +489,15 @@ def payroll_load(request):
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
+        # query = """
+        #     SELECT * FROM `tev_incoming` WHERE status_id = 4
+        # """
         query = """
-            SELECT * FROM `tev_incoming` WHERE status_id = 4
+            SELECT t1.*,GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
+            FROM `tev_incoming` t1 
+            LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+            WHERE t1.status_id = 4
         """
 
         params = []
@@ -429,6 +526,8 @@ def payroll_load(request):
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
             query += f" AND id_no IN ({placeholders})"
             params.extend(EmployeeList)
+        
+        query += "GROUP BY t1.id ORDER BY t1.incoming_out DESC;"
 
         with connection.cursor() as cursor:
             cursor.execute(query, params)
@@ -438,16 +537,31 @@ def payroll_load(request):
 
     
     elif _search:
-        query = TevIncoming.objects.filter(status_id=4).filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
+        with connection.cursor() as cursor:
+            query = """
+                SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges, t1.user_id
+                FROM `tev_incoming` t1 
+                LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = t1.id
+                LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+                WHERE t1.status_id = 4
+                AND (
+                    t1.code LIKE %s
+                    OR t1.first_name LIKE %s
+                )
+                GROUP BY t1.id ORDER BY t1.incoming_out DESC;
+            """
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%'])
+            columns = [col[0] for col in cursor.description]
+            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        
     else:
         query = """
-            SELECT * FROM `tev_incoming` WHERE status_id = 4
+            SELECT t1.*,GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
+            FROM `tev_incoming` t1 
+            LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+            WHERE t1.status_id = 4 GROUP BY t1.id ORDER BY t1.incoming_out DESC;
         """
-
-        # item_data = TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by(_order_dash + 'id')
-
-    # item_data = (TevIncoming.objects.filter(status_id=4).select_related().distinct().order_by('-id').reverse())
-    
         with connection.cursor() as cursor:
             cursor.execute(query)
             columns = [col[0] for col in cursor.description]
@@ -455,8 +569,8 @@ def payroll_load(request):
     
     
     # total = item_data.count()
-
     total = len(results)
+
     _start = request.GET.get('start')
     _length = request.GET.get('length')
     if _start and _length:
@@ -493,6 +607,7 @@ def payroll_load(request):
             'slashed_out': item['incoming_out'],
             'remarks': item['remarks'],
             'status': item['status_id'],
+            'm_charges': item['multiple_charges'],
             'user_id': full_name
         }
 
@@ -512,20 +627,6 @@ def payroll_load(request):
 def box_load(request):
     adv_filter = request.GET.get('FAdvancedFilter')
 
-
-
-
-
-    # d.FAdvancedFilter = FAdvancedFilter.val()
-    # d.BoxDvNo = BoxDvNo.val()
-    # d.FCluster = FCluster.val()
-    # d.FDivision = FDivision.val()
-    # d.FBoxIn = FBoxIn.val()
-    # d.FBoxOut = FBoxOut.val()
-    # d.BoxStatus = BoxStatus.val()
-
-
-
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
@@ -533,7 +634,6 @@ def box_load(request):
     status_txt = ''
     status_txt = '5' if _search == 'outgoing' else '6'
      
-    # item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
     search_fields = ['dv_no', 'division__name', 'status__name'] 
     filter_conditions = Q()
 
@@ -589,16 +689,12 @@ def box_load(request):
 
     for item in item_data:
         userData = AuthUser.objects.filter(id=item.user_id)
-        
-        # Check if userData has results
         if userData.exists():
             full_name = userData[0].first_name + ' ' + userData[0].last_name
         else:
             full_name = ""
         
         userData_out = AuthUser.objects.filter(id=item.out_by)
-        
-        # Check if userData_out has results
         if userData_out.exists():
             full_name_out = userData_out[0].first_name + ' ' + userData_out[0].last_name
         else:
@@ -692,21 +788,10 @@ def item_edit(request):
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
-
-# @csrf_exempt
-# def item_update(request):
-#     id = request.POST.get('ItemID')
-#     emp_name = request.POST.get('EmployeeName')
-#     amount = request.POST.get('OriginalAmount')
-#     remarks = request.POST.get('Remarks')
-#     tev_update = TevIncoming.objects.filter(id=id).update(name=emp_name,original_amount=amount,remarks=remarks)
-#     return JsonResponse({'data': 'success'})
-
-
 @csrf_exempt
 def update_status(request):
     id = request.POST.get('dv_id')
-    tev_update = TevOutgoing.objects.filter(dv_no=id).update(is_print=True)
+    # tev_update = TevOutgoing.objects.filter(dv_no=id).update(is_print=True)
     return JsonResponse({'data': 'success'})
 
 
@@ -770,13 +855,207 @@ def update_box_list(request):
     }
     return JsonResponse(response)
 
+
+@csrf_exempt
+def add_multiple_charges(request):
+    if request.method == 'POST':
+        amount = request.POST.getlist('amount[]')
+        charges_id = request.POST.getlist('charges_id[]')
+        incoming_id = request.POST.get('incoming_id')
+        
+        PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
+        for amt, ch_id in zip(amount, charges_id):
+            PayrolledCharges.objects.create(
+                incoming_id=incoming_id,
+                amount=amt,
+                charges_id=ch_id
+        )
+        return JsonResponse({'data': 'success'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+@csrf_exempt
+def update_multiple_charges(request):
+    if request.method == 'POST':
+        amount = request.POST.getlist('amount[]')
+        charges_id = request.POST.getlist('charges_id[]')
+        incoming_id = request.POST.get('incoming_id')
+        amt_issued = request.POST.get('amt_issued')
+        TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt_issued)
+        PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
+        for amt, ch_id in zip(amount, charges_id):
+            PayrolledCharges.objects.create(
+                incoming_id=incoming_id,
+                amount=amt,
+                charges_id=ch_id
+        )
+        return JsonResponse({'data': 'success'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+@csrf_exempt
+def check_charges(request):
+    if request.method == 'POST':
+        incoming_id = request.POST.get('incoming_id')
+        
+    
+        amt = TevIncoming.objects.filter(id=incoming_id).values_list('final_amount', flat=True).first()
+        try:
+            data_exists = PayrolledCharges.objects.filter(incoming_id=incoming_id).exists()
+            return JsonResponse({'data': data_exists,'amt': amt})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+@csrf_exempt
+def payroll_add_charges(request):
+    if request.method == 'POST':
+        incoming_id = request.POST.get('incoming_id')
+        amt = request.POST.get('amt')
+        charge_id = request.POST.get('charge_id')
+        try:
+            PayrolledCharges(amount=amt,charges_id=charge_id,incoming_id=incoming_id).save()
+            return JsonResponse({'data': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+@csrf_exempt
+def remove_charges(request):
+    if request.method == 'POST':
+        incoming_id = request.POST.get('incoming_id')
+        charge_id = request.POST.get('charge_id')
+        amt = request.POST.get('amt')
+        try:
+            PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
+            PayrolledCharges(amount=amt,charges_id=charge_id,incoming_id =incoming_id).save()
+            return JsonResponse({'data': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
+@csrf_exempt
+def update_purpose(request):
+    if request.method == 'POST':
+        te_id = request.POST.get('te_id')
+        purpose = request.POST.get('value')
+        try:
+            TevBridge.objects.filter(tev_incoming_id=te_id).update(purpose=purpose)
+            return JsonResponse({'data': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
+@csrf_exempt
+def add_dv(request):
+    if request.method == 'POST':
+        user_id = request.session.get('user_id', 0)
+        dv_number = request.POST.get('DvNumber')
+        cluster_id = request.POST.get('Cluster')
+        div_id = request.POST.get('Division')
+        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_id,box_b_in=date_time.datetime.now(),user_id=user_id, division_id = div_id)
+        outgoing.save()
+        
+        return JsonResponse({'data': 'success'})
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+  
+
+@csrf_exempt
+def add_emp_dv(request):
+    if request.method == 'POST':
+        user_id = request.session.get('user_id', 0)
+        tev_id = request.POST.get('tev_id')
+        dv_no = request.POST.get('dv_no')
+        box_b = TevIncoming.objects.filter(id=tev_id).update(status_id=6, updated_at = date_time.datetime.now())
+        month_mapping = {
+            '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
+            '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Aug',
+            '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'
+        }
+        tev_incoming_object = TevIncoming.objects.get(id=tev_id)
+        travel_dates_str = tev_incoming_object.date_travel
+        travel_dates_list = travel_dates_str.split(',')
+        unique_months_by_year = {}
+
+        for date in travel_dates_list:
+            parts = date.split('-')
+            if len(parts) == 3:
+                year = parts[2]
+                month_abbr = month_mapping.get(parts[1])
+                if month_abbr:
+                    if year not in unique_months_by_year:
+                        unique_months_by_year[year] = set()
+                    unique_months_by_year[year].add(month_abbr)
+
+        ordered_years = sorted(unique_months_by_year.keys())
+
+        def month_order(month_abbr):
+            month_mapping_order = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+            return month_mapping_order.get(month_abbr, 0)
+
+        formatted_result = ', '.join([f"{', '.join(sorted(unique_months_by_year[year], key=month_order))} {year}" for year in ordered_years])
+        purpose = "TE for "+ formatted_result
+        outgoing_obj = TevOutgoing.objects.filter(dv_no=dv_no).first()
+        outgoing_id = outgoing_obj.id
+
+        bridge = TevBridge(purpose = purpose,charges_id = 1, tev_incoming_id = tev_id, tev_outgoing_id = outgoing_id)
+        bridge.save()
+        PayrolledCharges.objects.filter(incoming_id=tev_id).delete()
+        return JsonResponse({'data': 'success'})
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+  
+
+@csrf_exempt
+def retrieve_employee(request):
+    dv_no_id = request.POST.get('dv_no_id')
+    data = []
+    dv_number = TevOutgoing.objects.filter(id=dv_no_id).first()
+
+    list_employee = TevIncoming.objects.filter(status_id=4).order_by('first_name')
+
+    for row in list_employee:
+        date_travel_str = row.date_travel
+        date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=timezone.utc) for date_str in date_travel_str.split(',')]
+        date_travel_formatted = ', '.join(date_travel.strftime("%b. %d %Y") for date_travel in date_travel_list)
+        first_name = row.first_name if row.first_name else ''
+        middle_name = row.middle_name if row.middle_name else ''
+        last_name = row.last_name if row.last_name else ''
+        final_amount = row.final_amount if row.final_amount else ''
+        final_amount = ": Amount: " + f"{Decimal(final_amount):,.2f}"
+        emp_fullname = f"{first_name} {middle_name} {last_name} {final_amount} : Date Travel: {date_travel_formatted}".strip()
+        item = {
+            'id': row.id,
+            'name': emp_fullname
+        }
+        data.append(item)
+
+    response = {
+        'data': data,
+        'dv_no' : dv_number.dv_no
+    }
+
+    return JsonResponse(response)
+
+
+
+
 @csrf_exempt
 def delete_box_list(request):
     incoming_id = request.POST.get('emp_id')
     dv_no = request.POST.get('dv_number')
     
-    deleteBridge, _ = TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
-    delete, _ = TevIncoming.objects.filter(id=incoming_id).delete()
+    TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
+    TevIncoming.objects.filter(id=incoming_id).update(status_id=4)
 
     response = {
         'data': 'success'

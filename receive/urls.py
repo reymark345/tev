@@ -6,11 +6,13 @@ urlpatterns = [
     path('list', views.list, name='receive-list'),
     path('addtev', views.addtev, name='add-tev'),
     path('addtevdetails', views.addtevdetails, name='add-tev-details'),
+    path('updatetevdetails', views.updatetevdetails, name='update-tev-details'),
     path('tevemployee', views.tevemployee, name='tev-employee'),
     
     path('item_load', views.item_load, name='item-load'),
     path('checking_load', views.checking_load, name='checking-load'),
     path('item_edit', views.item_edit, name='item-edit'),
+    path('preview_received', views.preview_received, name='preview-received'),
     path('item_update', views.item_update, name='item-update'),
     path('item_add', views.item_add, name='item-add'),
     path('item_returned', views.item_returned, name='item-returned'),

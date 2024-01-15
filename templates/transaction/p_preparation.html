@@ -1,5 +1,36 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
 
+<style>
+    .has-error {
+        border: 1px solid red; /* Change the border color for the input with an error */
+    }
+
+    .error-label, .error-label-amount {
+        color: red; /* Set the text color for the error message */
+        margin-top: 5px; /* Add some space between the input and the error message */
+    }
+    
+
+    .select-charges.has-error {
+    border: 1px solid red; /* Change the border color for the input with an error */
+    }
+
+    /* Additional style for the error message */
+    .select-charges.has-error::after {
+        content: "Required"; /* Set the error message text */
+        color: red; /* Set the text color for the error message */
+        display: block; /* Display the error message as a block element */
+        margin-top: 5px; /* Add some space between the input and the error message */
+    }
+
+    /* Hide the error message when there's no error */
+    .select-charges::after {
+        content: ""; /* Empty content to hide the error message */
+        display: none;
+    }
+
+
+</style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -20,6 +51,7 @@
                             <th>Status</th>
                             <th>Incoming In</th>
                             <th>Charges</th>
+                            <th style="width:240px;">Add Charges</th>
                             <th>Purpose</th>
                         </tr>
                     </thead>
@@ -237,6 +269,55 @@
 </div>
 <!--/ Add New Credit Card Modal -->
 
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="payrollDetails" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+            <div class="text-center mb-4">
+                <h3 class="mb-2">Multiple Charges</h3>
+                <p>Select charges with their corresponding amount</p>
+            </div>
+
+            <div class="alert alert-warning" role="alert">
+                <h6 class="alert-heading mb-2">Amount</h6>
+                    <span id ="current_amount">₱ 0</span>
+                </div>
+
+
+            <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <br>
+                        <button type="button" id="add_charges" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
+                        <span id="remarks_error" style="color: red;"></span>
+                    </div>
+                </div>
+                <div class="rows-container">
+                    <!-- Appended rows will be placed here -->
+                </div>
+            </div>    
+            <div class="col-12">
+                <br>
+                <button type="submit" id ="save-multiple-charges" class="btn btn-label-primary me-sm-3 me-1">Save</button>
+                <button
+                    type="reset"
+                    class="btn btn-label-secondary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    >
+                    Cancel
+                </button>
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+<!--/ Enable OTP Modal -->
+
       
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
@@ -295,6 +376,8 @@
     let clicked_id = 0;
     let status_val =0;
     let employeeList = [];
+    let pp_id = 0;
+    let formattedAmount = 0;
     $(document).ready(function () {
         let selected_tev = [];
         var fdateField = $('#f-dateField').flatpickr({
@@ -308,6 +391,7 @@
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             Charges = jQuery(document.querySelector('[name="Charges"]')),
+            ChargesList = jQuery(document.querySelector('[name="ChargesList"]')),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             Remarks = jQuery(document.querySelector('[name="Remarks"]')),
@@ -369,17 +453,9 @@
                     data: 'id', status: 'status',
                     orderable: false, 
                     render: function (data, type, row) {
-                        var status = row.status; // Access the 'status' value from the 'row' object
+                        var status = row.status;
                         var checkboxId = row.id;
-
-                        if (status == 3) {
-                            return '<input type="checkbox" disabled="disabled">';
-                        } else {
-                            // Render a checkbox for each row with the item ID as its value
-                            return '<input type="checkbox" id="checkbox_data" class="checkbox-items checkbox_data" name = "checkboxtype" value="' + data + '">';
-                            
-                        }
-
+                        return '<input type="checkbox" id="checkbox_data" class="checkbox-items checkbox_data" name = "checkboxtype" value="' + data + '">';
                     }
                 },
                 { data: 'code' },
@@ -388,7 +464,8 @@
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'incoming_in' },
-                { data: null, orderable: false }, // Placeholder for charges column
+                { data: 'm_charges' },
+                { data: null, orderable: false },
                 { data: null, orderable: false }
              
             ],
@@ -403,7 +480,6 @@
                     targets: 3,
                     
                     render: function(data) {
-                        console.log(data);
                         let dates = data.split(',');
 
                         let formattedDates = dates.map(date => {
@@ -413,24 +489,7 @@
                             return `${month} ${day} ${year}`;
                         });
                         
-                        let result = formattedDates.join(', ');
-                        // return '<span class="badge bg-label-primary" >'+result+'</span>'
-                        
-                        
-                        // var splitValues = data.split(',');  // Split data by comma
-                        // var result = '';
-                        
-                        // splitValues.forEach(function(value, index) {
-                        //     if (index !== 0) {
-                        //         result += '  '; // Add a space before adding subsequent values
-                        //     }
-                        //     var dateParts = value.split('-');
-                        //     var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
-                        //     var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
-                            
-                        //     result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
-                        // });
-                        
+                        let result = formattedDates.join(', ');                        
                         return result;
                     },
                 },
@@ -465,23 +524,31 @@
                   },
                 },
                 {
-                    targets: -3,
+                    targets: -4,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
-
+                {
+                    targets: -3,
+                    render: function(data, type, row) {
+                        return data;
+                    }
+                },
                 {
                     targets: -2,
                     render: function(data, type, row) {
                         if (type === 'display') {
-                            return '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
-                                '<option></option>' +
-                                '{% for row in charges %}'+
-                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                '{% endfor %}'+
+                            return '<div style="display: inline-block;">' +
+                                '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
+                                    '<option></option>' +
+                                    '{% for row in charges %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endfor %}'+
                                 '</select>'+
-                                '<span id="charges_error" style="color: red;"></span>';
+                                '<span id="charges_error" style="color: red;"></span>'+
+                                '</div>'
+                                // '<button type="button" class="btn btn-info waves-effect waves-light" id="multiple_charges" name="MultipleCharges" style="margin-left: 10px; height:37px;" disabled>+</button>';
                         }
                         return data;
                     }
@@ -879,7 +946,6 @@
         }
 
         function savepayroll(selected_items){
-            console.log(selected_tev);
             var emptyDataExists = false;
             $('#tbl-items tbody select.charges').each(function() {
                 var selectedValue = $(this).val();
@@ -912,6 +978,10 @@
                 }
             });
 
+
+
+
+
             if (!emptyDataExists) {
                 $('#saveModal').modal('show');
                 const currentDate = new Date();
@@ -938,12 +1008,57 @@
           
 
         $(document).on("change", ".charges", function() {
+            var csrf_token = "{{ csrf_token }}";
             var checkboxId = $(this).closest("tr").find(".checkbox_data").attr("value");
             var errorSpan = $(this).closest('tr').find('#charges_error');
             var chargesValue = $(this).val();
             var existingItem = selected_tev.find(function(item) {
                 return item.id === checkboxId;
             });
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'check-charges' %}",
+                headers: {
+                    'X-CSRFToken': csrf_token
+                },
+                data:{
+                    incoming_id: checkboxId
+                }
+            }).done(function (data) {
+
+                if(data.data){
+                    Swal.fire({
+                        title: 'Are you sure to Change Charges?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, change it!',
+                        customClass: {
+                            confirmButton: 'btn btn-primary me-3',
+                            cancelButton: 'btn btn-label-secondary',
+                        },
+                        buttonsStyling: false,
+                    }).then(function (result) {
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'remove-charges' %}",
+                            data: {
+                                incoming_id: checkboxId
+                            }
+                            // data: form_data,
+                        }).done(function (data) { 
+                            console.log(data);
+                            console.log("data");
+
+                        })
+                    });
+                }
+                console.log("dataa_check_charges");
+                console.log(selected_tev);
+            });
+
+
             errorSpan.text("");
             if (existingItem) {
                 existingItem.charges = chargesValue;
@@ -951,13 +1066,99 @@
             } else {
                 console.log("Item not found in the selected_tev array.");
             }
+
+            if (chargesValue ==6){
+                
+                pp_id = checkboxId;
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'multiple-charges-details' %}",
+                    headers: {
+                        'X-CSRFToken': csrf_token
+                    },
+                    data:{
+                        payroll_id: checkboxId
+                    }
+                }).done(function (data) {
+                    let totalAmount = 0;
+                    let amountList = [];
+                    let chargesList = [];
+                    let preview_amt = [];
+                    let preview_charges = [];
+                    $('.rows-container').empty();
+
+                    var originalAmount = parseFloat(data.amount); 
+                    formattedAmount = originalAmount;
+                    $('#current_amount').text("₱" +formattedAmount);
+                    chargesList = data.data.map(item => item.charges_id);
+                    amountList = data.data.map(item => item.amount);
+                    if (data.data.length > 0) {
+                        for (let i = 0; i < data.data.length; i++) {
+                            var newRow = $('<div class="row mt-2">' +
+                            '<div class="col-5">' +
+                            '<select class="form-select select-charges" id="select-charges-'+i+'">' +
+                                '<option></option>'+
+                                '{% for row in charges %}'+
+                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                '{% endfor %}'+
+                            '</select>' +
+                            '<span class="error-label">Required</span>'+
+                            '</div>' +
+                            '<div class="col-5">' +
+                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+                            '<span class="error-label-amount">Required</span>'+
+                            '</div>' +
+                            '<div class="col-2">' +
+                            '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                            '</div>' +
+                            '</div>');
+                            newRow.find('.error-label, .error-label-amount').hide();
+                            $('.rows-container').append(newRow);
+                            $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
+                        }
+                    } else {
+                        var newRow = $('<div class="row mt-2">' +
+                        '<div class="col-5">' +
+                        '<select class="form-select select-charges" id="select-charges">' +
+                            '<option></option>'+
+                            '{% for row in charges %}'+
+                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                            '{% endfor %}'+
+                        '</select>' +
+                        '<span class="error-label">Required</span>'+
+                        '</div>' +
+                        '<div class="col-5">' +
+                        '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                        '<span class="error-label-amount">Required</span>'+
+                        '</div>' +
+                        '<div class="col-2">' +
+                        '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                        '</div>' +
+                        '</div>');
+                        newRow.find('.error-label, .error-label-amount').hide();
+                        $('.rows-container').append(newRow);
+                    }
+                });
+                $('#payrollDetails').modal('show');
+                if (ChargesList.length) {
+                    ChargesList.wrap('<div class="position-relative"></div>')
+                    ChargesList.select2({
+                        placeholder: 'Choose employee',
+                        dropdownParent: ChargesList.parent(),
+                        allowClear: true
+                    })
+                }
+            }
         });
 
         $(document).on('change', '.checkbox_data', function(event) {
+            console.log(selected_tev);
+            console.log("selected_tev");
             var clickedCheckbox = $(event.target);
             var row = clickedCheckbox.closest('tr');
             var checkboxId = clickedCheckbox.attr('value');
             var purposeInput = row.find('input[name="Purpose"]');
+            var charges_multiple = row.find('button[name="MultipleCharges"]');
             var purposeValue = purposeInput.val().trim();
             var stck_id = clickedCheckbox.val();
            
@@ -967,16 +1168,12 @@
             let monthName = monthDate.toLocaleString('en-US', { month: 'short' });
             let year = currentDate.getFullYear();
             let travel = '';
-            let defaultPurposeValue = "TE for " + monthName + " " + year;
             if (clickedCheckbox.prop('checked')) {
                 var existingItem = selected_tev.find(function(item) {
                     return item.id === checkboxId;
                 });
 
                 travel = row.find('td:eq(3)').text();
-                console.log(travel);
-                console.log("gegege");
-
                 let dates = travel.split(', ').map(dateString => {
                     let [month, day, year] = dateString.split(' ');
                     return { month, year };
@@ -999,11 +1196,8 @@
                 }).join(' and ');
                 
                 travel = "TE for " + output;
-         
-
-                
-
                 if (!existingItem) {
+                    charges_multiple.prop('disabled', false);
                     var array_id = {
                         id: stck_id,
                         code: row.find('td:eq(1)').text(),
@@ -1015,7 +1209,6 @@
                         purpose: travel,
                     };
                     selected_tev.push(array_id);
-                    console.log(array_id);
 
                 } else {
                     existingItem.purpose = purposeValue;
@@ -1024,6 +1217,7 @@
               
                 row.find('select[name="Charges"]').prop("disabled", false);
                 purposeInput.prop("disabled", false);
+                
               
                 if (!purposeValue) {
                     purposeInput.val(travel);
@@ -1038,6 +1232,7 @@
               
                 row.find('select[name="Charges"]').prop("disabled", true).val("");
                 purposeInput.prop("disabled", true).val("");
+                charges_multiple.prop('disabled', true);
             }
           
             unique_items = selected_tev.filter(function(item, index, self) {
@@ -1049,6 +1244,95 @@
                 );
             });
         });
+
+
+
+
+
+        $('#tbl-items').on('click', 'button[name="MultipleCharges"]', function() {
+            var rowData = $('#tbl-items').DataTable().row($(this).closest('tr')).data();
+            var csrf_token = "{{ csrf_token }}";
+            pp_id = rowData.id;
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'multiple-charges-details' %}",
+                headers: {
+                    'X-CSRFToken': csrf_token
+                },
+                data:{
+                    payroll_id: pp_id
+                }
+            }).done(function (data) {
+                let totalAmount = 0;
+                let amountList = [];
+                let chargesList = [];
+                let preview_amt = [];
+                let preview_charges = [];
+                $('.rows-container').empty();
+
+                var originalAmount = parseFloat(data.amount); 
+                formattedAmount = originalAmount;
+                $('#current_amount').text("₱" +formattedAmount);
+                chargesList = data.data.map(item => item.charges_id);
+                amountList = data.data.map(item => item.amount);
+                if (data.data.length > 0) {
+                    for (let i = 0; i < data.data.length; i++) {
+                        var newRow = $('<div class="row mt-2">' +
+                        '<div class="col-5">' +
+                        '<select class="form-select select-charges" id="select-charges-'+i+'">' +
+                            '<option></option>'+
+                            '{% for row in charges %}'+
+                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                            '{% endfor %}'+
+                        '</select>' +
+                        '<span class="error-label">Required</span>'+
+                        '</div>' +
+                        '<div class="col-5">' +
+                        '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+                        '<span class="error-label-amount">Required</span>'+
+                        '</div>' +
+                        '<div class="col-2">' +
+                        '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                        '</div>' +
+                        '</div>');
+                        newRow.find('.error-label, .error-label-amount').hide();
+                        $('.rows-container').append(newRow);
+                        $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
+                    }
+                } else {
+                    var newRow = $('<div class="row mt-2">' +
+                    '<div class="col-5">' +
+                    '<select class="form-select select-charges" id="select-charges">' +
+                        '<option></option>'+
+                        '{% for row in charges %}'+
+                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                        '{% endfor %}'+
+                    '</select>' +
+                    '<span class="error-label">Required</span>'+
+                    '</div>' +
+                    '<div class="col-5">' +
+                    '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                    '<span class="error-label-amount">Required</span>'+
+                    '</div>' +
+                    '<div class="col-2">' +
+                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                    '</div>' +
+                    '</div>');
+                    newRow.find('.error-label, .error-label-amount').hide();
+                    $('.rows-container').append(newRow);
+                }
+            })
+
+            $('#payrollDetails').modal('show');
+            if (ChargesList.length) {
+                ChargesList.wrap('<div class="position-relative"></div>')
+                ChargesList.select2({
+                    placeholder: 'Choose employee',
+                    dropdownParent: ChargesList.parent(),
+                    allowClear: true
+                })
+            }
+            });
 
         search_advance_filter.on('click', function () {
             FAdvancedFilter.val("true");
@@ -1113,8 +1397,34 @@
                     employeeList.splice(index, 1);
                  }
              });
-             console.log("Newly added values: " + employeeList);
+          
         
+        });
+
+        $('#add_charges').click(function () {     
+            var newRow = $('<div class="row mt-2">' +
+                '<div class="col-5">' +
+                '<select class="form-select select-charges" id="select-charges">' +
+                    '<option></option>'+
+                    '{% for row in charges %}'+
+                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                    '{% endfor %}'+
+                '</select>' +
+                '<span class="error-label">Required</span>'+
+                '</div>' +
+                '<div class="col-5">' +
+                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                '<span class="error-label-amount">Required</span>'+
+                '</div>' +
+                '<div class="col-2">' +
+                '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                '</div>' +
+                '</div>');
+                newRow.find('.error-label, .error-label-amount').hide();
+            $('.rows-container').append(newRow);
+        });
+        $('.container').on('click', '.delete-row', function () {
+            $(this).closest('.row').remove();
         });
         
         
@@ -1133,6 +1443,80 @@
                 tev_details(final_amount,correctness_remarks,status,clicked_id);
                 }
             
+        });
+
+        $('#save-multiple-charges').click(function() {
+            let selectedIDs = [];
+            let selectedAmount = [];  
+            let status = 7;
+            let hasError = 0;
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('.select-charges');
+                let selectElementDate = $(this).find('.select-charges');
+                let selectedValue = selectElement.val();
+                let selectErrorLabel = selectElement.siblings(".error-label");
+
+                let inputElement = $(this).find('.input-date');
+                let inputValue = inputElement.val();
+                let inputErrorLabel = inputElement.siblings(".error-label-amount");
+
+                if (selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+                    selectElement.removeClass('has-error');
+                    selectErrorLabel.hide();
+                } else {
+                    hasError++;
+                    selectElement.addClass('has-error');
+                    selectErrorLabel.show();
+                }
+                if (inputValue !== "") {
+                    selectedAmount.push(inputValue);
+                    inputElement.removeClass('has-error');
+                    inputErrorLabel.hide();
+                } else {
+                    hasError++;
+                    inputElement.addClass('has-error');
+                    inputErrorLabel.show();
+                }
+            });
+            let amountsAsNumbers = selectedAmount.map(amount => parseFloat(amount));
+            let totalAmount = amountsAsNumbers.reduce((total, amount) => total + amount, 0);
+            if (selectedIDs.length > 0 && hasError ==0) {
+                let selectedAmountNumber = parseFloat(selectedAmount[0]); 
+                console.log(formattedAmount + " selected amt");
+                console.log(totalAmount +" total amt");
+
+                if( formattedAmount > totalAmount){
+                    toastr.error('Amount Lacking', 'Invalid', toast_options);
+                }
+                else if ( formattedAmount < totalAmount){
+                    toastr.error('Amount Exceeds', 'Invalid', toast_options);
+                }
+                else{
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'add-multiple-charges' %}",
+                        data:{
+                            amount: selectedAmount,
+                            incoming_id: pp_id,
+                            charges_id : selectedIDs
+                        }
+                        }).done(function(data){
+                            if (data.data == 'success') {
+                                $('#payrollDetails').modal('hide');
+                                toastr.success('Successfully save', 'Success', toast_options);
+                                offCanvasEl.hide()
+                                dataTable.ajax.reload()
+                                toastr.error('Successfully save', 'Invalid', toast_options);
+                            }
+                            else {
+                                toastr.danger('Data not saved', 'Danger', toast_options);
+                            }
+                    });
+                    
+                }
+
+            }
         });
 
         function tev_details(amount,remarks,status,emp_id){
@@ -1175,6 +1559,7 @@
                 allowClear: true,
             })
         }
+
         
     })
 </script>

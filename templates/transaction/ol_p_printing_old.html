@@ -41,6 +41,33 @@
   .custom-file-upload:hover {
       background-color: #e9ecef;
   }
+  .has-error {
+        border: 1px solid red; /* Change the border color for the input with an error */
+  }
+
+  .error-label, .error-label-amount {
+      color: red; /* Set the text color for the error message */
+      margin-top: 5px; /* Add some space between the input and the error message */
+  }
+    
+
+  .select-charges.has-error {
+  border: 1px solid red; /* Change the border color for the input with an error */
+  }
+
+  /* Additional style for the error message */
+  .select-charges.has-error::after {
+      content: "Required"; /* Set the error message text */
+      color: red; /* Set the text color for the error message */
+      display: block; /* Display the error message as a block element */
+      margin-top: 5px; /* Add some space between the input and the error message */
+  }
+
+    /* Hide the error message when there's no error */
+  .select-charges::after {
+      content: ""; /* Empty content to hide the error message */
+      display: none;
+  }
 </style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -72,6 +99,75 @@
         </div>
     </div>
 </div>
+
+
+
+<!-- Add New Credit Card Modal -->
+<div class="modal fade" id="assign-dv" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered1 modal-simple modal-add-new-cc">
+      <div class="modal-content p-3 p-md-5">
+      <div class="modal-body">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="text-center mb-4">
+          <h3 class="mb-2">Assign Details</h3>
+          <p class="text-muted">Update data to complete payroll detail</p>
+          </div>
+          <form id="assign-form" class="row g-3" onsubmit="return false">
+          <div class="col-12">
+              <label class="form-label w-100" for="modalAddCard">DV Number</label>
+              <div class="input-group input-group-merge">
+              <input
+                  id="m-dvnumber"
+                  name="MDvNumber"
+                  class="form-control"
+                  type="text"
+                  placeholder="23-07-0000"
+                 
+              />
+              <span class="input-group-text cursor-pointer p-1" id="modalAddCard2"
+                  ><span class="card-type"></span
+              ></span>
+              </div>
+          </div>
+  
+          <div class="col-sm-12">
+              <label class="form-label" for="cluster-name">Cluster</label>
+              <select id="m-cluster" name="MCluster" class="form-select cluster" data-allow-clear="true">
+                  <option></option>
+                  {% for row in cluster %}
+                  <option value="{{ row.id }}">{{ row.name }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+  
+          <div class="col-sm-12">
+              <label class="form-label" for="division-name">Division</label>
+              <select id="m-division" name="MDivision" class="form-select division" data-allow-clear="true">
+                  <option></option>
+                  {% for row in division %}
+                  <option value="{{ row.id }}">{{ row.name }} : {{ row.chief }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+         
+  
+          <div class="col-12 text-center">
+              <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+              <button
+              type="reset"
+              class="btn btn-label-secondary btn-reset"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+              >
+              Cancel
+              </button>
+          </div>
+          </form>
+      </div>
+      </div>
+  </div>
+  </div>
+  <!--/ Add New Credit Card Modal -->
 
 
 <!-- Edit User Modal -->
@@ -175,6 +271,8 @@
   </div>
 </div>
 <!--/ Edit User Modal -->
+
+
   
 
 
@@ -203,6 +301,7 @@
                                 <th>Amount</th>
                                 <th>Purpose</th>
                                 <th>Charge</th>
+                                <th>Multiple Charges</th>
                                 <th>Action</th>
                             </tr>
                         </thead>    
@@ -410,6 +509,85 @@
     </div>
 </div>
 
+
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="payrollUpdate" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" >
+  <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+      <div class="modal-content p-3 p-md-5">
+      <div class="modal-body">
+          <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+          <div class="text-center mb-4">
+              <h3 class="mb-2">Multiple Charges</h3>
+              <p>Select charges with their corresponding amount</p>
+          </div>
+
+          <div class="col-12 col-md-12">
+            <label class="form-label">NAME</label>
+            <div class="input-group">
+              <input
+                  type="text"
+                  id="f-name"
+                  name="FName"
+                  class="form-control phone-number-mask"
+                  placeholder="Ed Sheeran"
+              disabled/>
+            </div>
+          </div>
+          <br>
+          <div class="col-12 col-md-12">
+            <label class="form-label">AMOUNT ISSUED</label>
+            <div class="input-group">
+              <span class="input-group-text">₱</span>
+              <input
+                  type="number"
+                  id="amount-issued"
+                  name="AmountIssued"
+                  class="form-control phone-number-mask"
+                  placeholder="0.00"
+              />
+            </div>
+          </div>
+          <br>
+
+          <!-- <div class="alert alert-warning" role="alert">
+              <h6 class="alert-heading mb-2">Amount</h6>
+                  <span id ="current_amount">₱ 0</span>
+              </div> -->
+
+
+          <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
+          <div class="container">
+              <div class="row">
+                  <div class="col-12">
+                      <br>
+                      <button type="button" id="add_charges" name="AddCharges" class="btn btn-primary me-sm-3 me-1">+</button>
+                      <span id="remarks_error" style="color: red;"></span>
+                  </div>
+              </div>
+              <div class="rows-container">
+                  <!-- Appended rows will be placed here -->
+              </div>
+          </div>    
+          <div class="col-12">
+              <br>
+              <button type="submit" id ="save-multiple-charges" class="btn btn-label-primary me-sm-3 me-1">Save</button>
+              <button
+                  id ="cancel-multiple-charges"
+                  type="reset"
+                  class="btn btn-label-secondary"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                  >
+                  Cancel
+              </button>
+          </div>
+          </form>
+      </div>
+      </div>
+  </div>
+</div>
+<!--/ Enable OTP Modal -->
+
 {% endblock %} {% block footer_scripts %}
 <script>
     let clicked_id = 0;
@@ -418,6 +596,7 @@
     let charges = '';
     let outgoing_id = 0;
     let selectedDv = [];
+    let temp_id = 0;
     $(document).ready(function () {
       $('#loading-screen').hide();
       const table_box_a = $('#tbl-box-a')
@@ -436,11 +615,18 @@
           FBoxOut= jQuery(document.querySelector('[name="FBoxOut"]')),
           FDivision = jQuery(document.querySelector('[name="FDivision"]')),
           FCluster = jQuery(document.querySelector('[name="FCluster"]')),
+          FName = jQuery(document.querySelector('[name="FName"]')),
+          AmountIssued = jQuery(document.querySelector('[name="AmountIssued"]')),
+          MDivision = jQuery(document.querySelector('[name="MDivision"]')),
+          MCluster = jQuery(document.querySelector('[name="MCluster"]')),
+          MDvNumber = jQuery(document.querySelector('[name="MDvNumber"]')),
           search_advance_filter = $('#search-advance-filter'),
           FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
           reset_advance_filter = $('#reset-advance-filter'),
           clear_advance_filter = $('#clear-advance-filter');
-        const toast_options = (toastr.options = {
+
+      const ItemFormAssignValidation = document.getElementById('assign-form');
+      const toast_options = (toastr.options = {
             maxOpened: 1,
             autoDismiss: true,
             closeButton: true,
@@ -639,6 +825,35 @@
                         }
                     }
                 },
+                {
+                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
+                    className: 'create-new btn btn-primary',
+                    action: function () {
+
+                      if (MCluster.length) {
+                        MCluster.wrap('<div class="position-relative"></div>')
+                        MCluster.select2({
+                              placeholder: 'Choose Cluster',
+                              dropdownParent: MCluster.parent(),
+                              allowClear: true,
+                          })
+                      }
+                      if (MDivision.length) {
+                        MDivision.wrap('<div class="position-relative"></div>')
+                        MDivision.select2({
+                              placeholder: 'Choose Division',
+                              dropdownParent: MDivision.parent(),
+                              allowClear: true,
+                          })
+                      }
+                      $('#assign-dv').modal('show');
+                      const currentDate = new Date();
+                      const year = currentDate.getFullYear().toString().slice(-2); 
+                      const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+                      MDvNumber.val(`${year}-${month}-`);
+
+                    }
+                },
             ],
             drawCallback: function (settings) {
                 const tableId = 'tbl-box-a'; // Change this to the specific table ID you want to populate
@@ -669,6 +884,164 @@
                     });
                     $('#total-amount').text("₱ "+totalAmount);
                   toastr.success('Data Successfully Save!', 'Success', toast_options);
+
+                })
+              });
+
+              $('body').on('click', '.item-update', function () {
+                temp_id = $(this).attr('id');
+                $('#update-transaction').modal('hide');
+                $("#payrollUpdate").modal("show");
+
+                  $.ajax({
+                    type: 'POST',
+                    url: "{% url 'multiple-charges-details' %}",
+                    data:{
+                      payroll_id: temp_id
+                    }
+                }).done(function (data) {
+
+                  let totalAmount = 0;
+                  let amountList = [];
+                  let chargesList = [];
+                  let preview_amt = [];
+                  let preview_charges = [];
+
+                  
+                  let full_name = data.full_name;
+                  let amount = data.amount;
+                  FName.val(full_name);
+                  AmountIssued.val(amount);
+
+                  
+                  $('.rows-container').empty();
+
+                  chargesList = data.data.map(item => item.charges_id);
+                  amountList = data.data.map(item => item.amount);
+                  if (data.data.length > 0) {
+                      for (let i = 0; i < data.data.length; i++) {
+                          var newRow = $('<div class="row mt-2">' +
+                          '<div class="col-5">' +
+                          '<select class="form-select select-charges" id="select-charges-'+i+'">' +
+                              '<option></option>'+
+                              '{% for row in charges %}'+
+                                 '{% if row.name != "Multiple" %}'+
+                                     '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                  '{% endif %}'+
+                              '{% endfor %}'+
+                          '</select>' +
+                          '<span class="error-label">Required</span>'+
+                          '</div>' +
+                          '<div class="col-5">' +
+                          '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+                          '<span class="error-label-amount">Required</span>'+
+                          '</div>' +
+                          '<div class="col-2">' +
+                          '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                          '</div>' +
+                          '</div>');
+                          newRow.find('.error-label, .error-label-amount').hide();
+                          $('.rows-container').append(newRow);
+                          $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
+                      }
+                  } else {
+                      var newRow = $('<div class="row mt-2">' +
+                      '<div class="col-5">' +
+                      '<select class="form-select select-charges" id="select-charges">' +
+                          '<option></option>'+
+                          '{% for row in charges %}'+
+                          '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                          '{% endfor %}'+
+                      '</select>' +
+                      '<span class="error-label">Required</span>'+
+                      '</div>' +
+                      '<div class="col-5">' +
+                      '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                      '<span class="error-label-amount">Required</span>'+
+                      '</div>' +
+                      '<div class="col-2">' +
+                      '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                      '</div>' +
+                      '</div>');
+                      newRow.find('.error-label, .error-label-amount').hide();
+                      $('.rows-container').append(newRow);
+                  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                  // var chargesIds = data.data.map(function(item) {
+                  //   return item.charges_id.toString();
+                  // });
+                  // var amountIds = data.data.map(function(item) {
+                  //   return item.amount.toString();
+                  // });
+
+
+                  // console.log(data);
+                  // console.log(chargesIds);
+          
+                  // console.log("datasssssngii");
+
+                  // let full_name = data.full_name;
+                  // let amount = data.amount;
+                  // FName.val(full_name);
+                  // AmountIssued.val(amount);
+
+                  // arraydetails = [];
+                  // $('.rows-container').empty();
+                  // // lacking = data.lacking.split(',').map(Number);
+
+                  // // chargesIds = chargesIds.split(", ");
+                  // // date_remarks = date_remarks.split(", ")
+                  // // remarks_date = date_remarks;
+                  // // charges_data = chargesIds;
+
+                  // for (let i = 0; i < chargesIds.length; i++) {                            
+                  //     var newRow = $('<div class="row mt-2">' +
+                  //         '<div class="col-5">' +
+                  //         '<select class="form-select select-remarks" id="remarks-select-'+i+'">' +
+                  //         '<option></option>' +
+                  //         '{% for row in remarks_list %}' +
+                  //         '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                  //         '{% endfor %}' +
+                  //         '</select>' +
+                  //         '</div>' +
+                  //         '<div class="col-5">' +
+                  //         '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="' + amountIds[i] + '" />' +
+                  //         '</div>' +
+                  //         '<div class="col-2">' +
+                  //         '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                  //         '</div>' +
+                  //         '</div>');
+                  //     $('.rows-container').append(newRow);
+
+                  //     $(`#remarks-select-${i}`).val(chargesIds[i]).trigger('change');
+
+                  //     item_entry = {
+                  //         'remarks': chargesIds[i],
+                  //         'amount': amountIds[i]
+                  //     }
+                  //     arraydetails.push(item_entry);
+
+                  // }
+                  // console.log(arraydetails);
+
+
 
                 })
               });
@@ -727,113 +1100,214 @@
                   }
               })
             });
-
-            $('.view-data').on('click', function () {
-
-                const selectAllCheckbox = $(`#${tableId} #selectAll`);
-                selectAllCheckbox.on('change', function () {
-                    const isChecked = this.checked;
-                    tbody.find(':checkbox').prop('checked', isChecked);
-                });
-
-                let id = $(this).attr('id');
-                dv_no_id = id
-                
-                $.ajax({
-                    type: 'POST',
-                    url: "{% url 'employee-dv' %}",
-                    data:{
-                        dv_id: id
-                    }
-                }).done(function (data) {
-                    dv_number = '';
-                    charges = '';
-                    outgoing_id = 0;
-                    dv_number = data.dv_number;
-                    charges = data.charges;
-                    outgoing_id = data.outgoing_id;
-                    $("#f-outgoing-id").val(data.outgoing_id)
-                    let is_print = data.is_print;
-                    tbody.empty();
-                    data.data.forEach(function (item) {
-                      const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
-                      let amountColumn = '';
-                      let editColumn = '';
-                      let deleteColumn = '';
-                      let purposeColumn = '';
-                      let chargesColumn = '';
-                      selectOptions = '';
-                      for (var i = 0; i < charges.length; i++) {
-                          var charge = charges[i];
-                          selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
-                      }
-                      if (is_print) {
-                        $(".create-new").prop("disabled", true);
-                        amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
-                        purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}" disabled></td>`;
-                        chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true" disabled>${selectOptions}</select></td>`;
-                        editColumn = `<a class="btn btn-sm btn-icon" id="${item.id}"><i class="text-primary ti ti-edit-off"></i></a>`;
-                        deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
-                    } else {
-                      $(".create-new").prop("disabled", false);
-                        amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
-                        purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
-                        chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
-                        editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
-                        deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
-                    }
-                      const row = `
-                          <tr>
-                              <td><input type="checkbox"></td>
-                              <td><span class="badge bg-label-primary">${item.code}</span></td>
-                              <td><span class="badge bg-label-warning">${item.account_no}</span></td>
-                              <td><span class="badge bg-label-primary">${item.id_no}</span></td>
-                              <td>${item.name}</td>
-                              ${amountColumn}
-                              ${purposeColumn}
-                              ${chargesColumn}
-                              <td>${editColumn}${deleteColumn}</td>
-                          </tr>
-                      `;
-                      tbody.append(row);
-                  });
-                  $('#emp-charges').html(selectOptions);
-                    let totalAmount = data.total_amount;
-                    totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    });
-                    $('#total-amount').text("₱ "+totalAmount);
-                    $('#update-transaction').modal('show');
-                })
-            });
-            $('#tbl-items tbody input[type="checkbox"]').change(function () {
-                // Do something when a checkbox in the table body is changed...
-            });
-
-            $('#check-all').change(function () {
-                // Get the checked state of the "check-all" checkbox
-                var isChecked = $(this).is(':checked');
-    
-                // Set the checked state of all checkboxes in the table body
-                $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
-                });
-
-            $('.preview-details').on('click', function () {
-                bx_id = $(this).data('id');
-
-                $.ajax({
-                    type: 'POST',
-                    url: "{% url 'preview-box-a' %}",
-                    data:{
-                        box_id: bx_id
-                    }
-                }).done(function (data) {
-                })
-            });
             
 
-        },
+      function updateTransaction(id){
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'employee-dv' %}",
+            data:{
+                dv_id: id
+            }
+        }).done(function (data) {
+            console.log(data);
+            console.log("data");
+            dv_number = '';
+            charges = '';
+            outgoing_id = 0;
+            dv_number = data.dv_number;
+            charges = data.charges;
+            outgoing_id = data.outgoing_id;
+            $("#f-outgoing-id").val(data.outgoing_id)
+            tbody.empty();
+            data.data.forEach(function (item) {
+              const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+              let amountColumn = '';
+              let editColumn = '';
+              let updateColumn = '';
+              let deleteColumn = '';
+              let purposeColumn = '';
+              let chargesColumn = '';
+              selectOptions = '';
+              for (var i = 0; i < charges.length; i++) {
+                  var charge = charges[i];
+                  selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+              }
+              // $(".create-new").prop("disabled", false);
+                amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+                chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+                editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
+                deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                
+      
+              const row = `
+                  <tr>
+                      <td><input type="checkbox"></td>
+                      <td><span class="badge bg-label-primary">${item.code}</span></td>
+                      <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                      <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                      <td>${item.name}</td>
+                      <td>${formattedFinalAmount}</td>
+                      ${purposeColumn}
+                      ${chargesColumn}
+                      <td>${item.multiple_charges}</td>
+                      <td>${editColumn}${updateColumn}${deleteColumn}</td>
+                  </tr>
+              `;
+              tbody.append(row);
+            });
+            $('#emp-charges').html(selectOptions);
+              let totalAmount = data.total_amount;
+              totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+              });
+              $('#total-amount').text("₱ "+totalAmount);
+              $('#update-transaction').modal('show');
+          })
+
+      }
+
+      const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
+                fields: {
+                    MDvNumber: {
+                        validators: {
+                            notEmpty: {
+                                message: 'Required!',
+                            },
+                        },
+                    },
+                    MCluster: {
+                        validators: {
+                            notEmpty: {
+                              message: 'Required!',
+                            },
+                        },
+                    },
+                    MDivision: {
+                        validators: {
+                            notEmpty: {
+                              message: 'Required!',
+                            },
+                        },
+                    },
+                },
+                plugins: {
+                    trigger: new FormValidation.plugins.Trigger(),
+                    bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                    submitButton: new FormValidation.plugins.SubmitButton(),
+                    autoFocus: new FormValidation.plugins.AutoFocus(),
+                },
+                init: (instance) => {
+                    instance.on('plugins.message.placed', function (e) {
+                        if (e.element.parentElement.classList.contains('input-group')) {
+                            e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                        }
+                    })
+                },
+        }).on('core.form.valid', function () {
+          $('#assign-dv').modal('hide');
+          Swal.fire({
+              title: '<strong>DV number <u>'+MDvNumber.val()+'</u> <br> Cluster : 0'+MCluster.val()+' </strong>',
+              text: "You won't be able to revert this!",
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Yes, save it!',
+              customClass: {
+                  confirmButton: 'btn btn-primary me-3',
+                  cancelButton: 'btn btn-label-secondary',
+              },
+              buttonsStyling: false,
+          }).then(function (result) {
+              if (result.value) {
+                let dv_number = MDvNumber.val();
+                let cluster = MCluster.val();
+                let division = MDivision.val();
+
+                  $.ajax({
+                      type: 'POST',
+                      url: "{% url 'add-dv' %}",
+                      data: {
+                          DvNumber: dv_number,
+                          Cluster: cluster,
+                          Division: division,
+                        }
+                  }).done(function (data) {
+                      if (data.data == 'success') {
+
+                          let code = data.g_code;
+                          if (code){
+                            Swal.fire({
+                                  icon: 'success',
+                                  title: 'Update Successfully!',
+                                  html:
+                                  'Successfully <b>Save!</b>',
+                                  customClass: {
+                                      confirmButton: 'btn btn-success',
+                                  },
+                            })
+                          }
+                          MCluster.val("").trigger('change');
+                          MDvNumber.val("");
+                          MDivision.val("").trigger('change');
+                          dataTable.ajax.reload();
+                      } else {
+                          Swal.fire({
+                              icon: 'error',
+                              title: 'Error saving!',
+                              text: data.message,
+                              customClass: {
+                                  confirmButton: 'btn btn-success',
+                              },
+                          })
+                      }
+                  })
+              }
+          })
+      });
+
+      $('.view-data').on('click', function () {
+
+          const selectAllCheckbox = $(`#${tableId} #selectAll`);
+          selectAllCheckbox.on('change', function () {
+              const isChecked = this.checked;
+              tbody.find(':checkbox').prop('checked', isChecked);
+          });
+          let id = $(this).attr('id');
+          dv_no_id = id
+          updateTransaction(dv_no_id);
+      });
+      $('#tbl-items tbody input[type="checkbox"]').change(function () {
+          // Do something when a checkbox in the table body is changed...
+      });
+      $('#check-all').change(function () {
+          // Get the checked state of the "check-all" checkbox
+          var isChecked = $(this).is(':checked');
+
+          // Set the checked state of all checkboxes in the table body
+          $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+          });
+
+      $('.preview-details').on('click', function () {
+          bx_id = $(this).data('id');
+
+          $.ajax({
+              type: 'POST',
+              url: "{% url 'preview-box-a' %}",
+              data:{
+                  box_id: bx_id
+              }
+          }).done(function (data) {
+          })
+      });
+      $('#cancel-multiple-charges').click(function() {
+        updateTransaction(dv_no_id);
+      });
+        
+
+    },
      })
     $('div.head-label').html('<h5 class="card-title mb-0">List</h5>')
         function clear_advfilter(){
@@ -960,7 +1434,191 @@
                 }
             })
 
-        }              
+        }   
+        $('#add_charges').click(function () {     
+            var newRow = $('<div class="row mt-2">' +
+                '<div class="col-5">' +
+                '<select class="form-select select-charges" id="select-charges">' +
+                    '<option></option>'+
+                    '{% for row in charges %}'+
+                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                    '{% endfor %}'+
+                '</select>' +
+                '<span class="error-label">Required</span>'+
+                '</div>' +
+                '<div class="col-5">' +
+                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                '<span class="error-label-amount">Required</span>'+
+                '</div>' +
+                '<div class="col-2">' +
+                '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                '</div>' +
+                '</div>');
+                newRow.find('.error-label, .error-label-amount').hide();
+            $('.rows-container').append(newRow);
+        });
+        $('.container').on('click', '.delete-row', function () {
+            $(this).closest('.row').remove();
+        });
+
+
+        function data_printing(id){
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'employee-dv' %}",
+                data:{
+                    dv_id: id
+                }
+            }).done(function (data) {
+                const tableId = 'tbl-box-a';
+                const tbody = $(`#${tableId} tbody`);
+                console.log(data);
+                console.log("data");
+                dv_number = '';
+                charges = '';
+                outgoing_id = 0;
+                dv_number = data.dv_number;
+                charges = data.charges;
+                outgoing_id = data.outgoing_id;
+                $("#f-outgoing-id").val(data.outgoing_id)
+                tbody.empty();
+                data.data.forEach(function (item) {
+                  const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                  let amountColumn = '';
+                  let editColumn = '';
+                  let updateColumn = '';
+                  let deleteColumn = '';
+                  let purposeColumn = '';
+                  let chargesColumn = '';
+                  selectOptions = '';
+                  for (var i = 0; i < charges.length; i++) {
+                      var charge = charges[i];
+                      selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                  }
+                  // $(".create-new").prop("disabled", false);
+                    amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                    purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+                    chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+                    editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                    updateColumn = `<a class="btn btn-sm btn-icon item-update" id="${item.id}" ><i class="text-primary ti ti-edit"></i></a>`;
+                    deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                    
+          
+                  const row = `
+                      <tr>
+                          <td><input type="checkbox"></td>
+                          <td><span class="badge bg-label-primary">${item.code}</span></td>
+                          <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                          <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                          <td>${item.name}</td>
+                          <td>${formattedFinalAmount}</td>
+                          ${purposeColumn}
+                          ${chargesColumn}
+                          <td>${item.multiple_charges}</td>
+                          <td>${editColumn}${updateColumn}${deleteColumn}</td>
+                      </tr>
+                  `;
+                  tbody.append(row);
+                });
+                $('#emp-charges').html(selectOptions);
+                  let totalAmount = data.total_amount;
+                  totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2
+                  });
+                  $('#total-amount').text("₱ "+totalAmount);
+                  $('#update-transaction').modal('show');
+              })
+
+          }
+
+
+
+        $('#save-multiple-charges').click(function() {
+            let selectedIDs = [];
+            let selectedAmount = [];  
+            let status = 7;
+            let hasError = 0;
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('.select-charges');
+                let selectElementDate = $(this).find('.select-charges');
+                let selectedValue = selectElement.val();
+                let selectErrorLabel = selectElement.siblings(".error-label");
+
+                let inputElement = $(this).find('.input-date');
+                let inputValue = inputElement.val();
+                let inputErrorLabel = inputElement.siblings(".error-label-amount");
+
+                if (selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+                    selectElement.removeClass('has-error');
+                    selectErrorLabel.hide();
+                } else {
+                    hasError++;
+                    selectElement.addClass('has-error');
+                    selectErrorLabel.show();
+                }
+                if (inputValue !== "") {
+                    selectedAmount.push(inputValue);
+                    inputElement.removeClass('has-error');
+                    inputErrorLabel.hide();
+                } else {
+                    hasError++;
+                    inputElement.addClass('has-error');
+                    inputErrorLabel.show();
+                }
+            });
+            let amountsAsNumbers = selectedAmount.map(amount => parseFloat(amount));
+            let totalAmount = amountsAsNumbers.reduce((total, amount) => total + amount, 0);
+            if (selectedIDs.length > 0 && hasError ==0) {
+                let selectedAmountNumber = parseFloat(selectedAmount[0]); 
+                let amt_issued = AmountIssued.val();
+
+                if( amt_issued > totalAmount){
+                    toastr.error('Amount Lacking', 'Invalid', toast_options);
+                }
+                else if ( amt_issued < totalAmount){
+                    toastr.error('Amount Exceeds', 'Invalid', toast_options);
+                }
+                else{
+                    console.log("tesstttingggg start");
+                    console.log(selectedAmount);
+                    console.log(selectedIDs);
+                    console.log("tesstttingggg enddd");
+                    console.log(amt_issued + " selected amt");
+                    console.log(totalAmount +" total amt");
+                    console.log(temp_id +" iddddd");
+
+                    console.log(outgoing_id +" outtgoingg");
+
+
+
+
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'update-multiple-charges' %}",
+                        data:{
+                            amount: selectedAmount,
+                            incoming_id: temp_id,
+                            charges_id : selectedIDs,
+                            amt_issued : amt_issued
+                        }
+                        }).done(function(data){
+                            if (data.data == 'success') {
+                              $('#payrollDetails').modal('hide');
+                              data_printing(outgoing_id);
+                              $("#payrollUpdate").modal("hide");
+                              toastr.success('Successfully save', 'Success', toast_options);
+                            }
+                            else {
+                                toastr.danger('Data not saved', 'Danger', toast_options);
+                            }
+                    });
+                    
+                }
+
+            }
+        });
     })
 </script>
 {% endblock footer_scripts %}
