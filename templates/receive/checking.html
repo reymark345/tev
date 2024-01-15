@@ -75,7 +75,7 @@
                 <table id="tbl-items" class="table">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" id="check-all"></th>
+                            <th><input type="checkbox" id="check-all" class="dt-checkboxes form-check-input"></th>
                             <th>ID number</th>
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
@@ -415,10 +415,10 @@
                         var status = row.status; // Access the 'status' value from the 'row' object
 
                         if (status == 2) {
-                            return '<input type="checkbox" disabled="disabled">';
+                            return '<input type="checkbox" disabled="disabled" class="dt-checkboxes form-check-input">';
                         } else {
                             // Render a checkbox for each row with the item ID as its value
-                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
+                            return '<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="' + data + '">';
                         }
 
                     }
@@ -610,7 +610,7 @@
 
                 $('#check-all').change(function () {
                     var isChecked = $(this).is(':checked');
-                    $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+                    $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
                 });
 
                 $('.item-details').on('click', function () {
