@@ -204,14 +204,15 @@ def charges_load(request):
     for item in charges_data:
         userData = AuthUser.objects.filter(id=item.created_by)
         full_name = userData[0].first_name + ' ' + userData[0].last_name
-        item = {
-            'id': item.id,
-            'name': item.name,
-            'created_by': full_name,
-            'created_at': item.created_at
-        }
 
-        data.append(item)
+        if item.name != "Multiple":
+            item = {
+                'id': item.id,
+                'name': item.name,
+                'created_by': full_name,
+                'created_at': item.created_at
+            }
+            data.append(item)
 
     response = {
         'data': data,
