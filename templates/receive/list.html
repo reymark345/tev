@@ -25,8 +25,8 @@
         z-index: 9999;
     }
     .sk-primary .sk-fold-cube {
-        width: 15px; /* Set the width of each cube */
-        height: 15px; /* Set the height of each cube */
+        width: 15px; 
+        height: 15px;
     }
     .custom-file-upload {
     border: 1px solid #ccc;
@@ -45,12 +45,12 @@
         color: red;
     }
     .has-error {
-        border: 1px solid red; /* Change the border color for the input with an error */
+        border: 1px solid red; 
     }
 
     .error-label {
-        color: red; /* Set the text color for the error message */
-        margin-top: 5px; /* Add some space between the input and the error message */
+        color: red; 
+        margin-top: 5px; 
     }
 </style>
 <!-- Content wrapper -->
@@ -141,16 +141,6 @@
                 class="form-control"
                 />
             </div>
-
-            <!-- <div class="col-12 col-md-6">
-                <label class="form-label" >Slashed out</label>
-                <input
-                type="date"
-                id="f-slashed-out"
-                name="FSLashedOut"
-                class="form-control"
-                />
-            </div> -->
 
             <div class="col-12 col-md-6">
                 <label class="form-label">Original Amount</label>
@@ -268,7 +258,6 @@
     <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
         <div class="modal-header">
-            <!-- <span class="badge rounded-pill bg-primary bg-glow">Upload Excel File <small>(xlsx)</small></span></center> -->
         <h5 class="modal-title" id="modalToggleLabel">Upload Excel File <small>(xlsx)</small></h5>
         <button
             type="button"
@@ -435,21 +424,6 @@
                 $("#dateField").prop("disabled", false);
             } 
         });
-
-        // $(".remarks-list").on("change", function() {
-        //     $("#dynamic-input-container").empty();
-        //     var selectedValues = $(this).val();
-        //     // Append input elements based on selected values
-        //     if (selectedValues) {
-        //         for (var i = 0; i < selectedValues.length; i++) {
-        //             var inputId = "date-remarks-" + selectedValues[i];
-        //             var selectedText = $(this).find('option[value="' + selectedValues[i] + '"]').text();
-        //             var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" /><br>';
-        //             $("#dynamic-input-container").append(inputElement);
-        //         }
-        //     }
-        // });
-
         $(".remarks-list").on("change", function() {
             $("#dynamic-input-container").empty();
             selectedRemarks = $(this).val();
@@ -603,12 +577,12 @@
                 {
                     targets: 5,
                     render: function(data) {
-                        var splitValues = data.split(',');  // Split data by comma
+                        var splitValues = data.split(','); 
                         var result = '';
                         
                         splitValues.forEach(function(value, index) {
                             if (index !== 0) {
-                                result += '  '; // Add a space before adding subsequent values
+                                result += '  '; 
                             }
                             var dateParts = value.split('-');
                             var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
@@ -821,18 +795,6 @@
                         else{
                             $('#remarks-list').val([]).trigger('change');
                         }
-
-                        // let fields = data[0].fields
-                        // let pk = data[0].pk
-                        // let employee_name = $('#employee-name');
-                        // let floatvalue = parseFloat(fields.final_amount);
-                        // let convertedAmount = 0;
-                        // let date_travel = fields.date_travel;
-                        // formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
-                        // status_val = fields.status;
-                        // let fullname = fields.first_name + " " + fields.middle_name + " " + fields.last_name
-                        // let id_no = fields.id_no;
-
 
                         if(status_val ===3){
                             EmployeeName.val(id_no).trigger('change').prop("disabled", true);
@@ -1056,22 +1018,6 @@
                                     let code = data.g_code;
                                     if (code){
                                         toastr.success('Save Successfully', 'Success', toast_options);
-                                        // Swal.fire({
-                                        //     title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
-                                        //     icon: 'info',
-                                        //     html:
-                                        //     'Successfully <b>Save!</b>',
-                                        //     showCloseButton: true,
-                                        //     showCancelButton: false,
-                                        //     focusConfirm: false,
-                                        //     confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                                        //     confirmButtonAriaLabel: 'Thumbs up, great!',
-                                        //     customClass: {
-                                        //     confirmButton: 'btn btn-primary me-3'
-                                        //     },
-                                        //     buttonsStyling: false
-                                        // });
-
                                     }
                                     else{
                                         offCanvasEl.hide()

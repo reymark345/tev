@@ -25,37 +25,35 @@
         z-index: 9999;
     }
     .sk-primary .sk-fold-cube {
-        width: 15px; /* Set the width of each cube */
-        height: 15px; /* Set the height of each cube */
+        width: 15px;
+        height: 15px;
     }
     .has-error {
-        border: 1px solid red; /* Change the border color for the input with an error */
+        border: 1px solid red; 
     }
 
     .error-label, .error-label-date {
-        color: red; /* Set the text color for the error message */
-        margin-top: 5px; /* Add some space between the input and the error message */
+        color: red; 
+        margin-top: 5px;
     }
     
 
     .select-remarks.has-error {
-    border: 1px solid red; /* Change the border color for the input with an error */
+    border: 1px solid red; 
     }
 
-    /* Additional style for the error message */
     .select-remarks.has-error::after {
-        content: "Required"; /* Set the error message text */
-        color: red; /* Set the text color for the error message */
-        display: block; /* Display the error message as a block element */
-        margin-top: 5px; /* Add some space between the input and the error message */
+        content: "Required"; 
+        color: red; 
+        display: block; 
+        margin-top: 5px; 
     }
 
-    /* Hide the error message when there's no error */
+
     .select-remarks::after {
-        content: ""; /* Empty content to hide the error message */
+        content: ""; 
         display: none;
     }
-            /* Custom styles for expanded select and input */
     .custom-select {
         width: 60px;
     }
@@ -239,14 +237,10 @@
                     class="form-control"
                     placeholder="AdvFilter"
                     />
-            
-    
-    
                 <div class="col-12 text-center">
                     <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
                     <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
                     <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
-                
                 </div>
             </form>
         </div>
@@ -482,12 +476,12 @@
                 {
                     targets: 5,
                     render: function(data) {
-                        var splitValues = data.split(',');  // Split data by comma
+                        var splitValues = data.split(',');
                         var result = '';
                         
                         splitValues.forEach(function(value, index) {
                             if (index !== 0) {
-                                result += '  '; // Add a space before adding subsequent values
+                                result += '  ';
                             }
                             var dateParts = value.split('-');
                             var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
@@ -612,14 +606,10 @@
             drawCallback: function (settings) {
 
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
-                    // Do something when a checkbox in the table body is changed...
                 });
 
                 $('#check-all').change(function () {
-                    // Get the checked state of the "check-all" checkbox
                     var isChecked = $(this).is(':checked');
-        
-                    // Set the checked state of all checkboxes in the table body
                     $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
                 });
 
@@ -710,7 +700,6 @@
                             final_amount = data.original_amount;
                         }
 
-                        // Trigger change event to reflect the selected options visually
                         $('#remarks-list').trigger('change');
                         let floatvalue = parseFloat(final_amount);
                         let convertedAmount = floatvalue.toFixed(2);
@@ -718,18 +707,16 @@
                         $("#final_amount").val(convertedAmount);
                         $("#correctness_remarks").val(duplicate_date);
                         $("#correctness_remarks").prop("disabled", true);
-                        // $("#correctness_remarks").css("background-color", "#cf2732");
 
                         $("#correctness_remarks").css({
-                            "background-color": "#cf2732",  // Yellow background color
-                            "color": "#ffffff"              // White text color
+                            "background-color": "#cf2732",  
+                            "color": "#ffffff"           
                         });
                     })
                 });
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
-        // Form validation for Add new record
         function incoming_out(selected_items){
             Swal.fire({
                 title: 'Out Tev?',
