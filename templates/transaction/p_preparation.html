@@ -453,7 +453,7 @@
                     data: 'id', status: 'status',
                     orderable: false, 
                     render: function (data, type, row) {
-                        var status = row.status; // Access the 'status' value from the 'row' object
+                        var status = row.status;
                         var checkboxId = row.id;
                         return '<input type="checkbox" id="checkbox_data" class="checkbox-items checkbox_data" name = "checkboxtype" value="' + data + '">';
                     }
@@ -465,7 +465,7 @@
                 { data: 'status' },
                 { data: 'incoming_in' },
                 { data: 'm_charges' },
-                { data: null, orderable: false }, // Placeholder for charges column
+                { data: null, orderable: false },
                 { data: null, orderable: false }
              
             ],

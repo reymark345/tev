@@ -28,23 +28,6 @@ from django.utils import timezone
 def get_user_details(request):
     return StaffDetails.objects.filter(user_id=request.user.id).first()
 
-# def generate_code():
-#     trans_code = SystemConfiguration.objects.values_list(
-#         'transaction_code', flat=True).first()
-    
-#     last_code = trans_code.split('-')
-#     sampleDate = date.today()
-#     year = sampleDate.strftime("%y")
-#     month = sampleDate.strftime("%m")
-#     series = 1
-
-#     if last_code[1] == month:
-#         series = int(last_code[2]) + 1
-
-#     code = year + '-' + month + '-' + f'{series:05d}'
-
-#     return code
-
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
         'transaction_code', flat=True
@@ -651,7 +634,6 @@ def box_load(request):
     status_txt = ''
     status_txt = '5' if _search == 'outgoing' else '6'
      
-    # item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
     search_fields = ['dv_no', 'division__name', 'status__name'] 
     filter_conditions = Q()
 
@@ -707,16 +689,12 @@ def box_load(request):
 
     for item in item_data:
         userData = AuthUser.objects.filter(id=item.user_id)
-        
-        # Check if userData has results
         if userData.exists():
             full_name = userData[0].first_name + ' ' + userData[0].last_name
         else:
             full_name = ""
         
         userData_out = AuthUser.objects.filter(id=item.out_by)
-        
-        # Check if userData_out has results
         if userData_out.exists():
             full_name_out = userData_out[0].first_name + ' ' + userData_out[0].last_name
         else:
@@ -1024,25 +1002,6 @@ def add_emp_dv(request):
             return month_mapping_order.get(month_abbr, 0)
 
         formatted_result = ', '.join([f"{', '.join(sorted(unique_months_by_year[year], key=month_order))} {year}" for year in ordered_years])
-        # tev_incoming_object = TevIncoming.objects.get(id=tev_id)
-        # travel_dates_str = tev_incoming_object.date_travel
-        # travel_dates_list = travel_dates_str.split(',')
-        # unique_months_by_year = {}
-
-        # for date in travel_dates_list:
-        #     parts = date.split('-')
-        #     if len(parts) == 3:
-        #         year = parts[2]
-        #         month_abbr = month_mapping.get(parts[1])
-        #         if month_abbr:
-        #             if year not in unique_months_by_year:
-        #                 unique_months_by_year[year] = set()
-        #             unique_months_by_year[year].add(month_abbr)
-
-
-        # ordered_years = sorted(unique_months_by_year.keys())
-        # formatted_result = ', '.join([f"{', '.join(unique_months_by_year[year])} {year}" for year in ordered_years])
-        
         purpose = "TE for "+ formatted_result
         outgoing_obj = TevOutgoing.objects.filter(dv_no=dv_no).first()
         outgoing_id = outgoing_obj.id
@@ -1066,20 +1025,14 @@ def retrieve_employee(request):
 
     for row in list_employee:
         date_travel_str = row.date_travel
-        # Split the comma-separated dates and convert each to a datetime object
         date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=timezone.utc) for date_str in date_travel_str.split(',')]
-
-        # Format each date and join them with a comma
         date_travel_formatted = ', '.join(date_travel.strftime("%b. %d %Y") for date_travel in date_travel_list)
-
         first_name = row.first_name if row.first_name else ''
         middle_name = row.middle_name if row.middle_name else ''
         last_name = row.last_name if row.last_name else ''
         final_amount = row.final_amount if row.final_amount else ''
         final_amount = ": Amount: " + f"{Decimal(final_amount):,.2f}"
-
         emp_fullname = f"{first_name} {middle_name} {last_name} {final_amount} : Date Travel: {date_travel_formatted}".strip()
-
         item = {
             'id': row.id,
             'name': emp_fullname
