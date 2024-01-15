@@ -138,6 +138,7 @@ class TevIncoming(models.Model):
     status = models.ForeignKey(Status, models.DO_NOTHING,default=1)
     user_id = models.CharField(max_length=128, blank=True, null=True)
     is_upload = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     
     class Meta:
         managed = True

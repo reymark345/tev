@@ -36,8 +36,10 @@ urlpatterns = [
     path('check_charges', views.check_charges, name='check-charges'),
     path('remove_charges', views.remove_charges, name='remove-charges'),
     path('payroll_add_charges', views.payroll_add_charges, name='payroll-add-charges'),
-    path('add_dv', views.add_dv, name='add-dv'),
+    path('add_dv', views.add_dv, name='add-dv'),  
+    path('retrieve_employee', views.retrieve_employee, name='retrieve-employee'),  
+    path('add_emp_dv', views.add_emp_dv, name='add-emp-dv'),  
+    path('update_purpose', views.update_purpose , name='update-purpose'),  
 
-    
-    
+     
 ]

@@ -1055,21 +1055,22 @@
                                     dateField.clear();
                                     let code = data.g_code;
                                     if (code){
-                                        Swal.fire({
-                                            title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
-                                            icon: 'info',
-                                            html:
-                                            'Successfully <b>Save!</b>',
-                                            showCloseButton: true,
-                                            showCancelButton: false,
-                                            focusConfirm: false,
-                                            confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
-                                            confirmButtonAriaLabel: 'Thumbs up, great!',
-                                            customClass: {
-                                            confirmButton: 'btn btn-primary me-3'
-                                            },
-                                            buttonsStyling: false
-                                        });
+                                        toastr.success('Save Successfully', 'Success', toast_options);
+                                        // Swal.fire({
+                                        //     title: '<strong>TEV Code <u>'+data.g_code+'</u></strong>',
+                                        //     icon: 'info',
+                                        //     html:
+                                        //     'Successfully <b>Save!</b>',
+                                        //     showCloseButton: true,
+                                        //     showCancelButton: false,
+                                        //     focusConfirm: false,
+                                        //     confirmButtonText: '<i class="ti ti-thumb-up"></i> Done!',
+                                        //     confirmButtonAriaLabel: 'Thumbs up, great!',
+                                        //     customClass: {
+                                        //     confirmButton: 'btn btn-primary me-3'
+                                        //     },
+                                        //     buttonsStyling: false
+                                        // });
 
                                     }
                                     else{

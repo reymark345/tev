@@ -282,7 +282,7 @@
                     <table id="tbl-box-a" class="table display compact">
                         <thead>
                             <tr>
-                                <th><input type="checkbox" id="selectAll"></th>
+                                <th>ID</th>
                                 <th>Code #</th>
                                 <th>Accnt. No.</th>
                                 <th>ID Number</th>
@@ -300,7 +300,7 @@
                             <br><br>
                             <div style="width:40%;">
                                 <label class="form-label" for="modalFEmployeeName"><i>Add Employee</i></label>
-                                <select id="payroll-name" name="PayrollName" class="form-select employee" data-allow-clear="true" ><option></option></select>
+                                <select id="payroll-name" name="PayrollName" class="form-select payroll-name" data-allow-clear="true" ><option></option></select>
                             </div>
                         </tfoot>              
                     </table>
@@ -604,8 +604,6 @@
                         $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
                             selectedItems.push($(this).val());
                         });
-
-                        console.log(selectedItems);
             
                         if(selectedItems.length ===0){
                             toastr.error('Select item first', 'Invalid', toast_options);
@@ -652,23 +650,29 @@
 
                 $('.view-data').on('click', function () {
                     // alert("fasfasf");
-                    const selectAllCheckbox = $(`#${tableId} #selectAll`);
-                    selectAllCheckbox.on('change', function () {
-                        const isChecked = this.checked;
-                        tbody.find(':checkbox').prop('checked', isChecked);
-                    });
+                    // const selectAllCheckbox = $(`#${tableId} #selectAll`);
+                    // selectAllCheckbox.on('change', function () {
+                    //     const isChecked = this.checked;
+                    //     tbody.find(':checkbox').prop('checked', isChecked);
+                    // });
                     let id = $(this).attr('id');
                     dv_no_id = id
                     data_clicked = true;
+
+
                     
                     $('#update-transaction').modal('show');
                     table_m();
+                    employee_list();
+
                     dataTable2.ajax.reload();
                     //   updat eTransaction(dv_no_id);
                 });
+
+
+
               $('body').on('click', '.item-update', function () {
                 temp_id = $(this).attr('id');
-                console.log("matches" + temp_id);
                 $('#update-transaction').modal('hide');
                 $("#payrollUpdate").modal("show");
 
@@ -756,48 +760,29 @@
                 let rowData = closestRow.data();
                 let p_id = rowData.id;
 
-                Swal.fire({
-                  title: 'Are you sure Remove from list?',
-                  text: "You won't be able to revert this!",
-                  icon: 'warning',
-                  showCancelButton: true,
-                  confirmButtonText: 'Yes, Remove it!',
-                  customClass: {
-                      confirmButton: 'btn btn-primary me-3',
-                      cancelButton: 'btn btn-label-secondary',
-                  },
-                  buttonsStyling: false,
-              }).then(function (result) {
-                  if (result.value) {
-                    
-                    console.log("id");
-                    console.log(p_id);
-                    console.log("dv_no value for all rows: " + dv_number);
-
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'delete-box-list' %}",
-                        data:{
-                        emp_id: p_id,
-                        dv_number: dv_number
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'delete-box-list' %}",
+                    data:{
+                    emp_id: p_id,
+                    dv_number: dv_number
+                }
+                }).done(function (data) {
+                    if (data.data == 'success') {
+                        employee_list();
+                        dataTable2.ajax.reload();
+                        toastr.success('Removed Successfully', 'Success', toast_options);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error saving!',
+                            text: data.message,
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        })
                     }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            dataTable2.ajax.reload();
-                            toastr.success('Removed Successfully', 'Success', toast_options);
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                  }
-              })
+                })
         });
  
       const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
@@ -924,12 +909,47 @@
             })
         });
         $('#cancel-multiple-charges').click(function() {
+            dataTable2.ajax.reload();
         // updateTransaction(dv_no_id);
         });
     
 
     },
         })
+
+    function employee_list(){
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'retrieve-employee' %}",
+            data:{
+                dv_no_id: dv_no_id
+            }  
+        }).done(function (data) {
+            let dv_no = data.dv_no;
+            dv_number = dv_no;
+            $('#dv-number').text("DV NUMBER: "+dv_no);
+
+            var selectElement = $("#payroll-name");
+            selectElement.empty();
+            selectElement.append($('<option></option>'));
+
+            $.each(data.data, function (index, item) {
+                selectElement.append($('<option>', {
+                    value: item.id,
+                    text: item.name
+                }));
+            });
+
+            if ($('#payroll-name').length) {
+                $('#payroll-name').wrap('<div class="position-relative"></div>');
+                $('#payroll-name').select2({
+                    placeholder: 'Choose Employee',
+                    dropdownParent: $('#payroll-name').parent(),
+                    allowClear: true,
+                });
+            }
+        });
+    }
 
     function table_m (){
         const table2 = $('#tbl-box-a');
@@ -939,6 +959,7 @@
         }
 
         dataTable2 = table2.DataTable({
+            autoWidth: true,
             processing: true,
             serverSide: true,
             ajax: {
@@ -961,12 +982,11 @@
             ],
         
             columnDefs: [
-                 {   
+                {
                     targets: 0,
                     render: function(data, type, row, meta) {
-                       
-                        // Set the data-row-id attribute on the <tr> element
-                        return '<tr data-row-id="' + row.id + '"><td><input type="checkbox"></td></tr>';
+                        // Assuming meta.row is the 0-based index of the current row
+                        return meta.row + 1;
                     },
                 },
                 {
@@ -978,7 +998,6 @@
                 {
                     targets: 2,
                     render: function(data) {
-                        console.log(data);
                         return (!data && data !== 0) ? '' : '<span class="badge bg-label-warning">' + data + '</span>';
                     },
                 },
@@ -1001,7 +1020,7 @@
                     targets: 6,
                     render: function (data) {
                         
-                        return '<td><input type="text" class="form-control emp-purpose" value="'+data+'"></td>'
+                        return '<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="'+data+'" style="width:500px; margin-right: -150px !important;" ></td>'
 
                     },
                 },
@@ -1037,31 +1056,17 @@
                 myDataTable.column(9, { search: 'applied' }).data().each(function (value) {
                     totalAmount += parseFloat(value);
                 });
-                $('#total-input').remove();
-                $('#tbl-box-a').append('<input type="text" class="form-control" id="total-input" value="' + totalAmount.toFixed(2) + '" disabled>');
-                $('#total-amount').text("₱ " + totalAmount.toFixed(2));
+                let formattedTotalAmount = totalAmount.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                });
+                $('#total-amount').text("₱ " + formattedTotalAmount);
+                // let dvNoValue = myDataTable.row(0).data().dv_no;
+                // dv_number = dvNoValue;
+
+                // $('#dv-number').text(dvNoValue);
                 
-                // let myDataTable = $('#tbl-box-a').DataTable();
-                // let payrolledListData = [];
-                // $('#payroll-name').empty();
-            
-                // // Add an empty option
-                // $('#payroll-name').append('<option></option>');
-            
-                // // Populate options based on payrolled_list data
-                // for (let i = 0; i < payrolledListData.length; i++) {
-                //     $('#payroll-name').append('<option value="' + payrolledListData[i].id + '">' + payrolledListData[i].name + '</option>');
-                // }
-            
-                // // Initialize Select2
-                // if ($('#payroll-name').length) {
-                //     $('#payroll-name').wrap('<div class="position-relative"></div>');
-                //     $('#payroll-name').select2({
-                //         placeholder: 'Choose Employee',
-                //         dropdownParent: $('#payroll-name').parent(),
-                //         allowClear: true,
-                //     });
-                // }
+                // console.log("dv_no value for all rows: " + dvNoValue);
             }
         });
     }
@@ -1079,8 +1084,6 @@
 
       BoxDvNo.on('change', function() {
         selectedDv = BoxDvNo.val();
-        console.log("byeee");
-        console.log(selectedDv);
       });
 
       search_advance_filter.on('click', function () {
@@ -1215,88 +1218,88 @@
                 newRow.find('.error-label, .error-label-amount').hide();
             $('.rows-container').append(newRow);
         });
+
         $('.container').on('click', '.delete-row', function () {
             $(this).closest('.row').remove();
         });
 
-         
-          $(document).on("change", ".emp-charges", function () {
-                let dataTable = $('#tbl-box-a').DataTable();
-                let closestRow = dataTable.row($(this).closest('tr'));
-                let rowData = closestRow.data();
-                let new_id = rowData.id;
-                let empChargesValue = $(this).val();
-                let empChargesText =  $(this).find(':selected').text();
+        $(document).on("change", ".emp-purpose", function () {
+            let dataTable = $('#tbl-box-a').DataTable();
+            let closestRow = dataTable.row($(this).closest('tr'));
+            let rowData = closestRow.data();
+            let tev_id = rowData.id;
+            let purpose = $(this).val();
 
-                console.log("new_id1:", new_id);
-                console.log("empChargesValue:", empChargesText);
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'update-purpose' %}",
+                data:{
+                    te_id: tev_id,
+                    value: purpose
+                }
+            }).done(function (data) {
+                if (data.data == 'success') {
+                    toastr.success('Purpose Added Successfully ', 'Success', toast_options);
+                }
+                else{
+                    toastr.error('Cannot Saved Please Contact IT Administrator', 'Invalid', toast_options);
+                }
+            });
 
-                let selectedOption = $(this).find(":selected");
-                if (selectedOption.length > 0) {
-                    temp_id = rowData.id;
-                    if (empChargesText=== "Multiple") {
-                        $("#payrollUpdate").modal("show");
-                        $.ajax({
-                            type: 'POST',
-                            url: "{% url 'multiple-charges-details' %}",
-                            data:{
-                                payroll_id: temp_id
-                            }
-                        }).done(function (data) {
+        });
 
-                            let totalAmount = 0;
-                            let amountList = [];
-                            let chargesList = [];
-                            let preview_amt = [];
-                            let preview_charges = [];
+        
+        $(document).on("change", ".emp-charges", function () {
+            let dataTable = $('#tbl-box-a').DataTable();
+            let closestRow = dataTable.row($(this).closest('tr'));
+            let rowData = closestRow.data();
+            let new_id = rowData.id;
+            let empChargesValue = $(this).val();
+            let empChargesText =  $(this).find(':selected').text();
 
-                            let full_name = data.full_name;
-                            let amount = data.amount;
-                            FName.val(full_name);
-                            AmountIssued.val(amount);
-                            $('.rows-container').empty();
+            let selectedOption = $(this).find(":selected");
+            if (selectedOption.length > 0) {
+                temp_id = rowData.id;
+                if (empChargesText=== "Multiple") {
+                    $("#payrollUpdate").modal("show");
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'multiple-charges-details' %}",
+                        data:{
+                            payroll_id: temp_id
+                        }
+                    }).done(function (data) {
 
-                            chargesList = data.data.map(item => item.charges_id);
-                            amountList = data.data.map(item => item.amount);
-                            if (data.data.length > 0) {
-                                for (let i = 0; i < data.data.length; i++) {
-                                    var newRow = $('<div class="row mt-2">' +
-                                    '<div class="col-5">' +
-                                    '<select class="form-select select-charges" id="select-charges-'+i+'">' +
-                                        '<option></option>'+
-                                        '{% for row in charges %}'+
-                                        '{% if row.name != "Multiple" %}'+
-                                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                            '{% endif %}'+
-                                        '{% endfor %}'+
-                                    '</select>' +
-                                    '<span class="error-label">Required</span>'+
-                                    '</div>' +
-                                    '<div class="col-5">' +
-                                    '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
-                                    '<span class="error-label-amount">Required</span>'+
-                                    '</div>' +
-                                    '<div class="col-2">' +
-                                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                                    '</div>' +
-                                    '</div>');
-                                    newRow.find('.error-label, .error-label-amount').hide();
-                                    $('.rows-container').append(newRow);
-                                    $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
-                                }
-                            } else {
+                        let totalAmount = 0;
+                        let amountList = [];
+                        let chargesList = [];
+                        let preview_amt = [];
+                        let preview_charges = [];
+
+                        let full_name = data.full_name;
+                        let amount = data.amount;
+                        FName.val(full_name);
+                        AmountIssued.val(amount);
+                        $('.rows-container').empty();
+
+                        chargesList = data.data.map(item => item.charges_id);
+                        amountList = data.data.map(item => item.amount);
+                        if (data.data.length > 0) {
+                            for (let i = 0; i < data.data.length; i++) {
                                 var newRow = $('<div class="row mt-2">' +
                                 '<div class="col-5">' +
-                                '<select class="form-select select-charges" id="select-charges">' +
+                                '<select class="form-select select-charges" id="select-charges-'+i+'">' +
                                     '<option></option>'+
                                     '{% for row in charges %}'+
-                                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% if row.name != "Multiple" %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                        '{% endif %}'+
                                     '{% endfor %}'+
                                 '</select>' +
                                 '<span class="error-label">Required</span>'+
                                 '</div>' +
                                 '<div class="col-5">' +
-                                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
                                 '<span class="error-label-amount">Required</span>'+
                                 '</div>' +
                                 '<div class="col-2">' +
@@ -1305,20 +1308,43 @@
                                 '</div>');
                                 newRow.find('.error-label, .error-label-amount').hide();
                                 $('.rows-container').append(newRow);
+                                $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
                             }
-                        });
-                    }
-                    else{
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'check-charges' %}",
-                        data:{
-                            incoming_id: temp_id
+                        } else {
+                            var newRow = $('<div class="row mt-2">' +
+                            '<div class="col-5">' +
+                            '<select class="form-select select-charges" id="select-charges">' +
+                                '<option></option>'+
+                                '{% for row in charges %}'+
+                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                '{% endfor %}'+
+                            '</select>' +
+                            '<span class="error-label">Required</span>'+
+                            '</div>' +
+                            '<div class="col-5">' +
+                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                            '<span class="error-label-amount">Required</span>'+
+                            '</div>' +
+                            '<div class="col-2">' +
+                            '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                            '</div>' +
+                            '</div>');
+                            newRow.find('.error-label, .error-label-amount').hide();
+                            $('.rows-container').append(newRow);
                         }
-                    }).done(function (data) {
-                        let amount = data.amt;
-                        if(data.data){
-                        
+                    });
+                }
+                else{
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'check-charges' %}",
+                    data:{
+                        incoming_id: temp_id
+                    }
+                }).done(function (data) {
+                    let amount = data.amt;
+                    if(data.data){
+                    
                         Swal.fire({
                             title: 'Are you sure to Change Charges?',
                             text: "You won't be able to revert this!",
@@ -1333,7 +1359,7 @@
                         }).then(function (result) {
                             if (result.value) {
                                 
-                                console.log("afterr:"+ temp_id);
+
                                 $.ajax({
                                     type: 'POST',
                                     url: "{% url 'remove-charges' %}",
@@ -1344,14 +1370,11 @@
                                     }
                                 }).done(function (data) {
                                     dataTable.ajax.reload(null, false);
-                                    console.log(data);
-                                    console.log("data");
                                 })
                                 }
                             });
-                            
-                        }
-                        else{
+                    }
+                    else{
                         $.ajax({
                             type: 'POST',
                             url: "{% url 'payroll-add-charges' %}",
@@ -1361,18 +1384,35 @@
                                 amt:amount
                             }
                             }).done(function (data) {
-                            console.log(data);
                             dataTable.ajax.reload();
                         });
-
-                        }
-
-                    });
                     }
-                } else {
-                    alert("No charge selected");
+                });
                 }
+            } else {
+                alert("No charge selected");
+            }
+        });
+
+
+                
+        $(document).on("change", ".payroll-name", function () {
+            let inc_id = $(this).val();
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'add-emp-dv' %}",
+                data:{
+                    tev_id: inc_id,
+                    dv_no: dv_number
+                }
+            }).done(function (data) {
+                employee_list();
+                dataTable2.ajax.reload();
+                toastr.success('Added Successfully ', 'Success', toast_options);
             });
+        });
+
+
 
 
 
@@ -1423,19 +1463,6 @@
                     toastr.error('Amount Exceeds', 'Invalid', toast_options);
                 }
                 else{
-                    console.log("tesstttingggg start");
-                    console.log(selectedAmount);
-                    console.log(selectedIDs);
-                    console.log("tesstttingggg enddd");
-                    console.log(amt_issued + " selected amt");
-                    console.log(totalAmount +" total amt");
-                    console.log(temp_id +" iddddd");
-
-                    console.log(outgoing_id +" outtgoingg");
-
-
-
-
                     $.ajax({
                         type: "POST",
                         url: "{% url 'update-multiple-charges' %}",
@@ -1448,7 +1475,6 @@
                         }).done(function(data){
                             if (data.data == 'success') {
                               $('#payrollDetails').modal('hide');
-                            //   data_printing(outgoing_id);
                               $("#payrollUpdate").modal("hide");
                               dataTable2.ajax.reload();
                               toastr.success('Successfully save', 'Success', toast_options);

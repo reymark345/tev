@@ -22,24 +22,44 @@ from django.db.models import Q, Max
 import datetime as date_time
 from decimal import Decimal
 from decimal import Decimal, ROUND_HALF_UP
+from django.utils import timezone
 
 
 def get_user_details(request):
     return StaffDetails.objects.filter(user_id=request.user.id).first()
 
+# def generate_code():
+#     trans_code = SystemConfiguration.objects.values_list(
+#         'transaction_code', flat=True).first()
+    
+#     last_code = trans_code.split('-')
+#     sampleDate = date.today()
+#     year = sampleDate.strftime("%y")
+#     month = sampleDate.strftime("%m")
+#     series = 1
+
+#     if last_code[1] == month:
+#         series = int(last_code[2]) + 1
+
+#     code = year + '-' + month + '-' + f'{series:05d}'
+
+#     return code
+
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
-        'transaction_code', flat=True).first()
-    
+        'transaction_code', flat=True
+    ).first()
+
     last_code = trans_code.split('-')
-    sampleDate = date.today()
-    year = sampleDate.strftime("%y")
-    month = sampleDate.strftime("%m")
-    series = 1
+    sample_date = date.today()
+    year = sample_date.strftime("%y")
+    month = sample_date.strftime("%m")
+    day = sample_date.strftime("%d")
 
-    if last_code[1] == month:
+    if last_code[0] == year:
         series = int(last_code[2]) + 1
-
+    else:
+        series = 1
     code = year + '-' + month + '-' + f'{series:05d}'
 
     return code
@@ -229,8 +249,6 @@ def preview_box_a(request):
         outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__chief','division__c_designation','division__approval','division__ap_designation').first()
         dvno = outgoing['dv_no']
 
-
-        
         te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
                 'code',
                 'first_name',
@@ -243,18 +261,13 @@ def preview_box_a(request):
                 'tevbridge__tev_outgoing__dv_no', 
                 'tevbridge__charges__name'  
             ).order_by('last_name')
-    
         result_count = len(te_lname)
-
-        print(data_result)
-        print("data_result")
 
         final_charges_amount = Decimal('0')
         charges_dict = {}
 
         for item in data_result:
             charges_name = item['charges_name']
-            # charges_amount = Decimal(item['charges_amount'])
             charges_amount = Decimal(item['charges_amount']) if item['charges_amount'] is not None else 0.0
 
             if charges_name in charges_dict:
@@ -262,10 +275,7 @@ def preview_box_a(request):
             else:
                 charges_dict[charges_name] = charges_amount
 
-        # Convert the dictionary to a list of dictionaries
         charges_list = [{'charges': name, 'final_amount': amount} for name, amount in charges_dict.items()]
-
-        print(charges_list)
 
         for item in te_lname:
             fullname = item['last_name'] + ', '+ item['first_name']
@@ -386,7 +396,7 @@ def employee_dv(request):
         LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
         WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s 
         GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
-        ORDER BY ti.incoming_out DESC;   
+        ORDER BY ti.updated_at DESC;  
     """
 
     with connection.cursor() as cursor:
@@ -428,9 +438,6 @@ def employee_dv(request):
             'total':final_amount,
         }
         data.append(item)
-        
-    # payrolled_list = TevIncoming.objects.filter(status_id = 4).order_by('first_name')
-    # payrolled_list = list(TevIncoming.objects.filter(status_id=4).order_by('first_name').values('id','code','first_name','middle_name','last_name','id_no','account_no','date_travel','original_amount','final_amount','incoming_in','slashed_out','remarks','user_id','is_upload','status_id'))
     payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))
 
                     
@@ -954,17 +961,26 @@ def remove_charges(request):
     
 
 @csrf_exempt
+def update_purpose(request):
+    if request.method == 'POST':
+        te_id = request.POST.get('te_id')
+        purpose = request.POST.get('value')
+        try:
+            TevBridge.objects.filter(tev_incoming_id=te_id).update(purpose=purpose)
+            return JsonResponse({'data': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
+@csrf_exempt
 def add_dv(request):
     if request.method == 'POST':
         user_id = request.session.get('user_id', 0)
-
-    
         dv_number = request.POST.get('DvNumber')
         cluster_id = request.POST.get('Cluster')
         div_id = request.POST.get('Division')
-
-        print(div_id)
-        print("selected_tev")
         outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_id,box_b_in=date_time.datetime.now(),user_id=user_id, division_id = div_id)
         outgoing.save()
         
@@ -972,7 +988,112 @@ def add_dv(request):
 
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
+  
+
+@csrf_exempt
+def add_emp_dv(request):
+    if request.method == 'POST':
+        user_id = request.session.get('user_id', 0)
+        tev_id = request.POST.get('tev_id')
+        dv_no = request.POST.get('dv_no')
+        box_b = TevIncoming.objects.filter(id=tev_id).update(status_id=6, updated_at = date_time.datetime.now())
+        month_mapping = {
+            '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
+            '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Aug',
+            '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'
+        }
+        tev_incoming_object = TevIncoming.objects.get(id=tev_id)
+        travel_dates_str = tev_incoming_object.date_travel
+        travel_dates_list = travel_dates_str.split(',')
+        unique_months_by_year = {}
+
+        for date in travel_dates_list:
+            parts = date.split('-')
+            if len(parts) == 3:
+                year = parts[2]
+                month_abbr = month_mapping.get(parts[1])
+                if month_abbr:
+                    if year not in unique_months_by_year:
+                        unique_months_by_year[year] = set()
+                    unique_months_by_year[year].add(month_abbr)
+
+        ordered_years = sorted(unique_months_by_year.keys())
+
+        def month_order(month_abbr):
+            month_mapping_order = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+            return month_mapping_order.get(month_abbr, 0)
+
+        formatted_result = ', '.join([f"{', '.join(sorted(unique_months_by_year[year], key=month_order))} {year}" for year in ordered_years])
+        # tev_incoming_object = TevIncoming.objects.get(id=tev_id)
+        # travel_dates_str = tev_incoming_object.date_travel
+        # travel_dates_list = travel_dates_str.split(',')
+        # unique_months_by_year = {}
+
+        # for date in travel_dates_list:
+        #     parts = date.split('-')
+        #     if len(parts) == 3:
+        #         year = parts[2]
+        #         month_abbr = month_mapping.get(parts[1])
+        #         if month_abbr:
+        #             if year not in unique_months_by_year:
+        #                 unique_months_by_year[year] = set()
+        #             unique_months_by_year[year].add(month_abbr)
+
+
+        # ordered_years = sorted(unique_months_by_year.keys())
+        # formatted_result = ', '.join([f"{', '.join(unique_months_by_year[year])} {year}" for year in ordered_years])
+        
+        purpose = "TE for "+ formatted_result
+        outgoing_obj = TevOutgoing.objects.filter(dv_no=dv_no).first()
+        outgoing_id = outgoing_obj.id
+
+        bridge = TevBridge(purpose = purpose,charges_id = 1, tev_incoming_id = tev_id, tev_outgoing_id = outgoing_id)
+        bridge.save()
+        PayrolledCharges.objects.filter(incoming_id=tev_id).delete()
+        return JsonResponse({'data': 'success'})
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+  
+
+@csrf_exempt
+def retrieve_employee(request):
+    dv_no_id = request.POST.get('dv_no_id')
+    data = []
+    dv_number = TevOutgoing.objects.filter(id=dv_no_id).first()
+
+    list_employee = TevIncoming.objects.filter(status_id=4).order_by('first_name')
+
+    for row in list_employee:
+        date_travel_str = row.date_travel
+        # Split the comma-separated dates and convert each to a datetime object
+        date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=timezone.utc) for date_str in date_travel_str.split(',')]
+
+        # Format each date and join them with a comma
+        date_travel_formatted = ', '.join(date_travel.strftime("%b. %d %Y") for date_travel in date_travel_list)
+
+        first_name = row.first_name if row.first_name else ''
+        middle_name = row.middle_name if row.middle_name else ''
+        last_name = row.last_name if row.last_name else ''
+        final_amount = row.final_amount if row.final_amount else ''
+        final_amount = ": Amount: " + f"{Decimal(final_amount):,.2f}"
+
+        emp_fullname = f"{first_name} {middle_name} {last_name} {final_amount} : Date Travel: {date_travel_formatted}".strip()
+
+        item = {
+            'id': row.id,
+            'name': emp_fullname
+        }
+        data.append(item)
+
+    response = {
+        'data': data,
+        'dv_no' : dv_number.dv_no
+    }
+
+    return JsonResponse(response)
+
+
 
 
 @csrf_exempt
@@ -980,8 +1101,8 @@ def delete_box_list(request):
     incoming_id = request.POST.get('emp_id')
     dv_no = request.POST.get('dv_number')
     
-    deleteBridge, _ = TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
-    # delete, _ = TevIncoming.objects.filter(id=incoming_id).delete()
+    TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
+    TevIncoming.objects.filter(id=incoming_id).update(status_id=4)
 
     response = {
         'data': 'success'
