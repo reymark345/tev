@@ -143,14 +143,6 @@ def user_add(request):
         # user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,role_id = 2,user_id = max_id)
         # user_details_add.save()
 
-        # for role in zip(role_id):
-        #     role_p_lib = RolePermissions(
-        #     role_id=role,
-        #     user_id=user_id
-        #     )
-        #     role_p_lib.save()
-
-
         for role_id in role_ids:
             role_p_lib = RolePermissions(
                 role_id=int(role_id), 
