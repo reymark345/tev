@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, RemarksLib)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, RemarksLib, RolePermissions)
 import math
 from django.core.serializers import serialize
 from django.db import IntegrityError
@@ -18,14 +18,17 @@ def get_user_details(request):
 
 @login_required(login_url='login')
 def division(request):
-    user_details = get_user_details(request)
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'division' : Division.objects.filter(status=0).order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
-            'role_permission' : role.role_name,
+            'permissions' : role_names,
         }
         return render(request, 'libraries/division.html', context)
     else:
@@ -33,14 +36,16 @@ def division(request):
 
 @login_required(login_url='login')
 def charges(request):
-    user_details = get_user_details(request)
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'charges' : Charges.objects.filter().order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
-            'role_permission' : role.role_name,
+            'permissions' : role_names,
         }
         return render(request, 'libraries/charges.html', context)
     else:
@@ -49,18 +54,68 @@ def charges(request):
     
 @login_required(login_url='login')
 def remarks(request):
-    user_details = get_user_details(request)
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'charges' : RemarksLib.objects.filter().order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
-            'role_permission' : role.role_name,
+            'permissions' : role_names,
         }
         return render(request, 'libraries/remarks.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+
+# @login_required(login_url='login')
+# def division(request):
+#     user_details = get_user_details(request)
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'division' : Division.objects.filter(status=0).order_by('name'),
+#             'cluster' : Cluster.objects.filter().order_by('name'),
+#             'role_permission' : role.role_name,
+#         }
+#         return render(request, 'libraries/division.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
+
+# @login_required(login_url='login')
+# def charges(request):
+#     user_details = get_user_details(request)
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'charges' : Charges.objects.filter().order_by('name'),
+#             'cluster' : Cluster.objects.filter().order_by('name'),
+#             'role_permission' : role.role_name,
+#         }
+#         return render(request, 'libraries/charges.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
+    
+    
+# @login_required(login_url='login')
+# def remarks(request):
+#     user_details = get_user_details(request)
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'charges' : RemarksLib.objects.filter().order_by('name'),
+#             'cluster' : Cluster.objects.filter().order_by('name'),
+#             'role_permission' : role.role_name,
+#         }
+#         return render(request, 'libraries/remarks.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
 
 
 @csrf_exempt

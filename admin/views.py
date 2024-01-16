@@ -29,20 +29,35 @@ def get_user_details(request):
 
 @login_required(login_url='login')
 def users(request):
-    user_details = get_user_details(request)
-    print(user_details.role_id)
-    print("testdawrole")
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
     allowed_roles = ["Admin"]    
-    if role.role_name in allowed_roles:
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
-            'role_permission': role.role_name,
+            'permissions' : role_names,
             'role_details': RoleDetails.objects.filter().order_by('role_name'),
         }
         return render(request, 'admin/users.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+
+# @login_required(login_url='login')
+# def users(request):
+#     user_details = get_user_details(request)
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     allowed_roles = ["Admin"]    
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
+#             'role_permission': role.role_name,
+#             'role_details': RoleDetails.objects.filter().order_by('role_name'),
+#         }
+#         return render(request, 'admin/users.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
 
 
 @csrf_exempt
@@ -118,13 +133,8 @@ def user_add(request):
     
     # role_id = request.POST.get('Roles')
     role_ids = request.POST.getlist('Roles')
+    superuser = 0
     
-
-    print("testtt")
-    print(role_ids)
-    print(user_name)
-
-
 
     sex = request.POST.get('Sex')
     address = request.POST.get('Address')
@@ -132,21 +142,24 @@ def user_add(request):
     password = make_password(password)
     user_id = request.session.get('user_id', 0)
 
+    if '1' in role_ids: 
+        superuser = 1
+        
     if AuthUser.objects.filter(username=user_name):
         return JsonResponse({'data': 'error', 'message': 'Username Taken'})
     
     else:
-        # user_add = AuthUser(password = password,is_superuser=1,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=timezone.now())
-        # user_add.save()
+        user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=timezone.now())
+        user_add.save()
+        max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
+        user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,role_id = 2,user_id = max_id)
+        user_details_add.save()
 
-        # max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
-        # user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,role_id = 2,user_id = max_id)
-        # user_details_add.save()
-
+        auth_max = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
         for role_id in role_ids:
             role_p_lib = RolePermissions(
                 role_id=int(role_id), 
-                user_id=user_id
+                user_id=auth_max
             )
             role_p_lib.save()
 
@@ -253,7 +266,7 @@ def user_load(request):
                 'sex': user_details_item.sex,
                 'address': user_details_item.address,
                 'position': user_details_item.position,
-                'role_name': role_name,
+                'role_name': '',
                 'id': item.id,
                 'username': item.username,
                 'first_name': item.first_name,
