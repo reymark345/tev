@@ -228,6 +228,15 @@ class StaffDetails(models.Model):
     class Meta:
         managed = True
         db_table = 'staff_details'
+
+
+class RolePermissions(models.Model):
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    role = models.ForeignKey(RoleDetails, models.DO_NOTHING)
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    class Meta:
+        managed = True
+        db_table = 'role_permissions'
         
 class SystemConfiguration(models.Model):
     name = models.CharField(max_length=128, blank=True, null=True)
@@ -276,6 +285,8 @@ class Remarks_r(models.Model):
     class Meta:
         managed = True
         db_table = 'remarks_r'
+
+
         
         
 

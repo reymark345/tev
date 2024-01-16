@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, StaffDetails,RoleDetails )
+from main.models import (AuthUser, StaffDetails,RoleDetails, RolePermissions )
 import json 
 from django.core.serializers import serialize
 import datetime
@@ -107,35 +107,59 @@ def updateuser(request):
 
 @csrf_exempt
 def user_add(request):
-    try:
-        user_name = request.POST.get('Username')
-        firstname = request.POST.get('Firstname')
-        middlename = request.POST.get('Middlename')
-        id_no = request.POST.get('IdNo')
-        lastname = request.POST.get('Lastname')
-        password = request.POST.get('Password')
-        email = request.POST.get('Email')
-        role_id = request.POST.get('Roles')
-        sex = request.POST.get('Sex')
-        address = request.POST.get('Address')
-        position = request.POST.get('Position')
-        password = make_password(password)
-        user_id = request.session.get('user_id', 0)
 
-        if AuthUser.objects.filter(username=user_name):
-            return JsonResponse({'data': 'error', 'message': 'Username Taken'})
-        
-        else:
-            user_add = AuthUser(password = password,is_superuser=role_id,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=timezone.now())
-            user_add.save()
+    user_name = request.POST.get('Username')
+    firstname = request.POST.get('Firstname')
+    middlename = request.POST.get('Middlename')
+    id_no = request.POST.get('IdNo')
+    lastname = request.POST.get('Lastname')
+    password = request.POST.get('Password')
+    email = request.POST.get('Email')
+    
+    # role_id = request.POST.get('Roles')
+    role_ids = request.POST.getlist('Roles')
+    
 
-            max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
-            user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,role_id = role_id,user_id = max_id)
-            user_details_add.save()
+    print("testtt")
+    print(role_ids)
+    print(user_name)
 
-            return JsonResponse({'data': 'success'})
-    except Exception as e:
-        return JsonResponse({'data': 'error'})
+
+
+    sex = request.POST.get('Sex')
+    address = request.POST.get('Address')
+    position = request.POST.get('Position')
+    password = make_password(password)
+    user_id = request.session.get('user_id', 0)
+
+    if AuthUser.objects.filter(username=user_name):
+        return JsonResponse({'data': 'error', 'message': 'Username Taken'})
+    
+    else:
+        # user_add = AuthUser(password = password,is_superuser=1,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=timezone.now())
+        # user_add.save()
+
+        # max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
+        # user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,role_id = 2,user_id = max_id)
+        # user_details_add.save()
+
+        # for role in zip(role_id):
+        #     role_p_lib = RolePermissions(
+        #     role_id=role,
+        #     user_id=user_id
+        #     )
+        #     role_p_lib.save()
+
+
+        for role_id in role_ids:
+            role_p_lib = RolePermissions(
+                role_id=int(role_id), 
+                user_id=user_id
+            )
+            role_p_lib.save()
+
+        return JsonResponse({'data': 'success'})
+
     
 #End User function ---------------->
 
