@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, StaffDetails,RoleDetails )
+from main.models import (AuthUser, StaffDetails,RoleDetails, RolePermissions )
 import json 
 from django.core.serializers import serialize
 import datetime
@@ -29,20 +29,35 @@ def get_user_details(request):
 
 @login_required(login_url='login')
 def users(request):
-    user_details = get_user_details(request)
-    print(user_details.role_id)
-    print("testdawrole")
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
     allowed_roles = ["Admin"]    
-    if role.role_name in allowed_roles:
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
-            'role_permission': role.role_name,
+            'permissions' : role_names,
             'role_details': RoleDetails.objects.filter().order_by('role_name'),
         }
         return render(request, 'admin/users.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+
+# @login_required(login_url='login')
+# def users(request):
+#     user_details = get_user_details(request)
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     allowed_roles = ["Admin"]    
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
+#             'role_permission': role.role_name,
+#             'role_details': RoleDetails.objects.filter().order_by('role_name'),
+#         }
+#         return render(request, 'admin/users.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
 
 
 @csrf_exempt
@@ -107,35 +122,49 @@ def updateuser(request):
 
 @csrf_exempt
 def user_add(request):
-    try:
-        user_name = request.POST.get('Username')
-        firstname = request.POST.get('Firstname')
-        middlename = request.POST.get('Middlename')
-        id_no = request.POST.get('IdNo')
-        lastname = request.POST.get('Lastname')
-        password = request.POST.get('Password')
-        email = request.POST.get('Email')
-        role_id = request.POST.get('Roles')
-        sex = request.POST.get('Sex')
-        address = request.POST.get('Address')
-        position = request.POST.get('Position')
-        password = make_password(password)
-        user_id = request.session.get('user_id', 0)
 
-        if AuthUser.objects.filter(username=user_name):
-            return JsonResponse({'data': 'error', 'message': 'Username Taken'})
+    user_name = request.POST.get('Username')
+    firstname = request.POST.get('Firstname')
+    middlename = request.POST.get('Middlename')
+    id_no = request.POST.get('IdNo')
+    lastname = request.POST.get('Lastname')
+    password = request.POST.get('Password')
+    email = request.POST.get('Email')
+    
+    # role_id = request.POST.get('Roles')
+    role_ids = request.POST.getlist('Roles')
+    superuser = 0
+    
+
+    sex = request.POST.get('Sex')
+    address = request.POST.get('Address')
+    position = request.POST.get('Position')
+    password = make_password(password)
+    user_id = request.session.get('user_id', 0)
+
+    if '1' in role_ids: 
+        superuser = 1
         
-        else:
-            user_add = AuthUser(password = password,is_superuser=role_id,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=timezone.now())
-            user_add.save()
+    if AuthUser.objects.filter(username=user_name):
+        return JsonResponse({'data': 'error', 'message': 'Username Taken'})
+    
+    else:
+        user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=timezone.now())
+        user_add.save()
+        max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
+        user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,role_id = 2,user_id = max_id)
+        user_details_add.save()
 
-            max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
-            user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,role_id = role_id,user_id = max_id)
-            user_details_add.save()
+        auth_max = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
+        for role_id in role_ids:
+            role_p_lib = RolePermissions(
+                role_id=int(role_id), 
+                user_id=auth_max
+            )
+            role_p_lib.save()
 
-            return JsonResponse({'data': 'success'})
-    except Exception as e:
-        return JsonResponse({'data': 'error'})
+        return JsonResponse({'data': 'success'})
+
     
 #End User function ---------------->
 
@@ -237,7 +266,7 @@ def user_load(request):
                 'sex': user_details_item.sex,
                 'address': user_details_item.address,
                 'position': user_details_item.position,
-                'role_name': role_name,
+                'role_name': '',
                 'id': item.id,
                 'username': item.username,
                 'first_name': item.first_name,

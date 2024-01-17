@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge,Charges)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, Charges, RolePermissions)
 import json 
 from django.core import serializers
 from datetime import date as datetime_date
@@ -31,16 +31,39 @@ def get_user_details(request):
 @csrf_exempt
 def tracking_list(request):
     user_details = get_user_details(request)
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+
+    user_id = request.session.get('user_id', 0)
+
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+              
+
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'role_permission' : role.role_name,
+            'permissions' : role_names,
         }
         return render(request, 'tracking/tracking_list.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+
+# @login_required(login_url='login')
+# @csrf_exempt
+# def tracking_list(request):
+#     user_details = get_user_details(request)
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+#             'role_permission' : role.role_name,
+#         }
+#         return render(request, 'tracking/tracking_list.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
     
 def tracking_load(request):
     total = 0
@@ -317,32 +340,74 @@ def employee_details(request):
 @login_required(login_url='login')
 @csrf_exempt
 def travel_history(request):
-    user_details = get_user_details(request)
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "End user"] 
+    user_id = request.session.get('user_id', 0)
+
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'role_permission' : role.role_name,
+            'permissions' : role_names,
         }
         return render(request, 'tracking/travel_history.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
+
 @login_required(login_url='login')
 @csrf_exempt
 def travel_calendar(request):
-    user_details = get_user_details(request)
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff","Payroll staff","Certified staff", "End user"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'role_permission' : role.role_name,
+            'permissions' : role_names,
         }
         return render(request, 'tracking/travel_calendar.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+
+
+# @login_required(login_url='login')
+# @csrf_exempt
+# def travel_history(request):
+#     user_details = get_user_details(request)
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+#             'role_permission' : role.role_name,
+#         }
+#         return render(request, 'tracking/travel_history.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
+    
+
+    
+# @login_required(login_url='login')
+# @csrf_exempt
+# def travel_calendar(request):
+#     user_details = get_user_details(request)
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+#             'role_permission' : role.role_name,
+#         }
+#         return render(request, 'tracking/travel_calendar.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
     
 def travel_history_load(request):
     total = 0
