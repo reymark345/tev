@@ -100,11 +100,20 @@ DATABASES = {
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2023',
-        'USER':'fmd',
-        'PASSWORD':'kr*KS[nKROg*HoRa',
+        'USER':'tris',
+        'PASSWORD':'vOHA]ko(5))If-LU',
         'HOST':'172.31.240.235',
         'PORT':'3306',
     },
+
+    # 'finance': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2023',
+    #     'USER':'fmd',
+    #     'PASSWORD':'kr*KS[nKROg*HoRa',
+    #     'HOST':'172.31.240.235',
+    #     'PORT':'3306',
+    # },
 
     # #for live main database INFIMOS
     # 'finance': {
