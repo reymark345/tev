@@ -353,12 +353,20 @@
               <label class="form-label" for="status">Roles</label>
               <div class="input-group input-group-merge">
                 <div class="col-12 col-xxl-12 col-xl-12">
-                  <select class="select2 form-select dt-roles" name="Roles" id="roles">
+
+                  <!-- <select class="select2 form-select dt-roles" name="Roles" id="roles">
                     <option></option>
                     {% for row in role_details %}
                     <option value="{{ row.id }}">{{ row.role_name }}</option>
                     {% endfor %}
-                  </select>
+                  </select> -->
+
+
+                  <select id="roles" class="select2 form-select roles" name="Roles" multiple>
+                    {% for row in role_details %}
+                    <option value="{{ row.id }}">{{ row.role_name }}</option>
+                    {% endfor %}
+                </select>
                 </div>
               </div>
             </div>
@@ -1160,7 +1168,15 @@
                 dropdownParent: Roles.parent(),
                 allowClear: true,
             })
-        }
+        }	
+        // if (Roles.length) {
+        //     Roles.wrap('<div class="position-relative"></div>')
+        //     Roles.select2({
+        //         placeholder: 'Choose Roles',
+        //         dropdownParent: Roles.parent(),
+        //         allowClear: true,
+        //     })
+        // }
         if (Sex.length) {
             Sex.wrap('<div class="position-relative"></div>')
             Sex.select2({

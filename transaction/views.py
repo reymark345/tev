@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges, RolePermissions)
 import json 
 from django.core import serializers
 from datetime import date, datetime, timedelta
@@ -65,37 +65,70 @@ def list(request):
     
 @login_required(login_url='login')
 def list_payroll(request):
-    user_details = get_user_details(request)
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff","Payroll staff", "Certified staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'charges' : Charges.objects.filter().order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
             'division' : Division.objects.filter(status=0).order_by('name'),
-            'role_permission' : role.role_name,
+            'permissions' : role_names,
         }
         return render(request, 'transaction/p_preparation.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
+# @login_required(login_url='login')
+# def list_payroll(request):
+#     user_details = get_user_details(request)
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'charges' : Charges.objects.filter().order_by('name'),
+#             'cluster' : Cluster.objects.filter().order_by('name'),
+#             'division' : Division.objects.filter(status=0).order_by('name'),
+#             'role_permission' : role.role_name,
+#         }
+#         return render(request, 'transaction/p_preparation.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
+    
 
 @login_required(login_url='login')
 @csrf_exempt
 def assign_payroll(request):
-    user_details = get_user_details(request)
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
-        user_details = get_user_details(request)
-        allowed_roles = ["Admin", "Payroll staff"] 
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
-            'role_permission' : role.role_name,
+            'permissions' : role_names,
         }
         return render(request, 'transaction/p_preparation.html', context)
     else:
         return render(request, 'pages/unauthorized.html')    
     
+# @login_required(login_url='login')
+# @csrf_exempt
+# def assign_payroll(request):
+#     user_details = get_user_details(request)
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     if role.role_name in allowed_roles:
+#         user_details = get_user_details(request)
+#         allowed_roles = ["Admin", "Payroll staff"] 
+#         context = {
+#             'role_permission' : role.role_name,
+#         }
+#         return render(request, 'transaction/p_preparation.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')        
     
 @login_required(login_url='login')
 @csrf_exempt
@@ -134,12 +167,19 @@ def save_payroll(request):
 def box_a(request):
     user_details = get_user_details(request)
 
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'role_permission' : role.role_name,
+            'permissions' : role_names,
             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
             'cluster' : Cluster.objects.filter().order_by('id'),
             'division' : Division.objects.filter(status=0).order_by('id'),
@@ -149,6 +189,26 @@ def box_a(request):
         return render(request, 'transaction/p_printing.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+# @login_required(login_url='login')
+# def box_a(request):
+#     user_details = get_user_details(request)
+
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
+#     if role.role_name in allowed_roles:
+#         context = {
+#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+#             'role_permission' : role.role_name,
+#             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
+#             'cluster' : Cluster.objects.filter().order_by('id'),
+#             'division' : Division.objects.filter(status=0).order_by('id'),
+#             'charges' : Charges.objects.filter().order_by('name')
+
+#         }
+#         return render(request, 'transaction/p_printing.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
     
 
 @login_required(login_url='login')

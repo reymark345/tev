@@ -1,5 +1,5 @@
 from faker import Faker
-from main.models import SystemConfiguration, StaffDetails, RoleDetails,Cluster,Charges,Division, Status, RemarksLib
+from main.models import SystemConfiguration, StaffDetails, RoleDetails,Cluster,Charges,Division, Status, RemarksLib, RolePermissions
 import numpy as np
 
 fake = Faker()
@@ -45,6 +45,9 @@ system_configuration_db.save()
 
 userdb = StaffDetails(id_number ='16-11810',division='Finance Management Division',section ='Accounting sectiion', position ='CMT II', sex = 'Male', address='J.P. Rizal', user_id = '1', role_id = '1')
 userdb.save()
+
+role_p = RolePermissions(role_id ='1',user_id='1')
+role_p.save()
 
 
 
