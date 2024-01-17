@@ -89,53 +89,53 @@ WSGI_APPLICATION = 'tev.wsgi.application'
 # }
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'tris',
-    #     'USER': 'tris',
-    #     'PASSWORD': 'vOHA]ko(5))If-LU',
-    #     'HOST': '172.31.240.235',
-    #     'PORT': '3306',
-    # },
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'tris',
+        'USER': 'tris',
+        'PASSWORD': 'vOHA]ko(5))If-LU',
+        'HOST': '172.31.240.235',
+        'PORT': '3306',
+    },
+    'finance': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'infimos_2023',
+        'USER':'fmd',
+        'PASSWORD':'kr*KS[nKROg*HoRa',
+        'HOST':'172.31.240.235',
+        'PORT':'3306',
+    },
+
+    # #for live main database INFIMOS
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'infimos_2023',
-    #     'USER':'fmd',
-    #     'PASSWORD':'kr*KS[nKROg*HoRa',
+    #     'USER':'fmdDeveloper',
+    #     'PASSWORD':'M@tth3w6fmd-developer',
     #     'HOST':'172.31.240.235',
     #     'PORT':'3306',
     # },
 
-    # # #for live main database INFIMOS
-    # # 'finance': {
-    # #     'ENGINE': 'django.db.backends.mysql',
-    # #     'NAME': 'infimos_2023',
-    # #     'USER':'fmdDeveloper',
-    # #     'PASSWORD':'M@tth3w6fmd-developer',
-    # #     'HOST':'172.31.240.235',
-    # #     'PORT':'3306',
-    # # },
-
-    #for localhost main database
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tev_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    },
+    # #for localhost main database
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'tev_db',
+    #     'USER': 'root',
+    #     'PASSWORD': '',
+    #     'HOST': 'localhost',
+    #     'PORT': '3306',
+    # },
 
 
-    #for localhost INFIMOS database
-    'finance': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'finance',
-        'USER':'root',
-        'PASSWORD':'',
-        'HOST':'localhost',
-        'PORT':'3306',
-    },
+    # #for localhost INFIMOS database
+    # 'finance': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'finance',
+    #     'USER':'root',
+    #     'PASSWORD':'',
+    #     'HOST':'localhost',
+    #     'PORT':'3306',
+    # },
 }
 
 
