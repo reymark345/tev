@@ -18,6 +18,7 @@ from django.contrib.auth.hashers import make_password
 import math
 from django.db.models import Max
 from django.utils import timezone
+from django.db import connection
 
 
 
@@ -205,28 +206,39 @@ def user_edit(request):
     data = json.dumps(data)
     return HttpResponse(data, content_type="application/json")
 
+
 @csrf_exempt
 def role_edit(request):
-    id = request.GET.get('id')
-    items = AuthUser.objects.get(pk=id)
-    userdetail = StaffDetails.objects.get(user_id=id)
-    data = serialize("json", [items])
-    data = json.loads(data)
-    userdetail_data = serialize("json", [userdetail])
-    userdetail_data = json.loads(userdetail_data)
-    data[0]['fields'].update(userdetail_data[0]['fields'])
-    data = json.dumps(data)
-    return HttpResponse(data, content_type="application/json")
+    try:
+        id = request.GET.get('id')
+        items = RolePermissions.objects.filter(user_id=id)
+
+        response_list = []
+        for item in items:
+            response_list.append({
+                'role_id': item.role_id,
+                'user_id': item.user_id,
+            })
+
+        return JsonResponse(response_list, safe=False)
+    
+    except Exception as e:
+        return JsonResponse({'data': 'error'})
 
 @csrf_exempt
 def role_update(request):
-    try:
-        id = request.POST.get('RoleID')
-        role = request.POST.get('ModalRole')
-        StaffDetails.objects.filter(user_id=id).update(role_id=role)
-        return JsonResponse({'data': 'success'})
-    except Exception as e:
-        return JsonResponse({'data': 'error'})
+    id = request.POST.get('role_id')
+    # role = request.POST.get('ModalRole')
+    role = request.POST.getlist('modal_role[]')
+    RolePermissions.objects.filter(user_id=id).delete()
+    for role_id in role:
+        role_p_lib = RolePermissions(
+            role_id=int(role_id), 
+            user_id=id
+        )
+        role_p_lib.save()
+
+    return JsonResponse({'data': 'success'})
     
 @csrf_exempt
 def update_password(request):
@@ -237,44 +249,50 @@ def update_password(request):
         return JsonResponse({'data': 'success'})
     except Exception as e:
         return JsonResponse({'data': 'error'})
+    
+
 
 def user_load(request):    
-    user_data = AuthUser.objects.select_related('staffdetails').order_by('-date_joined')
-    id_list = [item.id for item in user_data]
-    total = user_data.count()
     data = []
-    user_details = StaffDetails.objects.filter(user_id__in=id_list)
 
+    user_data = """
+        SELECT t1.id, t1.username, t1.first_name, t1.last_name, t2.position, t1.email, t2.sex, t2.address, GROUP_CONCAT(t4.role_name SEPARATOR ', ') AS role, t2.id AS staff_id, t1.is_active
+        FROM auth_user AS t1 
+        LEFT JOIN staff_details AS t2 ON t2.user_id = t1.id
+        LEFT JOIN role_permissions AS t3 ON t3.user_id = t1.id
+        LEFT JOIN role_details AS t4 ON t4.id = t3.role_id
+        GROUP BY t1.id ORDER BY t1.date_joined DESC;
+    """
+    with connection.cursor() as cursor:
+        cursor.execute(user_data)
+        columns = [col[0] for col in cursor.description]
+        user_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    total = len(user_data)
     _start = request.GET.get('start')
     _length = request.GET.get('length')
+    
     if _start and _length:
         start = int(_start)
         length = int(_length)
         page = math.ceil(start / length) + 1
         per_page = length
-
         user_data = user_data[start:start + length]
         
-        
     for item in user_data:
-        user_details_item = next((detail for detail in user_details if detail.user_id == item.id), None)
-        if user_details_item:
-            role_name = user_details_item.role.role_name if user_details_item.role else None
-            user_data_item = {
-                'user_details_id': user_details_item.id,
-
-                'sex': user_details_item.sex,
-                'address': user_details_item.address,
-                'position': user_details_item.position,
-                'role_name': '',
-                'id': item.id,
-                'username': item.username,
-                'first_name': item.first_name,
-                'last_name': item.last_name,
-                'email': item.email,
-                'is_active': item.is_active,
-            }
-            data.append(user_data_item)
+        user_data_item = {
+            'user_details_id': item['staff_id'],
+            'sex': item['sex'],
+            'address': item['address'],
+            'position': item['position'],
+            'role_name': item['role'],
+            'id': item['id'],
+            'username': item['username'],
+            'first_name': item['first_name'],
+            'last_name': item['last_name'],
+            'email': item['email'],
+            'is_active': item['is_active'],
+        }
+        data.append(user_data_item)
 
     response = {
         'data_user': data,
@@ -285,6 +303,61 @@ def user_load(request):
         'recordsFiltered': total,
     }
     return JsonResponse(response)
-#end ----------->
+
+
+
+# def user_load(request):    
+#     data = []
+#     user_data = AuthUser.objects.select_related('staffdetails').order_by('-date_joined')
+    
+#     print(user_data)
+#     print("testtdata")
+
+#     id_list = [item.id for item in user_data]
+#     total = user_data.count()
+
+#     user_details = StaffDetails.objects.filter(user_id__in=id_list)
+
+#     _start = request.GET.get('start')
+#     _length = request.GET.get('length')
+#     if _start and _length:
+#         start = int(_start)
+#         length = int(_length)
+#         page = math.ceil(start / length) + 1
+#         per_page = length
+
+#         user_data = user_data[start:start + length]
+        
+        
+#     for item in user_data:
+#         user_details_item = next((detail for detail in user_details if detail.user_id == item.id), None)
+#         if user_details_item:
+#             role_name = user_details_item.role.role_name if user_details_item.role else None
+#             user_data_item = {
+#                 'user_details_id': user_details_item.id,
+
+#                 'sex': user_details_item.sex,
+#                 'address': user_details_item.address,
+#                 'position': user_details_item.position,
+#                 'role_name': '',
+#                 'id': item.id,
+#                 'username': item.username,
+#                 'first_name': item.first_name,
+#                 'last_name': item.last_name,
+#                 'email': item.email,
+#                 'is_active': item.is_active,
+#             }
+#             data.append(user_data_item)
+
+#     response = {
+#         'data_user': data,
+#         'data': data,
+#         'page': page,
+#         'per_page': per_page,
+#         'recordsTotal': total,
+#         'recordsFiltered': total,
+#     }
+#     return JsonResponse(response)
+
 
        
