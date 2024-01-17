@@ -121,8 +121,13 @@
         <form id="update-role" class="row" onsubmit="return false">
             <input type="hidden" id="role-id" name="RoleID" />
             <div class="col-sm-9">
-                <label class="form-label" for="modalEditUserStatus">Status</label>
-                <select
+                <label class="form-label" for="modalEditUserStatus">Status</label>+
+                <select id="modalrole" class="select2 form-select roles" name="ModalRole" multiple>
+                    {% for row in role_details %}
+                    <option value="{{ row.id }}">{{ row.role_name }}</option>
+                    {% endfor %}
+                </select>
+                <!-- <select
                     id="modalrole"
                     name="ModalRole"
                     class="form-select"
@@ -131,7 +136,7 @@
                     {% for row in role_details %}
                     <option value="{{ row.id }}">{{ row.role_name }}</option>
                     {% endfor %}
-                </select>
+                </select> -->
             </div>
             <div class="col-sm-3 mb-3">
                 <label class="form-label invisible d-none d-sm-inline-block">Button</label>
@@ -205,7 +210,7 @@
         </div>
 
         <div class="col-12 col-md-6">
-            <label class="form-label">Sex</label>
+            <label class="form-label">Sex </label>
             <select
             id="modalsex"
             name="ModalSex"
@@ -353,15 +358,6 @@
               <label class="form-label" for="status">Roles</label>
               <div class="input-group input-group-merge">
                 <div class="col-12 col-xxl-12 col-xl-12">
-
-                  <!-- <select class="select2 form-select dt-roles" name="Roles" id="roles">
-                    <option></option>
-                    {% for row in role_details %}
-                    <option value="{{ row.id }}">{{ row.role_name }}</option>
-                    {% endfor %}
-                  </select> -->
-
-
                   <select id="roles" class="select2 form-select roles" name="Roles" multiple>
                     {% for row in role_details %}
                     <option value="{{ row.id }}">{{ row.role_name }}</option>
@@ -398,7 +394,7 @@
               </div>
       
               <div class="col-sm-12">
-                <label class="form-label" for="Email">Email</label>
+                <label class="form-label" for="Email">Email <small> <i>(optional)</i></small></label>
                 <div class="input-group input-group-merge">
                   <input
                     type="text"
@@ -412,7 +408,7 @@
               </div>
     
               <div class="col-sm-12">
-                <label class="form-label" for="Address">Address</label>
+                <label class="form-label" for="Address">Address <small> <i>(optional)</i></small></label>
                 <div class="input-group input-group-merge">
                   <input
                     type="text"
@@ -426,7 +422,7 @@
               </div>
       
               <div class="col-sm-12">
-                <label class="form-label" for="Position">Position</label>
+                <label class="form-label" for="Position">Position <small> <i>(optional)</i></small></label>
                 <div class="input-group input-group-merge">
                   <input
                     type="text"
@@ -523,7 +519,7 @@
       });
         let ItemID = $('#item-id');
         let ModalID = $('#modal-id');
-        let RoleID = $('#role-id');
+        let RoleID = 0;
         let PasswordID = $('#password-id')
 
         let dataTable = table.DataTable({
@@ -571,7 +567,7 @@
                             return '<span class="badge bg-label-info">'+data+'</span>'
                         }
                         else{
-                            return '<span class="badge bg-label-success">'+data+'</span>'
+                            return '<span class="badge bg-label-primary">'+data+'</span>'
                         }
                     },
                 },
@@ -621,7 +617,6 @@
                     }).done(function (data) {
                         if (data.length > 0) {
                             let fields = data[0].fields
-                            console.log(fields);
                             let pk = data[0].pk
                             let user = $('#user')
         
@@ -641,16 +636,29 @@
                 $('.modal-roles').on('click', function () {
                     let id = $(this).data('id');
                     $('#editPermissionModal').modal('show');
+                    
                     $.ajax({
                         type: 'GET',
                         url: "{% url 'role-edit' %}?id=" + id,
                         dataType: 'json',
                     }).done(function (data) {
                         if (data.length > 0) {
-                            let fields = data[0].fields
-                            let pk = data[0].pk
-                            ModalRole.val(fields.role);
-                            RoleID.val(pk);
+                            let user_id = data[0].user_id;
+                            RoleID = user_id;
+                            ModalRole.val(null).trigger('change');
+                            for (let i = 0; i < data.length; i++) {
+                                let role_id = data[i].role_id;
+                                ModalRole.find('option[value="' + role_id + '"]').prop('selected', true);
+                            }
+                            ModalRole.trigger('change');
+                            if (ModalRole.length) {
+                                ModalRole.wrap('<div class="position-relative"></div>')
+                                ModalRole.select2({
+                                placeholder: 'Choose Roles',
+                                dropdownParent: ModalRole.parent(),
+                                allowClear: true,
+                                })
+                            }	
                         }
                     })
                 }),
@@ -1032,11 +1040,15 @@
                 buttonsStyling: false,
             }).then(function (result) {
                 if (result.value) {
+                    let RoleList = ModalRole.val();
                     var form_data = $('#update-role').serialize();
                     $.ajax({
                         type: 'POST',
                         url: "{% url 'role-update' %}",
-                        data: form_data,
+                        data:{
+                            role_id : RoleID,
+                            modal_role : RoleList,
+                        }
                     }).done(function (data) {
                         if (data.data == 'success') {
                             Swal.fire({
