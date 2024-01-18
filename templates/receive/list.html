@@ -516,7 +516,7 @@
                         var status = row.status; // Access the 'status' value from the 'row' object
 
                         if (status == 3) {
-                            return '<input type="checkbox" disabled="disabled">';
+                            return '<input type="checkbox" disabled="disabled" class="dt-checkboxes form-check-input checkbox-items">';
                         } else {
                             // Render a checkbox for each row with the item ID as its value
                             return '<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="' + data + '">';
