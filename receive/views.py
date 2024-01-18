@@ -825,9 +825,11 @@ def item_add(request):
     middle = request.POST.get('EmpMiddle')
     lname = request.POST.get('EmpLastname')
     user_id = request.session.get('user_id', 0)
+    selected_remarks = request.POST.getlist('selectedRemarks[]')
+    selected_dates = request.POST.getlist('selectedDate[]')
     g_code = generate_code()
-    selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
-    date_values = request.POST.getlist('dateValues[]')
+    # selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
+    # date_values = request.POST.getlist('dateValues[]')
 
 
 
@@ -899,16 +901,24 @@ def item_add(request):
             system_config.save()
             last_added_tevincoming = TevIncoming.objects.latest('id')
 
-            for selected_value, date_value in zip(selected_values, date_values):
+            # for selected_value, date_value in zip(selected_values, date_values):
+            #     remarks_lib = Remarks_r(
+            #         date=date_value,
+            #         incoming_id=last_added_tevincoming.id,
+            #         remarks_lib_id=selected_value
+            #     )
+            #     remarks_lib.save()
+
+            for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
                 remarks_lib = Remarks_r(
-                    date=date_value,
+                    date=selected_dates,
                     incoming_id=last_added_tevincoming.id,
-                    remarks_lib_id=selected_value
+                    remarks_lib_id=selected_remarks
                 )
                 remarks_lib.save()
 
-        print(selected_values)
-        print(date_values)
+        print(selected_remarks)
+        print(selected_dates)
         print("dataassss")
 
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
@@ -929,17 +939,13 @@ def item_add(request):
 
         last_added_tevincoming = TevIncoming.objects.latest('id')
 
-        for selected_value, date_value in zip(selected_values, date_values):
+        for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             remarks_lib = Remarks_r(
-                date=date_value,
+                date=selected_dates,
                 incoming_id=last_added_tevincoming.id,
-                remarks_lib_id=selected_value
+                remarks_lib_id=selected_remarks
             )
             remarks_lib.save()
-
-        print(selected_values)
-        print(date_values)
-        print("dataassss")
 
         if tev_add.id:
             system_config = SystemConfiguration.objects.first()

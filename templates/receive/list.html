@@ -48,7 +48,7 @@
         border: 1px solid red; 
     }
 
-    .error-label {
+    .error-label, .error-label-date {
         color: red; 
         margin-top: 5px; 
     }
@@ -294,11 +294,6 @@
     </div>
 </div>
 
-
-
-
-
-      
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
     <div class="offcanvas-header border-bottom">
@@ -357,6 +352,22 @@
                 <br>
                 <div id="dynamic-input-container"></div>
             </div>
+
+
+            <!-- <div class="container"> -->
+                <div class="row">
+                    
+                    <div class="col-12">
+                        <label class="form-label" >Remarks <small>(optional)</small></label>
+                        <br>
+                        
+                        <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
+                        <span id="remarks_error" style="color: red;"></span>
+                    </div>
+                </div>
+                <div class="rows-container">
+                </div>
+            <!-- </div>  -->
 
             <div class="col-sm-12 mt-4">
                 <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
@@ -883,6 +894,7 @@
                         })
                     }
                     ItemID.val(0);
+                    $('.rows-container').empty();
                     $("#dateField").prop("disabled", false);
                     $(".rangeTravel").prop("disabled", false);
                     OriginalAmount.prop("disabled", false);
@@ -927,6 +939,8 @@
                 })
             },
         }).on('core.form.valid', function () {
+            let selectedIDs = [];
+            let selectedDate = [];
             if (DateTravel.val() && RangeTravel.val() ){
                 toastr.error('Duplicate Travel Date : Select only one', 'Invalid', toast_options);
             }
@@ -957,6 +971,37 @@
                         isValidationError++;
                         $(this).next(".error-message").remove(); // Remove existing error messages
                         $(this).after('<div class="error-message">Required!</div>');
+                    }
+                });
+
+
+                $('.rows-container .row').each(function() {
+                    let selectElement = $(this).find('.select-remarks');
+                    let selectElementDate = $(this).find('.select-remarks');
+                    let selectedValue = selectElement.val();
+                    let selectErrorLabel = selectElement.siblings(".error-label");
+
+                    let inputElement = $(this).find('.input-date');
+                    let inputValue = inputElement.val();
+                    let inputErrorLabel = inputElement.siblings(".error-label-date");
+
+                    if (selectedValue !== "") {
+                        selectedIDs.push(selectedValue);
+                        selectElement.removeClass('has-error');
+                        selectErrorLabel.hide();
+                    } else {
+                        isValidationError++;
+                        selectElement.addClass('has-error');
+                        selectErrorLabel.show();
+                    }
+                    if (inputValue !== "") {
+                        selectedDate.push(inputValue);
+                        inputElement.removeClass('has-error');
+                        inputErrorLabel.hide();
+                    } else {
+                        isValidationError++;
+                        inputElement.addClass('has-error');
+                        inputErrorLabel.show();
                     }
                 });
                 if (isValidationError == 0) {
@@ -1000,7 +1045,9 @@
                                     selectedValues: selectedValues,
                                     dateValues: dateValues,
                                     HDateTravel: hdate_travel,
-                                    ItemID:ItemID.val()
+                                    ItemID:ItemID.val(),
+                                    selectedRemarks: selectedIDs,
+                                    selectedDate: selectedDate
                                 }
                             }).done(function (data) {                
                                 function formatDate(dateString) {
@@ -1215,6 +1262,39 @@
         })
 
     }
+
+    $('#add_remarks').click(function () {     
+        var newRow = $('<div class="row mt-2">' +
+            '<div class="col-5">' +
+            '<select class="form-select select-remarks" id="select_remarks">' +
+                '<option></option>'+
+                '{% for row in remarks_list %}'+
+                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                '{% endfor %}'+
+            '</select>' +
+            '<span class="error-label">Required</span>'+
+            '</div>' +
+            '<div class="col-5">' +
+            '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="" />'+
+            '<span class="error-label-date">Required</span>'+
+            '</div>' +
+            '<div class="col-2">' +
+            '<button type="button" class="btn btn-warning delete-row">-</button>' +
+            '</div>' +
+            '</div>');
+            newRow.find('.error-label, .error-label-date').hide();
+        $('.rows-container').append(newRow);
+    });
+    $('.container').on('click', '.delete-row', function () {
+        $(this).closest('.row').remove();
+    });
+    $(document).on('click', '.delete-row', function () {
+        $(this).closest('.row').remove();
+    });
+
+    $('.container').on('click', '.delete-row', function () {
+            $(this).closest('.row').remove();
+    });
 
     $('#uploadButton').on('click', function(event) {
         if ($('#fileInput').get(0).files.length === 0) {
