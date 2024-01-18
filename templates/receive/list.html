@@ -337,7 +337,7 @@
                 </div>
             </div>
 
-            <div class="col-sm-12">
+            <!-- <div class="col-sm-12">
                 <label class="form-label" >Remarks <small>(optional)</small></label>
                 <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
                     <option></option>
@@ -345,29 +345,30 @@
                     <option value="{{ row.id }}">{{ row.name }}</option>
                     {% endfor %}
                 </select>
+            </div> -->
+
+            <div class="col-sm-12">
+                <div class="col-md-12 mb-2">
+                    <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-warning me-sm-3 me-1">Add Remarks</button>
+                </div>
             </div>
 
-            
+
+
+
+       
             <div class="col-sm-12">
-                <br>
+    
                 <div id="dynamic-input-container"></div>
             </div>
-
-
-            <!-- <div class="container"> -->
-                <div class="row">
-                    
-                    <div class="col-12">
-                        <label class="form-label" >Remarks <small>(optional)</small></label>
-                        <br>
-                        
-                        <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
-                        <span id="remarks_error" style="color: red;"></span>
-                    </div>
+            <div class="row">
+                <div class="col-12">
+   
+                    <span id="remarks_error" style="color: red;"></span>
                 </div>
-                <div class="rows-container">
-                </div>
-            <!-- </div>  -->
+            </div>
+            <div class="rows-container"></div>
+
 
             <div class="col-sm-12 mt-4">
                 <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
@@ -449,19 +450,19 @@
                 $("#dateField").prop("disabled", false);
             } 
         });
-        $(".remarks-list").on("change", function() {
-            $("#dynamic-input-container").empty();
-            selectedRemarks = $(this).val();
-            if (selectedRemarks) {
-                for (var i = 0; i < selectedRemarks.length; i++) {
-                    var inputId = "date-remarks-" + selectedRemarks[i];
-                    var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
-                    var inputValue = remarks_date[i] || "";
-                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
-                    $("#dynamic-input-container").append(inputElement);
-                }
-            }
-        })
+        // $(".remarks-list").on("change", function() {
+        //     $("#dynamic-input-container").empty();
+        //     selectedRemarks = $(this).val();
+        //     if (selectedRemarks) {
+        //         for (var i = 0; i < selectedRemarks.length; i++) {
+        //             var inputId = "date-remarks-" + selectedRemarks[i];
+        //             var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
+        //             var inputValue = remarks_date[i] || "";
+        //             var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
+        //             $("#dynamic-input-container").append(inputElement);
+        //         }
+        //     }
+        // })
 
 
         
@@ -803,19 +804,19 @@
                         if (date_remarks){
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
-                            $('#remarks-list').val([]).trigger('change');
-                            $('#remarks-list option').each(function() {
-                                let optionValue = parseInt($(this).val());
-                                if (lacking.includes(optionValue)) {
-                                    $(this).prop('selected', true);
-                                } 
-                            });
-                            $('#remarks-list').trigger('change');
+                            // $('#remarks-list').val([]).trigger('change');
+                            // $('#remarks-list option').each(function() {
+                            //     let optionValue = parseInt($(this).val());
+                            //     if (lacking.includes(optionValue)) {
+                            //         $(this).prop('selected', true);
+                            //     } 
+                            // });
+                            // $('#remarks-list').trigger('change');
 
                         }
-                        else{
-                            $('#remarks-list').val([]).trigger('change');
-                        }
+                        // else{
+                        //     $('#remarks-list').val([]).trigger('change');
+                        // }
 
                         if(status_val ===3){
                             EmployeeName.val(id_no).trigger('change').prop("disabled", true);
@@ -912,7 +913,7 @@
                     $("#dateField").prop("disabled", false);
                     $(".rangeTravel").prop("disabled", false);
                     OriginalAmount.prop("disabled", false);
-                    $('.title-name').text('Add Tev Record');
+                    $('.title-name').text('Add Travel Data');
                     EmployeeName.val('').trigger('change').prop("disabled", false);
                     $('.form-control').val('');
                     updateSelectedDates();
@@ -963,30 +964,30 @@
             }
             else {
                 let dateValues = [];
-                let isValidationError = -1;
-                let selectedValues = $(".remarks-list").val();
+                let isValidationError = 0;
+                // let selectedValues = $(".remarks-list").val();
                 // $("input[type='date']").each(function() {
                 //     if ($(this).val() !== "") {
                 //         dateValues.push($(this).val());
                 //     }
                 // });
-                $("input[type='date']").each(function() {
-                    var dateValue = $(this).val();
+                // $("input[type='date']").each(function() {
+                //     var dateValue = $(this).val();
 
-                    // Check if the value is not empty before adding to the array
-                    if (dateValue !== "") {
-                        isValidationError-1;
-                        dateValues.push(dateValue);
-                        $(this).next(".error-message").remove();
-                    }
-                    else if (selectedValues.length === 0){
-                        isValidationError = 0;
-                    } else {
-                        isValidationError++;
-                        $(this).next(".error-message").remove(); // Remove existing error messages
-                        $(this).after('<div class="error-message">Required!</div>');
-                    }
-                });
+                //     // Check if the value is not empty before adding to the array
+                //     if (dateValue !== "") {
+                //         isValidationError-1;
+                //         dateValues.push(dateValue);
+                //         $(this).next(".error-message").remove();
+                //     }
+                //     else if (selectedValues.length === 0){
+                //         isValidationError = 0;
+                //     } else {
+                //         isValidationError++;
+                //         $(this).next(".error-message").remove(); // Remove existing error messages
+                //         $(this).after('<div class="error-message">Required!</div>');
+                //     }
+                // });
 
 
                 $('.rows-container .row').each(function() {
@@ -1056,7 +1057,6 @@
                                     EmpLastname: lname,
                                     OriginalAmount: amount,
                                     form_data: form_data,
-                                    selectedValues: selectedValues,
                                     dateValues: dateValues,
                                     HDateTravel: hdate_travel,
                                     ItemID:ItemID.val(),
