@@ -696,12 +696,15 @@
                   FName.val(full_name);
                   AmountIssued.val(amount);
 
-                  
+
+    
                   $('.rows-container').empty();
 
                   chargesList = data.data.map(item => item.charges_id);
                   amountList = data.data.map(item => item.amount);
                   if (data.data.length > 0) {
+
+
                       for (let i = 0; i < data.data.length; i++) {
                           var newRow = $('<div class="row mt-2">' +
                           '<div class="col-5">' +
@@ -731,10 +734,12 @@
                       var newRow = $('<div class="row mt-2">' +
                       '<div class="col-5">' +
                       '<select class="form-select select-charges" id="select-charges">' +
-                          '<option></option>'+
-                          '{% for row in charges %}'+
-                          '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                          '{% endfor %}'+
+                            '<option></option>'+
+                            '{% for row in charges %}'+
+                                '{% if row.name != "Multiple" %}'+
+                                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                '{% endif %}'+
+                            '{% endfor %}'+
                       '</select>' +
                       '<span class="error-label">Required</span>'+
                       '</div>' +
@@ -1263,19 +1268,16 @@
                             payroll_id: temp_id
                         }
                     }).done(function (data) {
-
                         let totalAmount = 0;
                         let amountList = [];
                         let chargesList = [];
                         let preview_amt = [];
                         let preview_charges = [];
-
                         let full_name = data.full_name;
                         let amount = data.amount;
                         FName.val(full_name);
                         AmountIssued.val(amount);
                         $('.rows-container').empty();
-
                         chargesList = data.data.map(item => item.charges_id);
                         amountList = data.data.map(item => item.amount);
                         if (data.data.length > 0) {
@@ -1310,7 +1312,9 @@
                             '<select class="form-select select-charges" id="select-charges">' +
                                 '<option></option>'+
                                 '{% for row in charges %}'+
-                                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% if row.name != "Multiple" %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endif %}'+
                                 '{% endfor %}'+
                             '</select>' +
                             '<span class="error-label">Required</span>'+
