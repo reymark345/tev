@@ -149,8 +149,6 @@ def checking(request):
 @login_required(login_url='login')
 @csrf_exempt
 def search_list(request):
-    
-    print("dataheree")
     user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
@@ -573,9 +571,6 @@ def upload_tev(request):
                     'data': 'empty'
                 }
                 return JsonResponse(response_data) 
-            else:
-                print("falseeee")
-                print(excel_data)
 
             for row in excel_data:
                 g_code = generate_code()
@@ -615,12 +610,9 @@ def upload_tev(request):
                                 duplicate_records[date] = []
                             duplicate_records[date].append({'id_no': record.id_no, 'date_travel': record.date_travel})
 
-                # Print the duplicate records
-                for date, records in duplicate_records.items():
-                    # print(f'Duplicate date_travel: {date}')
-                    for record in records:
-                        # print(f'  id_no: {record["id_no"]}, duplicate_travel: {date}')
 
+                for date, records in duplicate_records.items():
+                    for record in records:
                         duplicate_te.append({
                             'id_no': record["id_no"],
                             'travel': date
@@ -708,17 +700,13 @@ def upload_tev(request):
                    matched_data_list = []
 
         except json.JSONDecodeError:
-            print("JSON decoding error")
             return JsonResponse({'data': 'errorjson'})
 
     else:
-        print("Invalid request")
         return JsonResponse({'data': 'error'})
 
 def item_edit(request):
     id = request.GET.get('id')
-    print("Tesingiddd")
-    print(id)
     items = TevIncoming.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
@@ -917,10 +905,6 @@ def item_add(request):
                 )
                 remarks_lib.save()
 
-        print(selected_remarks)
-        print(selected_dates)
-        print("dataassss")
-
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
 
     else:
@@ -997,7 +981,6 @@ def out_checking_tev(request):
 def tev_details(request):
     
     tev_id = request.POST.get('tev_id')
-    print(tev_id)
     
     result = TevIncoming.objects.filter(id=tev_id).first()
     data = {
