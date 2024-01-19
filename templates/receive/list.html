@@ -48,7 +48,7 @@
         border: 1px solid red; 
     }
 
-    .error-label {
+    .error-label, .error-label-date {
         color: red; 
         margin-top: 5px; 
     }
@@ -294,11 +294,6 @@
     </div>
 </div>
 
-
-
-
-
-      
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
     <div class="offcanvas-header border-bottom">
@@ -342,7 +337,7 @@
                 </div>
             </div>
 
-            <div class="col-sm-12">
+            <!-- <div class="col-sm-12">
                 <label class="form-label" >Remarks <small>(optional)</small></label>
                 <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
                     <option></option>
@@ -350,13 +345,21 @@
                     <option value="{{ row.id }}">{{ row.name }}</option>
                     {% endfor %}
                 </select>
-            </div>
+            </div> -->
 
-            
+            <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-warning me-sm-3 me-1">Add Remarks</button>
             <div class="col-sm-12">
-                <br>
+    
                 <div id="dynamic-input-container"></div>
             </div>
+            <div class="row">
+                <div class="col-12">
+   
+                    <span id="remarks_error" style="color: red;"></span>
+                </div>
+            </div>
+            <div class="rows-container"></div>
+
 
             <div class="col-sm-12 mt-4">
                 <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
@@ -382,6 +385,20 @@
     let selectedRemarks = [];
 
     $(document).ready(function () {
+
+        $('#f-employee-name').on('select2:open', function() {
+        $('.select2-search__field').keydown(function(e) {
+            if (e.keyCode === 9) { // Check if Tab key is pressed
+            var selectedValue = $('#f-employee-name').val();
+            if (selectedValue) {
+                // Assuming the option value is "reymark"
+                $('#f-employee-name').val(['2']).trigger('change.select2');
+            }
+            }
+        });
+        });
+
+
         employeelist();
         $('#loading-screen').hide();
         var dateField = $('#dateField').flatpickr({
@@ -424,19 +441,19 @@
                 $("#dateField").prop("disabled", false);
             } 
         });
-        $(".remarks-list").on("change", function() {
-            $("#dynamic-input-container").empty();
-            selectedRemarks = $(this).val();
-            if (selectedRemarks) {
-                for (var i = 0; i < selectedRemarks.length; i++) {
-                    var inputId = "date-remarks-" + selectedRemarks[i];
-                    var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
-                    var inputValue = remarks_date[i] || "";
-                    var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
-                    $("#dynamic-input-container").append(inputElement);
-                }
-            }
-        })
+        // $(".remarks-list").on("change", function() {
+        //     $("#dynamic-input-container").empty();
+        //     selectedRemarks = $(this).val();
+        //     if (selectedRemarks) {
+        //         for (var i = 0; i < selectedRemarks.length; i++) {
+        //             var inputId = "date-remarks-" + selectedRemarks[i];
+        //             var selectedText = $(this).find('option[value="' + selectedRemarks[i] + '"]').text();
+        //             var inputValue = remarks_date[i] || "";
+        //             var inputElement = '<label class="form-label">Date for <b>' + selectedText + '</b></label> <input type="date" id="' + inputId + '" name="DateRemarks" class="form-control" value="' + inputValue + '" /><br>';
+        //             $("#dynamic-input-container").append(inputElement);
+        //         }
+        //     }
+        // })
 
 
         
@@ -778,19 +795,19 @@
                         if (date_remarks){
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
-                            $('#remarks-list').val([]).trigger('change');
-                            $('#remarks-list option').each(function() {
-                                let optionValue = parseInt($(this).val());
-                                if (lacking.includes(optionValue)) {
-                                    $(this).prop('selected', true);
-                                } 
-                            });
-                            $('#remarks-list').trigger('change');
+                            // $('#remarks-list').val([]).trigger('change');
+                            // $('#remarks-list option').each(function() {
+                            //     let optionValue = parseInt($(this).val());
+                            //     if (lacking.includes(optionValue)) {
+                            //         $(this).prop('selected', true);
+                            //     } 
+                            // });
+                            // $('#remarks-list').trigger('change');
 
                         }
-                        else{
-                            $('#remarks-list').val([]).trigger('change');
-                        }
+                        // else{
+                        //     $('#remarks-list').val([]).trigger('change');
+                        // }
 
                         if(status_val ===3){
                             EmployeeName.val(id_no).trigger('change').prop("disabled", true);
@@ -883,10 +900,11 @@
                         })
                     }
                     ItemID.val(0);
+                    $('.rows-container').empty();
                     $("#dateField").prop("disabled", false);
                     $(".rangeTravel").prop("disabled", false);
                     OriginalAmount.prop("disabled", false);
-                    $('.title-name').text('Add Tev Record');
+                    $('.title-name').text('Add Travel Data');
                     EmployeeName.val('').trigger('change').prop("disabled", false);
                     $('.form-control').val('');
                     updateSelectedDates();
@@ -927,6 +945,8 @@
                 })
             },
         }).on('core.form.valid', function () {
+            let selectedIDs = [];
+            let selectedDate = [];
             if (DateTravel.val() && RangeTravel.val() ){
                 toastr.error('Duplicate Travel Date : Select only one', 'Invalid', toast_options);
             }
@@ -935,28 +955,59 @@
             }
             else {
                 let dateValues = [];
-                let isValidationError = -1;
-                let selectedValues = $(".remarks-list").val();
+                let isValidationError = 0;
+                // let selectedValues = $(".remarks-list").val();
                 // $("input[type='date']").each(function() {
                 //     if ($(this).val() !== "") {
                 //         dateValues.push($(this).val());
                 //     }
                 // });
-                $("input[type='date']").each(function() {
-                    var dateValue = $(this).val();
+                // $("input[type='date']").each(function() {
+                //     var dateValue = $(this).val();
 
-                    // Check if the value is not empty before adding to the array
-                    if (dateValue !== "") {
-                        isValidationError-1;
-                        dateValues.push(dateValue);
-                        $(this).next(".error-message").remove();
-                    }
-                    else if (selectedValues.length === 0){
-                        isValidationError = 0;
+                //     // Check if the value is not empty before adding to the array
+                //     if (dateValue !== "") {
+                //         isValidationError-1;
+                //         dateValues.push(dateValue);
+                //         $(this).next(".error-message").remove();
+                //     }
+                //     else if (selectedValues.length === 0){
+                //         isValidationError = 0;
+                //     } else {
+                //         isValidationError++;
+                //         $(this).next(".error-message").remove(); // Remove existing error messages
+                //         $(this).after('<div class="error-message">Required!</div>');
+                //     }
+                // });
+
+
+                $('.rows-container .row').each(function() {
+                    let selectElement = $(this).find('.select-remarks');
+                    let selectElementDate = $(this).find('.select-remarks');
+                    let selectedValue = selectElement.val();
+                    let selectErrorLabel = selectElement.siblings(".error-label");
+
+                    let inputElement = $(this).find('.input-date');
+                    let inputValue = inputElement.val();
+                    let inputErrorLabel = inputElement.siblings(".error-label-date");
+
+                    if (selectedValue !== "") {
+                        selectedIDs.push(selectedValue);
+                        selectElement.removeClass('has-error');
+                        selectErrorLabel.hide();
                     } else {
                         isValidationError++;
-                        $(this).next(".error-message").remove(); // Remove existing error messages
-                        $(this).after('<div class="error-message">Required!</div>');
+                        selectElement.addClass('has-error');
+                        selectErrorLabel.show();
+                    }
+                    if (inputValue !== "") {
+                        selectedDate.push(inputValue);
+                        inputElement.removeClass('has-error');
+                        inputErrorLabel.hide();
+                    } else {
+                        isValidationError++;
+                        inputElement.addClass('has-error');
+                        inputErrorLabel.show();
                     }
                 });
                 if (isValidationError == 0) {
@@ -997,10 +1048,11 @@
                                     EmpLastname: lname,
                                     OriginalAmount: amount,
                                     form_data: form_data,
-                                    selectedValues: selectedValues,
                                     dateValues: dateValues,
                                     HDateTravel: hdate_travel,
-                                    ItemID:ItemID.val()
+                                    ItemID:ItemID.val(),
+                                    selectedRemarks: selectedIDs,
+                                    selectedDate: selectedDate
                                 }
                             }).done(function (data) {                
                                 function formatDate(dateString) {
@@ -1215,6 +1267,39 @@
         })
 
     }
+
+    $('#add_remarks').click(function () {     
+        var newRow = $('<div class="row mt-2">' +
+            '<div class="col-5">' +
+            '<select class="form-select select-remarks" id="select_remarks">' +
+                '<option></option>'+
+                '{% for row in remarks_list %}'+
+                '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                '{% endfor %}'+
+            '</select>' +
+            '<span class="error-label">Required</span>'+
+            '</div>' +
+            '<div class="col-5">' +
+            '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="" />'+
+            '<span class="error-label-date">Required</span>'+
+            '</div>' +
+            '<div class="col-2">' +
+            '<button type="button" class="btn btn-warning delete-row">-</button>' +
+            '</div>' +
+            '</div>');
+            newRow.find('.error-label, .error-label-date').hide();
+        $('.rows-container').append(newRow);
+    });
+    $('.container').on('click', '.delete-row', function () {
+        $(this).closest('.row').remove();
+    });
+    $(document).on('click', '.delete-row', function () {
+        $(this).closest('.row').remove();
+    });
+
+    $('.container').on('click', '.delete-row', function () {
+            $(this).closest('.row').remove();
+    });
 
     $('#uploadButton').on('click', function(event) {
         if ($('#fileInput').get(0).files.length === 0) {

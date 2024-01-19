@@ -291,9 +291,6 @@ def employee_details(request):
         cursor.execute(query, [idd])
         results = cursor.fetchall()
 
-    print("daks")
-    print(results)
-
 
     id_number = incoming.id_no
     if incoming:
@@ -376,39 +373,6 @@ def travel_calendar(request):
     else:
         return render(request, 'pages/unauthorized.html')
 
-
-# @login_required(login_url='login')
-# @csrf_exempt
-# def travel_history(request):
-#     user_details = get_user_details(request)
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-#             'role_permission' : role.role_name,
-#         }
-#         return render(request, 'tracking/travel_history.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-    
-
-    
-# @login_required(login_url='login')
-# @csrf_exempt
-# def travel_calendar(request):
-#     user_details = get_user_details(request)
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "End user"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-#             'role_permission' : role.role_name,
-#         }
-#         return render(request, 'tracking/travel_calendar.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-    
 def travel_history_load(request):
     total = 0
     finance_database_alias = 'finance'
@@ -448,11 +412,6 @@ def travel_history_load(request):
             cursor.execute(query, [f'{id_number}', f'%{_search}%', f'%{_search}%'])
             columns = [col[0] for col in cursor.description]
             results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-    
-        # with connection.cursor() as cursor:
-        #     cursor.execute(query, [id_number])
-        #     results = cursor.fetchall()
-
     else:
         query = """
             SELECT code,first_name,middle_name,last_name,date_travel,ti.status_id,original_amount,final_amount,incoming_in,incoming_out, tb.purpose, dv_no, ti.user_id FROM tev_incoming AS ti 

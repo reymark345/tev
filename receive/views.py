@@ -149,8 +149,6 @@ def checking(request):
 @login_required(login_url='login')
 @csrf_exempt
 def search_list(request):
-    
-    print("dataheree")
     user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
@@ -573,9 +571,6 @@ def upload_tev(request):
                     'data': 'empty'
                 }
                 return JsonResponse(response_data) 
-            else:
-                print("falseeee")
-                print(excel_data)
 
             for row in excel_data:
                 g_code = generate_code()
@@ -615,12 +610,9 @@ def upload_tev(request):
                                 duplicate_records[date] = []
                             duplicate_records[date].append({'id_no': record.id_no, 'date_travel': record.date_travel})
 
-                # Print the duplicate records
-                for date, records in duplicate_records.items():
-                    # print(f'Duplicate date_travel: {date}')
-                    for record in records:
-                        # print(f'  id_no: {record["id_no"]}, duplicate_travel: {date}')
 
+                for date, records in duplicate_records.items():
+                    for record in records:
                         duplicate_te.append({
                             'id_no': record["id_no"],
                             'travel': date
@@ -708,17 +700,13 @@ def upload_tev(request):
                    matched_data_list = []
 
         except json.JSONDecodeError:
-            print("JSON decoding error")
             return JsonResponse({'data': 'errorjson'})
 
     else:
-        print("Invalid request")
         return JsonResponse({'data': 'error'})
 
 def item_edit(request):
     id = request.GET.get('id')
-    print("Tesingiddd")
-    print(id)
     items = TevIncoming.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
@@ -825,9 +813,11 @@ def item_add(request):
     middle = request.POST.get('EmpMiddle')
     lname = request.POST.get('EmpLastname')
     user_id = request.session.get('user_id', 0)
+    selected_remarks = request.POST.getlist('selectedRemarks[]')
+    selected_dates = request.POST.getlist('selectedDate[]')
     g_code = generate_code()
-    selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
-    date_values = request.POST.getlist('dateValues[]')
+    # selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
+    # date_values = request.POST.getlist('dateValues[]')
 
 
 
@@ -899,17 +889,21 @@ def item_add(request):
             system_config.save()
             last_added_tevincoming = TevIncoming.objects.latest('id')
 
-            for selected_value, date_value in zip(selected_values, date_values):
+            # for selected_value, date_value in zip(selected_values, date_values):
+            #     remarks_lib = Remarks_r(
+            #         date=date_value,
+            #         incoming_id=last_added_tevincoming.id,
+            #         remarks_lib_id=selected_value
+            #     )
+            #     remarks_lib.save()
+
+            for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
                 remarks_lib = Remarks_r(
-                    date=date_value,
+                    date=selected_dates,
                     incoming_id=last_added_tevincoming.id,
-                    remarks_lib_id=selected_value
+                    remarks_lib_id=selected_remarks
                 )
                 remarks_lib.save()
-
-        print(selected_values)
-        print(date_values)
-        print("dataassss")
 
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
 
@@ -929,17 +923,13 @@ def item_add(request):
 
         last_added_tevincoming = TevIncoming.objects.latest('id')
 
-        for selected_value, date_value in zip(selected_values, date_values):
+        for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             remarks_lib = Remarks_r(
-                date=date_value,
+                date=selected_dates,
                 incoming_id=last_added_tevincoming.id,
-                remarks_lib_id=selected_value
+                remarks_lib_id=selected_remarks
             )
             remarks_lib.save()
-
-        print(selected_values)
-        print(date_values)
-        print("dataassss")
 
         if tev_add.id:
             system_config = SystemConfiguration.objects.first()
@@ -991,7 +981,6 @@ def out_checking_tev(request):
 def tev_details(request):
     
     tev_id = request.POST.get('tev_id')
-    print(tev_id)
     
     result = TevIncoming.objects.filter(id=tev_id).first()
     data = {
