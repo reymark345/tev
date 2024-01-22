@@ -686,13 +686,13 @@ def payroll_load(request):
 @csrf_exempt
 def box_load(request):
     adv_filter = request.GET.get('FAdvancedFilter')
-
+    year = request.GET.get('Year')
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
-    status_txt = ''
-    status_txt = '5' if _search == 'outgoing' else '6'
+    print(year)
+    print("halaohhhhh")
      
     search_fields = ['dv_no', 'division__name', 'status__name'] 
     filter_conditions = Q()
