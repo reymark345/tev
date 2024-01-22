@@ -416,7 +416,15 @@
       const table_box_a = $('#tbl-box-a')
       const table = $('#tbl-items');
       const currentDate = new Date();
-      const year_now = currentDate.getFullYear().toString(); 
+  
+      let year_now  = "";
+
+      if(!year_now){
+        console.log("testtt");
+        year_now = currentDate.getFullYear().toString(); 
+        }  
+  
+
       
       const ItemFormValidation = document.getElementById('item-form'),
           AddRecordDv = document.getElementById('add-record-dv'),
@@ -440,7 +448,7 @@
           search_advance_filter = $('#search-advance-filter'),
           FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
           PayrollName = jQuery(document.querySelector('[name="PayrollName"]')),
-          Year = jQuery(document.querySelector('[name="Year"]')),
+          DpYear = jQuery(document.querySelector('[name="DpYear"]')),
           reset_advance_filter = $('#reset-advance-filter'),
           clear_advance_filter = $('#clear-advance-filter');
 
@@ -454,8 +462,11 @@
             positionClass: 'toast-top-right',
             rtl: isRtl,
       });
-      
+
+
         let ItemID = $('#item-id');
+        console.log(year_now);
+        console.log(year_now);
         
         let dataTable = table.DataTable({
             processing: true,
@@ -470,7 +481,7 @@
                     d.FBoxIn = FBoxIn.val()
                     d.FBoxOut = FBoxOut.val()
                     d.BoxStatus = BoxStatus.val()
-                    d.Year = year_now
+                    d.DpYear = year_now
                     d.ListDv = selectedDv;
                 },
             },
@@ -546,9 +557,10 @@
                     orderable: false,
                     searchable: false,
                     render: function (data) {
-                        var itemId = data; // Assuming data contains the ID you want to pass
+                        let itemId = data; // Assuming data contains the ID you want to pass
+                        let view = year_now+ "/"+itemId;
                         return (
-                            '<a href="{% url "preview-box-a" %}?id=' + itemId + '" onclick="window.open(this.href); return false" class="text-body"><i class="text-primary fa fa-print"></i></a>' +
+                            '<a href="{% url "preview-box-a" %}?id=' + view + '" onclick="window.open(this.href); return false" class="text-body"><i class="text-primary fa fa-print"></i></a>' +
                             '<a class="btn btn-sm btn-icon view-data" id="'+itemId+'"><i class="text-primary fa fa-eye"></i></a>'
                         
                         );
@@ -649,24 +661,14 @@
             ],
             drawCallback: function (settings) {
 
-
-                $('#year').val(year_now).trigger('change');
                 const tableId = 'tbl-box-a'; // Change this to the specific table ID you want to populate
                 const tbody = $(`#${tableId} tbody`);
                 let selectOptions = '';
 
                 $('.view-data').on('click', function () {
-                    // alert("fasfasf");
-                    // const selectAllCheckbox = $(`#${tableId} #selectAll`);
-                    // selectAllCheckbox.on('change', function () {
-                    //     const isChecked = this.checked;
-                    //     tbody.find(':checkbox').prop('checked', isChecked);
-                    // });
                     let id = $(this).attr('id');
                     dv_no_id = id
                     data_clicked = true;
-
-
                     
                     $('#update-transaction').modal('show');
                     table_m();
@@ -674,6 +676,10 @@
 
                     dataTable2.ajax.reload();
                     //   updat eTransaction(dv_no_id);
+                });
+                $('.print-data').on('click', function () {
+                    alert("testt");
+
                 });
               $('body').on('click', '.item-update', function () {
                 temp_id = $(this).attr('id');
@@ -903,7 +909,7 @@
 
             // Set the checked state of all checkboxes in the table body
             $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
-            });
+        });
 
         $('.preview-details').on('click', function () {
             bx_id = $(this).data('id');
@@ -924,7 +930,8 @@
     
 
     },
-        })
+    })
+
 
     function employee_list(){
         $.ajax({
@@ -1076,8 +1083,7 @@
  
 
     $('div.head-label').html('<h5 class="card-title mb-0">'+
-        '<select id="year" name="Year" class="form-select">'+
-            '<option></option>'+
+        '<select id="dp-year" name="DpYear" class="form-select">'+
             '<option value="2023">2023</option>'+
             '<option value="2024">2024</option>'+
             '</select>'
@@ -1234,6 +1240,20 @@
             $(this).closest('.row').remove();
         });
 
+        $(document).ready(function () {
+            $('#dp-year').val(year_now);
+
+
+
+            
+        });
+
+        $('#dp-year').change(function () {
+            year_now = $(this).val();
+            let dataTable = $('#tbl-items').DataTable();
+            dataTable.ajax.reload();
+        });
+
         $(document).on("change", ".emp-purpose", function () {
             let dataTable = $('#tbl-box-a').DataTable();
             let closestRow = dataTable.row($(this).closest('tr'));
@@ -1258,6 +1278,7 @@
             });
 
         });
+
 
         
         $(document).on("change", ".emp-charges", function () {
