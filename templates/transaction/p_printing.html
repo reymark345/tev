@@ -419,13 +419,8 @@
   
       let year_now  = "";
 
-      if(!year_now){
-        console.log("testtt");
-        year_now = currentDate.getFullYear().toString(); 
-        }  
-  
-
-      
+      if(!year_now){year_now = currentDate.getFullYear().toString();}  
+    
       const ItemFormValidation = document.getElementById('item-form'),
           AddRecordDv = document.getElementById('add-record-dv'),
           Remarks = jQuery(document.querySelector('[name="Remarks"]')),
@@ -465,8 +460,6 @@
 
 
         let ItemID = $('#item-id');
-        console.log(year_now);
-        console.log(year_now);
         
         let dataTable = table.DataTable({
             processing: true,
@@ -1241,11 +1234,7 @@
         });
 
         $(document).ready(function () {
-            $('#dp-year').val(year_now);
-
-
-
-            
+            $('#dp-year').val(year_now); 
         });
 
         $('#dp-year').change(function () {

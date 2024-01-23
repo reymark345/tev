@@ -217,8 +217,6 @@ def preview_box_a(request):
     outgoing_id = request.GET.get('id')
     user_id = request.session.get('user_id', 0)
 
-
-    
     year, ot_id = outgoing_id.split('/')
     year = int(year)
     outgoing_id = int(ot_id)
@@ -708,7 +706,7 @@ def box_load(request):
     print(last_two_digits)
 
     dv_no_string = f"{last_two_digits:02d}-"
-
+    
 
     # print("Last two digits: %d" % last_two_digits)
      
