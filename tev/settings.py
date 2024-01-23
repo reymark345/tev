@@ -118,14 +118,14 @@ DATABASES = {
     #     'PORT':'3306',
     # },
 
-    'finance_2024': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'infimos_2024',
-        'USER':'fmdDeveloper',
-        'PASSWORD':'M@tth3w6fmd-developer',
-        'HOST':'172.31.240.235',
-        'PORT':'3306',
-    },
+    # 'finance_2024': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2024',
+    #     'USER':'fmdDeveloper',
+    #     'PASSWORD':'M@tth3w6fmd-developer',
+    #     'HOST':'172.31.240.235',
+    #     'PORT':'3306',
+    # },
 
     #for localhost main database
     'default': {
@@ -140,6 +140,14 @@ DATABASES = {
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'finance',
+        'USER':'root',
+        'PASSWORD':'',
+        'HOST':'localhost',
+        'PORT':'3306',
+    },
+    'finance_2024': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'infimos_2024',
         'USER':'root',
         'PASSWORD':'',
         'HOST':'localhost',
