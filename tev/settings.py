@@ -119,21 +119,39 @@ DATABASES = {
     # },
     # #for localhost INFIMOS database
     # 'finance': {
+        #     'ENGINE': 'django.db.backends.mysql',
+        #     'NAME': 'finance',
+        #     'USER':'root',
+        #     'PASSWORD':'',
+        #     'HOST':'localhost',
+        #     'PORT':'3306',
+        # },
+        # 'finance_2024': {
+        #     'ENGINE': 'django.db.backends.mysql',
+        #     'NAME': 'infimos_2024',
+        #     'USER':'root',
+        #     'PASSWORD':'',
+        #     'HOST':'localhost',
+        #     'PORT':'3306',
+        # },
+
+    # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'finance',
-    #     'USER':'root',
-    #     'PASSWORD':'',
-    #     'HOST':'localhost',
+    #     'NAME': 'infimos_2023',
+    #     'USER':'fmdDeveloper',
+    #     'PASSWORD':'M@tth3w6fmd-developer',
+    #     'HOST':'172.31.240.235',
     #     'PORT':'3306',
     # },
     # 'finance_2024': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'infimos_2024',
-    #     'USER':'root',
-    #     'PASSWORD':'',
-    #     'HOST':'localhost',
+    #     'USER':'fmdDeveloper',
+    #     'PASSWORD':'M@tth3w6fmd-developer',
+    #     'HOST':'172.31.240.235',
     #     'PORT':'3306',
     # },
+
 }
 
 
