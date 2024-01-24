@@ -138,6 +138,28 @@ def division_add(request):
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
     
+# @csrf_exempt
+# def division_update(request):
+#     id = request.POST.get('ItemID')
+#     division = request.POST.get('Division')
+#     acrym = request.POST.get('Acronym')
+#     divchief = request.POST.get('Chief')
+#     c_designate = request.POST.get('CDesignation')
+#     approval = request.POST.get('Approval')
+#     ap_designation = request.POST.get('APDesignation')
+#     user_id = request.session.get('user_id', 0)
+
+#     print(id)
+#     print("testdibvv")
+
+#     if Division.objects.filter(name=division, status = 0).exclude(id=id):
+#         return JsonResponse({'data': 'error', 'message': 'Duplicate Division'})
+#     else:
+#         division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id, status=0)
+#         Division.objects.filter(id=id).update(updated_at =date.datetime.now(),status =1)
+#         division_add.save()
+#         return JsonResponse({'data': 'success'})
+    
 @csrf_exempt
 def division_update(request):
     id = request.POST.get('ItemID')
@@ -149,13 +171,19 @@ def division_update(request):
     ap_designation = request.POST.get('APDesignation')
     user_id = request.session.get('user_id', 0)
 
+    print(id)
+    print("testdibvv")
+
     if Division.objects.filter(name=division, status = 0).exclude(id=id):
         return JsonResponse({'data': 'error', 'message': 'Duplicate Division'})
     else:
-        division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id, status=0)
-        Division.objects.filter(id=id).update(updated_at =date.datetime.now(),status =1)
-        division_add.save()
+        # division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id, status=0)
+        Division.objects.filter(id=id).update(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id,updated_at =date.datetime.now())
+
         return JsonResponse({'data': 'success'})
+    
+
+
     
     
 def division_edit(request):
