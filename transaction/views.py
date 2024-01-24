@@ -190,32 +190,17 @@ def box_a(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-# @login_required(login_url='login')
-# def box_a(request):
-#     user_details = get_user_details(request)
-
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-#             'role_permission' : role.role_name,
-#             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
-#             'cluster' : Cluster.objects.filter().order_by('id'),
-#             'division' : Division.objects.filter(status=0).order_by('id'),
-#             'charges' : Charges.objects.filter().order_by('name')
-
-#         }
-#         return render(request, 'transaction/p_printing.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-    
-
 @login_required(login_url='login')
 def preview_box_a(request):
     finance_database_alias = 'finance'    
     outgoing_id = request.GET.get('id')
     user_id = request.session.get('user_id', 0)
+
+    results = []
+    total_final_amount = 0.0
+    emp_list_lname = []
+    charges_list = []
+    data_result = []
 
     year, ot_id = outgoing_id.split('/')
     year = int(year)
@@ -226,19 +211,11 @@ def preview_box_a(request):
     else:
         finance_database_alias = 'finance_2024' 
 
-    results = []
-    total_final_amount = 0.0
-    emp_list_code = []
-    emp_list_lname = []
-    charges_list = []
-    data_result = []
-    
     userData = AuthUser.objects.filter(id=user_id)
     full_name = userData[0].first_name + ' ' + userData[0].last_name
 
     designation = StaffDetails.objects.filter(user_id= user_id)
     position = designation[0].position
-    
     
     if outgoing_id:
         tev_incoming_ids = TevBridge.objects.filter(tev_outgoing_id=outgoing_id).values_list('tev_incoming_id', flat=True)
@@ -275,26 +252,33 @@ def preview_box_a(request):
                 tev_incoming.last_name;
         """
         total_final_amount = 0
+
+        if not tev_incoming_ids:
+            return render(request, 'pages/not_found.html', {'message': "No Travel assigned in this DV!",'text': "You must assign at least one travel to this DV to view the data" })
         with connection.cursor() as cursor:
             cursor.execute(query, [tuple(tev_incoming_ids)])
             rows = cursor.fetchall()
             for row in rows:
-                total_final_amount += Decimal(row[11]) if row[11] is not None else Decimal('0.0')
-                data_dict = {
-                    "id": row[0],
-                    "first_name": row[1],
-                    "last_name": row[2],
-                    "middle_name": row[3],
-                    "id_no": row[4],
-                    "account_no": row[5],
-                    "final_amount": row[6],
-                    "purpose": row[7],
-                    "dv_no": row[8],
-                    "name": row[9],
-                    "charges_name": row[10],
-                    "charges_amount": row[11]
-                }
-                data_result.append(data_dict)
+                if row[11] == None:
+
+                    return render(request, 'pages/not_found.html', {'message': "There was Travel with no assigned charges!",'text': "You must assign charges under this DV"})
+                else:
+                    total_final_amount += Decimal(row[11]) if row[11] is not None else Decimal('0.0')
+                    data_dict = {
+                        "id": row[0],
+                        "first_name": row[1],
+                        "last_name": row[2],
+                        "middle_name": row[3],
+                        "id_no": row[4],
+                        "account_no": row[5],
+                        "final_amount": row[6],
+                        "purpose": row[7],
+                        "dv_no": row[8],
+                        "name": row[9],
+                        "charges_name": row[10],
+                        "charges_amount": row[11]
+                    }
+                    data_result.append(data_dict)
         
         outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__chief','division__c_designation','division__approval','division__ap_designation').first()
         dvno = outgoing['dv_no']
@@ -600,7 +584,7 @@ def payroll_load(request):
             cursor.execute(query, params)
             results = dictfetchall(cursor)
 
-            print (results)
+  
 
     
     elif _search:
@@ -693,23 +677,14 @@ def payroll_load(request):
 @csrf_exempt
 def box_load(request):
     adv_filter = request.GET.get('FAdvancedFilter')
-
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
     year = request.GET.get('DpYear')
-    print("owowooooo111o2")
-    print(year)
     year = int(year)
     last_two_digits = year % 100
-    print(last_two_digits)
-
     dv_no_string = f"{last_two_digits:02d}-"
-    
-
-    # print("Last two digits: %d" % last_two_digits)
-     
     search_fields = ['dv_no', 'division__name', 'status__name'] 
     filter_conditions = Q()
 
@@ -876,8 +851,6 @@ def update_status(request):
 @csrf_exempt
 def dv_number_lib(request):
     dv_list = TevOutgoing.objects.values_list('dv_no', flat=True)
-    # dv_list = list(dv_list)
-    # print(dv_list)
     return JsonResponse({'data': dv_list})
 
 
