@@ -439,441 +439,463 @@
                 'firstDayOfWeek': 1 // start week on Monday
             },
       });
-        const table = $('#tbl-items')
-        const ItemFormValidation = document.getElementById('item-form'),
-            EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
-            OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
-            Remarks = jQuery(document.querySelector('[name="Remarks"]')),
-            FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
-            FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
-            FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
-            FIdNumber = jQuery(document.querySelector('[name="FIdNumber"]')),
-            NDVNumber = jQuery(document.querySelector('[name="NDVNumber"]')),
-            FTransactionCode = jQuery(document.querySelector('[name="FTransactionCode"]')),
-            search_advance_filter = $('#search-advance-filter'),
-            reset_advance_filter = $('#reset-advance-filter'),
-            clear_advance_filter = $('#clear-advance-filter'),
-            offCanvasElement = document.querySelector('#add-new-record')
-        const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
-        const toast_options = (toastr.options = {
-            maxOpened: 1,
-            autoDismiss: true,
-            closeButton: true,
-            newestOnTop: true,
-            progressBar: true,
-            positionClass: 'toast-top-right',
-            rtl: isRtl,
+      const currentDate = new Date();
+      let year_now  = "";
+      if(!year_now){year_now = currentDate.getFullYear().toString();}  
+      const table = $('#tbl-items')
+      const ItemFormValidation = document.getElementById('item-form'),
+          EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
+          OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
+          Remarks = jQuery(document.querySelector('[name="Remarks"]')),
+          FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
+          FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
+          FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
+          FIdNumber = jQuery(document.querySelector('[name="FIdNumber"]')),
+          NDVNumber = jQuery(document.querySelector('[name="NDVNumber"]')),
+          FTransactionCode = jQuery(document.querySelector('[name="FTransactionCode"]')),
+          DpYear = jQuery(document.querySelector('[name="DpYear"]')),
+          search_advance_filter = $('#search-advance-filter'),
+          reset_advance_filter = $('#reset-advance-filter'),
+          clear_advance_filter = $('#clear-advance-filter'),
+          offCanvasElement = document.querySelector('#add-new-record')
+      const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
+      const toast_options = (toastr.options = {
+          maxOpened: 1,
+          autoDismiss: true,
+          closeButton: true,
+          newestOnTop: true,
+          progressBar: true,
+          positionClass: 'toast-top-right',
+          rtl: isRtl,
       });
-        let ItemID = $('#item-id')
+      let ItemID = $('#item-id')
 
-        let dataTable = table.DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{% url 'tracking-load' %}",
-                data: function (d) {
-                    d.FAdvancedFilter = FAdvancedFilter.val()
-                    d.FIdNumber = FIdNumber.val()
-                    d.FTransactionCode = FTransactionCode.val()
-                    d.NDVNumber = NDVNumber.val()
-                    d.FDateTravel = FDateTravel.val()
-                    d.EmployeeList = employeeList
-                },
-            },
-            columns: [
-                { data: 'code' },
-                { data: 'dv_no' },
-                { data: 'full_name' },
-                { data: 'date_travel'},
-                { data: 'final_amount'},
-                { data: 'status'},
-                { data: 'status' },
-                { data: 'status' },
-                { data: 'amt_budget' },
-                { data: 'amt_journal' },
-                { data: 'approved_date' },
-                { data: 'amt_check' },
-                { data: 'id' },
+      let dataTable = table.DataTable({
+          processing: true,
+          serverSide: true,
+          ajax: {
+              url: "{% url 'tracking-load' %}",
+              data: function (d) {
+                  d.FAdvancedFilter = FAdvancedFilter.val()
+                  d.FIdNumber = FIdNumber.val()
+                  d.FTransactionCode = FTransactionCode.val()
+                  d.NDVNumber = NDVNumber.val()
+                  d.FDateTravel = FDateTravel.val()
+                  d.DpYear = year_now
+                  d.EmployeeList = employeeList
+              },
+          },
+          columns: [
+              { data: 'code' },
+              { data: 'dv_no' },
+              { data: 'full_name' },
+              { data: 'date_travel'},
+              { data: 'final_amount'},
+              { data: 'status'},
+              { data: 'status' },
+              { data: 'status' },
+              { data: 'amt_budget' },
+              { data: 'amt_journal' },
+              { data: 'approved_date' },
+              { data: 'amt_check' },
+              { data: 'id' },
 
-            ],
-            columnDefs: [
-            {
-                targets: 0,
-                render: function (data) {
-                    return '<span class="badge bg-label-primary">' + data + '</span>'
-                },
-            },
-            {
-                targets: 1,
-                render: function (data) {
-                    if (data){
-                        return '<span class="badge bg-label-primary">' + data + '</span>'
-                    }
-                    else{
-                        return ''
-                    }
-                    
-                },
-            },
-            {
-                targets: 3,
-                render: function(data) {
-                    var splitValues = data.split(',');  // Split data by comma
-                    var result = '';
-                    
-                    splitValues.forEach(function(value, index) {
-                        if (index !== 0) {
-                            result += '  '; // Add a space before adding subsequent values
-                        }
-                        var dateParts = value.split('-');
-                        var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
-                        var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
-                        
-                        result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
-                    });
-                    
-                    return result;
-                },
-            },
-            {
-                targets: 4,
-                render: function(data) {
-                    var floatValue = parseFloat(data);
-                    if (floatValue !== 0) {
-                        var formattedValue = floatValue.toLocaleString('en-US', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                        });
-                        return '<span class="badge bg-label-primary">₱ ' +formattedValue+'</span>';
-                    } else {
-                        return "";
-                    }
-                },
-            },            
-            {
-                targets: 5,
-                render: function (data) {
-                    data = parseInt(data); 
-
-                    let tooltip = 'Done';
-                    if (data == 1) {
-                        tooltip = "Pending";
-                    }
-                    return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>';
-                },
-            },
-            {
-                targets: 6,
-                render: function (data) {
-                    data = parseInt(data); 
-                    let tooltip = '';
-                    let status = '';
-                    if(data==3){
-                      tooltip = 'Returned';
-                      status = 'bg-danger';
-
-                      return '<span class="badge badge-center rounded-pill bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-x"></i></span>'
-                    }
-                    if(data==2){
-                      tooltip = 'For Checking';
-                      return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
-                    }
-                    if(data==7){
-                      tooltip = 'Approved';
-                      return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
-                    }
-                    else if (data > 3){
-                      tooltip = 'Done';
-                        return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
-                    }
-                    else{
-                        return ''
-                    }
-                    
-                },
-            },
-            {
-              targets: 7,
+          ],
+          columnDefs: [
+          {
+              targets: 0,
+              render: function (data) {
+                  return '<span class="badge bg-label-primary">' + data + '</span>'
+              },
+          },
+          {
+              targets: 1,
+              render: function (data) {
+                  if (data){
+                      return '<span class="badge bg-label-primary">' + data + '</span>'
+                  }
+                  else{
+                      return ''
+                  }
+                  
+              },
+          },
+          {
+              targets: 3,
+              render: function(data) {
+                  var splitValues = data.split(',');  // Split data by comma
+                  var result = '';
+                  
+                  splitValues.forEach(function(value, index) {
+                      if (index !== 0) {
+                          result += '  '; // Add a space before adding subsequent values
+                      }
+                      var dateParts = value.split('-');
+                      var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                      var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
+                      
+                      result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
+                  });
+                  
+                  return result;
+              },
+          },
+          {
+              targets: 4,
+              render: function(data) {
+                  var floatValue = parseFloat(data);
+                  if (floatValue !== 0) {
+                      var formattedValue = floatValue.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2
+                      });
+                      return '<span class="badge bg-label-primary">₱ ' +formattedValue+'</span>';
+                  } else {
+                      return "";
+                  }
+              },
+          },            
+          {
+              targets: 5,
               render: function (data) {
                   data = parseInt(data); 
-                  if (data>=5 && data!=7){
+
+                  let tooltip = 'Done';
+                  if (data == 1) {
+                      tooltip = "Pending";
+                  }
+                  return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>';
+              },
+          },
+          {
+              targets: 6,
+              render: function (data) {
+                  data = parseInt(data); 
+                  let tooltip = '';
+                  let status = '';
+                  if(data==3){
+                    tooltip = 'Returned';
+                    status = 'bg-danger';
+
+                    return '<span class="badge badge-center rounded-pill bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-x"></i></span>'
+                  }
+                  if(data==2){
+                    tooltip = 'For Checking';
+                    return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
+                  }
+                  if(data==7){
+                    tooltip = 'Approved';
+                    return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
+                  }
+                  else if (data > 3){
+                    tooltip = 'Done';
+                      return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
+                  }
+                  else{
+                      return ''
+                  }
+                  
+              },
+          },
+          {
+            targets: 7,
+            render: function (data) {
+                data = parseInt(data); 
+                if (data>=5 && data!=7){
+                    return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                }
+                else{
+                    return ''
+                    
+                }
+
+            },
+        },
+
+          {
+              targets: 8,
+              render: function (data) {
+                  data = parseInt(data); 
+
+                  if (data){
                       return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
                   }
                   else{
                       return ''
-                      
+                  }
+              },
+          },
+
+          {
+              targets: 9,
+              render: function (data) {
+                  data = parseInt(data); 
+
+                  if (data){
+                      return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                  }
+                  else{
+                      return ''
                   }
 
               },
           },
+          {
+              targets: 10,
+              render: function (data) {
 
-            {
-                targets: 8,
-                render: function (data) {
-                    data = parseInt(data); 
+                if (data){
+                    return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                }
+                else{
+                    return ''
+                }
+              },
+          },
+          {
+              targets: 11,
+              render: function (data) {
+                data = parseInt(data); 
+                
+                if (data){
+                    return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                }
+                else{
+                    return ''
+                }
 
-                    if (data){
-                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                    }
-                    else{
-                        return ''
-                    }
-                },
-            },
+              },
+          },
+          {
+              targets: -1,
+              title: 'Action',
+              orderable: false,
+              searchable: false,
+              render: function (data) {
+                  return (
+                      '<a href="javascript:;" data-id="' + data + '" id="'+data+'" class="item-edit text-body view-data"><i class="text-primary ti ti-eye"></i></a>'
+                  )
+              },
+          },
+          
+          ],
+          dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+          buttons: [
+              {
+                  className: 'btn btn-label-primary me-2',
+                  text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                  action: function () {
+                      employeeList = [];
+                      const $selectElement = $('#f-employee-name');
+                      $selectElement.empty();
+                      fetchEmployee($selectElement);
+                      FEmployeeName.val('').trigger('change');
 
-            {
-                targets: 9,
-                render: function (data) {
-                    data = parseInt(data); 
-
-                    if (data){
-                        return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                    }
-                    else{
-                        return ''
-                    }
-
-                },
-            },
-            {
-                targets: 10,
-                render: function (data) {
-
-                  if (data){
-                      return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                      setTimeout(function() {
+                          if (FEmployeeName.length) {
+                              FEmployeeName.wrap('<div class="position-relative"></div>')
+                              FEmployeeName.select2({
+                                  placeholder: 'Choose employee',
+                                  dropdownParent: FEmployeeName.parent(),
+                                  allowClear: true,
+                              })
+                          }
+                      }, 300);
+                      $("#advance-filter").modal("show");
                   }
-                  else{
-                      return ''
-                  }
                 },
-            },
-            {
-                targets: 11,
-                render: function (data) {
-                  data = parseInt(data); 
-                  
-                  if (data){
-                      return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                  }
-                  else{
-                      return ''
-                  }
-
-                },
-            },
-            {
-                targets: -1,
-                title: 'Action',
-                orderable: false,
-                searchable: false,
-                render: function (data) {
-                    return (
-                        '<a href="javascript:;" data-id="' + data + '" id="'+data+'" class="item-edit text-body view-data"><i class="text-primary ti ti-eye"></i></a>'
-                    )
-                },
-            },
-            
-            ],
-            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-            buttons: [
-                {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
-                    action: function () {
-                        employeeList = [];
-                        const $selectElement = $('#f-employee-name');
-                        $selectElement.empty();
-                        fetchEmployee($selectElement);
-                        FEmployeeName.val('').trigger('change');
-
-                        setTimeout(function() {
-                            if (FEmployeeName.length) {
-                                FEmployeeName.wrap('<div class="position-relative"></div>')
-                                FEmployeeName.select2({
-                                    placeholder: 'Choose employee',
-                                    dropdownParent: FEmployeeName.parent(),
-                                    allowClear: true,
-                                })
-                            }
-                        }, 300);
-                        $("#advance-filter").modal("show");
-                    }
-                  },
 
 
-            ],
-            drawCallback: function (settings) { 
-                $('.view-data').on('click', function () {
-                    let id = $(this).attr('id');
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'employee-details' %}",
-                        data:{
-                            dv_id: id
+          ],
+          drawCallback: function (settings) { 
+              $('.view-data').on('click', function () {
+                  let id = $(this).attr('id');
+                  $.ajax({
+                      type: 'POST',
+                      url: "{% url 'employee-details' %}",
+                      data:{
+                          dv_id: id
+                      }
+                  }).done(function (data) {
+                      const tableId = 'tbl-history';
+                      const tbody = $(`#${tableId} tbody`);
+
+                      let fullname = data.full_name;
+                      let id_number = data.id_number;
+                      tbody.empty();
+                      data.data.forEach(function (item) {
+                        let data_date = item.incoming_in;
+                        let inputDate = new Date(item.incoming_in);
+                        const months = [
+                          "January", "February", "March", "April", "May", "June", "July",
+                          "August", "September", "October", "November", "December"
+                        ];
+
+                        function padZero(number) {
+                          return number < 10 ? "0" + number : number;
                         }
-                    }).done(function (data) {
-                        const tableId = 'tbl-history';
-                        const tbody = $(`#${tableId} tbody`);
+                        let month = months[inputDate.getMonth()];
+                        let day = inputDate.getDate();
+                        let year = inputDate.getFullYear();
+                        let hours = inputDate.getHours() % 12 || 12;
+                        let minutes = padZero(inputDate.getMinutes());
+                        let ampm = inputDate.getHours() >= 12 ? "PM" : "AM";
+                        let formattedDate = `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
 
-                        let fullname = data.full_name;
-                        let id_number = data.id_number;
-                        tbody.empty();
-                        data.data.forEach(function (item) {
-                          let data_date = item.incoming_in;
-                          let inputDate = new Date(item.incoming_in);
-                          const months = [
-                            "January", "February", "March", "April", "May", "June", "July",
-                            "August", "September", "October", "November", "December"
-                          ];
+                        const formattedOriginalAmount = parseFloat(item.original_amount).toFixed(2);
+                        const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                        let orgAmountColumn = '';
+                        let finalAmountColumn = '';
+                        let editColumn = '';
+                        let statusColumn = '';
+                        let status = item.status;
+                        let remarks = '';
+                        if (item.remarks) {remarks = item.remarks;} 
+                        else {remarks = remarks = '';}
+                        if (status ==1){
+                          statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
+                        }
+                        else if (status ==2){
+                          statusColumn = `<td><span class="badge bg-label-warning">For Checking</span></td>`;
+                        }
+                        else if (status ==3){
+                          statusColumn = `<td><span class="badge bg-label-danger">Returned</span></td>`;
+                        }
+                        else if (status ==7){
+                          statusColumn = `<td><span class="badge bg-label-success">Approved</span></td>`;
+                        }
+                        else if (status ==4){
+                          statusColumn = `<td><span class="badge bg-label-primary">Payroll</span></td>`;
+                        }
+                        else if (status ==5){
+                          statusColumn = `<td><span class="badge bg-label-warning">Outgoing</span></td>`;
+                        }
+                        else if (status ==6){
+                          statusColumn = `<td><span class="badge bg-label-success">Ongoing</span></td>`;
+                        }
+                        else {
+                          statusColumn = `<td><span class="badge bg-label-primary">${item.status}</span></td>`;
+                        }
+                        orgAmountColumn = `<td>${formattedOriginalAmount}</td>`;
+                        finalAmountColumn = `<td>${formattedFinalAmount}</td>`;
 
-                          function padZero(number) {
-                            return number < 10 ? "0" + number : number;
-                          }
-                          let month = months[inputDate.getMonth()];
-                          let day = inputDate.getDate();
-                          let year = inputDate.getFullYear();
-                          let hours = inputDate.getHours() % 12 || 12;
-                          let minutes = padZero(inputDate.getMinutes());
-                          let ampm = inputDate.getHours() >= 12 ? "PM" : "AM";
-                          let formattedDate = `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
-
-                          const formattedOriginalAmount = parseFloat(item.original_amount).toFixed(2);
-                          const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
-                          let orgAmountColumn = '';
-                          let finalAmountColumn = '';
-                          let editColumn = '';
-                          let statusColumn = '';
-                          let status = item.status;
-                          let remarks = '';
-                          if (item.remarks) {remarks = item.remarks;} 
-                          else {remarks = remarks = '';}
-                          if (status ==1){
-                            statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
-                          }
-                          else if (status ==2){
-                            statusColumn = `<td><span class="badge bg-label-warning">For Checking</span></td>`;
-                          }
-                          else if (status ==3){
-                            statusColumn = `<td><span class="badge bg-label-danger">Returned</span></td>`;
-                          }
-                          else if (status ==7){
-                            statusColumn = `<td><span class="badge bg-label-success">Approved</span></td>`;
-                          }
-                          else if (status ==4){
-                            statusColumn = `<td><span class="badge bg-label-primary">Payroll</span></td>`;
-                          }
-                          else if (status ==5){
-                            statusColumn = `<td><span class="badge bg-label-warning">Outgoing</span></td>`;
-                          }
-                          else if (status ==6){
-                            statusColumn = `<td><span class="badge bg-label-success">Ongoing</span></td>`;
-                          }
-                          else {
-                            statusColumn = `<td><span class="badge bg-label-primary">${item.status}</span></td>`;
-                          }
-                          orgAmountColumn = `<td>${formattedOriginalAmount}</td>`;
-                          finalAmountColumn = `<td>${formattedFinalAmount}</td>`;
-
-                          editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
-                      
-            
-                          const row = `
-                              <tr>
-                                  <td><span class="badge bg-label-primary">${item.code}</span></td>
-                                  <td><span class="badge bg-label-warning">${item.account_no}</span></td>
-                                  ${orgAmountColumn}
-                                  ${finalAmountColumn}
-                                  ${statusColumn}
-                                  <td>${item.purpose}</td>
-                                  <td><span class="badge bg-label-danger">${remarks}</span></td>
-                                  <td><span class="badge bg-label-primary">${formattedDate}</span></td>
-                       
-                              </tr>
-                          `;
-                          tbody.append(row);
-                      
-                        })
-                        $('#employee-id-no').text(id_number);
-                        $('#employee-full-name').text(fullname);
-                        $('#tracking-history').modal('show');
-                    })
+                        editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
                     
-                });
-            }
-        })
-        $('div.head-label').html('<h5 class="card-title mb-0">List</h5>');
-        $('.view-data').on('click', function () {
-            let id = $(this).attr('id');
-            dv_no_id = id
-            
-            $.ajax({
-                type: 'POST',
-                url: "{% url 'employee-dv' %}",
-                data:{
-                    dv_id: id
-                }
-            }).done(function (data) {
-                dv_number = '';
-                charges = '';
-                outgoing_id = 0;
-                dv_number = data.dv_number;
-                charges = data.charges;
-                outgoing_id = data.outgoing_id;
-                $("#f-outgoing-id").val(data.outgoing_id)
-                let is_print = data.is_print;
-                tbody.empty();
-                data.data.forEach(function (item) {
-                  const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
-                  let amountColumn = '';
-                  let editColumn = '';
-                  let deleteColumn = '';
-                  let purposeColumn = '';
-                  let chargesColumn = '';
-                  selectOptions = '';
-                  for (var i = 0; i < charges.length; i++) {
-                      var charge = charges[i];
-                      selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
-                  }
-                  if (is_print) {
-                    $(".create-new").prop("disabled", true);
-                    amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
-                    purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}" disabled></td>`;
-                    chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true" disabled>${selectOptions}</select></td>`;
-                    editColumn = `<a class="btn btn-sm btn-icon" id="${item.id}"><i class="text-primary ti ti-edit-off"></i></a>`;
-                    deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
-                } else {
-                  $(".create-new").prop("disabled", false);
-                    amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
-                    purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
-                    chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
-                    editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
-                    deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
-                }
-                  const row = `
-                      <tr>
-                          <td><input type="checkbox"></td>
-                          <td><span class="badge bg-label-primary">${item.code}</span></td>
-                          <td><span class="badge bg-label-warning">${item.account_no}</span></td>
-                          <td><span class="badge bg-label-primary">${item.id_no}</span></td>
-                          <td>${item.name}</td>
-                          ${amountColumn}
-                          ${purposeColumn}
-                          ${chargesColumn}
-                          <td>${editColumn}${deleteColumn}</td>
-                      </tr>
-                  `;
-                  tbody.append(row);
+          
+                        const row = `
+                            <tr>
+                                <td><span class="badge bg-label-primary">${item.code}</span></td>
+                                <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                                ${orgAmountColumn}
+                                ${finalAmountColumn}
+                                ${statusColumn}
+                                <td>${item.purpose}</td>
+                                <td><span class="badge bg-label-danger">${remarks}</span></td>
+                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
+                      
+                            </tr>
+                        `;
+                        tbody.append(row);
+                    
+                      })
+                      $('#employee-id-no').text(id_number);
+                      $('#employee-full-name').text(fullname);
+                      $('#tracking-history').modal('show');
+                  })
+                  
               });
-              $('#emp-charges').html(selectOptions);
-                let totalAmount = data.total_amount;
-                totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                $('#update-transaction').modal('show');
-            })
-        });
+          }
+      })
+      // $('div.head-label').html('<h5 class="card-title mb-0">List</h5>');
+      $('div.head-label').html('<h5 class="card-title mb-0">'+
+      '<select id="dp-year" name="DpYear" class="form-select">'+
+          '<option value="2023">2023</option>'+
+          '<option value="2024">2024</option>'+
+          '</select>'
+      +'</h5>')
 
+      $('.view-data').on('click', function () {
+          let id = $(this).attr('id');
+          dv_no_id = id
+          
+          $.ajax({
+              type: 'POST',
+              url: "{% url 'employee-dv' %}",
+              data:{
+                  dv_id: id
+              }
+          }).done(function (data) {
+              dv_number = '';
+              charges = '';
+              outgoing_id = 0;
+              dv_number = data.dv_number;
+              charges = data.charges;
+              outgoing_id = data.outgoing_id;
+              $("#f-outgoing-id").val(data.outgoing_id)
+              let is_print = data.is_print;
+              tbody.empty();
+              data.data.forEach(function (item) {
+                const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                let amountColumn = '';
+                let editColumn = '';
+                let deleteColumn = '';
+                let purposeColumn = '';
+                let chargesColumn = '';
+                selectOptions = '';
+                for (var i = 0; i < charges.length; i++) {
+                    var charge = charges[i];
+                    selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                }
+                if (is_print) {
+                  $(".create-new").prop("disabled", true);
+                  amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
+                  purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}" disabled></td>`;
+                  chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true" disabled>${selectOptions}</select></td>`;
+                  editColumn = `<a class="btn btn-sm btn-icon" id="${item.id}"><i class="text-primary ti ti-edit-off"></i></a>`;
+                  deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
+              } else {
+                $(".create-new").prop("disabled", false);
+                  amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                  purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+                  chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+                  editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                  deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+              }
+                const row = `
+                    <tr>
+                        <td><input type="checkbox"></td>
+                        <td><span class="badge bg-label-primary">${item.code}</span></td>
+                        <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                        <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                        <td>${item.name}</td>
+                        ${amountColumn}
+                        ${purposeColumn}
+                        ${chargesColumn}
+                        <td>${editColumn}${deleteColumn}</td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+            $('#emp-charges').html(selectOptions);
+              let totalAmount = data.total_amount;
+              totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+              });
+              $('#update-transaction').modal('show');
+          })
+      });
+      
+      $(document).ready(function () {
+          $('#dp-year').val(year_now); 
+      });
+
+      $('#dp-year').change(function () {
+            year_now = $(this).val();
+            let dataTable = $('#tbl-items').DataTable();
+            dataTable.ajax.reload();
+      });
+      
       $('#f-employee-name').change(function() {
             var selectedOptions = $(this).find('option:selected');
             selectedOptions.each(function() {
