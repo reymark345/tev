@@ -217,8 +217,15 @@ def preview_box_a(request):
     outgoing_id = request.GET.get('id')
     user_id = request.session.get('user_id', 0)
 
+    year, ot_id = outgoing_id.split('/')
+    year = int(year)
+    outgoing_id = int(ot_id)
 
-    
+    if year == 2023:
+        finance_database_alias = 'finance' 
+    else:
+        finance_database_alias = 'finance_2024' 
+
     results = []
     total_final_amount = 0.0
     emp_list_code = []
@@ -691,8 +698,17 @@ def box_load(request):
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
-    status_txt = ''
-    status_txt = '5' if _search == 'outgoing' else '6'
+    year = request.GET.get('DpYear')
+    print("owowooooo111o2")
+    print(year)
+    year = int(year)
+    last_two_digits = year % 100
+    print(last_two_digits)
+
+    dv_no_string = f"{last_two_digits:02d}-"
+    
+
+    # print("Last two digits: %d" % last_two_digits)
      
     search_fields = ['dv_no', 'division__name', 'status__name'] 
     filter_conditions = Q()
@@ -709,7 +725,8 @@ def box_load(request):
         BoxStatus = request.GET.get('BoxStatus')
         dv_list = request.GET.getlist('ListDv[]')
 
-        item_data = TevOutgoing.objects.all()
+        # item_data = TevOutgoing.objects.all(dv_no = dv_no_string)
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string)
 
         if FCluster:
             item_data = item_data.filter(cluster=FCluster)
@@ -730,9 +747,9 @@ def box_load(request):
             item_data = item_data.filter(id__in=dv_list)
 
     elif _search:
-        item_data = TevOutgoing.objects.filter().filter(filter_conditions).select_related().distinct().order_by(_order_dash + 'id')
+        item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        item_data = TevOutgoing.objects.filter().select_related().distinct().order_by('-id')
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string).select_related().distinct().order_by('-id')
 
     total = item_data.count()
 

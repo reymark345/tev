@@ -50,25 +50,10 @@ def tracking_list(request):
     else:
         return render(request, 'pages/unauthorized.html')
 
-# @login_required(login_url='login')
-# @csrf_exempt
-# def tracking_list(request):
-#     user_details = get_user_details(request)
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-#             'role_permission' : role.role_name,
-#         }
-#         return render(request, 'tracking/tracking_list.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-    
+
 def tracking_load(request):
     total = 0
     data = []
-    finance_database_alias = 'finance'
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
     _order_dash = '-' if _order_dir == 'desc' else ''
@@ -78,6 +63,16 @@ def tracking_load(request):
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
     NDVNumber= request.GET.get('NDVNumber') 
+    DpYear= request.GET.get('DpYear') 
+
+    if DpYear == "2023":
+        finance_database_alias = 'finance' 
+    else:
+        finance_database_alias = 'finance_2024' 
+
+    year = int(DpYear) % 100
+    formatted_year = str(year)+"-"
+    
     EmployeeList = request.GET.getlist('EmployeeList[]')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
 
@@ -89,52 +84,8 @@ def tracking_load(request):
 
     if FAdvancedFilter:
 
-        def dictfetchall(cursor):
-            columns = [col[0] for col in cursor.description]
-            return [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-        query = """
-            SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
-                tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
-                tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
-                tev_incoming.incoming_out, tev_bridge.purpose AS purposes,
-                tev_outgoing.dv_no AS dv_no
-            FROM tev_incoming
-            INNER JOIN (
-                SELECT MAX(id) AS max_id
-                FROM tev_incoming
-                GROUP BY code
-            ) AS latest_ids
-            ON tev_incoming.id = latest_ids.max_id
-            LEFT JOIN tev_bridge
-            ON tev_incoming.id = tev_bridge.tev_incoming_id
-            LEFT JOIN tev_outgoing
-            ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-            WHERE tev_incoming.is_upload = 0 OR tev_incoming.is_upload = 1
-        """
-        params = []
-
-        if FTransactionCode:
-            query += " AND tev_incoming.code = %s"
-            params.append(FTransactionCode)
-
-        if FDateTravel:
-            query += " AND tev_incoming.date_travel LIKE %s"
-            params.append(f'%{FDateTravel}%')
-
-        if EmployeeList:
-            placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
-            query += f" AND tev_incoming.id_no IN ({placeholders})"
-            params.extend(EmployeeList)
-
-        query += "ORDER BY tev_incoming.id DESC;"
-
         with connection.cursor() as cursor:
-            cursor.execute(query, params)
-            finance_data = dictfetchall(cursor)
 
-    elif _search:
-        with connection.cursor() as cursor:
             query = """
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
                     tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
@@ -152,16 +103,75 @@ def tracking_load(request):
                 ON tev_incoming.id = tev_bridge.tev_incoming_id
                 LEFT JOIN tev_outgoing
                 ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-                WHERE tev_incoming.code LIKE %s 
-                      OR tev_incoming.first_name LIKE %s
-                      OR tev_incoming.last_name LIKE %s 
-                      OR tev_outgoing.dv_no LIKE %s
-                      ORDER BY tev_incoming.id DESC;
+                WHERE (tev_outgoing.dv_no LIKE %s OR dv_no IS NULL) AND
+                tev_incoming.is_upload = 0 OR tev_incoming.is_upload = 1
             """
-            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%'])
+            params = []
+
+            if FTransactionCode:
+                query += " AND tev_incoming.code = %s"
+                params.append(FTransactionCode)
+
+            if FDateTravel:
+                query += " AND tev_incoming.date_travel LIKE %s"
+                params.append(f'%{FDateTravel}%')
+
+            if EmployeeList:
+                placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
+                query += f" AND tev_incoming.id_no IN ({placeholders})"
+                params.extend(EmployeeList)
+            query += "ORDER BY tev_incoming.id DESC;"
+
+            cursor.execute(query, [f'%{formatted_year}%'])
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
+
+
+
+    elif _search:
+        with connection.cursor() as cursor:
+            query = """
+                SELECT
+                    tev_incoming.id,
+                    tev_incoming.code,
+                    tev_incoming.first_name,
+                    tev_incoming.middle_name,
+                    tev_incoming.last_name,
+                    tev_incoming.date_travel,
+                    tev_incoming.status_id,
+                    tev_incoming.original_amount,
+                    tev_incoming.final_amount,
+                    tev_incoming.incoming_in,
+                    tev_incoming.incoming_out,
+                    tev_bridge.purpose AS purposes,
+                    tev_outgoing.dv_no AS dv_no
+                FROM
+                    tev_incoming
+                INNER JOIN (
+                    SELECT
+                        MAX(id) AS max_id
+                    FROM
+                        tev_incoming
+                    GROUP BY
+                        code
+                ) AS latest_ids ON tev_incoming.id = latest_ids.max_id
+                LEFT JOIN
+                    tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+                LEFT JOIN
+                    tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                WHERE
+                    (tev_incoming.code LIKE %s
+                    OR tev_incoming.first_name LIKE %s
+                    OR tev_incoming.last_name LIKE %s
+                    OR tev_outgoing.dv_no LIKE %s)
+                    AND (tev_outgoing.dv_no LIKE %s OR dv_no IS NULL)
+                ORDER BY
+                    tev_incoming.id DESC;
+            """
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{formatted_year}%'])
+            columns = [col[0] for col in cursor.description]
+            finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -181,9 +191,11 @@ def tracking_load(request):
                 ON tev_incoming.id = tev_bridge.tev_incoming_id
                 LEFT JOIN tev_outgoing
                 ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-                           
+                WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
                 ORDER BY tev_incoming.id DESC;
-            """)
+            """, [f'{formatted_year}%'])
+
+
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     
@@ -203,19 +215,18 @@ def tracking_load(request):
         amt_budget = ''
         amt_check = ''
         approved_date = ''
+
+        finance_query = """
+            SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
+            FROM transactions AS ts
+            LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
+        """
         if row['dv_no']:
-            
-            finance_query = """
-                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
-                FROM transactions AS ts
-                LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
-            """
             with connections[finance_database_alias].cursor() as cursor2:
                 cursor2.execute(finance_query, (row['dv_no'],))
                 finance_results = cursor2.fetchall()
 
             if finance_results:
-                
                 amt_certified = finance_results[0][1]
                 amt_journal = finance_results[0][2]
                 amt_budget = finance_results[0][3]
@@ -227,6 +238,8 @@ def tracking_load(request):
         last_name = row['last_name'] if row['last_name'] else ''
         
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
+
+
         
         item = {
             'code': row['code'],
