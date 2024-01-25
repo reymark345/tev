@@ -1067,6 +1067,7 @@
                         }
                         if (data.data == 'success') {
                             dateField.clear();
+                            $('.rows-container').empty();
                             let code = data.g_code;
                             if (code){
                                 toastr.success('Save Successfully', 'Success', toast_options);

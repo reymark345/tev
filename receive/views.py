@@ -813,7 +813,7 @@ def item_update(request):
         results = TevIncoming.objects.filter(
             Q(first_name=name) & Q(middle_name=middle) & Q(last_name=lname) &
             Q(date_travel__contains=cleaned_date)
-        ).values('date_travel')
+        ).values('date_travel').exclude(id=id)
 
         if results:
             duplicate_travel.append(cleaned_date)
@@ -888,6 +888,7 @@ def item_add(request):
     g_code = generate_code()
     # selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
     # date_values = request.POST.getlist('dateValues[]')
+
     if travel_date:
         travel_date = request.POST.get('DateTravel')
     else :
