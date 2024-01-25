@@ -732,11 +732,7 @@
                     className: 'btn btn-label-success me-2 waves-effect',
                     text: '<i class="ti ti-file-import me-sm-1"></i> <span class="d-none d-sm-inline-block">Import xlsx</span>',
                     action: function () {
-                        $("#import-excel").modal("show");
-
-                        
-                        
-                       
+                        $("#import-excel").modal("show");              
                     }
                 },
 
@@ -749,15 +745,48 @@
             drawCallback: function (settings) {
                 $('.item-edit').on('click', function () {
                     let id = $(this).data('id')
-                    $('.title-name').text('Update TEV Record')
+                    $('.title-name').text('Update TEV Record');
                     $.ajax({
                         type: 'GET',
                         url: "{% url 'preview-received' %}?id=" + id,
                         dataType: 'json',
                     }).done(function (data) {
+                        let arraydetails = [];
+                        let lacking_ = data.lacking;
+                        let date_remarks_ = data.date_remarks;
+                        $('.rows-container').empty();
+                        if (lacking_){
+                            lacking_ = lacking_.split(',').map(Number);
+                            date_remarks_ = date_remarks_.split(", ")
 
+                            for (let i = 0; i < lacking_.length; i++) {                            
+                                var newRow = $('<div class="row mt-2">' +
+                                    '<div class="col-5">' +
+                                    '<select class="form-select select-remarks" id="remarks-select-'+i+'">' +
+                                    '<option></option>' +
+                                    '{% for row in remarks_list %}' +
+                                    '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                                    '{% endfor %}' +
+                                    '</select>' +
+                                    '</div>' +
+                                    '<div class="col-5">' +
+                                    '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="' + date_remarks_[i] + '" />' +
+                                    '</div>' +
+                                    '<div class="col-2">' +
+                                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                                    '</div>' +
+                                    '</div>');
+                                $('.rows-container').append(newRow);
 
+                                $(`#remarks-select-${i}`).val(lacking_[i]).trigger('change');
 
+                                item_entry = {
+                                    'remarks': lacking_[i],
+                                    'date': date_remarks_[i]
+                                }
+                                arraydetails.push(item_entry);
+                            }
+                        }
                         const $selectElement1 = $('#employee-name');
                         $selectElement1.empty();
                         fetchEmployee($selectElement1);
@@ -795,19 +824,7 @@
                         if (date_remarks){
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
-                            // $('#remarks-list').val([]).trigger('change');
-                            // $('#remarks-list option').each(function() {
-                            //     let optionValue = parseInt($(this).val());
-                            //     if (lacking.includes(optionValue)) {
-                            //         $(this).prop('selected', true);
-                            //     } 
-                            // });
-                            // $('#remarks-list').trigger('change');
-
                         }
-                        // else{
-                        //     $('#remarks-list').val([]).trigger('change');
-                        // }
 
                         if(status_val ===3){
                             EmployeeName.val(id_no).trigger('change').prop("disabled", true);
@@ -1011,106 +1028,91 @@
                     }
                 });
                 if (isValidationError == 0) {
-                    Swal.fire({
-                        title: 'Are you sure?',
-                        text: "You won't be able to revert this!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, save it!',
-                        customClass: {
-                            confirmButton: 'btn btn-primary me-3',
-                            cancelButton: 'btn btn-label-secondary',
-                        },
-                        buttonsStyling: false,
-                    }).then(function (result) {
-                        if (result.value) {
-                            let amount = OriginalAmount.val();
-                            let date_travel = DateTravel.val();
-                            let range_travel = RangeTravel.val();
-                            let id_no = IdNumber.val();
-                            let acct_no = AccountNumber.val();
-                            let name = EmpName.val();
-                            let middle = EmpMiddle.val();
-                            let lname = EmpLastname.val();
-                            let hdate_travel = HDateTravel.val();
-                            let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
-                            let form_data = $('#item-form').serialize()
-                            $.ajax({
-                                type: 'POST',
-                                url: post_url,
-                                data: {
-                                    DateTravel: date_travel,
-                                    RangeTravel: range_travel,
-                                    AccountNumber: acct_no,
-                                    IdNumber: id_no,
-                                    EmpName: name,
-                                    EmpMiddle: middle,
-                                    EmpLastname: lname,
-                                    OriginalAmount: amount,
-                                    form_data: form_data,
-                                    dateValues: dateValues,
-                                    HDateTravel: hdate_travel,
-                                    ItemID:ItemID.val(),
-                                    selectedRemarks: selectedIDs,
-                                    selectedDate: selectedDate
-                                }
-                            }).done(function (data) {                
-                                function formatDate(dateString) {
-                                    const [day, month, year] = dateString.split("-");
-                                    const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
-                                    const monthName = months[parseInt(month, 10) - 1];
-                                    return `${monthName} ${day}, ${year}`;
-                                }
-                                if (data.data == 'success') {
-                                    dateField.clear();
-                                    let code = data.g_code;
-                                    if (code){
-                                        toastr.success('Save Successfully', 'Success', toast_options);
-                                    }
-                                    else{
-                                        offCanvasEl.hide()
-                                        Swal.fire({
-                                            icon: 'success',
-                                            title: 'Update Successfully!',
-                                            html:
-                                            'Successfully <b>Save!</b>',
-                                            customClass: {
-                                                confirmButton: 'btn btn-success',
-                                            },
-                                        })
-                                    }
-                                    EmployeeName.val("").trigger('change');
-                                    RemarksList.val([]).trigger("change");
-                                    OriginalAmount.val("");
-                                    DateTravel.val("")
-                                    RangeTravel.val("")
-                                    $("#dateField").prop("disabled", false);
-                                    $(".rangeTravel").prop("disabled", false);
+                    let amount = OriginalAmount.val();
+                    let date_travel = DateTravel.val();
+                    let range_travel = RangeTravel.val();
+                    let id_no = IdNumber.val();
+                    let acct_no = AccountNumber.val();
+                    let name = EmpName.val();
+                    let middle = EmpMiddle.val();
+                    let lname = EmpLastname.val();
+                    let hdate_travel = HDateTravel.val();
+                    let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
+                    let form_data = $('#item-form').serialize()
+                    $.ajax({
+                        type: 'POST',
+                        url: post_url,
+                        data: {
+                            DateTravel: date_travel,
+                            RangeTravel: range_travel,
+                            AccountNumber: acct_no,
+                            IdNumber: id_no,
+                            EmpName: name,
+                            EmpMiddle: middle,
+                            EmpLastname: lname,
+                            OriginalAmount: amount,
+                            form_data: form_data,
+                            dateValues: dateValues,
+                            HDateTravel: hdate_travel,
+                            ItemID:ItemID.val(),
+                            selectedRemarks: selectedIDs,
+                            selectedDate: selectedDate
+                        }
+                    }).done(function (data) {                
+                        function formatDate(dateString) {
+                            const [day, month, year] = dateString.split("-");
+                            const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                            const monthName = months[parseInt(month, 10) - 1];
+                            return `${monthName} ${day}, ${year}`;
+                        }
+                        if (data.data == 'success') {
+                            dateField.clear();
+                            $('.rows-container').empty();
+                            let code = data.g_code;
+                            if (code){
+                                toastr.success('Save Successfully', 'Success', toast_options);
+                            }
+                            else{
+                                offCanvasEl.hide()
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Update Successfully!',
+                                    html:
+                                    'Successfully <b>Save!</b>',
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                            }
+                            EmployeeName.val("").trigger('change');
+                            RemarksList.val([]).trigger("change");
+                            OriginalAmount.val("");
+                            DateTravel.val("")
+                            RangeTravel.val("")
+                            $("#dateField").prop("disabled", false);
+                            $(".rangeTravel").prop("disabled", false);
 
-                                    dataTable.ajax.reload();
-                                } else {
-                                    let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
-                                    dateField.clear();
-                                    EmployeeName.val("").trigger('change');
-                                    OriginalAmount.val("");
-                                    DateTravel.val("")
-                                    RangeTravel.val("")
-                                    $("#dateField").prop("disabled", false);
-                                    $(".rangeTravel").prop("disabled", false);
-                                    dataTable.ajax.reload();
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Duplicate Travel!',
-                                        html:"Date: <br><b>"+formattedDates+"</b>",
-                                        customClass: {
-                                            confirmButton: 'btn btn-success',
-                                        },
-                                    })
-                                }
+                            dataTable.ajax.reload();
+                        } else {
+                            let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
+                            dateField.clear();
+                            EmployeeName.val("").trigger('change');
+                            OriginalAmount.val("");
+                            DateTravel.val("")
+                            RangeTravel.val("")
+                            $("#dateField").prop("disabled", false);
+                            $(".rangeTravel").prop("disabled", false);
+                            dataTable.ajax.reload();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Duplicate Travel!',
+                                html:"Date: <br><b>"+formattedDates+"</b>",
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
                             })
                         }
-                    });
-
+                    })
                 }
 
             }

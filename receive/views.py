@@ -712,7 +712,10 @@ def item_edit(request):
     return HttpResponse(data, content_type="application/json")
 
 def preview_received(request):
+
     id = request.GET.get('id')
+    print(id)
+    print("Testt")
     with connection.cursor() as cursor:
         query = """
         SELECT
@@ -768,12 +771,7 @@ def preview_received(request):
         }
         return JsonResponse(data)
     else:
-        # Handle the case where no results are found
         return JsonResponse({'error': 'No data found for the given ID'}, status=404)
-
-
-
-
 
 @csrf_exempt
 def item_update(request):
@@ -782,8 +780,80 @@ def item_update(request):
     middle = request.POST.get('EmpMiddle')
     lname = request.POST.get('EmpLastname')
     amount = request.POST.get('OriginalAmount')
-    tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount)
-    return JsonResponse({'data': 'success'})
+    selected_remarks = request.POST.getlist('selectedRemarks[]')
+    selected_dates = request.POST.getlist('selectedDate[]')
+    travel_date = request.POST.get('DateTravel')
+    range_travel = request.POST.get('RangeTravel')
+
+    if travel_date:
+        travel_date = request.POST.get('DateTravel')
+    else :
+        start_date_str, end_date_str = range_travel.split(' to ')
+        
+        start_date = datetime.strptime(start_date_str.strip(), '%Y-%m-%d')
+        end_date = datetime.strptime(end_date_str.strip(), '%Y-%m-%d')
+        
+        formatted_dates = []
+
+        current_date = start_date
+        while current_date <= end_date:
+            formatted_dates.append(current_date.strftime('%d-%m-%Y'))
+            current_date += timedelta(days=1)
+
+        formatted_dates_str = ', '.join(formatted_dates)
+        travel_date = formatted_dates_str
+
+    duplicate_travel = []
+    individual_dates = travel_date.split(',')
+    cleaned_dates = ','.join(date.strip() for date in individual_dates)
+
+    for date in individual_dates:
+        cleaned_date = date.strip()
+
+        results = TevIncoming.objects.filter(
+            Q(first_name=name) & Q(middle_name=middle) & Q(last_name=lname) &
+            Q(date_travel__contains=cleaned_date)
+        ).values('date_travel').exclude(id=id)
+
+        if results:
+            duplicate_travel.append(cleaned_date)
+
+    if duplicate_travel:
+        formatted_dates = [date.replace("'", "") for date in duplicate_travel]
+        result = ",".join(formatted_dates)
+
+        date_components = result.split(',')
+        def format_date(date_str):
+            date_object = datetime.strptime(date_str, '%d-%m-%Y')
+            formatted_date = date_object.strftime('%b. %d, %Y')
+            return formatted_date
+        formatted_dates = [format_date(date) for date in date_components]
+        formatted_dates_string = ', '.join(formatted_dates)
+        formatted_dates_string = formatted_dates_string
+        
+        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, date_travel = travel_date, original_amount=amount, remarks = formatted_dates_string)
+        Remarks_r.objects.filter(incoming_id=id).delete()
+        for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
+            remarks_lib = Remarks_r(
+                date=selected_dates,
+                incoming_id=id,
+                remarks_lib_id=selected_remarks
+            )
+            remarks_lib.save()
+        
+        return JsonResponse({'data': 'error', 'message': duplicate_travel})
+    else:
+        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,date_travel = travel_date, original_amount=amount, remarks = None)
+        Remarks_r.objects.filter(incoming_id=id).delete()
+        for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
+            remarks_lib = Remarks_r(
+                date=selected_dates,
+                incoming_id=id,
+                remarks_lib_id=selected_remarks
+            )
+            remarks_lib.save()
+        # tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount)
+        return JsonResponse({'data': 'success'})
 
 @csrf_exempt
 def item_returned(request):
@@ -818,8 +888,6 @@ def item_add(request):
     g_code = generate_code()
     # selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
     # date_values = request.POST.getlist('dateValues[]')
-
-
 
     if travel_date:
         travel_date = request.POST.get('DateTravel')
