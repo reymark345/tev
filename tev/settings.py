@@ -80,33 +80,33 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tev.wsgi.application'
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tris',
-        'USER': 'tris',
-        'PASSWORD': 'vOHA]ko(5))If-LU',
-        'HOST': '172.31.240.235',
-        'PORT': '3306',
-    },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'tris',
+    #     'USER': 'tris',
+    #     'PASSWORD': 'vOHA]ko(5))If-LU',
+    #     'HOST': '172.31.240.235',
+    #     'PORT': '3306',
+    # },
 
-    #for server INFIMOS
-    'finance': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'infimos_2023',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
-        'PORT':'3306',
-    },
+    # #for server INFIMOS
+    # 'finance': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2023',
+    #     'USER':'tris',
+    #     'PASSWORD':'vOHA]ko(5))If-LU',
+    #     'HOST':'172.31.240.235',
+    #     'PORT':'3306',
+    # },
 
-    'finance_2024': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'infimos_2024',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
-        'PORT':'3306',
-    },
+    # 'finance_2024': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2024',
+    #     'USER':'tris',
+    #     'PASSWORD':'vOHA]ko(5))If-LU',
+    #     'HOST':'172.31.240.235',
+    #     'PORT':'3306',
+    # },
 
     #for localhost main database
     'default': {
