@@ -254,7 +254,7 @@ def preview_box_a(request):
         total_final_amount = 0
 
         if not tev_incoming_ids:
-            return render(request, 'pages/not_found.html', {'message': "No Travel assigned in this DV!",'text': "You must assign at least one travel to this DV to view the data" })
+            return render(request, 'pages/not_found.html', {'message': "No Travel assigned on this DV!",'text': "You must assign at least one travel to this DV to view the data" })
         with connection.cursor() as cursor:
             cursor.execute(query, [tuple(tev_incoming_ids)])
             rows = cursor.fetchall()
