@@ -40,6 +40,9 @@ urlpatterns = [
     path('retrieve_employee', views.retrieve_employee, name='retrieve-employee'),  
     path('add_emp_dv', views.add_emp_dv, name='add-emp-dv'),  
     path('update_purpose', views.update_purpose , name='update-purpose'),  
+    path('transmittal_details', views.transmittal_details , name='transmittal-details'),  
+
+
 
      
 ]

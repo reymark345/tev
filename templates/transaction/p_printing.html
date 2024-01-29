@@ -563,6 +563,56 @@
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
                 {
+                    
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Transmittal</span>',
+                    action: function () {
+                        let data_year = $('#dp-year').val();
+                        console.log(data_year);
+                        console.log("data_year");
+                        // Get the IDs of checked items
+                        var selectedItems = [];
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+            
+                        if(selectedItems.length ===0){
+                            toastr.error('Select item first', 'Invalid', toast_options);
+                        }
+                        else{
+                            console.log(selectedItems);
+                            console.log("------------------------");
+                            $.ajax({
+                                type: 'POST',
+                                url: "{% url 'transmittal-details' %}",
+                                data:{
+                                    selectedDv: selectedItems,
+                                    year: data_year
+                                }
+                            }).done(function (data) {
+                                console.log("halakaaa");
+                                console.log(data);
+
+                                // var parameter1 = 'value1';
+                                // var parameter2 = 'value2';
+
+                                // // Concatenate parameters to the URL
+                                // var url = 'https://example.com/transmittal?param1=' + encodeURIComponent(parameter1) + '&param2=' + encodeURIComponent(parameter2);
+
+                                // // Open a new tab with the constructed URL
+                                // window.open(url, '_blank');
+
+
+                            });
+
+
+
+
+ 
+                        }
+                    }
+                },
+                {
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
                     action: function () {
@@ -1159,7 +1209,7 @@
 
       function incoming_out(selected_items){
             Swal.fire({
-                title: 'Date out, Are you sure?',
+                title: 'Forwarded, Are you sure?',
                 text: "You won't be able to revert this!",
                 icon: 'warning',
                 showCancelButton: true,

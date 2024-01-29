@@ -1002,6 +1002,71 @@ def update_purpose(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
 
+
+@csrf_exempt
+def transmittal_details(request):
+    finance_database_alias = 'finance'  
+    if request.method == 'POST':
+        data_result = []
+        year = request.POST.get('year') 
+        selected_dv = request.POST.getlist('selectedDv[]')
+        print("testtt")
+        print(year)
+        print(selected_dv)
+
+
+
+        if year == 2023:
+            finance_database_alias = 'finance' 
+        else:
+            finance_database_alias = 'finance_2024'  
+        # with connection.cursor() as cursor:
+        with connections[finance_database_alias].cursor() as cursor:
+            query = """
+                SELECT
+                    tev_incoming.id,
+                    tev_outgoing.dv_no,
+                    finance.payee,
+                    finance.modepayment AS n_o_p,
+                    tev_incoming.final_amount AS amt_certified
+                FROM
+                    tev_incoming
+                JOIN
+                    tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+                LEFT JOIN
+                    tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                LEFT JOIN
+                    finance.transactions AS finance ON tev_outgoing.dv_no = finance.dv_no
+                WHERE
+                    tev_incoming.id IN %s
+                ORDER BY
+                    tev_outgoing.dv_no;
+            """
+            # Use tuple(selected_dv) to create the tuple for the IN clause
+            cursor.execute(query, [tuple(selected_dv)])
+            columns = [col[0] for col in cursor.description]
+            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+        for row in results:
+            data_dict = {
+                "id": row['id'],
+                "dv_no": row['dv_no'],
+                "payee": row['payee'],
+                "n_payment": row['n_o_p'],
+                "amt_certified": row['amt_certified']
+            }
+            data_result.append(data_dict)
+
+        response = {
+            'data': data_result
+        }
+        return JsonResponse(response)
+    
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
 @csrf_exempt
 def add_dv(request):
     if request.method == 'POST':

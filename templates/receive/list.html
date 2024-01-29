@@ -814,7 +814,8 @@
                         let convertedAmount = 0;
                         let date_travel = data.date_travel;
                         formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
-                        status_val = data.status;
+
+                        status_val = data.status_id;
                         let fullname = data.first_name + " " + data.middle_name + " " + data.last_name
                         let id_no = data.id_no;
                         let date_remarks = data.date_remarks;
@@ -1221,11 +1222,11 @@
 
     function incoming_out(selected_items){
         Swal.fire({
-            title: 'Mark as Out?',
+            title: 'Forwarded',
             text: "You won't be able to revert this!",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, mark as out!',
+            confirmButtonText: 'Yes, Forwarded!',
             customClass: {
                 confirmButton: 'btn btn-primary me-3',
                 cancelButton: 'btn btn-label-secondary',

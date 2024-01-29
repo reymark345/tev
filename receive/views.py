@@ -785,6 +785,8 @@ def item_update(request):
     travel_date = request.POST.get('DateTravel')
     range_travel = request.POST.get('RangeTravel')
 
+    print("updateeeeeeee")
+
     if travel_date:
         travel_date = request.POST.get('DateTravel')
     else :
@@ -857,6 +859,7 @@ def item_update(request):
 
 @csrf_exempt
 def item_returned(request):
+    print("Retturrnnnnnna")
     id = request.POST.get('ItemID')
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
