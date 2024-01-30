@@ -1000,71 +1000,218 @@ def update_purpose(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
 
 
 @csrf_exempt
 def transmittal_details(request):
-    finance_database_alias = 'finance'  
-    if request.method == 'POST':
-        data_result = []
-        year = request.POST.get('year') 
-        selected_dv = request.POST.getlist('selectedDv[]')
-        print("testtt")
-        print(year)
-        print(selected_dv)
+    finance_database_name = 'finance'
+    data_result = []
+    year = request.POST.get('year')
+    selected_dv = request.POST.getlist('selectedDv[]')
+
+    if year == '2023':
+        finance_database_name = 'finance'
+    else:
+        finance_database_name = 'infimos_2024'
+
+    with connection.cursor() as cursor:
+        query = f"""
+            SELECT
+                tev_outgoing.dv_no,
+                {finance_database_name}.payee,
+                {finance_database_name}.modepayment,
+                COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+            FROM
+                tev_incoming
+            JOIN
+                tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+            LEFT JOIN
+                tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+            LEFT JOIN
+                charges ON charges.id = tev_bridge.charges_id
+            LEFT JOIN
+                payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+            LEFT JOIN
+                charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+            LEFT JOIN
+                {finance_database_name}.transactions AS {finance_database_name}
+                ON tev_outgoing.dv_no = {finance_database_name}.dv_no
+            WHERE
+                tev_outgoing.id IN %s
+            GROUP BY
+                tev_outgoing.dv_no, {finance_database_name}.payee, {finance_database_name}.modepayment
+            ORDER BY
+                tev_outgoing.dv_no;
+        """
+
+        cursor.execute(query, [tuple(selected_dv)])
+        columns = [col[0] for col in cursor.description]
+        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+    print(len(results))
+
+    print("lenn")
 
 
-
-        if year == 2023:
-            finance_database_alias = 'finance' 
-        else:
-            finance_database_alias = 'finance_2024'  
-        # with connection.cursor() as cursor:
-        with connections[finance_database_alias].cursor() as cursor:
-            query = """
-                SELECT
-                    tev_incoming.id,
-                    tev_outgoing.dv_no,
-                    finance.payee,
-                    finance.modepayment AS n_o_p,
-                    tev_incoming.final_amount AS amt_certified
-                FROM
-                    tev_incoming
-                JOIN
-                    tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
-                LEFT JOIN
-                    tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-                LEFT JOIN
-                    finance.transactions AS finance ON tev_outgoing.dv_no = finance.dv_no
-                WHERE
-                    tev_incoming.id IN %s
-                ORDER BY
-                    tev_outgoing.dv_no;
-            """
-            # Use tuple(selected_dv) to create the tuple for the IN clause
-            cursor.execute(query, [tuple(selected_dv)])
-            columns = [col[0] for col in cursor.description]
-            results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-        for row in results:
-            data_dict = {
-                "id": row['id'],
-                "dv_no": row['dv_no'],
-                "payee": row['payee'],
-                "n_payment": row['n_o_p'],
-                "amt_certified": row['amt_certified']
-            }
-            data_result.append(data_dict)
-
-        response = {
-            'data': data_result
+    for row in results:
+        data_dict = {
+            "dv_no": row['dv_no'],
+            "payee": row['payee'],
+            "modepayment": row['modepayment'],
+            "charges_amount": row['charges_amount']
         }
-        return JsonResponse(response)
+        data_result.append(data_dict)
+
+    response = {
+        'data': data_result
+    }
+    return JsonResponse(response)
+
+# @csrf_exempt
+# def transmittal_details(request):
+#     finance_database_name = 'finance'
+#     data_result = []
+#     year = request.POST.get('year')
+#     selected_dv = request.POST.getlist('selectedDv[]')
+
+#     if year == '2023':
+#         finance_database_name = 'finance'
+#     else:
+#         finance_database_name = 'infimos_2024'
+
+#     with connection.cursor() as cursor:
+#         query = f"""
+#             SELECT
+#                 tev_outgoing.dv_no,
+#                 {finance_database_name}.payee,
+#                 {finance_database_name}.modepayment,
+#                 COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+
+#             FROM
+#                 tev_incoming
+#             JOIN
+#                 tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+#             LEFT JOIN
+#                 tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+#             LEFT JOIN
+#                 charges ON charges.id = tev_bridge.charges_id
+#             LEFT JOIN
+#                 payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+#             LEFT JOIN
+#                 charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+#             LEFT JOIN
+#                 {finance_database_name}.transactions AS {finance_database_name}
+#                 ON tev_outgoing.dv_no = {finance_database_name}.dv_no
+#             WHERE
+#                 tev_outgoing.id IN %s
+#             GROUP BY
+#                 tev_outgoing.dv_no, finance.payee, finance.modepayment
+#             ORDER BY
+#                 tev_outgoing.dv_no;
+#         """
+
+#         cursor.execute(query, [tuple(selected_dv)])
+#         columns = [col[0] for col in cursor.description]
+#         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+#     for row in results:
+#         data_dict = {
+#             "id": row['id'],
+#             "dv_no": row['dv_no'],
+#             "payee": row['payee'],
+#             "n_payment": row['modepayment'],
+#             "amt_certified": row['charges_amount']
+#         }
+#         data_result.append(data_dict)
+
+#     response = {
+#         'data': data_result
+#     }
+#     return JsonResponse(response)
     
 
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+            # query = f"""
+        #     SELECT
+        #         tev_incoming.id,
+        #         tev_outgoing.dv_no,
+        #         {finance_database_name}.payee,
+        #         {finance_database_name}.modepayment AS n_o_p,
+        #         tev_incoming.final_amount AS amt_certified
+        #     FROM
+        #         tev_incoming
+        #     JOIN
+        #         tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+        #     LEFT JOIN
+        #         tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+        #     LEFT JOIN
+        #         {finance_database_name}.transactions AS {finance_database_name}
+        #         ON tev_outgoing.dv_no = {finance_database_name}.dv_no
+        #     WHERE
+        #         tev_incoming.id IN %s
+        #     ORDER BY
+        #         tev_outgoing.dv_no;
+        # """
+
+    # else:
+    #     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
+# @csrf_exempt
+# def transmittal_details(request):
+#     finance_database_alias = 'finance'  
+#     data_result = []
+#     year = request.POST.get('year') 
+#     selected_dv = request.POST.getlist('selectedDv[]')
+#     if year == 2023:
+#         finance_database_alias = 'finance' 
+#     else:
+#         finance_database_alias = 'finance_2024' 
+
+#     with connection.cursor() as cursor:
+#     # with connections[finance_database_alias].cursor() as cursor:
+#         query = """
+#             SELECT
+#                 tev_incoming.id,
+#                 tev_outgoing.dv_no,
+#                 finance.payee,
+#                 finance.modepayment AS n_o_p,
+#                 tev_incoming.final_amount AS amt_certified
+#             FROM
+#                 tev_incoming
+#             JOIN
+#                 tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+#             LEFT JOIN
+#                 tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+#             LEFT JOIN
+#                 finance.transactions AS finance ON tev_outgoing.dv_no = finance.dv_no
+#             WHERE
+#                 tev_incoming.id IN %s
+#             ORDER BY
+#                 tev_outgoing.dv_no;
+#         """
+#         # Use tuple(selected_dv) to create the tuple for the IN clause
+#         cursor.execute(query, [tuple(selected_dv)])
+#         columns = [col[0] for col in cursor.description]
+#         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+#     for row in results:
+#         data_dict = {
+#             "id": row['id'],
+#             "dv_no": row['dv_no'],
+#             "payee": row['payee'],
+#             "n_payment": row['n_o_p'],
+#             "amt_certified": row['amt_certified']
+#         }
+#         data_result.append(data_dict)
+
+#     response = {
+#         'data': data_result
+#     }
+#     return JsonResponse(response)
+    
+
+#     # else:
+#     #     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
 
 @csrf_exempt
