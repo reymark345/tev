@@ -191,6 +191,138 @@ def box_a(request):
         return render(request, 'pages/unauthorized.html')
     
 @login_required(login_url='login')
+def outgoing_list(request):
+    user_details = get_user_details(request)
+
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'permissions' : role_names,
+            'dv_number' : TevOutgoing.objects.filter(status_id = 6).order_by('id'),
+            'cluster' : Cluster.objects.filter().order_by('id'),
+            'division' : Division.objects.filter(status=0).order_by('id'),
+            'charges' : Charges.objects.filter().order_by('name')
+
+        }
+        return render(request, 'transaction/p_outgoing.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+
+
+@csrf_exempt
+def outgoing_load(request):
+    adv_filter = request.GET.get('FAdvancedFilter')
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    _order_col_num = request.GET.get('order[0][column]')
+    year = request.GET.get('DpYear')
+    year = int(year)
+    last_two_digits = year % 100
+    dv_no_string = f"{last_two_digits:02d}-"
+    search_fields = ['dv_no', 'division__name', 'status__name'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+    if adv_filter:
+
+        FCluster = request.GET.get('FCluster')
+        FDivision = request.GET.get('FDivision')
+        FBoxIn = request.GET.get('FBoxIn')
+        FBoxOut = request.GET.get('FBoxOut')
+        BoxStatus = request.GET.get('BoxStatus')
+        dv_list = request.GET.getlist('ListDv[]')
+
+        # item_data = TevOutgoing.objects.all(dv_no = dv_no_string)
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id = 6)
+
+        if FCluster:
+            item_data = item_data.filter(cluster=FCluster)
+
+        if FDivision:
+            item_data = item_data.filter(division_id = FDivision)
+
+        if FBoxIn:
+            item_data = item_data.filter(box_b_in__icontains=FBoxIn)
+
+        if FBoxOut:
+            item_data = item_data.filter(box_b_out__icontains=FBoxOut)
+
+        if BoxStatus:
+            item_data = item_data.filter(status_id=BoxStatus)
+
+        if dv_list:
+            item_data = item_data.filter(id__in=dv_list)
+
+    elif _search:
+        item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string, status_id = 6).select_related().distinct().order_by(_order_dash + 'id')
+    else:
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id = 6).select_related().distinct().order_by('-id')
+
+    total = item_data.count()
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        item_data = item_data[start:start + length]
+
+    data = []
+
+    for item in item_data:
+        userData = AuthUser.objects.filter(id=item.user_id)
+        if userData.exists():
+            full_name = userData[0].first_name + ' ' + userData[0].last_name
+        else:
+            full_name = ""
+        
+        userData_out = AuthUser.objects.filter(id=item.out_by)
+        if userData_out.exists():
+            full_name_out = userData_out[0].first_name + ' ' + userData_out[0].last_name
+        else:
+            full_name_out = ""
+
+        item = {
+            'id': item.id,
+            'dv_no': item.dv_no,
+            'cluster': item.cluster,
+            'division_name': item.division.name,
+            'division_chief': item.division.chief,
+            'status':item.status_id,
+            'box_b_in': item.box_b_in,
+            'box_b_out': item.box_b_out,
+            'user_id': full_name,
+            'out_by': full_name_out
+        }
+
+        data.append(item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+    
+@login_required(login_url='login')
 def preview_box_a(request):
     finance_database_alias = 'finance'    
     outgoing_id = request.GET.get('id')
@@ -1001,13 +1133,13 @@ def update_purpose(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
-
 @csrf_exempt
 def transmittal_details(request):
     finance_database_name = 'finance'
     data_result = []
-    year = request.POST.get('year')
-    selected_dv = request.POST.getlist('selectedDv[]')
+    year = request.GET.get('year')
+    # selected_dv = request.GET.getlist('selectedDv[]')
+    selected_dv = request.GET.getlist('selectedDv')
 
     if year == '2023':
         finance_database_name = 'finance'
@@ -1047,172 +1179,101 @@ def transmittal_details(request):
         cursor.execute(query, [tuple(selected_dv)])
         columns = [col[0] for col in cursor.description]
         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    rs_len = len(results)
+    sl_dv = len(selected_dv)
+    if rs_len != sl_dv:
+        return render(request, 'pages/not_found.html', {'message': "Review Travel First",'text': "You must assign at least one travel to this DV to view the data" })
 
-    print(len(results))
+    else:
+        date_now = datetime.now().strftime("%Y-%m-%d")
+        for row in results:
+            amt_certified = row['charges_amount']
+            if amt_certified == 0 :
+                return render(request, 'pages/not_found.html', {'message': "Invalid Amount Charges",'text': "There is travel with no assigned Charges!" })
+            else:
+                data_dict = {
+                    "dv_no": row['dv_no'],
+                    "payee": row['payee'],
+                    "modepayment": row['modepayment'],
+                    "date":date_now,
+                    "charges_amount": amt_certified
+                }
+                data_result.append(data_dict)
 
-    print("lenn")
-
-
-    for row in results:
-        data_dict = {
-            "dv_no": row['dv_no'],
-            "payee": row['payee'],
-            "modepayment": row['modepayment'],
-            "charges_amount": row['charges_amount']
+        response = {
+            'data': data_result
         }
-        data_result.append(data_dict)
+        return render(request, 'transaction/preview_transmittal.html', response)
 
-    response = {
-        'data': data_result
-    }
-    return JsonResponse(response)
+
 
 # @csrf_exempt
 # def transmittal_details(request):
-#     finance_database_name = 'finance'
-#     data_result = []
-#     year = request.POST.get('year')
-#     selected_dv = request.POST.getlist('selectedDv[]')
-
-#     if year == '2023':
+#     if request.method == 'POST':
 #         finance_database_name = 'finance'
-#     else:
-#         finance_database_name = 'infimos_2024'
+#         data_result = []
+#         year = request.POST.get('year')
+#         selected_dv = request.POST.getlist('selectedDv[]')
 
-#     with connection.cursor() as cursor:
-#         query = f"""
-#             SELECT
-#                 tev_outgoing.dv_no,
-#                 {finance_database_name}.payee,
-#                 {finance_database_name}.modepayment,
-#                 COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+#         if year == '2023':
+#             finance_database_name = 'finance'
+#         else:
+#             finance_database_name = 'infimos_2024'
 
-#             FROM
-#                 tev_incoming
-#             JOIN
-#                 tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
-#             LEFT JOIN
-#                 tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-#             LEFT JOIN
-#                 charges ON charges.id = tev_bridge.charges_id
-#             LEFT JOIN
-#                 payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
-#             LEFT JOIN
-#                 charges AS charges2 ON payrolled_charges.charges_id = charges2.id
-#             LEFT JOIN
-#                 {finance_database_name}.transactions AS {finance_database_name}
-#                 ON tev_outgoing.dv_no = {finance_database_name}.dv_no
-#             WHERE
-#                 tev_outgoing.id IN %s
-#             GROUP BY
-#                 tev_outgoing.dv_no, finance.payee, finance.modepayment
-#             ORDER BY
-#                 tev_outgoing.dv_no;
-#         """
+#         with connection.cursor() as cursor:
+#             query = f"""
+#                 SELECT
+#                     tev_outgoing.dv_no,
+#                     {finance_database_name}.payee,
+#                     {finance_database_name}.modepayment,
+#                     COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+#                 FROM
+#                     tev_incoming
+#                 JOIN
+#                     tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+#                 LEFT JOIN
+#                     tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+#                 LEFT JOIN
+#                     charges ON charges.id = tev_bridge.charges_id
+#                 LEFT JOIN
+#                     payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+#                 LEFT JOIN
+#                     charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+#                 LEFT JOIN
+#                     {finance_database_name}.transactions AS {finance_database_name}
+#                     ON tev_outgoing.dv_no = {finance_database_name}.dv_no
+#                 WHERE
+#                     tev_outgoing.id IN %s
+#                 GROUP BY
+#                     tev_outgoing.dv_no, {finance_database_name}.payee, {finance_database_name}.modepayment
+#                 ORDER BY
+#                     tev_outgoing.dv_no;
+#             """
 
-#         cursor.execute(query, [tuple(selected_dv)])
-#         columns = [col[0] for col in cursor.description]
-#         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+#             cursor.execute(query, [tuple(selected_dv)])
+#             columns = [col[0] for col in cursor.description]
+#             results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+#         rs_len = len(results)
+#         sl_dv = len(selected_dv)
+#         if rs_len != sl_dv:
+#             return JsonResponse({'message': 'Review Travel First'})
 
-#     for row in results:
-#         data_dict = {
-#             "id": row['id'],
-#             "dv_no": row['dv_no'],
-#             "payee": row['payee'],
-#             "n_payment": row['modepayment'],
-#             "amt_certified": row['charges_amount']
-#         }
-#         data_result.append(data_dict)
+#         else:
+#             for row in results:
+#                 data_dict = {
+#                     "dv_no": row['dv_no'],
+#                     "payee": row['payee'],
+#                     "modepayment": row['modepayment'],
+#                     "charges_amount": row['charges_amount']
+#                 }
+#                 data_result.append(data_dict)
 
-#     response = {
-#         'data': data_result
-#     }
-#     return JsonResponse(response)
-    
+#             response = {
+#                 'data': data_result
+#             }
+#             return JsonResponse(response)
+#     return JsonResponse({'data': 'error', 'message': 'Invalid request method'})
 
-            # query = f"""
-        #     SELECT
-        #         tev_incoming.id,
-        #         tev_outgoing.dv_no,
-        #         {finance_database_name}.payee,
-        #         {finance_database_name}.modepayment AS n_o_p,
-        #         tev_incoming.final_amount AS amt_certified
-        #     FROM
-        #         tev_incoming
-        #     JOIN
-        #         tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
-        #     LEFT JOIN
-        #         tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-        #     LEFT JOIN
-        #         {finance_database_name}.transactions AS {finance_database_name}
-        #         ON tev_outgoing.dv_no = {finance_database_name}.dv_no
-        #     WHERE
-        #         tev_incoming.id IN %s
-        #     ORDER BY
-        #         tev_outgoing.dv_no;
-        # """
-
-    # else:
-    #     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
-
-# @csrf_exempt
-# def transmittal_details(request):
-#     finance_database_alias = 'finance'  
-#     data_result = []
-#     year = request.POST.get('year') 
-#     selected_dv = request.POST.getlist('selectedDv[]')
-#     if year == 2023:
-#         finance_database_alias = 'finance' 
-#     else:
-#         finance_database_alias = 'finance_2024' 
-
-#     with connection.cursor() as cursor:
-#     # with connections[finance_database_alias].cursor() as cursor:
-#         query = """
-#             SELECT
-#                 tev_incoming.id,
-#                 tev_outgoing.dv_no,
-#                 finance.payee,
-#                 finance.modepayment AS n_o_p,
-#                 tev_incoming.final_amount AS amt_certified
-#             FROM
-#                 tev_incoming
-#             JOIN
-#                 tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
-#             LEFT JOIN
-#                 tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-#             LEFT JOIN
-#                 finance.transactions AS finance ON tev_outgoing.dv_no = finance.dv_no
-#             WHERE
-#                 tev_incoming.id IN %s
-#             ORDER BY
-#                 tev_outgoing.dv_no;
-#         """
-#         # Use tuple(selected_dv) to create the tuple for the IN clause
-#         cursor.execute(query, [tuple(selected_dv)])
-#         columns = [col[0] for col in cursor.description]
-#         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-#     for row in results:
-#         data_dict = {
-#             "id": row['id'],
-#             "dv_no": row['dv_no'],
-#             "payee": row['payee'],
-#             "n_payment": row['n_o_p'],
-#             "amt_certified": row['amt_certified']
-#         }
-#         data_result.append(data_dict)
-
-#     response = {
-#         'data': data_result
-#     }
-#     return JsonResponse(response)
-    
-
-#     # else:
-#     #     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
 
 @csrf_exempt
 def add_dv(request):

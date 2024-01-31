@@ -203,13 +203,20 @@
                                     <a href="{% url 'transaction-payroll' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
                                         
-                                        <div data-i18n="Payroll Preparation">Payroll Preparation</div>
+                                        <div data-i18n="Payroll Preparation">Payroll List</div>
                                     </a>
                                 </li>
                                 <li class="menu-item {% if url_name == 'box-a' %}active{% endif %}">
                                     <a href="{% url 'box-a' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti-solid fa-inbox"></i>
                                         <div data-i18n="Payroll Printing">Payroll Printing</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item {% if url_name == 'outgoing-list' %}active{% endif %}">
+                                    <a href="{% url 'outgoing-list' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti-solid fa-inbox"></i>
+                                        <div data-i18n="Outgoing">Outgoing</div>
                                     </a>
                                 </li>
                             {% endif %}
