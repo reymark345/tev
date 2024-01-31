@@ -217,6 +217,33 @@ def outgoing_list(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
+@login_required(login_url='login')
+def budget_list(request):
+    user_details = get_user_details(request)
+
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'permissions' : role_names,
+            'dv_number' : TevOutgoing.objects.filter(status_id = 6).order_by('id'),
+            'cluster' : Cluster.objects.filter().order_by('id'),
+            'division' : Division.objects.filter(status=0).order_by('id'),
+            'charges' : Charges.objects.filter().order_by('name')
+
+        }
+        return render(request, 'transaction/p_budget.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
 
 
 @csrf_exempt

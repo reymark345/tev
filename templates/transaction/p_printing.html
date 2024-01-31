@@ -585,31 +585,10 @@
                             // var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems + '&year=' + data_year ;
                             var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems.join('&selectedDv=') + '&year=' + data_year;
                             window.open(url, '_blank');
-
-                            // $.ajax({
-                            //     type: 'POST',
-                            //     url: "{% url 'transmittal-details' %}",
-                            //     data:{
-                            //         selectedDv: selectedItems,
-                            //         year: data_year
-                            //     }
-                            // }).done(function (data) {
-                            //     let message = data.message;
-
-                            //     if (!message){
-                            //         let list_data = data.data;
-                            //         console.log(list_data);
-                            //         // Concatenate parameters to the URL
-                            //         var url = 'https://example.com/preview_transmittal?param1=' + list_data;
-                            //         window.open(url, '_blank');
-                            //     }
-    
-
-                            // });
-
                         }
                     }
                 },
+        
                 {
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
