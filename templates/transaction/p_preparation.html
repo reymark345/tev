@@ -43,7 +43,7 @@
                 <table id="tbl-items" class="table">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" id="check-all"></th>
+                            <th><input type="checkbox" id="check-all" class="dt-checkboxes form-check-input"></th>
                             <th>Transaction Code</th>
                             <th>Employee Name</th>
                             <th>Date Travel</th>
@@ -455,7 +455,7 @@
                     render: function (data, type, row) {
                         var status = row.status;
                         var checkboxId = row.id;
-                        return '<input type="checkbox" id="checkbox_data" class="checkbox-items checkbox_data" name = "checkboxtype" value="' + data + '">';
+                        return '<input type="checkbox" id="checkbox_data" class="dt-checkboxes form-check-input checkbox_data" name = "checkboxtype" value="' + data + '">';
                     }
                 },
                 { data: 'code' },

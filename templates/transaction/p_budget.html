@@ -84,7 +84,7 @@
                 <table id="tbl-items" class="table">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" id="check-all"></th>
+                            <th><input type="checkbox" id="check-all" class="dt-checkboxes form-check-input"></th>
                             <th>Dv Number</th>
                             <th>Cluster</th>
                             <th>Division</th>
@@ -411,12 +411,7 @@
                     orderable: false, 
                     render: function (data, type, row) {
                         var status = row.status; // Access the 'status' value from the 'row' object
-
-                        if (status == 2) {
-                            return '<input type="checkbox" disabled="disabled">';
-                        } else {
-                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
-                        }
+                        return '<input type="checkbox" class="dt-checkboxes form-check-input" value="' + data + '">';
 
                     }
                 },
@@ -728,7 +723,7 @@
             var isChecked = $(this).is(':checked');
 
             // Set the checked state of all checkboxes in the table body
-            $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+            $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input"]').prop('checked', isChecked);
         });
 
         $('.preview-details').on('click', function () {
