@@ -325,14 +325,11 @@
     let remarks_date = [];
     let remarks_data = [];
     let selectedRemarks = [];
-
     let selectedRemarksOrder = [];
     let remarksDateMap = {};
-
     let arraydetails = [];
-
-    let first_attempt = false
     let count = 0;
+    let selectedCb = [];
     
     $(document).ready(function () {
         $('#loading-screen').hide();
@@ -401,21 +398,38 @@
 
             },
             columns: [
+                // {
+                //     data: 'id', status: 'status',
+                //     orderable: false, 
+                //     render: function (data, type, row) {
+                //         var status = row.status; // Access the 'status' value from the 'row' object
+
+                //         if (status == 2) {
+                //             return '<input type="checkbox" disabled="disabled" class="dt-checkboxes form-check-input">';
+                //         } else {
+                //             // Render a checkbox for each row with the item ID as its value
+                //             return '<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="' + data + '">';
+                //         }
+
+                //     }
+                // },
                 {
                     data: 'id', status: 'status',
                     orderable: false, 
                     render: function (data, type, row) {
+                        let isChecked = selectedCb.includes(data.toString());
                         var status = row.status; // Access the 'status' value from the 'row' object
-
                         if (status == 2) {
                             return '<input type="checkbox" disabled="disabled" class="dt-checkboxes form-check-input">';
                         } else {
                             // Render a checkbox for each row with the item ID as its value
-                            return '<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="' + data + '">';
+                            return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
                         }
 
                     }
                 },
+
+
                 { data: 'id_no' },
                 { data: 'name' },
                 { data: 'original_amount'},
@@ -580,18 +594,11 @@
                     text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
                     action: function () {
                         // Get the IDs of checked items
-                        var selectedItems = [];
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-
-                        console.log(selectedItems);
-            
-                        if(selectedItems.length ===0){
+                        if(selectedCb.length ===0){
                             toastr.error('Select item first', 'Invalid', toast_options);
                         }
                         else{
-                            incoming_out(selectedItems);
+                            incoming_out();
                         }
                     }
                 },
@@ -604,10 +611,48 @@
                 $('#check-all').change(function () {
                     var isChecked = $(this).is(':checked');
                     $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
+                    if (isChecked) {
+                        // Add all IDs to the array
+                        $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                            var id = $(this).val();
+                            if (selectedCb.indexOf(id) === -1) {
+                                selectedCb.push(id);
+                            }
+                        });
+                    } else {
+                        // Remove all IDs from the array
+                        $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                            var id = $(this).val();
+                            let index = selectedCb.indexOf(id);
+                            if (index !== -1) {
+                                selectedCb.splice(index, 1);
+                            }
+                        });
+                    }
+
+                    // Log or perform further actions with the selectedCb array
+                    console.log(selectedCb);
+                });
+
+                $('#tbl-items').on('click', '.dt-checkboxes', function () {
+                    var id = $(this).val();
+                    if ($(this).prop('checked')) {
+                        if (selectedCb.indexOf(id) === -1) {
+                            selectedCb.push(id);
+                        }
+                        $(this).data('checked', true); 
+                    } else {
+
+                        let index = selectedCb.indexOf(id);
+                        if (index !== -1) {
+                            selectedCb.splice(index, 1);
+                        }
+                        $(this).data('checked', false); 
+                    }
+                    console.log(selectedCb);
                 });
 
                 $('.item-details').on('click', function () {
-                    first_attempt = true;
                     if (RemarksList.length) {
                             RemarksList.wrap('<div class="position-relative"></div>')
                             RemarksList.select2({
@@ -708,7 +753,9 @@
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
-        function incoming_out(selected_items){
+        function incoming_out(){
+            console.log(selectedCb);
+            console.log("selectedCb");
             Swal.fire({
                 title: 'Forwarded',
                 text: "You won't be able to revert this!",
@@ -722,13 +769,16 @@
                 buttonsStyling: false,
             }).then(function (result) {
                 if (result.value) {
+                    selectedCb = $.grep(selectedCb, function(value) {
+                        return value !== 'on';
+                    });
                     let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
        
                     $.ajax({
                         type: 'POST',
                         url: "{% url 'out-checking-tev' %}",
                         data:{
-                            out_list: selected_items
+                            out_list: selectedCb
                         }
                     }).done(function (data) {
                         if (data.data == 'success') {

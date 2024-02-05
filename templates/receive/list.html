@@ -383,6 +383,7 @@
     let employeeList = [];
     let remarks_date = [];
     let selectedRemarks = [];
+    let selectedCb = [];
 
     $(document).ready(function () {
 
@@ -530,13 +531,17 @@
                     data: 'id', status: 'status',
                     orderable: false, 
                     render: function (data, type, row) {
+                        let isChecked = selectedCb.includes(data.toString());
+                        var status = row.status;
+
+
                         var status = row.status; // Access the 'status' value from the 'row' object
 
                         if (status == 3) {
                             return '<input type="checkbox" disabled="disabled" class="dt-checkboxes form-check-input checkbox-items">';
                         } else {
                             // Render a checkbox for each row with the item ID as its value
-                            return '<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="' + data + '">';
+                            return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
                         }
 
                     }
@@ -714,16 +719,11 @@
                     text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
                     action: function () {
                         // Get the IDs of checked items
-                        var selectedItems = [];
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-
-                        if(selectedItems.length ===0){
+                        if(selectedCb.length ===0){
                             toastr.error('Select item first', 'Invalid', toast_options);
                         }
                         else{
-                            incoming_out(selectedItems);
+                            incoming_out();
                         }
                     }
                 },
@@ -860,16 +860,47 @@
                     })
                 }),
 
-                $('#tbl-items tbody input[type="checkbox"]').change(function () {
-                    // Do something when a checkbox in the table body is changed...
+                $('#tbl-items').on('click', '.dt-checkboxes', function () {
+                    var id = $(this).val();
+                    if ($(this).prop('checked')) {
+                        if (selectedCb.indexOf(id) === -1) {
+                            selectedCb.push(id);
+                        }
+                        $(this).data('checked', true); 
+                    } else {
+ 
+                        let index = selectedCb.indexOf(id);
+                        if (index !== -1) {
+                            selectedCb.splice(index, 1);
+                        }
+                        $(this).data('checked', false); 
+                    }
                 });
 
                 $('#check-all').change(function () {
-                    // Get the checked state of the "check-all" checkbox
                     var isChecked = $(this).is(':checked');
-        
-                    // Set the checked state of all checkboxes in the table body
                     $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
+                    if (isChecked) {
+                        // Add all IDs to the array
+                        $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                            var id = $(this).val();
+                            if (selectedCb.indexOf(id) === -1) {
+                                selectedCb.push(id);
+                            }
+                        });
+                    } else {
+                        // Remove all IDs from the array
+                        $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                            var id = $(this).val();
+                            let index = selectedCb.indexOf(id);
+                            if (index !== -1) {
+                                selectedCb.splice(index, 1);
+                            }
+                        });
+                    }
+
+                    // Log or perform further actions with the selectedCb array
+                    console.log(selectedCb);
                 });
 
                 $('.item-details').on('click', function () {
@@ -1220,7 +1251,11 @@
         
     }
 
-    function incoming_out(selected_items){
+    function incoming_out(){
+        selectedCb = $.grep(selectedCb, function(value) {
+            return value !== 'on';
+        });
+
         Swal.fire({
             title: 'Forwarded',
             text: "You won't be able to revert this!",
@@ -1240,10 +1275,11 @@
                     type: 'POST',
                     url: "{% url 'out-pending-tev' %}",
                     data:{
-                        out_list: selected_items
+                        out_list: selectedCb
                     }
                 }).done(function (data) {
                     if (data.data == 'success') {
+                        selectedCb = [];
                         Swal.fire({
                             icon: 'success',
                             title: 'Successfully save!',

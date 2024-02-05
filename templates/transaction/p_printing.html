@@ -411,6 +411,7 @@
     let dataTable2;
     var new_id;
     let chargeId = 0;
+    let selectedCb = [];
     $(document).ready(function () {
       $('#loading-screen').hide();
       const table_box_a = $('#tbl-box-a')
@@ -483,8 +484,9 @@
                     data: 'id', status: 'status',
                     orderable: false, 
                     render: function (data, type, row) {
-                        var status = row.status; // Access the 'status' value from the 'row' object
-                        return '<input type="checkbox" class="dt-checkboxes form-check-input" value="' + data + '" id ="checkbox_data">';
+                        let isChecked = selectedCb.includes(data.toString());
+                        var status = row.status;
+                        return `<input type="checkbox" class="dt-checkboxes form-check-input" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
                     }
                 },
                 { data: 'dv_no' },
@@ -499,6 +501,12 @@
 
             ],
             columnDefs: [
+                {
+                    targets: 0,
+                    render: function(data) {
+                        return '<span class="badge bg-label-primary">' + data + '</span>';
+                    },
+                },
                 {
                     targets: 1,
                     render: function(data) {
@@ -562,9 +570,6 @@
                     text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Transmittal</span>',
                     action: function () {
                         let data_year = $('#dp-year').val();
-                        console.log(data_year);
-                        console.log("data_year");
-                        // Get the IDs of checked items
                         var selectedItems = [];
                         $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
                             selectedItems.push($(this).val());
@@ -574,8 +579,6 @@
                             toastr.error('Select item first', 'Invalid', toast_options);
                         }
                         else{
-                            console.log("leak");
-                            console.log(selectedItems);
                             // var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems + '&year=' + data_year ;
                             var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems.join('&selectedDv=') + '&year=' + data_year;
                             window.open(url, '_blank');
@@ -621,8 +624,6 @@
                           })
                       }
                       $("#advance-filter").modal("show");   
-                      
-                      
                   }
                 
                 },
@@ -631,16 +632,11 @@
                     text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
                     action: function () {
                         // Get the IDs of checked items
-                        var selectedItems = [];
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-            
-                        if(selectedItems.length ===0){
+                        if(selectedCb.length ===0){
                             toastr.error('Select item first', 'Invalid', toast_options);
                         }
                         else{
-                            incoming_out(selectedItems);
+                            incoming_out();
                         }
                     }
                 },
@@ -674,8 +670,7 @@
                 },
             ],
             drawCallback: function (settings) {
-
-                const tableId = 'tbl-box-a'; // Change this to the specific table ID you want to populate
+                const tableId = 'tbl-box-a';
                 const tbody = $(`#${tableId} tbody`);
                 let selectOptions = '';
 
@@ -687,101 +682,109 @@
                     $('#update-transaction').modal('show');
                     table_m();
                     employee_list();
-
                     dataTable2.ajax.reload();
-                    //   updat eTransaction(dv_no_id);
                 });
-                $('.print-data').on('click', function () {
-                    alert("testt");
 
-                });
-              $('body').on('click', '.item-update', function () {
-                temp_id = $(this).attr('id');
-                $('#update-transaction').modal('hide');
-                $("#payrollUpdate").modal("show");
+                $('#tbl-items').on('click', '.dt-checkboxes', function () {
+                    var id = $(this).val();
+                    if ($(this).prop('checked')) {
+                        if (selectedCb.indexOf(id) === -1) {
+                            selectedCb.push(id);
+                        }
+                        $(this).data('checked', true); 
+                    } else {
 
-                  $.ajax({
-                    type: 'POST',
-                    url: "{% url 'multiple-charges-details' %}",
-                    data:{
-                      payroll_id: temp_id
+                        let index = selectedCb.indexOf(id);
+                        if (index !== -1) {
+                            selectedCb.splice(index, 1);
+                        }
+                        $(this).data('checked', false); 
                     }
-                }).done(function (data) {
+                    console.log(selectedCb);
+                });
 
-                  let totalAmount = 0;
-                  let amountList = [];
-                  let chargesList = [];
-                  let preview_amt = [];
-                  let preview_charges = [];
+                $('body').on('click', '.item-update', function () {
+                    temp_id = $(this).attr('id');
+                    $('#update-transaction').modal('hide');
+                    $("#payrollUpdate").modal("show");
 
-                  
-                  let full_name = data.full_name;
-                  let amount = data.amount;
-                  FName.val(full_name);
-                  AmountIssued.val(amount);
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'multiple-charges-details' %}",
+                        data:{
+                        payroll_id: temp_id
+                        }
+                    }).done(function (data) {
+                    let totalAmount = 0;
+                    let amountList = [];
+                    let chargesList = [];
+                    let preview_amt = [];
+                    let preview_charges = [];
+
+                    
+                    let full_name = data.full_name;
+                    let amount = data.amount;
+                    FName.val(full_name);
+                    AmountIssued.val(amount);
+                    $('.rows-container').empty();
+                    chargesList = data.data.map(item => item.charges_id);
+                    amountList = data.data.map(item => item.amount);
+                    if (data.data.length > 0) {
 
 
-    
-                  $('.rows-container').empty();
-
-                  chargesList = data.data.map(item => item.charges_id);
-                  amountList = data.data.map(item => item.amount);
-                  if (data.data.length > 0) {
-
-
-                      for (let i = 0; i < data.data.length; i++) {
-                          var newRow = $('<div class="row mt-2">' +
-                          '<div class="col-5">' +
-                          '<select class="form-select select-charges" id="select-charges-'+i+'">' +
-                              '<option></option>'+
-                              '{% for row in charges %}'+
-                                 '{% if row.name != "Multiple" %}'+
-                                     '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                  '{% endif %}'+
-                              '{% endfor %}'+
-                          '</select>' +
-                          '<span class="error-label">Required</span>'+
-                          '</div>' +
-                          '<div class="col-5">' +
-                          '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
-                          '<span class="error-label-amount">Required</span>'+
-                          '</div>' +
-                          '<div class="col-2">' +
-                          '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                          '</div>' +
-                          '</div>');
-                          newRow.find('.error-label, .error-label-amount').hide();
-                          $('.rows-container').append(newRow);
-                          $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
-                      }
-                  } else {
-                      var newRow = $('<div class="row mt-2">' +
-                      '<div class="col-5">' +
-                      '<select class="form-select select-charges" id="select-charges">' +
-                            '<option></option>'+
-                            '{% for row in charges %}'+
-                                '{% if row.name != "Multiple" %}'+
-                                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                '{% endif %}'+
-                            '{% endfor %}'+
-                      '</select>' +
-                      '<span class="error-label">Required</span>'+
-                      '</div>' +
-                      '<div class="col-5">' +
-                      '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
-                      '<span class="error-label-amount">Required</span>'+
-                      '</div>' +
-                      '<div class="col-2">' +
-                      '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                      '</div>' +
-                      '</div>');
-                      newRow.find('.error-label, .error-label-amount').hide();
-                      $('.rows-container').append(newRow);
-                  }
-                })
+                        for (let i = 0; i < data.data.length; i++) {
+                            var newRow = $('<div class="row mt-2">' +
+                            '<div class="col-5">' +
+                            '<select class="form-select select-charges" id="select-charges-'+i+'">' +
+                                '<option></option>'+
+                                '{% for row in charges %}'+
+                                    '{% if row.name != "Multiple" %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endif %}'+
+                                '{% endfor %}'+
+                            '</select>' +
+                            '<span class="error-label">Required</span>'+
+                            '</div>' +
+                            '<div class="col-5">' +
+                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+                            '<span class="error-label-amount">Required</span>'+
+                            '</div>' +
+                            '<div class="col-2">' +
+                            '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                            '</div>' +
+                            '</div>');
+                            newRow.find('.error-label, .error-label-amount').hide();
+                            $('.rows-container').append(newRow);
+                            $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
+                        }
+                    } else {
+                        var newRow = $('<div class="row mt-2">' +
+                        '<div class="col-5">' +
+                        '<select class="form-select select-charges" id="select-charges">' +
+                                '<option></option>'+
+                                '{% for row in charges %}'+
+                                    '{% if row.name != "Multiple" %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endif %}'+
+                                '{% endfor %}'+
+                        '</select>' +
+                        '<span class="error-label">Required</span>'+
+                        '</div>' +
+                        '<div class="col-5">' +
+                        '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                        '<span class="error-label-amount">Required</span>'+
+                        '</div>' +
+                        '<div class="col-2">' +
+                        '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                        '</div>' +
+                        '</div>');
+                        newRow.find('.error-label, .error-label-amount').hide();
+                        $('.rows-container').append(newRow);
+                    }
+                    })
               });
 
-              $('body').on('click', '.item-delete', function () {
+                $('body').on('click', '.item-delete', function () {
                 let emp_id = $(this).attr('id');
 
                 let dataTable = $('#tbl-box-a').DataTable();
@@ -917,13 +920,43 @@
         $('#tbl-items tbody input[type="checkbox"]').change(function () {
             // Do something when a checkbox in the table body is changed...
         });
+        
         $('#check-all').change(function () {
-            // Get the checked state of the "check-all" checkbox
             var isChecked = $(this).is(':checked');
-
-            // Set the checked state of all checkboxes in the table body
             $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input"]').prop('checked', isChecked);
+            if (isChecked) {
+                // Add all IDs to the array
+                $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input"]').each(function () {
+                    var id = $(this).val();
+                    if (selectedCb.indexOf(id) === -1) {
+                        selectedCb.push(id);
+                    }
+                });
+            } else {
+                // Remove all IDs from the array
+                $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input"]').each(function () {
+                    var id = $(this).val();
+                    let index = selectedCb.indexOf(id);
+                    if (index !== -1) {
+                        selectedCb.splice(index, 1);
+                    }
+                });
+            }
+
+            // Log or perform further actions with the selectedCb array
+            console.log(selectedCb);
         });
+
+
+
+
+        // $('#check-all').change(function () {
+        //     // Get the checked state of the "check-all" checkbox
+        //     var isChecked = $(this).is(':checked');
+
+        //     // Set the checked state of all checkboxes in the table body
+        //     $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input"]').prop('checked', isChecked);
+        // });
 
         $('.preview-details').on('click', function () {
             bx_id = $(this).data('id');
@@ -944,7 +977,10 @@
     
 
     },
-    })
+    });
+
+
+
 
 
     function employee_list(){
@@ -1178,53 +1214,56 @@
           });
       }
 
-      function incoming_out(selected_items){
-            Swal.fire({
-                title: 'Forwarded, Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, mark as out!',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-3',
-                    cancelButton: 'btn btn-label-secondary',
-                },
-                buttonsStyling: false,
-            }).then(function (result) {
-                if (result.value) {
-                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-       
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'out-box-a' %}",
-                        data:{
-                            out_list: selected_items
-                        }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Successfully save!',
-                                text: 'Item has been added.',
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
+      function incoming_out(){
+        selectedCb = $.grep(selectedCb, function(value) {
+            return value !== 'on';
+        });
+        Swal.fire({
+            title: 'Forwarded, Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, mark as out!',
+            customClass: {
+                confirmButton: 'btn btn-primary me-3',
+                cancelButton: 'btn btn-label-secondary',
+            },
+            buttonsStyling: false,
+        }).then(function (result) {
+            if (result.value) {
+                let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
+    
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'out-box-a' %}",
+                    data:{
+                        out_list: selected_items
+                    }
+                }).done(function (data) {
+                    if (data.data == 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Successfully save!',
+                            text: 'Item has been added.',
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        })
 
-                            dataTable.ajax.reload()
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                }
-            })
+                        dataTable.ajax.reload()
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error saving!',
+                            text: data.message,
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        })
+                    }
+                })
+            }
+        })
 
         }   
         $('#add_charges').click(function () {     
