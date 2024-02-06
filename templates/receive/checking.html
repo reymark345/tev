@@ -398,21 +398,6 @@
 
             },
             columns: [
-                // {
-                //     data: 'id', status: 'status',
-                //     orderable: false, 
-                //     render: function (data, type, row) {
-                //         var status = row.status; // Access the 'status' value from the 'row' object
-
-                //         if (status == 2) {
-                //             return '<input type="checkbox" disabled="disabled" class="dt-checkboxes form-check-input">';
-                //         } else {
-                //             // Render a checkbox for each row with the item ID as its value
-                //             return '<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="' + data + '">';
-                //         }
-
-                //     }
-                // },
                 {
                     data: 'id', status: 'status',
                     orderable: false, 
@@ -754,8 +739,6 @@
         })
         $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
         function incoming_out(){
-            console.log(selectedCb);
-            console.log("selectedCb");
             Swal.fire({
                 title: 'Forwarded',
                 text: "You won't be able to revert this!",

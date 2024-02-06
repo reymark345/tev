@@ -86,14 +86,15 @@
                         <tr>
                             <th><input type="checkbox" id="check-all" class="dt-checkboxes form-check-input"></th>
                             <th>Dv Number</th>
-                            <th>Cluster</th>
                             <th>Division</th>
                             <th>Division Chief</th>
                             <th>Status</th>
                             <th>Date In</th>
-                            <th>Date Out</th>
-                            <th>Out by</th>
-                            <th>ID</th>
+                            <th>Date Received</th>
+                            <th>Received By</th>
+                            <th>Date Forwarded</th>
+                            <th>Forwarded By</th>
+                         
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -341,6 +342,7 @@
     let dataTable2;
     var new_id;
     let chargeId = 0;
+    let selectedCb = [];
     $(document).ready(function () {
       $('#loading-screen').hide();
       const table_box_a = $('#tbl-box-a')
@@ -406,61 +408,65 @@
                 },
             },
             columns: [
-                {
-                    data: 'id', status: 'status',
-                    orderable: false, 
-                    render: function (data, type, row) {
-                        var status = row.status; 
-
-                        if (status == 2) {
-                            return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
-                        } else {
-                            return '<input type="checkbox" class="dt-checkboxes form-check-input" value="' + data + '">';
-                        }
-
-                    }
-                },
-                { data: 'dv_no' },
-                { data: 'cluster' },
+                { data: 'id', status : 'status' },
+                { data: 'dv_no'},
                 { data: 'division_name' },
                 { data: 'division_chief' },
                 { data: 'status' },
-                { data: 'box_b_in' },
                 { data: 'box_b_out' },
-                { data: 'out_by' },
-                { data: 'id' },
-
+                { data: 'd_received' },
+                { data: 'received_by' },
+                { data: 'd_forwarded' },
+                { data: 'out_by' }
             ],
             columnDefs: [
                 {
-                    targets: 1,
-                    render: function(data) {
-                        return '<span class="badge bg-label-primary">' + data + '</span>';
+                    targets: 0,
+                    orderable: false,
+                    render: function (data, type, row) {
+                        var status = row.status; 
+                        if (status == 6 || status == 8 ) {
+                            let isChecked = selectedCb.includes(data.toString());
+                            var status = row.status;
+                            return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
+                            
+                        } else {
+                            return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
+                        }
                     },
                 },
 
                 {
-                    targets: 2,
+                    targets: 1,
                     render: function(data) {
-                        return '<span class="badge bg-label-info">'+data+'</span>'
+                        return '<span class="badge bg-label-primary" >' + data + '</span>';
                     },
                 },
+
              
-              
                 {
-                  targets: 5,
+                  targets: 4,
                   render: function (data) {
-                      if(data==5){
-                        return '<span class="badge bg-label-warning">Outgoing</span>'
+                      if(data==6){
+                        return '<span class="badge bg-label-warning">For Receive</span>'
+                      }
+                      if(data==8){
+                        return '<span class="badge bg-label-primary">Received</span>'
                       }
                       else{
-                        return '<span class="badge bg-label-success">Ongoing</span>'
+                        return '<span class="badge bg-label-success">Forwarded</span>'
                       }
 
                   },
                 },
                 {
                     targets: -3,
+                    render: function (data) {
+                        return data;
+                    },
+                },
+                {
+                    targets: -2,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
@@ -472,23 +478,36 @@
                     },
                 },
                 {
-                    targets: -1,
-                    title: 'Action',
-                    orderable: false,
-                    searchable: false,
+                    targets: -5,
                     render: function (data) {
-                        let itemId = data; // Assuming data contains the ID you want to pass
-                        let view = year_now+ "/"+itemId;
-                        return (
-                            '<a href="{% url "preview-box-a" %}?id=' + view + '" onclick="window.open(this.href); return false" class="text-body"><i class="text-primary fa fa-print"></i></a>' +
-                            '<a class="btn btn-sm btn-icon view-data" id="'+itemId+'"><i class="text-primary fa fa-eye"></i></a>'
-                        
-                        );
+                        return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
+                {
+                    
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Transmittal</span>',
+                    action: function () {
+                        let data_year = $('#dp-year').val();
+                        // Get the IDs of checked items
+                        var selectedItems = [];
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+            
+                        if(selectedItems.length ===0){
+                            toastr.error('Select item first', 'Invalid', toast_options);
+                        }
+                        else{
+                            // var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems + '&year=' + data_year ;
+                            var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems.join('&selectedDv=') + '&year=' + data_year;
+                            window.open(url, '_blank');
+                        }
+                    }
+                },
                 {
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
@@ -532,53 +551,9 @@
                   }
                 
                 },
-                {
-                    
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Transmittal</span>',
-                    action: function () {
-                        let data_year = $('#dp-year').val();
-                        console.log(data_year);
-                        console.log("data_year");
-                        // Get the IDs of checked items
-                        var selectedItems = [];
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-            
-                        if(selectedItems.length ===0){
-                            toastr.error('Select item first', 'Invalid', toast_options);
-                        }
-                        else{
-                            console.log("leak");
-                            console.log(selectedItems);
-                            // var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems + '&year=' + data_year ;
-                            var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems.join('&selectedDv=') + '&year=' + data_year;
-                            window.open(url, '_blank');
-                        }
-                    }
-                },
-                {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
-                    action: function () {
-                        // Get the IDs of checked items
-                        var selectedItems = [];
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-            
-                        if(selectedItems.length ===0){
-                            toastr.error('Select item first', 'Invalid', toast_options);
-                        }
-                        else{
-                            incoming_out(selectedItems);
-                        }
-                    }
-                },
+
             ],
             drawCallback: function (settings) {
-
                 const tableId = 'tbl-box-a'; // Change this to the specific table ID you want to populate
                 const tbody = $(`#${tableId} tbody`);
                 let selectOptions = '';
@@ -595,11 +570,32 @@
                     dataTable2.ajax.reload();
                     //   updat eTransaction(dv_no_id);
                 });
+
+                $('#tbl-items').on('click', '.dt-checkboxes', function () {
+                    var id = $(this).val();
+                    if ($(this).prop('checked')) {
+                        if (selectedCb.indexOf(id) === -1) {
+                            selectedCb.push(id);
+                        }
+                        $(this).data('checked', true); 
+                    } else {
+
+                        let index = selectedCb.indexOf(id);
+                        if (index !== -1) {
+                            selectedCb.splice(index, 1);
+                        }
+                        $(this).data('checked', false); 
+                    }
+                    console.log(selectedCb);
+                });
+
+
                 $('.print-data').on('click', function () {
                     alert("testt");
 
                 });
-              $('body').on('click', '.item-update', function () {
+
+                $('body').on('click', '.item-update', function () {
                 temp_id = $(this).attr('id');
                 $('#update-transaction').modal('hide');
                 $("#payrollUpdate").modal("show");
@@ -685,7 +681,7 @@
                 })
               });
 
-              $('body').on('click', '.item-delete', function () {
+                $('body').on('click', '.item-delete', function () {
                 let emp_id = $(this).attr('id');
 
                 let dataTable = $('#tbl-box-a').DataTable();
@@ -717,18 +713,45 @@
                     }
                 })
         });
- 
 
-
-        $('#tbl-items tbody input[type="checkbox"]').change(function () {
-            // Do something when a checkbox in the table body is changed...
+        $('#received').on('click', function(){
+            if(selectedCb.length ===0){
+                toastr.error('Selected item first', 'Invalid', toast_options);
+            }
+            else{
+                outgoing(0);
+            }
         });
-        $('#check-all').change(function () {
-            // Get the checked state of the "check-all" checkbox
-            var isChecked = $(this).is(':checked');
 
-            // Set the checked state of all checkboxes in the table body
-            $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input"]').prop('checked', isChecked);
+        $('#forward').on('click', function(){
+            if(selectedCb.length ===0){
+                toastr.error('Selected item first', 'Invalid', toast_options);
+            }
+            else{
+                outgoing(1);
+            }
+
+        });
+
+        $('#check-all').change(function () {
+            var isChecked = $(this).is(':checked');
+            $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
+            if (isChecked) {
+                $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                    var id = $(this).val();
+                    if (selectedCb.indexOf(id) === -1) {
+                        selectedCb.push(id);
+                    }
+                });
+            } else {
+                $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                    var id = $(this).val();
+                    let index = selectedCb.indexOf(id);
+                    if (index !== -1) {
+                        selectedCb.splice(index, 1);
+                    }
+                });
+            }
         });
 
         $('.preview-details').on('click', function () {
@@ -902,12 +925,14 @@
     }
  
 
-    $('div.head-label').html('<h5 class="card-title mb-0">'+
-        '<select id="dp-year" name="DpYear" class="form-select">'+
+    $('div.head-label').html('<h5 class="card-title mb-0 d-flex align-items-center">'+
+        '<select id="dp-year" name="DpYear" class="form-select me-3">'+
             '<option value="2023">2023</option>'+
             '<option value="2024">2024</option>'+
-            '</select>'
-        +'</h5>')
+        '</select>' +
+        '<button type="submit" id="received" class="btn btn-primary me-3">Receive</button>' +
+        '<button type="submit" id="forward" class="btn btn-success">Forward</button>' +
+        '</h5>');
 
 
         function clear_advfilter(){
@@ -984,53 +1009,56 @@
           });
       }
 
-      function incoming_out(selected_items){
-            Swal.fire({
-                title: 'Forwarded, Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, mark as out!',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-3',
-                    cancelButton: 'btn btn-label-secondary',
-                },
-                buttonsStyling: false,
-            }).then(function (result) {
-                if (result.value) {
-                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-       
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'out-box-a' %}",
-                        data:{
-                            out_list: selected_items
-                        }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Successfully save!',
-                                text: 'Item has been added.',
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-
-                            dataTable.ajax.reload()
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                }
-            })
+      function outgoing(status_id){
+        selectedCb = $.grep(selectedCb, function(value) {
+            return value !== 'on';
+        })
+        let title_ = (status_id == 0) ? 'Mark as Received, Are you sure?' : 'Mark as Forward, Are you sure?';
+        Swal.fire({
+            title: title_,
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Confirm',
+            customClass: {
+                confirmButton: 'btn btn-primary me-3',
+                cancelButton: 'btn btn-label-secondary',
+            },
+            buttonsStyling: false,
+        }).then(function (result) {
+            if (result.value) {
+                let post_url = status_id == '0' ? "{% url 'receive-otg' %}" : "{% url 'forward-otg' %}"
+                $.ajax({
+                    type: 'POST',
+                    url: post_url,
+                    data:{
+                        out_list: selectedCb
+                    }
+                }).done(function (data) {
+                    if (data.data == 'success') {
+                        selectedCb = [];
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Successfully save!',
+                            text: 'Item has been added.',
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        })
+                        dataTable.ajax.reload()
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error saving!',
+                            text: data.message,
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        })
+                    }
+                })
+            }
+        })
 
         }   
         $('#add_charges').click(function () {     

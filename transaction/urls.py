@@ -16,6 +16,8 @@ urlpatterns = [
     # path('item_update', views.item_update, name='item-update'),
 
     path('out_box_a', views.out_box_a, name='out-box-a'),
+    path('receive_otg', views.receive_otg, name='receive-otg'),
+    path('forward_otg', views.forward_otg, name='forward-otg'),
     path('tev_details', views.tev_details, name='tev-details'),
 
     path('payroll', views.list_payroll, name='transaction-payroll'),
@@ -45,7 +47,4 @@ urlpatterns = [
     path('update_purpose', views.update_purpose , name='update-purpose'),  
     path('transmittal_details', views.transmittal_details , name='transmittal-details'),  
     
-
-
-     
 ]

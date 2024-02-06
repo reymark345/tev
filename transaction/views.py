@@ -273,7 +273,7 @@ def outgoing_load(request):
         dv_list = request.GET.getlist('ListDv[]')
 
         # item_data = TevOutgoing.objects.all(dv_no = dv_no_string)
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id = 6)
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [6,8,9])
 
         if FCluster:
             item_data = item_data.filter(cluster=FCluster)
@@ -294,9 +294,9 @@ def outgoing_load(request):
             item_data = item_data.filter(id__in=dv_list)
 
     elif _search:
-        item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string, status_id = 6).select_related().distinct().order_by(_order_dash + 'id')
+        item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9]).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id = 6).select_related().distinct().order_by('-id')
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9]).select_related().distinct().order_by('-id')
 
     total = item_data.count()
 
@@ -312,17 +312,21 @@ def outgoing_load(request):
     data = []
 
     for item in item_data:
-        userData = AuthUser.objects.filter(id=item.user_id)
+        userData = AuthUser.objects.filter(id=item.otg_out_user_id)
         if userData.exists():
             full_name = userData[0].first_name + ' ' + userData[0].last_name
         else:
             full_name = ""
-        
-        userData_out = AuthUser.objects.filter(id=item.out_by)
-        if userData_out.exists():
-            full_name_out = userData_out[0].first_name + ' ' + userData_out[0].last_name
+
+
+        userData_received = AuthUser.objects.filter(id=item.otg_r_user_id)
+        if userData_received.exists():
+            full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
         else:
-            full_name_out = ""
+            full_name_receiver = ""
+
+        print("full_name_receiver")
+        print(full_name_receiver)
 
         item = {
             'id': item.id,
@@ -333,8 +337,11 @@ def outgoing_load(request):
             'status':item.status_id,
             'box_b_in': item.box_b_in,
             'box_b_out': item.box_b_out,
+            'd_received': item.otg_d_received,
+            'd_forwarded': item.otg_d_forwarded,
+            'received_by': full_name_receiver,
             'user_id': full_name,
-            'out_by': full_name_out
+            'out_by': full_name
         }
 
         data.append(item)
@@ -1430,6 +1437,32 @@ def out_box_a(request):
         box_b = TevOutgoing.objects.filter(id=item_id).update(status_id=6,box_b_out=date_time.datetime.now(), out_by = user_id)
 
     
+    return JsonResponse({'data': 'success'})
+
+@csrf_exempt
+def receive_otg(request):
+    out_list = request.POST.getlist('out_list[]')
+    user_id = request.session.get('user_id', 0)
+    out_list_int = [int(item) for item in out_list]
+    ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+    
+    TevIncoming.objects.filter(id__in=ids).update(status_id=8)
+    
+    for item_id  in out_list:
+        TevOutgoing.objects.filter(id=item_id).update(status_id=8,otg_d_received=date_time.datetime.now(), otg_r_user_id = user_id)
+    return JsonResponse({'data': 'success'})
+
+@csrf_exempt
+def forward_otg(request):
+    out_list = request.POST.getlist('out_list[]')
+    user_id = request.session.get('user_id', 0)
+    out_list_int = [int(item) for item in out_list]
+    ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+    
+    TevIncoming.objects.filter(id__in=ids).update(status_id=9)
+    
+    for item_id  in out_list:
+        TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=date_time.datetime.now())
     return JsonResponse({'data': 'success'})
 
 
