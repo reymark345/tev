@@ -529,14 +529,15 @@
 
                   },
                 },
+
                 {
-                    targets: -3,
+                    targets: -4,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
                 {
-                    targets: -4,
+                    targets: -3,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
@@ -1209,7 +1210,7 @@
         });
         console.log(selectedCb);
         Swal.fire({
-            title: 'Forwarded, Are you sure?',
+            title: 'Forward, Are you sure?',
             text: "You won't be able to revert this!",
             icon: 'warning',
             showCancelButton: true,

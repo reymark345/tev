@@ -27,6 +27,7 @@ urlpatterns = [
     path('preview', views.preview_box_a, name='preview-box-a'),
     path('outgoing_list', views.outgoing_list, name='outgoing-list'),
     path('budget_list', views.budget_list, name='budget-list'),
+    path('journal_list', views.journal_list, name='journal-list'),
     
     path('employee_dv', views.employee_dv, name='employee-dv'),
     path('update_box_list', views.update_box_list, name='update-box-list'),

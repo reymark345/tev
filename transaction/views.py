@@ -201,8 +201,31 @@ def outgoing_list(request):
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'permissions' : role_names,
+            'dv_number' : TevOutgoing.objects.filter(status_id__in =[6,8,9]).order_by('id'),
+            'cluster' : Cluster.objects.filter().order_by('id'),
+            'division' : Division.objects.filter(status=0).order_by('id'),
+            'charges' : Charges.objects.filter().order_by('name')
 
+        }
+        return render(request, 'transaction/p_outgoing.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def journal_list(request):
+    user_details = get_user_details(request)
 
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
@@ -213,7 +236,7 @@ def outgoing_list(request):
             'charges' : Charges.objects.filter().order_by('name')
 
         }
-        return render(request, 'transaction/p_outgoing.html', context)
+        return render(request, 'transaction/p_journal.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
@@ -325,8 +348,6 @@ def outgoing_load(request):
         else:
             full_name_receiver = ""
 
-        print("full_name_receiver")
-        print(full_name_receiver)
 
         item = {
             'id': item.id,
@@ -1316,7 +1337,7 @@ def add_dv(request):
         dv_number = request.POST.get('DvNumber')
         cluster_id = request.POST.get('Cluster')
         div_id = request.POST.get('Division')
-        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_id,box_b_in=date_time.datetime.now(),user_id=user_id, division_id = div_id)
+        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_id,box_b_in=timezone.now(),user_id=user_id, division_id = div_id)
         outgoing.save()
         
         return JsonResponse({'data': 'success'})
@@ -1423,21 +1444,29 @@ def delete_box_list(request):
 def out_box_a(request):
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
-    
-    # Convert the out_list items to integers
+    missing_items = []
     out_list_int = [int(item) for item in out_list]
-
-    
-    # Update the tev_incoming table
-    ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-    
-    TevIncoming.objects.filter(id__in=ids).update(status_id=6)
-    
-    for item_id  in out_list:
-        box_b = TevOutgoing.objects.filter(id=item_id).update(status_id=6,box_b_out=date_time.datetime.now(), out_by = user_id)
-
-    
-    return JsonResponse({'data': 'success'})
+    for check_dv in out_list_int:
+        check_no_assigned = TevBridge.objects.filter(tev_outgoing_id=check_dv).values_list('tev_incoming_id', flat=True)
+        if not check_no_assigned:
+            missing_items.append(check_dv)
+    if missing_items:
+        return JsonResponse({'message': "Travel selected no assign DV please review",'text': "You must assign at least one travel to this DV to view the data" })
+    else:
+        result_id = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        result_list = [item for item in result_id]
+        for check_charges in result_list:
+            check_no_charges = PayrolledCharges.objects.filter(incoming_id=check_charges).values_list('incoming_id', flat=True)
+            if not check_no_charges:
+                missing_items.append(check_charges)
+        if missing_items:
+            return JsonResponse({'message': "Travel selected no assigned Amount Charges",'text': "You must assign at least one charges to this DVs" })
+        else:
+            ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+            TevIncoming.objects.filter(id__in=ids).update(status_id=6)
+            for item_id  in out_list:
+                TevOutgoing.objects.filter(id=item_id).update(status_id=6,box_b_out=timezone.now(), out_by = user_id)
+            return JsonResponse({'data': 'success'})
 
 @csrf_exempt
 def receive_otg(request):
@@ -1445,25 +1474,45 @@ def receive_otg(request):
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
     ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-    
+     
     TevIncoming.objects.filter(id__in=ids).update(status_id=8)
     
     for item_id  in out_list:
-        TevOutgoing.objects.filter(id=item_id).update(status_id=8,otg_d_received=date_time.datetime.now(), otg_r_user_id = user_id)
+        TevOutgoing.objects.filter(id=item_id).update(status_id=8,otg_d_received=timezone.now(), otg_r_user_id = user_id)
     return JsonResponse({'data': 'success'})
 
 @csrf_exempt
 def forward_otg(request):
+    missing_items = []
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
-    ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+
+    # for status_id  in out_list_int:
+    #     check_status = TevOutgoing.objects.filter(id=status_id, status_id = 6).values_list('dv_no', flat=True)
+    #     if check_status:
+    #         status = [item for item in check_status]
+    #         missing_items.append(status)
+    # if missing_items:
+    #     print(missing_items)
+    #     return JsonResponse({'message': missing_items + 'Dvs must receive First'})
+
+    for status_id in out_list_int:
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=6).values_list('dv_no', flat=True)
+        if check_status:
+            status = [item for item in check_status]
+            missing_items.extend(status)  # Extend instead of append to avoid nested lists
+    if missing_items:
+        print(missing_items)
+        return JsonResponse({'message': ', '.join(map(str, missing_items))})
+
     
-    TevIncoming.objects.filter(id__in=ids).update(status_id=9)
-    
-    for item_id  in out_list:
-        TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=date_time.datetime.now())
-    return JsonResponse({'data': 'success'})
+    else:
+        # ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        # TevIncoming.objects.filter(id__in=ids).update(status_id=9)
+        # for item_id  in out_list:
+        #     TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=timezone.now())
+        return JsonResponse({'data': 'success'})
 
 
 @csrf_exempt

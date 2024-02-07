@@ -12,7 +12,66 @@
   </center>
 </div>
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
-<link rel="stylesheet" href="{% static 'custom/custom.css' %}" />
+<style>
+  #loading-screen {
+      position: fixed;
+      background: rgba(255, 255, 255, 0.7);
+      color: rgb(0, 0, 0);
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+  }
+  .sk-primary .sk-fold-cube {
+      width: 15px; /* Set the width of each cube */
+      height: 15px; /* Set the height of each cube */
+  }
+  .custom-file-upload {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  background-color: #f8f9fa;
+  color: #495057;
+  border-radius: 4px;
+  }
+
+  .custom-file-upload:hover {
+      background-color: #e9ecef;
+  }
+  .has-error {
+        border: 1px solid red; /* Change the border color for the input with an error */
+  }
+
+  .error-label, .error-label-amount {
+      color: red; /* Set the text color for the error message */
+      margin-top: 5px; /* Add some space between the input and the error message */
+  }
+    
+
+  .select-charges.has-error {
+  border: 1px solid red; /* Change the border color for the input with an error */
+  }
+
+  /* Additional style for the error message */
+  .select-charges.has-error::after {
+      content: "Required"; /* Set the error message text */
+      color: red; /* Set the text color for the error message */
+      display: block; /* Display the error message as a block element */
+      margin-top: 5px; /* Add some space between the input and the error message */
+  }
+
+    /* Hide the error message when there's no error */
+  .select-charges::after {
+      content: ""; /* Empty content to hide the error message */
+      display: none;
+  }
+  .blur-modal-backdrop {
+    backdrop-filter: blur(5px); /* Adjust the blur value as needed */
+}
+</style>
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -27,7 +86,6 @@
                         <tr>
                             <th><input type="checkbox" id="check-all" class="dt-checkboxes form-check-input"></th>
                             <th>Dv Number</th>
-                            <th>Cluster</th>	
                             <th>Division</th>
                             <th>Division Chief</th>
                             <th>Status</th>
@@ -36,6 +94,7 @@
                             <th>Received By</th>
                             <th>Date Forwarded</th>
                             <th>Forwarded By</th>
+                         
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -95,7 +154,7 @@
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label" >Date Forwarded</label>
+                <label class="form-label" >Date Out</label>
                 <input
                 type="date"
                 id="f-box-out"
@@ -108,9 +167,8 @@
                 <label class="form-label" for="modalEditTaxID">Status</label>
                 <select class="select2 form-select f-status" name="BoxStatus" id="box-status">
                   <option></option>
-                  <option value="6">For Receive</option>
-                  <option value="8">Received</option>
-                  <option value="9">Forwarded</option>
+                  <option value="5">Outgoing</option>
+                  <option value="6">Ongoing</option>
                 </select>
               </div>
 
@@ -352,7 +410,6 @@
             columns: [
                 { data: 'id', status : 'status' },
                 { data: 'dv_no'},
-                { data: 'cluster' },
                 { data: 'division_name' },
                 { data: 'division_chief' },
                 { data: 'status' },
@@ -385,14 +442,10 @@
                         return '<span class="badge bg-label-primary" >' + data + '</span>';
                     },
                 },
+
+             
                 {
-                    targets: 2,
-                    render: function(data) {
-                        return '<span class="badge bg-label-info">'+data+'</span>'
-                    },
-                },
-                {
-                  targets: 5,
+                  targets: 4,
                   render: function (data) {
                       if(data==6){
                         return '<span class="badge bg-label-warning">For Receive</span>'
@@ -896,11 +949,11 @@
         });
 
         search_advance_filter.on('click', function () {
-            FAdvancedFilter.val("true");
-            $("#advance-filter").modal("hide");
-            dataTable.ajax.reload();
-            clear_advfilter();
-            toastr.success('Search successfully', 'Success', toast_options);
+                FAdvancedFilter.val("true");
+                $("#advance-filter").modal("hide");
+                dataTable.ajax.reload();
+                clear_advfilter();
+                toastr.success('Search successfully', 'Success', toast_options);
         });
 
         reset_advance_filter.on('click', function () {
@@ -960,7 +1013,7 @@
         selectedCb = $.grep(selectedCb, function(value) {
             return value !== 'on';
         })
-        let title_ = (status_id == 0) ? 'Mark as Received, Are you sure?' : 'Already Printed Transmittal? Confirm to forward';
+        let title_ = (status_id == 0) ? 'Mark as Received, Are you sure?' : 'Already Printed Transmittal? Forward to confirm';
         Swal.fire({
             title: title_,
             text: "You won't be able to revert this!",
