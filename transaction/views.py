@@ -888,7 +888,7 @@ def box_load(request):
         dv_list = request.GET.getlist('ListDv[]')
 
         # item_data = TevOutgoing.objects.all(dv_no = dv_no_string)
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string)
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6])
 
         if FCluster:
             item_data = item_data.filter(cluster=FCluster)
@@ -909,9 +909,9 @@ def box_load(request):
             item_data = item_data.filter(id__in=dv_list)
 
     elif _search:
-        item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string).select_related().distinct().order_by(_order_dash + 'id')
+        item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string,status_id__in = [5,6]).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string).select_related().distinct().order_by('-id')
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6]).select_related().distinct().order_by('-id')
 
     total = item_data.count()
 
@@ -1505,13 +1505,11 @@ def forward_otg(request):
     if missing_items:
         print(missing_items)
         return JsonResponse({'message': ', '.join(map(str, missing_items))})
-
-    
     else:
-        # ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-        # TevIncoming.objects.filter(id__in=ids).update(status_id=9)
-        # for item_id  in out_list:
-        #     TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=timezone.now())
+        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        TevIncoming.objects.filter(id__in=ids).update(status_id=9)
+        for item_id  in out_list:
+            TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=timezone.now())
         return JsonResponse({'data': 'success'})
 
 
