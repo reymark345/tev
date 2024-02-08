@@ -402,7 +402,6 @@
     let outgoing_id = 0;
     let selectedDv = [];
     let temp_id = 0;
-    let data_clicked = false;
     let dataTable2;
     var new_id;
     let chargeId = 0;
@@ -673,8 +672,6 @@
                 $('.view-data').on('click', function () {
                     let id = $(this).attr('id');
                     dv_no_id = id
-                    data_clicked = true;
-                    
                     $('#update-transaction').modal('show');
                     table_m();
                     employee_list();
@@ -1208,7 +1205,6 @@
         selectedCb = $.grep(selectedCb, function(value) {
             return value !== 'on';
         });
-        console.log(selectedCb);
         Swal.fire({
             title: 'Forward, Are you sure?',
             text: "You won't be able to revert this!",

@@ -222,11 +222,19 @@ margin-top: 200%;
               
               </tr>              
               {% for emp in data %}
-              <tr>
+              <tr style="height: 60px;">
                 <td class="align-text-left" style="padding: 2; width:2%">{{ forloop.counter }}</td>
                 <td class="align-text-left" style="padding: 2; width:13%">{{ emp.dv_no }}</td>
+                {% if emp.payee %}
                 <td class="align-text-left" style="padding: 2;">{{ emp.payee }}</td>
+                {% else %}
+                <td class="align-text-left" style="padding: 2;"></td>
+                {% endif %}
+                {% if emp.payee %}
                 <td  class="align-text-left" style="padding: 2; width:35%">{{ emp.modepayment }}</td>
+                {% else %}
+                <td class="align-text-left" style="padding: 2; width:35%"></td>
+                {% endif %}
                 <td style="padding: 4; width:18%" class="align-text-right">{{ emp.charges_amount|floatformat:2|intcomma }}</td>
                 <td class="align-text-left" style="padding: 2; width:12%">{{ emp.date }}</td>
                 <td class="align-text-left" style="padding: 2; width:20%"></td>
