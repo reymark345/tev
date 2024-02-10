@@ -216,31 +216,6 @@ def outgoing_list(request):
         return render(request, 'pages/unauthorized.html')
     
 @login_required(login_url='login')
-def journal_list(request):
-    user_details = get_user_details(request)
-
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
-    user_id = request.session.get('user_id', 0)
-    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
-    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
-    role_names = [entry['role_name'] for entry in role_details]
-    if any(role_name in allowed_roles for role_name in role_names):
-        context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'permissions' : role_names,
-            'dv_number' : TevOutgoing.objects.filter(status_id = 6).order_by('id'),
-            'cluster' : Cluster.objects.filter().order_by('id'),
-            'division' : Division.objects.filter(status=0).order_by('id'),
-            'charges' : Charges.objects.filter().order_by('name')
-
-        }
-        return render(request, 'transaction/p_journal.html', context)
-    else:
-        return render(request, 'pages/unauthorized.html')
-    
-@login_required(login_url='login')
 def budget_list(request):
     user_details = get_user_details(request)
 
@@ -257,13 +232,38 @@ def budget_list(request):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'permissions' : role_names,
-            'dv_number' : TevOutgoing.objects.filter(status_id = 6).order_by('id'),
+            'dv_number' : TevOutgoing.objects.filter(status_id__in =[9,10,11]).order_by('id'),
             'cluster' : Cluster.objects.filter().order_by('id'),
             'division' : Division.objects.filter(status=0).order_by('id'),
             'charges' : Charges.objects.filter().order_by('name')
 
         }
         return render(request, 'transaction/p_budget.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def journal_list(request):
+    user_details = get_user_details(request)
+
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'permissions' : role_names,
+            'dv_number' : TevOutgoing.objects.filter(status_id__in =[11,12,13]).order_by('id'),
+            'cluster' : Cluster.objects.filter().order_by('id'),
+            'division' : Division.objects.filter(status=0).order_by('id'),
+            'charges' : Charges.objects.filter().order_by('name')
+
+        }
+        return render(request, 'transaction/p_journal.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
@@ -412,10 +412,10 @@ def budget_load(request):
             item_data = item_data.filter(box_b_out__icontains=FBoxIn)
         
         if FDateReceived:
-            item_data = item_data.filter(otg_d_received__icontains=FDateReceived)
+            item_data = item_data.filter(b_d_received__icontains=FDateReceived)
 
         if FDateForwarded:
-            item_data = item_data.filter(otg_d_forwarded__icontains=FDateForwarded)
+            item_data = item_data.filter(b_d_forwarded__icontains=FDateForwarded)
 
         if BoxStatus:
             item_data = item_data.filter(status_id=BoxStatus)
@@ -442,14 +442,14 @@ def budget_load(request):
     data = []
 
     for item in item_data:
-        userData = AuthUser.objects.filter(id=item.otg_out_user_id)
+        userData = AuthUser.objects.filter(id=item.b_out_user_id)
         if userData.exists():
             full_name = userData[0].first_name + ' ' + userData[0].last_name
         else:
             full_name = ""
 
 
-        userData_received = AuthUser.objects.filter(id=item.otg_r_user_id)
+        userData_received = AuthUser.objects.filter(id=item.b_r_user_id)
         if userData_received.exists():
             full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
         else:
@@ -463,8 +463,8 @@ def budget_load(request):
             'status':item.status_id,
             'box_b_in': item.box_b_in,
             'box_b_out': item.box_b_out,
-            'd_received': item.otg_d_received,
-            'd_forwarded': item.otg_d_forwarded,
+            'd_received': item.b_d_received,
+            'd_forwarded': item.b_d_forwarded,
             'received_by': full_name_receiver,
             'user_id': full_name,
             'out_by': full_name
@@ -517,10 +517,10 @@ def journal_load(request):
             item_data = item_data.filter(box_b_out__icontains=FBoxIn)
         
         if FDateReceived:
-            item_data = item_data.filter(otg_d_received__icontains=FDateReceived)
+            item_data = item_data.filter(j_d_received__icontains=FDateReceived)
 
         if FDateForwarded:
-            item_data = item_data.filter(otg_d_forwarded__icontains=FDateForwarded)
+            item_data = item_data.filter(j_d_forwarded__icontains=FDateForwarded)
 
         if BoxStatus:
             item_data = item_data.filter(status_id=BoxStatus)
@@ -547,14 +547,14 @@ def journal_load(request):
     data = []
 
     for item in item_data:
-        userData = AuthUser.objects.filter(id=item.otg_out_user_id)
+        userData = AuthUser.objects.filter(id=item.j_out_user_id)
         if userData.exists():
             full_name = userData[0].first_name + ' ' + userData[0].last_name
         else:
             full_name = ""
 
 
-        userData_received = AuthUser.objects.filter(id=item.otg_r_user_id)
+        userData_received = AuthUser.objects.filter(id=item.j_r_user_id)
         if userData_received.exists():
             full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
         else:
@@ -568,8 +568,8 @@ def journal_load(request):
             'status':item.status_id,
             'box_b_in': item.box_b_in,
             'box_b_out': item.box_b_out,
-            'd_received': item.otg_d_received,
-            'd_forwarded': item.otg_d_forwarded,
+            'd_received': item.j_d_received,
+            'd_forwarded': item.j_d_forwarded,
             'received_by': full_name_receiver,
             'user_id': full_name,
             'out_by': full_name
@@ -1721,17 +1721,33 @@ def forward_otg(request):
         for item_id  in out_list:
             TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=timezone.now())
         return JsonResponse({'data': 'success'})
-    
+
+
 @csrf_exempt
 def receive_budget(request):
+    missing_items = []
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
-    ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-    TevIncoming.objects.filter(id__in=ids).update(status_id=10)
-    for item_id  in out_list:
-        TevOutgoing.objects.filter(id=item_id).update(status_id=10,otg_d_received=timezone.now(), otg_r_user_id = user_id)
-    return JsonResponse({'data': 'success'})
+
+    for status_id in out_list_int:
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
+        if check_status:
+            status = [item for item in check_status]
+            missing_items.extend(status)
+
+    if missing_items:
+        return JsonResponse({'data': ', '.join(map(str, missing_items)), 'message' : 'Selected DVs is already Forwarded'})
+    else:
+        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        
+        TevIncoming.objects.filter(id__in=ids).update(status_id=10)
+        
+        for item_id  in out_list:
+            TevOutgoing.objects.filter(id=item_id).update(status_id=10,b_d_received=timezone.now(), b_r_user_id = user_id)
+        return JsonResponse({'data': 'success'})
+    
+
 
 @csrf_exempt
 def forward_budget(request):
@@ -1750,21 +1766,34 @@ def forward_budget(request):
         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
         TevIncoming.objects.filter(id__in=ids).update(status_id=11)
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=11,otg_out_user_id = user_id,otg_d_forwarded=timezone.now())
+            TevOutgoing.objects.filter(id=item_id).update(status_id=11,b_out_user_id = user_id,b_d_forwarded=timezone.now())
         return JsonResponse({'data': 'success'})
-    
+
+
 @csrf_exempt
 def receive_journal(request):
+    missing_items = []
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
-    ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+
+    for status_id in out_list_int:
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=13).values_list('dv_no', flat=True)
+        if check_status:
+            status = [item for item in check_status]
+            missing_items.extend(status)
+
+    if missing_items:
+        return JsonResponse({'data': ', '.join(map(str, missing_items)), 'message' : 'Selected DVs is already Forwarded'})
+    else:
+        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        
+        TevIncoming.objects.filter(id__in=ids).update(status_id=12)
+        
+        for item_id  in out_list:
+            TevOutgoing.objects.filter(id=item_id).update(status_id=12,j_d_received=timezone.now(), j_r_user_id = user_id)
+        return JsonResponse({'data': 'success'})
      
-    TevIncoming.objects.filter(id__in=ids).update(status_id=12)
-    
-    for item_id  in out_list:
-        TevOutgoing.objects.filter(id=item_id).update(status_id=12,otg_d_received=timezone.now(), otg_r_user_id = user_id)
-    return JsonResponse({'data': 'success'})
 
 @csrf_exempt
 def forward_journal(request):
@@ -1773,7 +1802,7 @@ def forward_journal(request):
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
     for status_id in out_list_int:
-        check_status = TevOutgoing.objects.filter(id=status_id, status_id=6).values_list('dv_no', flat=True)
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
         if check_status:
             status = [item for item in check_status]
             missing_items.extend(status)
@@ -1783,7 +1812,7 @@ def forward_journal(request):
         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
         TevIncoming.objects.filter(id__in=ids).update(status_id=13)
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=13,otg_out_user_id = user_id,otg_d_forwarded=timezone.now())
+            TevOutgoing.objects.filter(id=item_id).update(status_id=13,j_out_user_id = user_id,j_d_forwarded=timezone.now())
         return JsonResponse({'data': 'success'})
 
 
