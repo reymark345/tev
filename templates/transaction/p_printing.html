@@ -84,15 +84,15 @@
                 <table id="tbl-items" class="table">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" id="check-all"></th>
+                            <th><input type="checkbox" class="dt-checkboxes form-check-input" id="check-all"></th>
                             <th>Dv Number</th>
                             <th>Cluster</th>
                             <th>Division</th>
                             <th>Division Chief</th>
                             <th>Status</th>
                             <th>Date In</th>
-                            <th>Date Out</th>
-                            <th>Out by</th>
+                            <th>Date Forwarded</th>
+                            <th>Forwarded by</th>
                             <th>ID</th>
                         </tr>
                     </thead>
@@ -223,7 +223,7 @@
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label" >Date Out</label>
+                <label class="form-label" >Forwarded</label>
                 <input
                 type="date"
                 id="f-box-out"
@@ -260,60 +260,55 @@
   </div>
 </div>
 <!--/ Edit User Modal -->
-
-
-  
-
-
 <div class="modal fade" id="update-transaction" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered" style="min-width: 90%; min-height: 70%;" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <!-- <h5 class="modal-title" id="exampleModalLabel4">Update Transaction</h5> -->
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-
-                <!-- Modern Vertical Wizard -->
-                <div class="col-12">
-                  <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
-                    <div class="bs-stepper-content">
-                       <div class="card-datatable table-responsive pt-0">  <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label> <span id="dv-number" class="badge bg-label-primary"><i></i></span>
-                    <table id="tbl-box-a" class="table display compact">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Code #</th>
-                                <th>Accnt. No.</th>
-                                <th>ID Number</th>
-                                <th>Name</th>
-                                <th>Amount</th>
-                                <th>Purpose</th>
-                                <th>Assign Charges</th>
-                                <th>Charges</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>    
-                        <tbody>
-                        </tbody> 
-                        <tfoot>
-                            <br><br>
-                            <div style="width:40%;">
-                                <label class="form-label" for="modalFEmployeeName"><i>Add Employee</i></label>
-                                <select id="payroll-name" name="PayrollName" class="form-select payroll-name" data-allow-clear="true" ><option></option></select>
-                            </div>
-                        </tfoot>              
-                    </table>
-                   
-                    </div>
-                  </div>
+        <div class="modal-dialog modal-xl modal-dialog-centered" style="min-width: 90%; min-height: 70%;" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <!-- /Modern Vertical Wizard -->
-               
-            </div>
-            <div class="modal-footer">
-                <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5>
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                <div class="modal-body">
+
+                    <div class="col-12">
+                    <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
+                        <div class="bs-stepper-content">
+                        <div class="card-datatable table-responsive pt-0">  <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label> <span id="dv-number" class="badge bg-label-primary"><i></i></span>
+                        <table id="tbl-box-a" class="table display compact">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Code #</th>
+                                    <th>Accnt. No.</th>
+                                    <th>ID Number</th>
+                                    <th>Name</th>
+                                    <th>Amount</th>
+                                    <th>Purpose</th>
+                                    <th>Assign Charges</th>
+                                    <th>Charges</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>    
+                            <tbody>
+                            </tbody> 
+                            <tfoot>
+                                <br><br>
+                                <div style="width:40%;">
+                                    <label class="form-label" for="modalFEmployeeName"><i>Add Employee</i></label>
+                                    <select id="payroll-name" name="PayrollName" class="form-select payroll-name" data-allow-clear="true" ><option></option></select>
+                                </div>
+                            </tfoot>              
+                        </table>
+                    
+                        </div>
+                    </div>
+                    </div>
+    
+                
+                </div>
+                <div class="modal-footer">
+                    <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -407,10 +402,10 @@
     let outgoing_id = 0;
     let selectedDv = [];
     let temp_id = 0;
-    let data_clicked = false;
     let dataTable2;
     var new_id;
     let chargeId = 0;
+    let selectedCb = [];
     $(document).ready(function () {
       $('#loading-screen').hide();
       const table_box_a = $('#tbl-box-a')
@@ -479,21 +474,8 @@
                 },
             },
             columns: [
-                {
-                    data: 'id', status: 'status',
-                    orderable: false, 
-                    render: function (data, type, row) {
-                        var status = row.status; // Access the 'status' value from the 'row' object
-
-                        if (status == 2) {
-                            return '<input type="checkbox" disabled="disabled">';
-                        } else {
-                            return '<input type="checkbox" class="checkbox-items" value="' + data + '">';
-                        }
-
-                    }
-                },
-                { data: 'dv_no' },
+                { data: 'id', status : 'status' },
+                { data: 'dv_no', id : 'id' },
                 { data: 'cluster' },
                 { data: 'division_name' },
                 { data: 'division_chief' },
@@ -506,20 +488,34 @@
             ],
             columnDefs: [
                 {
+                    targets: 0,
+                    orderable: false, 
+                    render: function (data, type, row) {
+                        var status = row.status; 
+                        if (status == 5) {
+                            let isChecked = selectedCb.includes(data.toString());
+                            var status = row.status;
+                            return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
+                        }
+                        else{
+                            return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
+                        }
+
+                    }
+                },
+                {
                     targets: 1,
-                    render: function(data) {
-                        return '<span class="badge bg-label-primary">' + data + '</span>';
+                    render: function(data, type, row) {
+                        let id = row.id;
+                        return '<span class="badge bg-label-primary view-data" id="'+id+'" >' + data + '</span>';
                     },
                 },
-
                 {
                     targets: 2,
                     render: function(data) {
                         return '<span class="badge bg-label-info">'+data+'</span>'
                     },
                 },
-             
-              
                 {
                   targets: 5,
                   render: function (data) {
@@ -527,19 +523,20 @@
                         return '<span class="badge bg-label-warning">Outgoing</span>'
                       }
                       else{
-                        return '<span class="badge bg-label-success">Ongoing</span>'
+                        return '<span class="badge bg-label-success">Forwarded</span>'
                       }
 
                   },
                 },
+
                 {
-                    targets: -3,
+                    targets: -4,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
                 {
-                    targets: -4,
+                    targets: -3,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
@@ -562,6 +559,28 @@
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
+                {
+                    
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Transmittal</span>',
+                    action: function () {
+                        let data_year = $('#dp-year').val();
+                        var selectedItems = [];
+                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
+                            selectedItems.push($(this).val());
+                        });
+            
+                        if(selectedItems.length ===0){
+                            toastr.error('Select item first', 'Invalid', toast_options);
+                        }
+                        else{
+                            // var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems + '&year=' + data_year ;
+                            var url = '{% url "transmittal-details" %}?selectedDv=' + selectedItems.join('&selectedDv=') + '&year=' + data_year;
+                            window.open(url, '_blank');
+                        }
+                    }
+                },
+        
                 {
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
@@ -600,26 +619,19 @@
                           })
                       }
                       $("#advance-filter").modal("show");   
-                      
-                      
                   }
                 
                 },
                 {
                     className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Date Out</span>',
+                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Forward</span>',
                     action: function () {
                         // Get the IDs of checked items
-                        var selectedItems = [];
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-            
-                        if(selectedItems.length ===0){
+                        if(selectedCb.length ===0){
                             toastr.error('Select item first', 'Invalid', toast_options);
                         }
                         else{
-                            incoming_out(selectedItems);
+                            incoming_out();
                         }
                     }
                 },
@@ -653,114 +665,119 @@
                 },
             ],
             drawCallback: function (settings) {
-
-                const tableId = 'tbl-box-a'; // Change this to the specific table ID you want to populate
+                const tableId = 'tbl-box-a';
                 const tbody = $(`#${tableId} tbody`);
                 let selectOptions = '';
 
                 $('.view-data').on('click', function () {
                     let id = $(this).attr('id');
                     dv_no_id = id
-                    data_clicked = true;
-                    
                     $('#update-transaction').modal('show');
                     table_m();
                     employee_list();
-
                     dataTable2.ajax.reload();
-                    //   updat eTransaction(dv_no_id);
                 });
-                $('.print-data').on('click', function () {
-                    alert("testt");
 
-                });
-              $('body').on('click', '.item-update', function () {
-                temp_id = $(this).attr('id');
-                $('#update-transaction').modal('hide');
-                $("#payrollUpdate").modal("show");
+                $('#tbl-items').on('click', '.dt-checkboxes', function () {
+                    var id = $(this).val();
+                    if ($(this).prop('checked')) {
+                        if (selectedCb.indexOf(id) === -1) {
+                            selectedCb.push(id);
+                        }
+                        $(this).data('checked', true); 
+                    } else {
 
-                  $.ajax({
-                    type: 'POST',
-                    url: "{% url 'multiple-charges-details' %}",
-                    data:{
-                      payroll_id: temp_id
+                        let index = selectedCb.indexOf(id);
+                        if (index !== -1) {
+                            selectedCb.splice(index, 1);
+                        }
+                        $(this).data('checked', false); 
                     }
-                }).done(function (data) {
+                    
+                });
 
-                  let totalAmount = 0;
-                  let amountList = [];
-                  let chargesList = [];
-                  let preview_amt = [];
-                  let preview_charges = [];
+                $('body').on('click', '.item-update', function () {
+                    temp_id = $(this).attr('id');
+                    $('#update-transaction').modal('hide');
+                    $("#payrollUpdate").modal("show");
 
-                  
-                  let full_name = data.full_name;
-                  let amount = data.amount;
-                  FName.val(full_name);
-                  AmountIssued.val(amount);
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'multiple-charges-details' %}",
+                        data:{
+                        payroll_id: temp_id
+                        }
+                    }).done(function (data) {
+                    let totalAmount = 0;
+                    let amountList = [];
+                    let chargesList = [];
+                    let preview_amt = [];
+                    let preview_charges = [];
+
+                    
+                    let full_name = data.full_name;
+                    let amount = data.amount;
+                    FName.val(full_name);
+                    AmountIssued.val(amount);
+                    $('.rows-container').empty();
+                    chargesList = data.data.map(item => item.charges_id);
+                    amountList = data.data.map(item => item.amount);
+                    if (data.data.length > 0) {
 
 
-    
-                  $('.rows-container').empty();
-
-                  chargesList = data.data.map(item => item.charges_id);
-                  amountList = data.data.map(item => item.amount);
-                  if (data.data.length > 0) {
-
-
-                      for (let i = 0; i < data.data.length; i++) {
-                          var newRow = $('<div class="row mt-2">' +
-                          '<div class="col-5">' +
-                          '<select class="form-select select-charges" id="select-charges-'+i+'">' +
-                              '<option></option>'+
-                              '{% for row in charges %}'+
-                                 '{% if row.name != "Multiple" %}'+
-                                     '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                  '{% endif %}'+
-                              '{% endfor %}'+
-                          '</select>' +
-                          '<span class="error-label">Required</span>'+
-                          '</div>' +
-                          '<div class="col-5">' +
-                          '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
-                          '<span class="error-label-amount">Required</span>'+
-                          '</div>' +
-                          '<div class="col-2">' +
-                          '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                          '</div>' +
-                          '</div>');
-                          newRow.find('.error-label, .error-label-amount').hide();
-                          $('.rows-container').append(newRow);
-                          $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
-                      }
-                  } else {
-                      var newRow = $('<div class="row mt-2">' +
-                      '<div class="col-5">' +
-                      '<select class="form-select select-charges" id="select-charges">' +
-                            '<option></option>'+
-                            '{% for row in charges %}'+
-                                '{% if row.name != "Multiple" %}'+
-                                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                '{% endif %}'+
-                            '{% endfor %}'+
-                      '</select>' +
-                      '<span class="error-label">Required</span>'+
-                      '</div>' +
-                      '<div class="col-5">' +
-                      '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
-                      '<span class="error-label-amount">Required</span>'+
-                      '</div>' +
-                      '<div class="col-2">' +
-                      '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                      '</div>' +
-                      '</div>');
-                      newRow.find('.error-label, .error-label-amount').hide();
-                      $('.rows-container').append(newRow);
-                  }
-                })
+                        for (let i = 0; i < data.data.length; i++) {
+                            var newRow = $('<div class="row mt-2">' +
+                            '<div class="col-5">' +
+                            '<select class="form-select select-charges" id="select-charges-'+i+'">' +
+                                '<option></option>'+
+                                '{% for row in charges %}'+
+                                    '{% if row.name != "Multiple" %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endif %}'+
+                                '{% endfor %}'+
+                            '</select>' +
+                            '<span class="error-label">Required</span>'+
+                            '</div>' +
+                            '<div class="col-5">' +
+                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+                            '<span class="error-label-amount">Required</span>'+
+                            '</div>' +
+                            '<div class="col-2">' +
+                            '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                            '</div>' +
+                            '</div>');
+                            newRow.find('.error-label, .error-label-amount').hide();
+                            $('.rows-container').append(newRow);
+                            $(`#select-charges-${i}`).val(chargesList[i]).trigger('change');
+                        }
+                    } else {
+                        var newRow = $('<div class="row mt-2">' +
+                        '<div class="col-5">' +
+                        '<select class="form-select select-charges" id="select-charges">' +
+                                '<option></option>'+
+                                '{% for row in charges %}'+
+                                    '{% if row.name != "Multiple" %}'+
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                                    '{% endif %}'+
+                                '{% endfor %}'+
+                        '</select>' +
+                        '<span class="error-label">Required</span>'+
+                        '</div>' +
+                        '<div class="col-5">' +
+                        '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                        '<span class="error-label-amount">Required</span>'+
+                        '</div>' +
+                        '<div class="col-2">' +
+                        '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                        '</div>' +
+                        '</div>');
+                        newRow.find('.error-label, .error-label-amount').hide();
+                        $('.rows-container').append(newRow);
+                    }
+                    })
               });
 
-              $('body').on('click', '.item-delete', function () {
+                $('body').on('click', '.item-delete', function () {
                 let emp_id = $(this).attr('id');
 
                 let dataTable = $('#tbl-box-a').DataTable();
@@ -896,13 +913,38 @@
         $('#tbl-items tbody input[type="checkbox"]').change(function () {
             // Do something when a checkbox in the table body is changed...
         });
+        
         $('#check-all').change(function () {
-            // Get the checked state of the "check-all" checkbox
             var isChecked = $(this).is(':checked');
-
-            // Set the checked state of all checkboxes in the table body
-            $('#tbl-items tbody input[type="checkbox"][class="checkbox-items"]').prop('checked', isChecked);
+            $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
+            if (isChecked) {
+                $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                    var id = $(this).val();
+                    if (selectedCb.indexOf(id) === -1) {
+                        selectedCb.push(id);
+                    }
+                });
+            } else {
+                $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                    var id = $(this).val();
+                    let index = selectedCb.indexOf(id);
+                    if (index !== -1) {
+                        selectedCb.splice(index, 1);
+                    }
+                });
+            }
         });
+
+
+
+
+        // $('#check-all').change(function () {
+        //     // Get the checked state of the "check-all" checkbox
+        //     var isChecked = $(this).is(':checked');
+
+        //     // Set the checked state of all checkboxes in the table body
+        //     $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input"]').prop('checked', isChecked);
+        // });
 
         $('.preview-details').on('click', function () {
             bx_id = $(this).data('id');
@@ -923,7 +965,10 @@
     
 
     },
-    })
+    });
+
+
+
 
 
     function employee_list(){
@@ -994,7 +1039,6 @@
                 {
                     targets: 0,
                     render: function(data, type, row, meta) {
-                        // Assuming meta.row is the 0-based index of the current row
                         return meta.row + 1;
                     },
                 },
@@ -1157,53 +1201,57 @@
           });
       }
 
-      function incoming_out(selected_items){
-            Swal.fire({
-                title: 'Date out, Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, mark as out!',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-3',
-                    cancelButton: 'btn btn-label-secondary',
-                },
-                buttonsStyling: false,
-            }).then(function (result) {
-                if (result.value) {
-                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-       
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'out-box-a' %}",
-                        data:{
-                            out_list: selected_items
-                        }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Successfully save!',
-                                text: 'Item has been added.',
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
+      function incoming_out(){
+        selectedCb = $.grep(selectedCb, function(value) {
+            return value !== 'on';
+        });
+        Swal.fire({
+            title: 'Forward, Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, forward!',
+            customClass: {
+                confirmButton: 'btn btn-primary me-3',
+                cancelButton: 'btn btn-label-secondary',
+            },
+            buttonsStyling: false,
+        }).then(function (result) {
+            if (result.value) {
+                let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
+    
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'out-box-a' %}",
+                    data:{
+                        out_list: selectedCb
+                    }
+                }).done(function (data) {
+                    if (data.data == 'success') {
+                        selectedCb = []
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Successfully save!',
+                            text: 'Item has been added.',
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        })
 
-                            dataTable.ajax.reload()
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                }
-            })
+                        dataTable.ajax.reload()
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error saving!',
+                            text: data.message,
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        })
+                    }
+                })
+            }
+        })
 
         }   
         $('#add_charges').click(function () {     

@@ -191,6 +191,403 @@ def box_a(request):
         return render(request, 'pages/unauthorized.html')
     
 @login_required(login_url='login')
+def outgoing_list(request):
+    user_details = get_user_details(request)
+
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'permissions' : role_names,
+            'dv_number' : TevOutgoing.objects.filter(status_id__in =[6,8,9]).order_by('id'),
+            'cluster' : Cluster.objects.filter().order_by('id'),
+            'division' : Division.objects.filter(status=0).order_by('id'),
+            'charges' : Charges.objects.filter().order_by('name')
+
+        }
+        return render(request, 'transaction/p_outgoing.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def budget_list(request):
+    user_details = get_user_details(request)
+
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'permissions' : role_names,
+            'dv_number' : TevOutgoing.objects.filter(status_id__in =[9,10,11]).order_by('id'),
+            'cluster' : Cluster.objects.filter().order_by('id'),
+            'division' : Division.objects.filter(status=0).order_by('id'),
+            'charges' : Charges.objects.filter().order_by('name')
+
+        }
+        return render(request, 'transaction/p_budget.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def journal_list(request):
+    user_details = get_user_details(request)
+
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'permissions' : role_names,
+            'dv_number' : TevOutgoing.objects.filter(status_id__in =[11,12,13]).order_by('id'),
+            'cluster' : Cluster.objects.filter().order_by('id'),
+            'division' : Division.objects.filter(status=0).order_by('id'),
+            'charges' : Charges.objects.filter().order_by('name')
+
+        }
+        return render(request, 'transaction/p_journal.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+
+
+@csrf_exempt
+def outgoing_load(request):
+    adv_filter = request.GET.get('FAdvancedFilter')
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    year = request.GET.get('DpYear')
+    year = int(year)
+    last_two_digits = year % 100
+    dv_no_string = f"{last_two_digits:02d}-"
+    search_fields = ['dv_no', 'division__name', 'status__name'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+    if adv_filter:
+
+        FCluster = request.GET.get('FCluster')
+        FDivision = request.GET.get('FDivision')
+        FBoxIn = request.GET.get('FBoxIn')
+        FDateReceived = request.GET.get('FDateReceived')
+        FDateForwarded = request.GET.get('FDateForwarded')
+        BoxStatus = request.GET.get('BoxStatus')
+        dv_list = request.GET.getlist('ListDv[]')
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [6,8,9])
+        if FCluster:
+            item_data = item_data.filter(cluster=FCluster)
+
+        if FDivision:
+            item_data = item_data.filter(division_id = FDivision)
+
+        if FBoxIn:
+            item_data = item_data.filter(box_b_out__icontains=FBoxIn)
+        
+        if FDateReceived:
+            item_data = item_data.filter(otg_d_received__icontains=FDateReceived)
+
+        if FDateForwarded:
+            item_data = item_data.filter(otg_d_forwarded__icontains=FDateForwarded)
+
+        if BoxStatus:
+            item_data = item_data.filter(status_id=BoxStatus)
+
+        if dv_list:
+            item_data = item_data.filter(id__in=dv_list)
+
+    elif _search:
+        item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9]).select_related().distinct().order_by(_order_dash + 'id')
+    else:
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9]).select_related().distinct().order_by('-id')
+
+    total = item_data.count()
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        item_data = item_data[start:start + length]
+
+    data = []
+
+    for item in item_data:
+        userData = AuthUser.objects.filter(id=item.otg_out_user_id)
+        if userData.exists():
+            full_name = userData[0].first_name + ' ' + userData[0].last_name
+        else:
+            full_name = ""
+
+
+        userData_received = AuthUser.objects.filter(id=item.otg_r_user_id)
+        if userData_received.exists():
+            full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
+        else:
+            full_name_receiver = ""
+        item = {
+            'id': item.id,
+            'dv_no': item.dv_no,
+            'cluster': item.cluster,
+            'division_name': item.division.name,
+            'division_chief': item.division.chief,
+            'status':item.status_id,
+            'box_b_in': item.box_b_in,
+            'box_b_out': item.box_b_out,
+            'd_received': item.otg_d_received,
+            'd_forwarded': item.otg_d_forwarded,
+            'received_by': full_name_receiver,
+            'user_id': full_name,
+            'out_by': full_name
+        }
+
+        data.append(item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+
+
+@csrf_exempt
+def budget_load(request):
+    adv_filter = request.GET.get('FAdvancedFilter')
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    year = request.GET.get('DpYear')
+    year = int(year)
+    last_two_digits = year % 100
+    dv_no_string = f"{last_two_digits:02d}-"
+    search_fields = ['dv_no', 'division__name', 'status__name'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+    if adv_filter:
+
+        FCluster = request.GET.get('FCluster')
+        FDivision = request.GET.get('FDivision')
+        FBoxIn = request.GET.get('FBoxIn')
+        FDateReceived = request.GET.get('FDateReceived')
+        FDateForwarded = request.GET.get('FDateForwarded')
+        BoxStatus = request.GET.get('BoxStatus')
+        dv_list = request.GET.getlist('ListDv[]')
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [9,10,11])
+        if FCluster:
+            item_data = item_data.filter(cluster=FCluster)
+
+        if FDivision:
+            item_data = item_data.filter(division_id = FDivision)
+
+        if FBoxIn:
+            item_data = item_data.filter(box_b_out__icontains=FBoxIn)
+        
+        if FDateReceived:
+            item_data = item_data.filter(b_d_received__icontains=FDateReceived)
+
+        if FDateForwarded:
+            item_data = item_data.filter(b_d_forwarded__icontains=FDateForwarded)
+
+        if BoxStatus:
+            item_data = item_data.filter(status_id=BoxStatus)
+
+        if dv_list:
+            item_data = item_data.filter(id__in=dv_list)
+
+    elif _search:
+        item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [9,10,11]).select_related().distinct().order_by(_order_dash + 'id')
+    else:
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [9,10,11]).select_related().distinct().order_by('-id')
+
+    total = item_data.count()
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        item_data = item_data[start:start + length]
+
+    data = []
+
+    for item in item_data:
+        userData = AuthUser.objects.filter(id=item.b_out_user_id)
+        if userData.exists():
+            full_name = userData[0].first_name + ' ' + userData[0].last_name
+        else:
+            full_name = ""
+
+
+        userData_received = AuthUser.objects.filter(id=item.b_r_user_id)
+        if userData_received.exists():
+            full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
+        else:
+            full_name_receiver = ""
+        item = {
+            'id': item.id,
+            'dv_no': item.dv_no,
+            'cluster': item.cluster,
+            'division_name': item.division.name,
+            'division_chief': item.division.chief,
+            'status':item.status_id,
+            'box_b_in': item.box_b_in,
+            'box_b_out': item.box_b_out,
+            'd_received': item.b_d_received,
+            'd_forwarded': item.b_d_forwarded,
+            'received_by': full_name_receiver,
+            'user_id': full_name,
+            'out_by': full_name
+        }
+
+        data.append(item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+@csrf_exempt
+def journal_load(request):
+    adv_filter = request.GET.get('FAdvancedFilter')
+    _search = request.GET.get('search[value]')
+    _order_dir = request.GET.get('order[0][dir]')
+    _order_dash = '-' if _order_dir == 'desc' else ''
+    year = request.GET.get('DpYear')
+    year = int(year)
+    last_two_digits = year % 100
+    dv_no_string = f"{last_two_digits:02d}-"
+    search_fields = ['dv_no', 'division__name', 'status__name'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+    if adv_filter:
+
+        FCluster = request.GET.get('FCluster')
+        FDivision = request.GET.get('FDivision')
+        FBoxIn = request.GET.get('FBoxIn')
+        FDateReceived = request.GET.get('FDateReceived')
+        FDateForwarded = request.GET.get('FDateForwarded')
+        BoxStatus = request.GET.get('BoxStatus')
+        dv_list = request.GET.getlist('ListDv[]')
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [11,12,13])
+        if FCluster:
+            item_data = item_data.filter(cluster=FCluster)
+
+        if FDivision:
+            item_data = item_data.filter(division_id = FDivision)
+
+        if FBoxIn:
+            item_data = item_data.filter(box_b_out__icontains=FBoxIn)
+        
+        if FDateReceived:
+            item_data = item_data.filter(j_d_received__icontains=FDateReceived)
+
+        if FDateForwarded:
+            item_data = item_data.filter(j_d_forwarded__icontains=FDateForwarded)
+
+        if BoxStatus:
+            item_data = item_data.filter(status_id=BoxStatus)
+
+        if dv_list:
+            item_data = item_data.filter(id__in=dv_list)
+
+    elif _search:
+        item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [11,12,13]).select_related().distinct().order_by(_order_dash + 'id')
+    else:
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [11,12,13]).select_related().distinct().order_by('-id')
+
+    total = item_data.count()
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        item_data = item_data[start:start + length]
+
+    data = []
+
+    for item in item_data:
+        userData = AuthUser.objects.filter(id=item.j_out_user_id)
+        if userData.exists():
+            full_name = userData[0].first_name + ' ' + userData[0].last_name
+        else:
+            full_name = ""
+
+
+        userData_received = AuthUser.objects.filter(id=item.j_r_user_id)
+        if userData_received.exists():
+            full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
+        else:
+            full_name_receiver = ""
+        item = {
+            'id': item.id,
+            'dv_no': item.dv_no,
+            'cluster': item.cluster,
+            'division_name': item.division.name,
+            'division_chief': item.division.chief,
+            'status':item.status_id,
+            'box_b_in': item.box_b_in,
+            'box_b_out': item.box_b_out,
+            'd_received': item.j_d_received,
+            'd_forwarded': item.j_d_forwarded,
+            'received_by': full_name_receiver,
+            'user_id': full_name,
+            'out_by': full_name
+        }
+
+        data.append(item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+    
+@login_required(login_url='login')
 def preview_box_a(request):
     finance_database_alias = 'finance'    
     outgoing_id = request.GET.get('id')
@@ -701,7 +1098,7 @@ def box_load(request):
         dv_list = request.GET.getlist('ListDv[]')
 
         # item_data = TevOutgoing.objects.all(dv_no = dv_no_string)
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string)
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6])
 
         if FCluster:
             item_data = item_data.filter(cluster=FCluster)
@@ -722,9 +1119,9 @@ def box_load(request):
             item_data = item_data.filter(id__in=dv_list)
 
     elif _search:
-        item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string).select_related().distinct().order_by(_order_dash + 'id')
+        item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string,status_id__in = [5,6]).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string).select_related().distinct().order_by('-id')
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6]).select_related().distinct().order_by('-id')
 
     total = item_data.count()
 
@@ -1000,23 +1397,164 @@ def update_purpose(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
+
+@csrf_exempt
+def transmittal_details(request):
+    finance_database_name = 'finance'
+    data_result = []
+    year = request.GET.get('year')
+    # selected_dv = request.GET.getlist('selectedDv[]')
+    selected_dv = request.GET.getlist('selectedDv')
+
+    if year == '2023':
+        finance_database_name = 'finance'
+    else:
+        finance_database_name = 'infimos_2024'
+
+    with connection.cursor() as cursor:
+        query = f"""
+            SELECT
+                tev_outgoing.dv_no,
+                {finance_database_name}.payee,
+                {finance_database_name}.modepayment,
+                COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+            FROM
+                tev_incoming
+            JOIN
+                tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+            LEFT JOIN
+                tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+            LEFT JOIN
+                charges ON charges.id = tev_bridge.charges_id
+            LEFT JOIN
+                payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+            LEFT JOIN
+                charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+            LEFT JOIN
+                {finance_database_name}.transactions AS {finance_database_name}
+                ON tev_outgoing.dv_no = {finance_database_name}.dv_no
+            WHERE
+                tev_outgoing.id IN %s
+            GROUP BY
+                tev_outgoing.dv_no, {finance_database_name}.payee, {finance_database_name}.modepayment
+            ORDER BY
+                tev_outgoing.dv_no;
+        """
+
+        cursor.execute(query, [tuple(selected_dv)])
+        columns = [col[0] for col in cursor.description]
+        results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    rs_len = len(results)
+    sl_dv = len(selected_dv)
+    if rs_len != sl_dv:
+        return render(request, 'pages/not_found.html', {'message': "Review Travel First",'text': "You must assign at least one travel to this DV to view the data" })
+
+    else:
+        date_now = datetime.now().strftime("%Y-%m-%d")
+        for row in results:
+            amt_certified = row['charges_amount']
+            if amt_certified == 0 :
+                return render(request, 'pages/not_found.html', {'message': "Invalid Amount Charges",'text': "There is travel with no assigned Charges!" })
+            else:
+                data_dict = {
+                    "dv_no": row['dv_no'],
+                    "payee": row['payee'],
+                    "modepayment": row['modepayment'],
+                    "date":date_now,
+                    "charges_amount": amt_certified
+                }
+                data_result.append(data_dict)
+
+        response = {
+            'data': data_result
+        }
+        return render(request, 'transaction/preview_transmittal.html', response)
+
+
+
+# @csrf_exempt
+# def transmittal_details(request):
+#     if request.method == 'POST':
+#         finance_database_name = 'finance'
+#         data_result = []
+#         year = request.POST.get('year')
+#         selected_dv = request.POST.getlist('selectedDv[]')
+
+#         if year == '2023':
+#             finance_database_name = 'finance'
+#         else:
+#             finance_database_name = 'infimos_2024'
+
+#         with connection.cursor() as cursor:
+#             query = f"""
+#                 SELECT
+#                     tev_outgoing.dv_no,
+#                     {finance_database_name}.payee,
+#                     {finance_database_name}.modepayment,
+#                     COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+#                 FROM
+#                     tev_incoming
+#                 JOIN
+#                     tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+#                 LEFT JOIN
+#                     tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+#                 LEFT JOIN
+#                     charges ON charges.id = tev_bridge.charges_id
+#                 LEFT JOIN
+#                     payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+#                 LEFT JOIN
+#                     charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+#                 LEFT JOIN
+#                     {finance_database_name}.transactions AS {finance_database_name}
+#                     ON tev_outgoing.dv_no = {finance_database_name}.dv_no
+#                 WHERE
+#                     tev_outgoing.id IN %s
+#                 GROUP BY
+#                     tev_outgoing.dv_no, {finance_database_name}.payee, {finance_database_name}.modepayment
+#                 ORDER BY
+#                     tev_outgoing.dv_no;
+#             """
+
+#             cursor.execute(query, [tuple(selected_dv)])
+#             columns = [col[0] for col in cursor.description]
+#             results = [dict(zip(columns, row)) for row in cursor.fetchall()]
+#         rs_len = len(results)
+#         sl_dv = len(selected_dv)
+#         if rs_len != sl_dv:
+#             return JsonResponse({'message': 'Review Travel First'})
+
+#         else:
+#             for row in results:
+#                 data_dict = {
+#                     "dv_no": row['dv_no'],
+#                     "payee": row['payee'],
+#                     "modepayment": row['modepayment'],
+#                     "charges_amount": row['charges_amount']
+#                 }
+#                 data_result.append(data_dict)
+
+#             response = {
+#                 'data': data_result
+#             }
+#             return JsonResponse(response)
+#     return JsonResponse({'data': 'error', 'message': 'Invalid request method'})
 
 @csrf_exempt
 def add_dv(request):
     if request.method == 'POST':
-        user_id = request.session.get('user_id', 0)
         dv_number = request.POST.get('DvNumber')
+        if TevOutgoing.objects.filter(dv_no=dv_number).exists():
+            return JsonResponse({'status': 'error', 'message': 'DV Number Already exists'})
+        user_id = request.session.get('user_id', 0)
         cluster_id = request.POST.get('Cluster')
         div_id = request.POST.get('Division')
-        outgoing = TevOutgoing(dv_no=dv_number,cluster=cluster_id,box_b_in=date_time.datetime.now(),user_id=user_id, division_id = div_id)
+        
+        outgoing = TevOutgoing(dv_no=dv_number, cluster=cluster_id, box_b_in=timezone.now(), user_id=user_id, division_id=div_id)
         outgoing.save()
         
         return JsonResponse({'data': 'success'})
-
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-  
 
 @csrf_exempt
 def add_emp_dv(request):
@@ -1116,21 +1654,166 @@ def delete_box_list(request):
 def out_box_a(request):
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
-    
-    # Convert the out_list items to integers
+    missing_items = []
+    out_list_int = [int(item) for item in out_list]
+    for check_dv in out_list_int:
+        check_no_assigned = TevBridge.objects.filter(tev_outgoing_id=check_dv).values_list('tev_incoming_id', flat=True)
+        if not check_no_assigned:
+            missing_items.append(check_dv)
+    if missing_items:
+        return JsonResponse({'message': "Travel selected no assign DV please review",'text': "You must assign at least one travel to this DV to view the data" })
+    else:
+        result_id = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        result_list = [item for item in result_id]
+        for check_charges in result_list:
+            check_no_charges = PayrolledCharges.objects.filter(incoming_id=check_charges).values_list('incoming_id', flat=True)
+            if not check_no_charges:
+                missing_items.append(check_charges)
+        if missing_items:
+            return JsonResponse({'message': "Travel selected no assigned Amount Charges",'text': "You must assign at least one charges to this DVs" })
+        else:
+            ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+            TevIncoming.objects.filter(id__in=ids).update(status_id=6)
+            for item_id  in out_list:
+                TevOutgoing.objects.filter(id=item_id).update(status_id=6,box_b_out=timezone.now(), out_by = user_id)
+            return JsonResponse({'data': 'success'})
+
+@csrf_exempt
+def receive_otg(request):
+    missing_items = []
+    out_list = request.POST.getlist('out_list[]')
+    user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
 
-    
-    # Update the tev_incoming table
-    ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-    
-    TevIncoming.objects.filter(id__in=ids).update(status_id=6)
-    
-    for item_id  in out_list:
-        box_b = TevOutgoing.objects.filter(id=item_id).update(status_id=6,box_b_out=date_time.datetime.now(), out_by = user_id)
+    for status_id in out_list_int:
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=9).values_list('dv_no', flat=True)
+        if check_status:
+            status = [item for item in check_status]
+            missing_items.extend(status)
 
+    if missing_items:
+        return JsonResponse({'data': ', '.join(map(str, missing_items)), 'message' : 'Selected DVs is already Forwarded'})
+    else:
+        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        
+        TevIncoming.objects.filter(id__in=ids).update(status_id=8)
+        
+        for item_id  in out_list:
+            TevOutgoing.objects.filter(id=item_id).update(status_id=8,otg_d_received=timezone.now(), otg_r_user_id = user_id)
+        return JsonResponse({'data': 'success'})
+
+@csrf_exempt
+def forward_otg(request):
+    missing_items = []
+    out_list = request.POST.getlist('out_list[]')
+    user_id = request.session.get('user_id', 0)
+    out_list_int = [int(item) for item in out_list]
+    for status_id in out_list_int:
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=6).values_list('dv_no', flat=True)
+        if check_status:
+            status = [item for item in check_status]
+            missing_items.extend(status)
+    if missing_items:
+        return JsonResponse({'data':'Dvs must receive first!','message': ', '.join(map(str, missing_items))})
+    else:
+        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        TevIncoming.objects.filter(id__in=ids).update(status_id=9)
+        for item_id  in out_list:
+            TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=timezone.now())
+        return JsonResponse({'data': 'success'})
+
+
+@csrf_exempt
+def receive_budget(request):
+    missing_items = []
+    out_list = request.POST.getlist('out_list[]')
+    user_id = request.session.get('user_id', 0)
+    out_list_int = [int(item) for item in out_list]
+
+    for status_id in out_list_int:
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
+        if check_status:
+            status = [item for item in check_status]
+            missing_items.extend(status)
+
+    if missing_items:
+        return JsonResponse({'data': ', '.join(map(str, missing_items)), 'message' : 'Selected DVs is already Forwarded'})
+    else:
+        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        
+        TevIncoming.objects.filter(id__in=ids).update(status_id=10)
+        
+        for item_id  in out_list:
+            TevOutgoing.objects.filter(id=item_id).update(status_id=10,b_d_received=timezone.now(), b_r_user_id = user_id)
+        return JsonResponse({'data': 'success'})
     
-    return JsonResponse({'data': 'success'})
+
+
+@csrf_exempt
+def forward_budget(request):
+    missing_items = []
+    out_list = request.POST.getlist('out_list[]')
+    user_id = request.session.get('user_id', 0)
+    out_list_int = [int(item) for item in out_list]
+    for status_id in out_list_int:
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=9).values_list('dv_no', flat=True)
+        if check_status:
+            status = [item for item in check_status]
+            missing_items.extend(status)
+    if missing_items:
+        return JsonResponse({'data':'Dvs must receive first!','message': ', '.join(map(str, missing_items))})
+    else:
+        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        TevIncoming.objects.filter(id__in=ids).update(status_id=11)
+        for item_id  in out_list:
+            TevOutgoing.objects.filter(id=item_id).update(status_id=11,b_out_user_id = user_id,b_d_forwarded=timezone.now())
+        return JsonResponse({'data': 'success'})
+
+
+@csrf_exempt
+def receive_journal(request):
+    missing_items = []
+    out_list = request.POST.getlist('out_list[]')
+    user_id = request.session.get('user_id', 0)
+    out_list_int = [int(item) for item in out_list]
+
+    for status_id in out_list_int:
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=13).values_list('dv_no', flat=True)
+        if check_status:
+            status = [item for item in check_status]
+            missing_items.extend(status)
+
+    if missing_items:
+        return JsonResponse({'data': ', '.join(map(str, missing_items)), 'message' : 'Selected DVs is already Forwarded'})
+    else:
+        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        
+        TevIncoming.objects.filter(id__in=ids).update(status_id=12)
+        
+        for item_id  in out_list:
+            TevOutgoing.objects.filter(id=item_id).update(status_id=12,j_d_received=timezone.now(), j_r_user_id = user_id)
+        return JsonResponse({'data': 'success'})
+     
+
+@csrf_exempt
+def forward_journal(request):
+    missing_items = []
+    out_list = request.POST.getlist('out_list[]')
+    user_id = request.session.get('user_id', 0)
+    out_list_int = [int(item) for item in out_list]
+    for status_id in out_list_int:
+        check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
+        if check_status:
+            status = [item for item in check_status]
+            missing_items.extend(status)
+    if missing_items:
+        return JsonResponse({'data':'Dvs must receive first!','message': ', '.join(map(str, missing_items))})
+    else:
+        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+        TevIncoming.objects.filter(id__in=ids).update(status_id=13)
+        for item_id  in out_list:
+            TevOutgoing.objects.filter(id=item_id).update(status_id=13,j_out_user_id = user_id,j_d_forwarded=timezone.now())
+        return JsonResponse({'data': 'success'})
 
 
 @csrf_exempt

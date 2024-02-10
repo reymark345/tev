@@ -10,18 +10,30 @@ urlpatterns = [
     
     path('payroll_load', views.payroll_load, name='payroll-load'),
     path('box_load', views.box_load, name='box-load'),
+    path('outgoing_load', views.outgoing_load, name='outgoing-load'),
+    path('budget_load', views.budget_load, name='budget-load'),
+    path('journal_load', views.journal_load, name='journal-load'),
     path('box_emp_load', views.box_emp_load, name='box-emp-load'),
     path('item_edit', views.item_edit, name='item-edit'),
     # path('item_update', views.item_update, name='item-update'),
 
     path('out_box_a', views.out_box_a, name='out-box-a'),
-    path('tev_details', views.tev_details, name='tev-details'),
+    path('receive_otg', views.receive_otg, name='receive-otg'),
+    path('forward_otg', views.forward_otg, name='forward-otg'),
+    path('receive_budget', views.receive_budget, name='receive-budget'),
+    path('forward_budget', views.forward_budget, name='forward-budget'),
+    path('receive_journal', views.receive_journal, name='receive-journal'),
+    path('forward_journal', views.forward_journal, name='forward-journal'),
 
+    path('tev_details', views.tev_details, name='tev-details'),
     path('payroll', views.list_payroll, name='transaction-payroll'),
     path('assign_payroll', views.assign_payroll, name='assign-payroll'),
     path('save_payroll', views.save_payroll, name='save-payroll'),
     path('box_a', views.box_a, name='box-a'),
     path('preview', views.preview_box_a, name='preview-box-a'),
+    path('outgoing_list', views.outgoing_list, name='outgoing-list'),
+    path('budget_list', views.budget_list, name='budget-list'),
+    path('journal_list', views.journal_list, name='journal-list'),
     
     path('employee_dv', views.employee_dv, name='employee-dv'),
     path('update_box_list', views.update_box_list, name='update-box-list'),
@@ -40,6 +52,6 @@ urlpatterns = [
     path('retrieve_employee', views.retrieve_employee, name='retrieve-employee'),  
     path('add_emp_dv', views.add_emp_dv, name='add-emp-dv'),  
     path('update_purpose', views.update_purpose , name='update-purpose'),  
-
-     
+    path('transmittal_details', views.transmittal_details , name='transmittal-details'),  
+    
 ]
