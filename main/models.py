@@ -181,7 +181,10 @@ class TevOutgoing(models.Model):
     j_r_user_id = models.CharField(max_length=128, blank=True, null=True)
     j_d_forwarded = models.DateTimeField(blank=True, null=True)
     j_out_user_id = models.CharField(max_length=128, blank=True, null=True)
-
+    a_d_received = models.DateTimeField(blank=True, null=True)
+    a_r_user_id = models.CharField(max_length=128, blank=True, null=True)
+    a_d_forwarded = models.DateTimeField(blank=True, null=True)
+    a_out_user_id = models.CharField(max_length=128, blank=True, null=True)
     status = models.ForeignKey(Status, models.DO_NOTHING,default=5)
     user_id = models.CharField(max_length=128, blank=True, null=True)
     out_by = models.CharField(max_length=128, blank=True, null=True)
