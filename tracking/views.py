@@ -70,6 +70,9 @@ def tracking_load(request):
     else:
         finance_database_alias = 'finance_2024' 
 
+    print(DpYear)
+    print("formatted_year")
+
     year = int(DpYear) % 100
     formatted_year = str(year)+"-"
     
@@ -83,6 +86,8 @@ def tracking_load(request):
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if FAdvancedFilter:
+        print(formatted_year)
+        print("formatted_year22")
 
         with connection.cursor() as cursor:
 
@@ -103,10 +108,9 @@ def tracking_load(request):
                 ON tev_incoming.id = tev_bridge.tev_incoming_id
                 LEFT JOIN tev_outgoing
                 ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-                WHERE (tev_outgoing.dv_no LIKE %s OR dv_no IS NULL) AND
-                tev_incoming.is_upload = 0 OR tev_incoming.is_upload = 1
+                WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
             """
-            params = []
+            params = [f'{formatted_year}%']
 
             if FTransactionCode:
                 query += " AND tev_incoming.code = %s"
@@ -122,7 +126,7 @@ def tracking_load(request):
                 params.extend(EmployeeList)
             query += "ORDER BY tev_incoming.id DESC;"
 
-            cursor.execute(query, [f'%{formatted_year}%'])
+            cursor.execute(query, params)
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
@@ -173,6 +177,8 @@ def tracking_load(request):
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
+        print("formatted_year")
+        print(formatted_year)
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
@@ -286,48 +292,113 @@ def employee_details(request):
     incoming = TevIncoming.objects.filter(id=idd).first()
     inc_list = TevIncoming.objects.filter(code=incoming.code).order_by('-id')
 
-    query = """
-        SELECT ti.id, ti.code, ti.id_no, ti.account_no, ti.original_amount, ti.final_amount, ti.status_id, tb.purpose, ti.remarks, ti.incoming_in,
-        t_o.dv_no, ch.name AS charges, cl.name AS cluster FROM tev_incoming AS ti 
-        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-        LEFT JOIN charges AS ch ON ch.id = tb.charges_id
-        LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
-        -- LEFT JOIN trans_check AS tc ON tc.dv_no = t_o.dv_no 
-        -- LEFT JOIN trans_payeename AS tp ON tp.dv_no = t_o.dv_no
-        -- LEFT JOIN trans_number AS tn ON tn.trans_payee_id = tp.trans_payee_id
-        -- LEFT JOIN obligate AS ob ON ob.obligate_id = tn.obligate_id
-        WHERE ti.id = %s
+    print(incoming.code)
+    print("damnnn")
+
+    # query = """
+    #     SELECT ti.id, ti.code, ti.id_no, ti.account_no, ti.original_amount, ti.final_amount, ti.status_id, tb.purpose, ti.remarks, ti.incoming_in,
+    #     t_o.dv_no, ch.name AS charges, cl.name AS cluster FROM tev_incoming AS ti 
+    #     LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+    #     LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+    #     LEFT JOIN charges AS ch ON ch.id = tb.charges_id
+    #     LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
+    #     WHERE ti.id = %s
+    # """
+
+    query = """ 
+        SELECT 
+            ti.id, 
+            ti.code, 
+            ti.id_no, 
+            ti.account_no, 
+            ti.original_amount, 
+            ti.final_amount, 
+            ti.status_id, 
+            GROUP_CONCAT(tb.purpose SEPARATOR ', ') AS purposes,
+            ti.incoming_in,
+            t_o.dv_no, 
+            ch.name AS charges, 
+            cl.name AS cluster,
+            GROUP_CONCAT(t3.name SEPARATOR ', ') AS remarks
+        FROM 
+            tev_incoming AS ti 
+        LEFT JOIN 
+            tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN 
+            tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        LEFT JOIN 
+            charges AS ch ON ch.id = tb.charges_id
+        LEFT JOIN 
+            cluster AS cl ON cl.id = t_o.cluster
+        LEFT JOIN 
+            remarks_r AS t2 ON t2.incoming_id = ti.id
+        LEFT JOIN 
+            remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+        WHERE 
+            ti.code LIKE %s
+        GROUP BY 
+            ti.id, 
+            ti.code, 
+            ti.id_no, 
+            ti.account_no, 
+            ti.original_amount, 
+            ti.final_amount, 
+            ti.status_id, 
+            ti.remarks, 
+            ti.incoming_in,
+            t_o.dv_no, 
+            ch.name, 
+            cl.name
+        ORDER BY 
+            ti.id DESC;
     """
 
     with connection.cursor() as cursor:
-        cursor.execute(query, [idd])
+        cursor.execute(query, [incoming.code])
         results = cursor.fetchall()
 
 
     id_number = incoming.id_no
-    if incoming:
-        first_name = incoming.first_name or ""
-        middle_name = incoming.middle_name or ""
-        last_name = incoming.last_name or ""
-        fullname = first_name + " "+ middle_name + " "+ last_name
-
-
-    for row in inc_list:
+    # if incoming:
+    #     first_name = incoming.first_name or ""
+    #     middle_name = incoming.middle_name or ""
+    #     last_name = incoming.last_name or ""
+    #     fullname = first_name + " "+ middle_name + " "+ last_name
+        
+    for row in results:
         item = {
-            'id': row.id,
-            'code': row.code,
-            'id_no': row.id_no,
-            'account_no': row.account_no,
-            'date_travel': row.date_travel,
-            'original_amount': row.original_amount,
-            'final_amount': row.final_amount,
-            'incoming_in': row.incoming_in,
-            'remarks': row.remarks,
-            'status': row.status_id,
-            'purpose': "",
+            'id': row[0],
+            'code': row[1],
+            'id_no': row[2],
+            'account_no': row[3],
+            'original_amount': row[4],
+            'final_amount': row[5],
+            'status': row[6],
+            'purpose': row[7], 
+            'incoming_in': row[8],
+            'dv_no': row[9],
+            'charges': row[10],
+            'cluster': row[11],
+            'remarks': row[12], 
         }
         data.append(item)
+
+
+    # for row in results:
+    #     item = {
+    #         'id': row.id,
+    #         'code': row.code,
+    #         'id_no': row.id_no,
+    #         'account_no': row.account_no,
+    #         'date_travel': row.date_travel,
+    #         'original_amount': row.original_amount,
+    #         'final_amount': row.final_amount,
+    #         'incoming_in': row.incoming_in,
+    #         'remarks': row.remarks,
+    #         'status': row.status_id,
+    #         'purpose': "",
+    #     }
+    #     data.append(item)
         
                
     total = len(data)    
