@@ -131,8 +131,6 @@ def tracking_load(request):
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
-
-
     elif _search:
         with connection.cursor() as cursor:
             query = """
