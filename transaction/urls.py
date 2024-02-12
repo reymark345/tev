@@ -13,6 +13,7 @@ urlpatterns = [
     path('outgoing_load', views.outgoing_load, name='outgoing-load'),
     path('budget_load', views.budget_load, name='budget-load'),
     path('journal_load', views.journal_load, name='journal-load'),
+    path('approval_load', views.approval_load, name='approval-load'),
     path('box_emp_load', views.box_emp_load, name='box-emp-load'),
     path('item_edit', views.item_edit, name='item-edit'),
     # path('item_update', views.item_update, name='item-update'),
@@ -24,6 +25,8 @@ urlpatterns = [
     path('forward_budget', views.forward_budget, name='forward-budget'),
     path('receive_journal', views.receive_journal, name='receive-journal'),
     path('forward_journal', views.forward_journal, name='forward-journal'),
+    path('receive_approval', views.receive_approval, name='receive-approval'),
+    path('forward_approval', views.forward_approval, name='forward-approval'),
 
     path('tev_details', views.tev_details, name='tev-details'),
     path('payroll', views.list_payroll, name='transaction-payroll'),
@@ -34,6 +37,7 @@ urlpatterns = [
     path('outgoing_list', views.outgoing_list, name='outgoing-list'),
     path('budget_list', views.budget_list, name='budget-list'),
     path('journal_list', views.journal_list, name='journal-list'),
+    path('approval_list', views.approval_list, name='approval-list'),
     
     path('employee_dv', views.employee_dv, name='employee-dv'),
     path('update_box_list', views.update_box_list, name='update-box-list'),

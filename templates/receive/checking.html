@@ -26,6 +26,7 @@
                     <thead>
                         <tr>
                             <th><input type="checkbox" id="check-all" class="dt-checkboxes form-check-input"></th>
+                            <th>Code</th>
                             <th>ID number</th>
                             <th>Employee Name</th>
                             <th>Actual Amount</th>
@@ -363,7 +364,7 @@
                     }
                 },
 
-
+                { data: 'code' },
                 { data: 'id_no' },
                 { data: 'name' },
                 { data: 'original_amount'},
@@ -379,7 +380,7 @@
             ],
             columnDefs: [
                 {
-                    targets: 1,
+                    targets: 2,
                     render: function(data) {
                         if (data){
                             return '<span class="badge bg-label-primary">' + data + '</span>';
@@ -390,18 +391,6 @@
                     },
                 },
 
-                {
-                    targets: 3,
-                    render: function(data) {
-                        var floatValue = parseFloat(data);
-                        if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
-                        } else {
-                            return "";
-                        }
-                    },
-                },
                 {
                     targets: 4,
                     render: function(data) {
@@ -416,6 +405,18 @@
                 },
                 {
                     targets: 5,
+                    render: function(data) {
+                        var floatValue = parseFloat(data);
+                        if (floatValue !== 0) {
+                            var convertedValue = floatValue.toFixed(2);
+                            return convertedValue;
+                        } else {
+                            return "";
+                        }
+                    },
+                },
+                {
+                    targets: 6,
                     render: function(data) {
                         var splitValues = data.split(',');
                         var result = '';
@@ -435,7 +436,7 @@
                     },
                 },
                 {
-                  targets: 6,
+                  targets: 7,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
