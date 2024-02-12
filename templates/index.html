@@ -112,9 +112,6 @@
 
                     <div class="menu-inner-shadow"></div>
                     {% with request.resolver_match.url_name as url_name %}
-
-                   
-
                     <ul class="menu-inner py-1">
                         {% comment %} {% if role_permission %}
                             {% if 'admin' in role_permission or 'Incoming staff' in role_permission or 'Payroll staff' in role_permission or 'Validating staff' in role_permission or 'Certified staff' in role_permission %}
@@ -173,7 +170,7 @@
                                 <li class="menu-item {% if url_name == 'tracking-list' %}active{% endif %}" >
                                     <a href="{% url 'tracking-list' %}" class="menu-link">
                                     
-                                        <i class="menu-icon tf-icons ti-solid fa-inbox"></i>
+                                        <i class="menu-icon tf-icons ti ti-lifebuoy"></i>
                                         <div data-i18n="Status">Status</div>
                                     </a>
                                 </li>
@@ -203,13 +200,38 @@
                                     <a href="{% url 'transaction-payroll' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
                                         
-                                        <div data-i18n="Payroll Preparation">Payroll Preparation</div>
+                                        <div data-i18n="Payroll List">Payroll List</div>
                                     </a>
                                 </li>
                                 <li class="menu-item {% if url_name == 'box-a' %}active{% endif %}">
                                     <a href="{% url 'box-a' %}" class="menu-link">
-                                        <i class="menu-icon tf-icons ti-solid fa-inbox"></i>
+                                        <i class="menu-icon tf-icons ti ti-layout-kanban"></i>
                                         <div data-i18n="Payroll Printing">Payroll Printing</div>
+                                    </a>
+                                </li>
+
+                                <li class="menu-item {% if url_name == 'outgoing-list' %}active{% endif %}">
+                                    <a href="{% url 'outgoing-list' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-forms"></i>
+                                        <div data-i18n="Outgoing">Outgoing</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item {% if url_name == 'budget-list' %}active{% endif %}">
+                                    <a href="{% url 'budget-list' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-text-wrap-disabled"></i>
+                                        <div data-i18n="Budget">Budget</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item {% if url_name == 'journal-list' %}active{% endif %}">
+                                    <a href="{% url 'journal-list' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-layout-grid"></i>
+                                        <div data-i18n="Journal">Journal</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item {% if url_name == 'approval-list' %}active{% endif %}">
+                                    <a href="{% url 'approval-list' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-map"></i>
+                                        <div data-i18n="Approval">Approval</div>
                                     </a>
                                 </li>
                             {% endif %}
@@ -221,15 +243,13 @@
                                 <li class="menu-item {% if url_name == 'charges' %}active{% endif %}">
                                     <a href="{% url 'charges' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti fa-list-check"></i>
-                                    
                                         <div data-i18n="Charges">Charges</div>
                                     </a>
                                 </li>
 
                                 <li class="menu-item {% if url_name == 'division' %}active{% endif %}">
                                     <a href="{% url 'division' %}" class="menu-link">
-                                        <i class="menu-icon tf-icons ti ti-color-swatch"></i>
-                                    
+                                        <i class="menu-icon tf-icons ti ti-file-description"></i>
                                         <div data-i18n="Division">Division</div>
                                     </a>
                                 </li>
@@ -237,7 +257,6 @@
                                 <li class="menu-item {% if url_name == 'remarks' %}active{% endif %}">
                                     <a href="{% url 'remarks' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-color-swatch"></i>
-                                    
                                         <div data-i18n="Remarks">Remarks</div>
                                     </a>
                                 </li>
@@ -253,7 +272,7 @@
 
                                 <li class="menu-item {% if url_name == 'users' %}active{% endif %}">
                                     <a href="{% url 'users' %}" class="menu-link">
-                                        <i class="menu-icon tf-icons ti ti-settings"></i>
+                                        <i class="menu-icon tf-icons ti ti-users"></i>
                                         <div data-i18n="Users">Users</div>
                                     </a>
                                 </li>

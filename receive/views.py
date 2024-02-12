@@ -714,8 +714,6 @@ def item_edit(request):
 def preview_received(request):
 
     id = request.GET.get('id')
-    print(id)
-    print("Testt")
     with connection.cursor() as cursor:
         query = """
         SELECT
@@ -807,16 +805,53 @@ def item_update(request):
     individual_dates = travel_date.split(',')
     cleaned_dates = ','.join(date.strip() for date in individual_dates)
 
+
+    print(individual_dates)
     for date in individual_dates:
         cleaned_date = date.strip()
 
-        results = TevIncoming.objects.filter(
-            Q(first_name=name) & Q(middle_name=middle) & Q(last_name=lname) &
-            Q(date_travel__contains=cleaned_date)
-        ).values('date_travel').exclude(id=id)
+        print(cleaned_date)
+        print("cleaned_date")
 
+        results = Q(first_name=name) & \
+          Q(middle_name=middle) & \
+          Q(last_name=lname) & \
+          Q(date_travel__icontains=cleaned_date) & \
+          ~Q(status_id=3) & \
+          ~Q(id=id)
+        
+        results = TevIncoming.objects.filter(results).values('date_travel')
+        
         if results:
             duplicate_travel.append(cleaned_date)
+
+        # results = TevIncoming.objects.filter(
+        #     Q(first_name=name) & Q(middle_name=middle) & Q(last_name=lname) &
+        #     Q(date_travel__contains=cleaned_date) &  Q(status_id=1)
+        # ).exclude(id=id,status_id=3)
+
+        # results = results.values('date_travel')
+        # if results:
+        #     duplicate_travel.append(cleaned_date)
+
+    print(id)
+    print(duplicate_travel)
+    print("nahhhhh")
+
+
+
+    # for date in individual_dates:
+    #     cleaned_date = date.strip()
+
+    #     results = TevIncoming.objects.filter(
+    #         Q(first_name=name) & Q(middle_name=middle) & Q(last_name=lname) &
+    #         Q(date_travel__contains=cleaned_date)
+    #     ).values('date_travel').exclude(id=id, status_id = 3)
+
+    #     print(results)
+    #     print("daaaaaaaaaa")
+    #     if results:
+    #         duplicate_travel.append(cleaned_date)
 
     if duplicate_travel:
         formatted_dates = [date.replace("'", "") for date in duplicate_travel]
@@ -857,16 +892,33 @@ def item_update(request):
 
 @csrf_exempt
 def item_returned(request):
+
     id = request.POST.get('ItemID')
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
     travel_date = request.POST.get('HDateTravel')
+    selected_remarks = request.POST.getlist('selectedRemarks[]')
+    selected_dates = request.POST.getlist('selectedDate[]')
+
+
+    
     travel_date_stripped = travel_date.strip()
     travel_date_spaces = travel_date_stripped.replace(' ', '')
     id = request.POST.get('ItemID')
+
     data = TevIncoming.objects.filter(id=id).first()
     tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,user_id=data.user_id)
     tev_add.save()
+
+    last_added_tevincoming = TevIncoming.objects.latest('id')
+    for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
+        remarks_lib = Remarks_r(
+            date=selected_dates,
+            incoming_id=last_added_tevincoming.id,
+            remarks_lib_id=selected_remarks
+        )
+        remarks_lib.save()
+
     return JsonResponse({'data': 'success'})
 
 

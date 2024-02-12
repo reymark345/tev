@@ -20,9 +20,11 @@
                             <th>Received</th>
                             <th>Reviewed</th>
                             <th>Payroll</th>
+                            <th>Outgoing</th>
                             <th>Obligate</th>
                             <th>Journal</th>
                             <th>Certified</th>
+                            <th>Approval</th>
                             <th>Check Issued</th>
                             <th>ID</th>
                         </tr>
@@ -494,9 +496,11 @@
               { data: 'status'},
               { data: 'status' },
               { data: 'status' },
-              { data: 'amt_budget' },
-              { data: 'amt_journal' },
-              { data: 'approved_date' },
+              { data: 'status' },
+              { data: 'status' },
+              { data: 'amt_budget', status : 'status' },
+              { data: 'amt_journal', status : 'status' },
+              { data: 'approved_date', status : 'status' },
               { data: 'amt_check' },
               { data: 'id' },
 
@@ -515,9 +519,8 @@
                       return '<span class="badge bg-label-primary">' + data + '</span>'
                   }
                   else{
-                      return ''
+                      return ``;
                   }
-                  
               },
           },
           {
@@ -560,7 +563,7 @@
               render: function (data) {
                   data = parseInt(data); 
 
-                  let tooltip = 'Done';
+                  let tooltip = 'Forwarded';
                   if (data == 1) {
                       tooltip = "Pending";
                   }
@@ -581,92 +584,170 @@
                   }
                   if(data==2){
                     tooltip = 'For Checking';
-                    return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
+                    return '<span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
                   }
                   if(data==7){
                     tooltip = 'Approved';
                     return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
                   }
                   else if (data > 3){
-                    tooltip = 'Done';
+                    tooltip = 'Forwarded';
                       return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>'
                   }
                   else{
-                      return ''
+                      return ``;
                   }
                   
               },
           },
           {
-            targets: 7,
-            render: function (data) {
-                data = parseInt(data); 
-                if (data>=5 && data!=7){
-                    return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                }
-                else{
-                    return ''
-                    
-                }
-
-            },
-        },
-
+              targets: 7,
+              render: function (data) {
+                  data = parseInt(data); 
+                  let tooltip = '';
+                  let status = '';
+                  tooltip = 'For Received';
+                  if (data >= 5 && data < 6 ){
+                    return `<span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Payroll"><i class="ti ti-check"></i></span>`
+                  }
+                  if (data >= 6 && data !=7 ){
+                    return `<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span>`
+                  }
+                  else{
+                    return ``;;
+                  }
+              },
+          },
           {
               targets: 8,
               render: function (data) {
                   data = parseInt(data); 
-
-                  if (data){
-                      return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+                  let tooltip = '';
+                  let status = '';
+                  tooltip = 'For Received';
+                  if (data >= 6  && data < 8 && data != 7){
+                    return `<span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span>`
+                  }
+                  else if (data == 8 ){
+                    return  `<span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span>`
+                  }
+                  else if (data >= 9){
+                    return `<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span>`
                   }
                   else{
-                      return ''
+                      return ``;
+                        
                   }
               },
           },
 
           {
               targets: 9,
-              render: function (data) {
-                  data = parseInt(data); 
-
-                  if (data){
-                      return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
+              orderable: false,
+              render: function (data, type, row) {
+                  var status = row.status; 
+                  if (status >= 9  && status < 10){
+                    return `<span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span>`
+                  }
+                  else if (status == 10 ){
+                    return  `<span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span>`
+                  }
+                  else if (status >= 11){
+                    return `<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span>`
                   }
                   else{
-                      return ''
+                      return ``;
+                        
                   }
-
               },
           },
+
           {
               targets: 10,
-              render: function (data) {
-
-                if (data){
-                    return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                }
-                else{
-                    return ''
-                }
+              orderable: false,
+              render: function (data, type, row) {
+                  var status = row.status; 
+                  if (status >= 11  && status < 12){
+                    return `<span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span>`
+                  }
+                  else if (status == 12 ){
+                    return  `<span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span>`
+                  }
+                  else if (status >= 13){
+                    return `<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span>`
+                  }
+                  else{
+                    return ``;
+                        
+                  }
               },
           },
+
+          
           {
               targets: 11,
-              render: function (data) {
-                data = parseInt(data); 
-                
-                if (data){
-                    return '<span class="badge badge-center rounded-pill bg-success"><i class="ti ti-check"></i></span>'
-                }
-                else{
-                    return ''
-                }
-
+              orderable: false,
+              render: function (data, type, row) {
+                  var status = row.status; 
+                  if (status >= 13  && status <= 15){
+                    return `<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span>`
+                  }
+                  else{
+                      return ``;   
+                  }
               },
           },
+          
+          //approval
           {
+              targets: 12,
+              orderable: false,
+              render: function (data, type, row) {
+                  var status = row.status; 
+                  if (status >= 13  && status < 14){
+                    return `<span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span>`
+                  }
+                  else if (status == 14 ){
+                    return  `<span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span>`
+                  }
+                  else if (status >= 15){
+                    return `<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span>`
+                  }
+                  else{
+                    return ``;
+                        
+                  }
+              },
+          },
+           //check issued
+
+          {
+              targets: 13,
+              orderable: false,
+              render: function (data) {
+                  if (data){
+                    return `<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success"><i class="ti ti-check"></i></span>`
+                  }
+                  else{
+                    return ``;    
+                  }
+              },
+          },
+
+
+
+          // {
+          //     targets: 13,
+          //     render: function (data) {
+          //         if (data){
+          //             return '<span class="badge bg-label-primary">' + data + '</span>'
+          //         }
+          //         else{
+          //             return data;
+          //         }
+          //     },
+          // },
+          { 
               targets: -1,
               title: 'Action',
               orderable: false,
@@ -747,11 +828,17 @@
                         let orgAmountColumn = '';
                         let finalAmountColumn = '';
                         let editColumn = '';
+                        let purposeColumn = '';
                         let statusColumn = '';
                         let status = item.status;
                         let remarks = '';
                         if (item.remarks) {remarks = item.remarks;} 
                         else {remarks = remarks = '';}
+
+                        if (item.purpose) {
+                          purposeColumn = item.purpose;
+                        }
+
                         if (status ==1){
                           statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
                         }
@@ -780,7 +867,7 @@
                         finalAmountColumn = `<td>${formattedFinalAmount}</td>`;
 
                         editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
-                    
+                        
           
                         const row = `
                             <tr>
@@ -789,7 +876,7 @@
                                 ${orgAmountColumn}
                                 ${finalAmountColumn}
                                 ${statusColumn}
-                                <td>${item.purpose}</td>
+                                <td>${purposeColumn}</td>
                                 <td><span class="badge bg-label-danger">${remarks}</span></td>
                                 <td><span class="badge bg-label-primary">${formattedDate}</span></td>
                       

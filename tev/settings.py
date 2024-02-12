@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -108,7 +107,7 @@ DATABASES = {
         'PORT':'3306',
     },
 
-    #for localhost main database
+    # #for localhost main database
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'tev_db',
@@ -117,23 +116,23 @@ DATABASES = {
     #     'HOST': 'localhost',
     #     'PORT': '3306',
     # },
-    # #for localhost INFIMOS database
+    # # #for localhost INFIMOS database
     # 'finance': {
-        #     'ENGINE': 'django.db.backends.mysql',
-        #     'NAME': 'finance',
-        #     'USER':'root',
-        #     'PASSWORD':'',
-        #     'HOST':'localhost',
-        #     'PORT':'3306',
-        # },
-        # 'finance_2024': {
-        #     'ENGINE': 'django.db.backends.mysql',
-        #     'NAME': 'infimos_2024',
-        #     'USER':'root',
-        #     'PASSWORD':'',
-        #     'HOST':'localhost',
-        #     'PORT':'3306',
-        # },
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'finance',
+    #     'USER':'root',
+    #     'PASSWORD':'',
+    #     'HOST':'localhost',
+    #     'PORT':'3306',
+    # },
+    # 'finance_2024': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2024',
+    #     'USER':'root',
+    #     'PASSWORD':'',
+    #     'HOST':'localhost',
+    #     'PORT':'3306',
+    # },
 
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',

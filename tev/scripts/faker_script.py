@@ -1,5 +1,5 @@
 from faker import Faker
-from main.models import SystemConfiguration, StaffDetails, RoleDetails,Cluster,Charges,Division, Status, RemarksLib, RolePermissions
+from main.models import SystemConfiguration, StaffDetails, RoleDetails,Cluster,Charges,Division, Status, RemarksLib, RolePermissions, AuthUser
 import numpy as np
 
 fake = Faker()
@@ -10,7 +10,7 @@ cluster = ['Cluster 01','Cluster 02','Cluster 03','Cluster 04', 'Cluster 05', 'C
 charges = ['AICS','Socpen','Disaster','CCAM', '4PS', 'Pantawid', 'Multiple']
 division = ['Finance Management Division','Pantawid','DRMD','HRRMD', 'PSD', 'PPD','ORD']
 acronym = ['FMD','PTW','DRMD','HRRMD', 'PSD', 'PPD','ORD']
-status = ['Pending','For checking','Returned','For payroll', 'Outgoing','Ongoing','For approval' ]
+status = ['Pending','For checking','Returned','For payroll', 'p_payroll','f_payroll','For approval','r_outgoing','f_outgoing','r_budget','f_budget','r_journal','f_journal','r_approval','f_approval']
 remarks = ['NO CA','NO TICKET']
 
 
@@ -48,6 +48,6 @@ userdb.save()
 
 role_p = RolePermissions(role_id ='1',user_id='1')
 role_p.save()
-
+AuthUser.objects.filter(id=1).update(first_name="Reymark", last_name = "Valdehueza")
 
 
