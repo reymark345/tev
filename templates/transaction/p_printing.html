@@ -491,15 +491,17 @@
                     targets: 0,
                     orderable: false, 
                     render: function (data, type, row) {
-                        var status = row.status; 
-                        if (status == 5) {
-                            let isChecked = selectedCb.includes(data.toString());
-                            var status = row.status;
-                            return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                        }
-                        else{
-                            return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
-                        }
+                        var status = row.status;
+                        let isChecked = selectedCb.includes(data.toString());
+                        return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
+                        // if (status == 5) {
+                        //     let isChecked = selectedCb.includes(data.toString());
+                        //     var status = row.status;
+                        //     return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
+                        // }
+                        // else{
+                        //     return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
+                        // }
 
                     }
                 },
