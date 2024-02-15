@@ -1016,6 +1016,109 @@ def employee_dv(request):
     }
     return JsonResponse(response)
 
+
+@login_required(login_url='login')
+@csrf_exempt
+def employee_journal(request):
+    user_details = get_user_details(request)
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    dvno = ''
+    total_amount = 0       
+    charges_list = []
+    idd = request.GET.get('dv_id')
+    dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','id').first()
+
+    charges = Charges.objects.filter().order_by('name')
+    for charge in charges:
+        charge_data = {
+            'id': charge.id,
+            'name': charge.name
+        }
+        charges_list.append(charge_data)
+    
+    if dv_no is not None:
+        dvno = dv_no['dv_no']
+    query = """ 
+        SELECT 
+            ti.id, 
+            code, 
+            first_name, 
+            middle_name, 
+            last_name,
+            id_no,
+            account_no, 
+            final_amount, 
+            MAX(tb.purpose) AS purpose,  -- Using an aggregate function
+            dv_no, 
+            cl.name as cluster, 
+            GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
+        FROM tev_incoming AS ti 
+        LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+        LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+        LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
+        LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = ti.id
+        LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7, 12, 13) AND dv_no = %s 
+        GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
+        ORDER BY ti.updated_at DESC;  
+    """
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, (dvno,))
+        results = cursor.fetchall()
+        
+    column_names = ['id','code', 'first_name','middle_name', 'last_name','id_no','account_no', 'final_amount','purpose','dv_no','cluster','multiple_charges']
+    data_result = []
+
+    for finance_row in results:
+        finance_dict = dict(zip(column_names, finance_row))
+        data_result.append(finance_dict)
+
+    data = []  
+    
+
+    for row in data_result:
+        first_name = row['first_name'] if row['first_name'] else ''
+        middle_name = row['middle_name'] if row['middle_name'] else ''
+        last_name = row['last_name'] if row['last_name'] else ''
+        emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
+        
+        final_amount_str = row['final_amount']
+        final_amount = Decimal(final_amount_str).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        
+
+        total_amount += final_amount
+        item = {
+            'id': row['id'],
+            'code': row['code'],
+            'name': emp_fullname,
+            'id_no': row['id_no'],
+            'account_no': row['account_no'],
+            'final_amount': final_amount,
+            'purpose': row['purpose'],
+            'dv_no': row['dv_no'],
+            'cluster':row['cluster'],
+            'multiple_charges':row['multiple_charges'],
+            'total':final_amount,
+        }
+        data.append(item)
+    payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))
+
+                    
+    total = len(data)  
+ 
+    response = {
+        'data': data,
+        'charges': charges_list,
+        'dv_number':dv_no['dv_no'],
+        'outgoing_id':dv_no['id'],
+        'payrolled_list': payrolled_list,
+        'recordsTotal': total,
+        'recordsFiltered': total
+    }
+    return JsonResponse(response)
+
+
 @csrf_exempt
 def multiple_charges_details(request):
     pp_id = request.POST.get('payroll_id')
@@ -1780,6 +1883,22 @@ def delete_box_list(request):
         'data': 'success'
     }
     return JsonResponse(response)
+
+
+@csrf_exempt
+def update_amt(request):
+    incoming_id = request.POST.get('emp_id')
+    amt = request.POST.get('amount')
+    pp = request.POST.get('purpose')
+    TevBridge.objects.filter(tev_incoming_id=incoming_id).update(purpose=pp)
+    TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt)
+
+    response = {
+        'data': 'success'
+    }
+    return JsonResponse(response)
+
+
 
 @csrf_exempt
 def out_box_a(request):
