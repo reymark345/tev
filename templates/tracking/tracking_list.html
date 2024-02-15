@@ -567,8 +567,19 @@
                   if (data == 1) {
                       tooltip = "Pending";
                   }
+                  // return ` <button
+                  //       type="button"
+                  //       class="btn btn-primary text-nowrap"
+                  //       data-bs-toggle="popover"
+                  //       data-bs-placement="top"
+                  //       data-bs-content="This is a very beautiful popover, show some love."
+                  //       title="Popover title"
+                  //     >
+                  //       Popover on top
+                  //     </button>`
                   return '<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span>';
-              },
+                  // return `<button type="button" class="btn btn-primary" data-bs-toggle="tooltip" data-bs-placement="top" title="Tooltip on right">`
+                },
           },
           {
               targets: 6,
@@ -859,6 +870,33 @@
                         }
                         else if (status ==6){
                           statusColumn = `<td><span class="badge bg-label-success">Ongoing</span></td>`;
+                        }
+                        else if (status ==7){
+                          statusColumn = `<td><span class="badge bg-label-success">For Approval</span></td>`;
+                        }
+                        else if (status ==8){
+                          statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
+                        }
+                        else if (status ==9){
+                          statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (status ==10){
+                          statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
+                        }
+                        else if (status ==11){
+                          statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (status ==12){
+                          statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
+                        }
+                        else if (status ==13){
+                          statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (status ==14){
+                          statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
+                        }
+                        else if (status ==15){
+                          statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         }
                         else {
                           statusColumn = `<td><span class="badge bg-label-primary">${item.status}</span></td>`;

@@ -118,9 +118,9 @@
                   <label class="form-label" for="modalEditTaxID">Status</label>
                   <select class="select2 form-select f-status" name="BoxStatus" id="box-status">
                     <option></option>
-                    <option value="13">For Receive</option>
-                    <option value="14">Received</option>
-                    <option value="15">Forwarded</option>
+                    <option value="11">For Receive</option>
+                    <option value="12">Received</option>
+                    <option value="13">Forwarded</option>
                   </select>
                 </div>
   
@@ -337,7 +337,7 @@
               processing: true,
               serverSide: true,
               ajax: {
-                  url: "{% url 'approval-load' %}",
+                  url: "{% url 'journal-load' %}",
                   data: function (d) {
                       d.FAdvancedFilter = FAdvancedFilter.val()
                       d.BoxDvNo = BoxDvNo.val()
@@ -371,14 +371,13 @@
                       render: function (data, type, row) {
                           var status = row.status; 
                           let isChecked = selectedCb.includes(data.toString());
-                          return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                          //   if (status == 6 || status == 8 ) {
-                            //   return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
+                          if (status == 6 || status == 8 ) {
+                              return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
                               
-                        //   } else {
-                        //       return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                        //       // return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
-                        //   }
+                          } else {
+                              return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
+                              // return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
+                          }
                       },
                   },
   
@@ -397,15 +396,16 @@
                   {
                     targets: 5,
                     render: function (data) {
-                        if(data==13){
+                        if(data==11){
                           return '<span class="badge bg-label-warning">For Receive</span>'
                         }
-                        if(data==14){
+                        if(data==12){
                           return '<span class="badge bg-label-primary">Received</span>'
                         }
                         else{
                           return '<span class="badge bg-label-success">Forwarded</span>'
                         }
+  
                     },
                   },
                   {
@@ -959,57 +959,56 @@
         }
   
         function outgoing(status_id){
-          selectedCb = $.grep(selectedCb, function(value) {
-              return value !== 'on';
-          })
-          let title_ = (status_id == 0) ? 'Mark as Received, Are you sure?' : 'Are you sure? Please Confirm to forward';
-          Swal.fire({
-              title: title_,
-              text: "You won't be able to revert this!",
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonText: 'Confirm',
-              customClass: {
-                  confirmButton: 'btn btn-primary me-3',
-                  cancelButton: 'btn btn-label-secondary',
-              },
-              buttonsStyling: false,
-          }).then(function (result) {
-              if (result.value) {
-                  let post_url = status_id == '0' ? "{% url 'receive-approval' %}" : "{% url 'forward-approval' %}"
-                  $.ajax({
-                      type: 'POST',
-                      url: post_url,
-                      data:{
-                          out_list: selectedCb
-                      }
-                  }).done(function (data) {
-                      if (data.data == 'success') {
-                          selectedCb = [];
-                          Swal.fire({
-                              icon: 'success',
-                              title: 'Successfully save!',
-                              text: 'Item has been added.',
-                              customClass: {
-                                  confirmButton: 'btn btn-success',
-                              },
-                          })
-                          dataTable.ajax.reload()
-                      } else {
-                          Swal.fire({
-                              icon: 'error',
-                              title: 'Error Saving!',
-                              html: "<b>"+ data.message + "</b>"+ "<br>Selected DVs must Receive First",
-                              customClass: {
-                                  confirmButton: 'btn btn-success',
-                              },
-                          })
-                      }
-                  })
-              }
-          })
-  
-          }   
+            selectedCb = $.grep(selectedCb, function(value) {
+                return value !== 'on';
+            })
+            let title_ = (status_id == 0) ? 'Mark as Received, Are you sure?' : 'Are you sure? Please Confirm to forward';
+            Swal.fire({
+                title: title_,
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Confirm',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    let post_url = status_id == '0' ? "{% url 'receive-journal' %}" : "{% url 'forward-journal' %}"
+                    $.ajax({
+                        type: 'POST',
+                        url: post_url,
+                        data:{
+                            out_list: selectedCb
+                        }
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            selectedCb = [];
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Item has been added.',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                            dataTable.ajax.reload()
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error Saving!',
+                                html: "<b>"+ data.message + "</b>"+ "<br>Selected DVs must Receive First",
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            })
+        }   
           $('#add_charges').click(function () {     
               var newRow = $('<div class="row mt-2">' +
                   '<div class="col-5">' +
@@ -1216,7 +1215,10 @@
               } else {
                   alert("No charge selected");
               }
-          });      
+          });
+  
+  
+                  
           $(document).on("change", ".payroll-name", function () {
               let inc_id = $(this).val();
               $.ajax({
@@ -1232,7 +1234,11 @@
                   toastr.success('Added Successfully ', 'Success', toast_options);
               });
           });
-
+  
+  
+  
+  
+  
           $('#save-multiple-charges').click(function() {
               let selectedIDs = [];
               let selectedAmount = [];  

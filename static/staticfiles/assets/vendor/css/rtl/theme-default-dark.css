@@ -83,8 +83,12 @@ body {
     background: #25293c !important;
 }
 
-.text-primary {
+/* .text-primary {
     color: #1051d1 !important;
+} */
+
+.text-primary {
+    color: #f1e6e6 !important;
 }
 
 .text-body[href]:hover {
@@ -104,9 +108,14 @@ a.bg-primary:focus {
     background-color: #1051d1;
 }
 
-.bg-label-primary {
+/* .bg-label-primary {
     background-color: #3a3b64 !important;
     color: #1051d1 !important;
+} */
+
+.bg-label-primary {
+    background-color: #0a204d !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .bg-primary.bg-glow {
@@ -361,11 +370,18 @@ button.list-group-item-primary.active {
     border-left: 1px solid #685dd8;
 }
 
-.btn-label-primary {
+/* .btn-label-primary {
     color: #1051d1;
     border-color: transparent;
     background: #3a3b64;
+} */
+
+.btn-label-primary {
+    color: #ffffff;
+    border-color: transparent;
+    background: #3a3b64;
 }
+
 .btn-label-primary.waves-effect .waves-ripple {
     background: radial-gradient(
         rgba(115, 103, 240, 0.2) 0,
@@ -940,6 +956,7 @@ a:hover {
 .select2-container--default.select2-container--open .select2-selection {
     border-color: #1051d1 !important;
 }
+
 
 .select2-primary .select2-container--default .select2-selection--multiple .select2-selection__choice {
     background: rgba(115, 103, 240, 0.16) !important;

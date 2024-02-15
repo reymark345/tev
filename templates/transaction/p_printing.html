@@ -272,7 +272,10 @@
                     <div class="col-12">
                     <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
                         <div class="bs-stepper-content">
-                        <div class="card-datatable table-responsive pt-0">  <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label> <span id="dv-number" class="badge bg-label-primary"><i></i></span>
+                        <div class="card-datatable table-responsive pt-0"> 
+                             <!-- <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label> -->
+                             <span id="dv-number" class="badge bg-label-primary"><i></i></span><br><br>
+                             <h5 class="card-action-title mb-0">AMT CERTIFIED <span id="total-amount" class="badge bg-label-primary"></span></h5>
                         <table id="tbl-box-a" class="table display compact">
                             <thead>
                                 <tr>
@@ -306,16 +309,15 @@
                 
                 </div>
                 <div class="modal-footer">
-                    <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5>
+                    <!-- <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5> -->
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<!-- End -->
 
-
-<!-- Enable OTP Modal -->
 <div class="modal fade" id="payrollUpdate" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" >
   <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
       <div class="modal-content p-3 p-md-5">
@@ -491,15 +493,17 @@
                     targets: 0,
                     orderable: false, 
                     render: function (data, type, row) {
-                        var status = row.status; 
-                        if (status == 5) {
-                            let isChecked = selectedCb.includes(data.toString());
-                            var status = row.status;
-                            return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                        }
-                        else{
-                            return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
-                        }
+                        var status = row.status;
+                        let isChecked = selectedCb.includes(data.toString());
+                        return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
+                        // if (status == 5) {
+                        //     let isChecked = selectedCb.includes(data.toString());
+                        //     var status = row.status;
+                        //     return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
+                        // }
+                        // else{
+                        //     return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
+                        // }
 
                     }
                 },
@@ -778,38 +782,82 @@
               });
 
                 $('body').on('click', '.item-delete', function () {
-                let emp_id = $(this).attr('id');
+                    let emp_id = $(this).attr('id');
 
-                let dataTable = $('#tbl-box-a').DataTable();
-                let closestRow = dataTable.row($(this).closest('tr'));
-                let rowData = closestRow.data();
-                let p_id = rowData.id;
+                    let dataTable = $('#tbl-box-a').DataTable();
+                    let closestRow = dataTable.row($(this).closest('tr'));
+                    let rowData = closestRow.data();
+                    let p_id = rowData.id;
 
-                $.ajax({
-                    type: 'POST',
-                    url: "{% url 'delete-box-list' %}",
-                    data:{
-                    emp_id: p_id,
-                    dv_number: dv_number
-                }
-                }).done(function (data) {
-                    if (data.data == 'success') {
-                        employee_list();
-                        dataTable2.ajax.reload();
-                        toastr.success('Removed Successfully', 'Success', toast_options);
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error saving!',
-                            text: data.message,
-                            customClass: {
-                                confirmButton: 'btn btn-success',
-                            },
-                        })
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'delete-box-list' %}",
+                        data:{
+                        emp_id: p_id,
+                        dv_number: dv_number
                     }
-                })
-        });
- 
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            employee_list();
+                            dataTable2.ajax.reload();
+                            toastr.success('Removed Successfully', 'Success', toast_options);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    });
+                
+                });
+
+                $('body').on('click', '.item-amount', function () {
+                    let emp_id = $(this).attr('id');
+
+                    let dataTable = $('#tbl-box-a').DataTable();
+                    let closestRow = dataTable.row($(this).closest('tr'));
+                    let rowData = closestRow.data();
+                    let p_id = rowData.id;
+                    let amt = closestRow.node().querySelector('.emp-amount').value;
+                    let pp = closestRow.node().querySelector('.emp-purpose').value;
+
+
+                    console.log(dv_number);
+                    console.log("AMOUNTTTTT");
+
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'update-amt' %}",
+                        data:{
+                        emp_id: p_id,
+                        amount: amt,
+                        purpose:pp
+                    }
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            dataTable2.ajax.reload();
+                            toastr.success('Update successfully', 'Success', toast_options);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    });
+
+
+
+                    
+                });
+
       const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
                 fields: {
                     MDvNumber: {
@@ -1028,7 +1076,7 @@
                 { data: 'account_no' },
                 { data: 'id_no' },
                 { data: 'name' },
-                { data: 'final_amount' },
+                { data: 'final_amount', charges: 'multiple_charges' },
                 { data: 'purpose' },
                 { data: 'dv_no', name: 'dv_no' },
                 { data: 'multiple_charges' },
@@ -1060,21 +1108,28 @@
                         return '<span class="badge bg-label-primary">' + data + '<span>'
                     },
                 },
-
-                
                 {
                     targets: 5,
-                    render: function (data) {
-                        return data
-
+                    render: function (data, type, row) {
+                        let charges = row.multiple_charges;
+                        if (charges !== null && charges.includes(",")) {
+                            return `&nbsp;&nbsp;&nbsp;&nbsp;${data}`;
+                        }
+                        else if (charges == null){
+                            return `<td><input type="text" class="form-control emp-amount" id="emp-amount" value="${data}" style="width:150px;" ></td>`
+                            // return data
+                        }
+                        else {
+                            let chargesArray = charges.split(",");
+                            let numberOfCharges = chargesArray.length;
+                            return `<td><input type="text" class="form-control emp-amount" id="emp-amount" value="${data}" style="width:150px;" ></td>`
+                        }
                     },
                 },
                 {
                     targets: 6,
                     render: function (data) {
-                        
-                        return '<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="'+data+'" style="width:500px; margin-right: -150px !important;" ></td>'
-
+                        return `<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="${data}" style="width:500px; margin-right: -150px !important;" ></td>`
                     },
                 },
                 {
@@ -1096,7 +1151,12 @@
                     searchable: false,
                     render: function (data) {
                         var itemId = data;
-                        return '<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>';
+                        return (
+                            `<a class="btn btn-sm btn-icon item-delete" id="${itemId.id}"><i class="text-primary ti ti-trash"></i></a>` +
+                            `<a class="btn btn-sm btn-icon item-amount" id="${itemId.id}"><i class="text-primary fa fa-edit"></i></a>`
+                        
+                        );
+                        // return `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
                     },
                 },
                 
@@ -1307,7 +1367,7 @@
                 }
             }).done(function (data) {
                 if (data.data == 'success') {
-                    toastr.success('Purpose Added Successfully ', 'Success', toast_options);
+                    toastr.success('Data update Successfully ', 'Success', toast_options);
                 }
                 else{
                     toastr.error('Cannot Saved Please Contact IT Administrator', 'Invalid', toast_options);

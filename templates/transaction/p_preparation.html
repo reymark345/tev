@@ -43,16 +43,12 @@
                 <table id="tbl-items" class="table">
                     <thead>
                         <tr>
-                            <th><input type="checkbox" id="check-all" class="dt-checkboxes form-check-input"></th>
                             <th>Transaction Code</th>
                             <th>Employee Name</th>
                             <th>Date Travel</th>
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Incoming In</th>
-                            <th>Charges</th>
-                            <th style="width:240px;">Add Charges</th>
-                            <th>Purpose</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -117,17 +113,6 @@
                     class="form-control"
                     />
                 </div>
-    
-                <!-- <div class="col-12 col-md-6">
-                    <label class="form-label" >Slashed out</label>
-                    <input
-                    type="date"
-                    id="f-slashed-out"
-                    name="FSLashedOut"
-                    class="form-control"
-                    />
-                </div> -->
-    
     
                 <div class="col-12 col-md-6">
                     <label class="form-label">Final Amount</label>
@@ -428,14 +413,6 @@
         let dataTable = table.DataTable({
             processing: true,
             serverSide: true,
-            // ajax: {
-            //     url: "{% url 'payroll-load' %}",
-            //     type: "GET",
-            //     data: {
-            //         identifier: 1
-            //     }
-            // },
-
             ajax: {
                 url: "{% url 'payroll-load' %}",
                 data: function (d) {
@@ -449,36 +426,24 @@
                 },
             },
             columns: [
-                {
-                    data: 'id', status: 'status',
-                    orderable: false, 
-                    render: function (data, type, row) {
-                        var status = row.status;
-                        var checkboxId = row.id;
-                        return '<input type="checkbox" id="checkbox_data" class="dt-checkboxes form-check-input checkbox_data" name = "checkboxtype" value="' + data + '">';
-                    }
-                },
+
                 { data: 'code' },
                 { data: 'name' },
                 { data: 'date_travel' },
                 { data: 'final_amount'},
                 { data: 'status' },
-                { data: 'incoming_in' },
-                { data: 'm_charges' },
-                { data: null, orderable: false },
-                { data: null, orderable: false }
+                { data: 'incoming_in' }
              
             ],
             columnDefs: [
                 {
-                    targets: 1,
+                    targets: 0,
                     render: function(data) {
                         return '<span class="badge bg-label-primary">'+data+'</span>'
                     },
                 },
                 {
-                    targets: 3,
-                    
+                    targets: 2,
                     render: function(data) {
                         let dates = data.split(',');
 
@@ -494,19 +459,19 @@
                     },
                 },
                 {
-                    targets: 4,
+                    targets: 3,
                     render: function(data) {
                         var floatValue = parseFloat(data);
                         if (floatValue !== 0) {
                             var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
+                            return `<span class="badge bg-label-primary">₱ ${convertedValue}</span>`
                         } else {
                             return "";
                         }
                     },
                 },
                 {
-                  targets: 5,
+                  targets: 4,
                   render: function (data) {
                       if (data==1){
                         return '<span class="badge bg-label-warning">Pending</span>'
@@ -524,45 +489,13 @@
                   },
                 },
                 {
-                    targets: -4,
+                    targets: -1,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
-                {
-                    targets: -3,
-                    render: function(data, type, row) {
-                        return data;
-                    }
-                },
-                {
-                    targets: -2,
-                    render: function(data, type, row) {
-                        if (type === 'display') {
-                            return '<div style="display: inline-block;">' +
-                                '<select id="charges" name="Charges" class="form-select charges" data-allow-clear="true" style="width:140px;" disabled >' +
-                                    '<option></option>' +
-                                    '{% for row in charges %}'+
-                                        '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                                    '{% endfor %}'+
-                                '</select>'+
-                                '<span id="charges_error" style="color: red;"></span>'+
-                                '</div>'
-                                // '<button type="button" class="btn btn-info waves-effect waves-light" id="multiple_charges" name="MultipleCharges" style="margin-left: 10px; height:37px;" disabled>+</button>';
-                        }
-                        return data;
-                    }
-                },
-                {
-                    targets: -1,
-                    render: function(data, type, row) {
-                        if (type === 'display') {
-                            return '<input type="text" class="form-control purpose" id="basic-default-name" name="Purpose" style="width:350px;" disabled  />'+
-                            '<span id="purpose_error" style="color: red;"></span>';;
-                        }
-                        return data;
-                    }
-                },
+
+               
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [

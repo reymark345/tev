@@ -40,8 +40,10 @@ urlpatterns = [
     path('approval_list', views.approval_list, name='approval-list'),
     
     path('employee_dv', views.employee_dv, name='employee-dv'),
+    path('employee_journal', views.employee_journal, name='employee-journal'),
     path('update_box_list', views.update_box_list, name='update-box-list'),
     path('delete_box_list', views.delete_box_list, name='delete-box-list'),
+    path('update_amt', views.update_amt, name='update-amt'),
     
     path('update_status', views.update_status, name='update-status'),
     path('dv_number_lib', views.dv_number_lib, name='dv-number-lib'),
