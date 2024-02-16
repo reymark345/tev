@@ -90,6 +90,7 @@
                             <th>Division</th>
                             <th>Division Chief</th>
                             <th>Status</th>
+                            <th>Amount</th>
                             <th>Date In</th>
                             <th>Date Received</th>
                             <th>Date In</th>
@@ -490,6 +491,7 @@
                 { data: 'division_name' },
                 { data: 'division_chief' },
                 { data: 'status' },
+                { data: 'amount' },
                 { data: 'box_b_in' },
                 { data: 'd_received' },
                 { data: 'received_by' },
@@ -544,12 +546,24 @@
                   },
                 },
 
+
+
+
+
                 {
                     targets: 6,
                     render: function (data) {
-                        return (data == null) ? '' : moment(data).format('LLL');
+                        let floatValue = parseFloat(data);
+
+                        var formattedValue = floatValue.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+              
+                        return `<span class="badge bg-label-primary">₱  ${formattedValue}</span>`
                     },
                 },
+
                 {
                     targets: 7,
                     render: function (data) {
@@ -557,7 +571,13 @@
                     },
                 },
                 {
-                    targets: 9,
+                    targets: 8,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+                {
+                    targets: 10,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },

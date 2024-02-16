@@ -556,51 +556,146 @@ def journal_load(request):
     elif _search:
         item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [11,12,13]).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [11,12,13]).select_related().distinct().order_by('-id')
+        query = """
+            SELECT
+                tev_outgoing.id,
+                tev_outgoing.dv_no,
+                tev_outgoing.cluster,
+                division.name AS division,
+                division.chief AS division_chief,
+                tev_outgoing.status_id,
+                tev_outgoing.box_b_in,
+                tev_outgoing.j_d_received,
+                tev_outgoing.j_r_user_id,
+                tev_outgoing.j_d_forwarded,
+                tev_outgoing.j_out_user_id,
+                COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+            FROM
+                tev_incoming
+            JOIN
+                tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+            LEFT JOIN
+                tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                    
+            LEFT JOIN
+                charges ON charges.id = tev_bridge.charges_id
+            LEFT JOIN
+                payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+            LEFT JOIN
+                charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+            LEFT JOIN
+                    division ON division.id = tev_outgoing.division_id
+            WHERE tev_outgoing.status_id IN (13,14,15)
+            GROUP BY
+                    tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.box_b_in,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id
+            ORDER BY
+                    tev_outgoing.dv_no DESC;
+        """
+        
+        with connection.cursor() as cursor:
+            cursor.execute(query)
+            columns = [col[0] for col in cursor.description]
+            item_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        data = []
 
-    total = item_data.count()
+        total = 20
 
-    _start = request.GET.get('start')
-    _length = request.GET.get('length')
-    if _start and _length:
-        start = int(_start)
-        length = int(_length)
-        page = math.ceil(start / length) + 1
-        per_page = length
-        item_data = item_data[start:start + length]
+        _start = request.GET.get('start')
+        _length = request.GET.get('length')
+        if _start and _length:
+            start = int(_start)
+            length = int(_length)
+            page = math.ceil(start / length) + 1
+            per_page = length
+            item_data = item_data[start:start + length]
 
-    data = []
-
-    for item in item_data:
-        userData = AuthUser.objects.filter(id=item.j_out_user_id)
-        if userData.exists():
-            full_name = userData[0].first_name + ' ' + userData[0].last_name
-        else:
-            full_name = ""
+        for item in item_data:
+            userData = AuthUser.objects.filter(id=item['j_out_user_id'])
+            if userData.exists():
+                full_name = userData[0].first_name + ' ' + userData[0].last_name
+            else:
+                full_name = ""
 
 
-        userData_received = AuthUser.objects.filter(id=item.j_r_user_id)
-        if userData_received.exists():
-            full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
-        else:
-            full_name_receiver = ""
-        item = {
-            'id': item.id,
-            'dv_no': item.dv_no,
-            'cluster': item.cluster,
-            'division_name': item.division.name,
-            'division_chief': item.division.chief,
-            'status':item.status_id,
-            'box_b_in': item.box_b_in,
-            'box_b_out': item.box_b_out,
-            'd_received': item.j_d_received,
-            'd_forwarded': item.j_d_forwarded,
-            'received_by': full_name_receiver,
-            'user_id': full_name,
-            'out_by': full_name
-        }
+            userData_received = AuthUser.objects.filter(id=item['j_r_user_id'])
+            if userData_received.exists():
+                full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
+            else:
+                full_name_receiver = ""
+            new_item = {
+                'id': item['id'],
+                'dv_no': item['dv_no'],
+                'cluster': item['cluster'],
+                'division_name': item['division'],
+                'division_chief': item['division_chief'],
+                'status': item['status_id'],
+                'box_b_in': item['box_b_in'],
+                'box_b_out': item['j_d_forwarded'],
+                'd_received': item['j_d_received'],
+                'd_forwarded': item['j_d_forwarded'],
+                'amount': item['charges_amount'],
+                'received_by': full_name_receiver,
+                'user_id': full_name,
+                'out_by': full_name
+            }
 
-        data.append(item)
+            data.append(new_item)
+            
+
+
+
+
+
+
+
+
+
+
+        # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [11,12,13]).select_related().distinct().order_by('-id')
+
+    # total = item_data.count()
+
+    # _start = request.GET.get('start')
+    # _length = request.GET.get('length')
+    # if _start and _length:
+    #     start = int(_start)
+    #     length = int(_length)
+    #     page = math.ceil(start / length) + 1
+    #     per_page = length
+    #     item_data = item_data[start:start + length]
+
+    # data = []
+
+    # for item in item_data:
+    #     userData = AuthUser.objects.filter(id=item.j_out_user_id)
+    #     if userData.exists():
+    #         full_name = userData[0].first_name + ' ' + userData[0].last_name
+    #     else:
+    #         full_name = ""
+
+
+    #     userData_received = AuthUser.objects.filter(id=item.j_r_user_id)
+    #     if userData_received.exists():
+    #         full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
+    #     else:
+    #         full_name_receiver = ""
+    #     item = {
+    #         'id': item.id,
+    #         'dv_no': item.dv_no,
+    #         'cluster': item.cluster,
+    #         'division_name': item.division.name,
+    #         'division_chief': item.division.chief,
+    #         'status':item.status_id,
+    #         'box_b_in': item.box_b_in,
+    #         'box_b_out': item.box_b_out,
+    #         'd_received': item.j_d_received,
+    #         'd_forwarded': item.j_d_forwarded,
+    #         'received_by': full_name_receiver,
+    #         'user_id': full_name,
+    #         'out_by': full_name
+    #     }
+
+    #     data.append(item)
 
     response = {
         'data': data,
