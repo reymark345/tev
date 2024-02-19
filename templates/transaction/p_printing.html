@@ -817,18 +817,18 @@
 
                 $('body').on('click', '.item-amount', function () {
                     let emp_id = $(this).attr('id');
-
                     let dataTable = $('#tbl-box-a').DataTable();
                     let closestRow = dataTable.row($(this).closest('tr'));
                     let rowData = closestRow.data();
                     let p_id = rowData.id;
-                    let amt = closestRow.node().querySelector('.emp-amount').value;
+                    
+                    let amt;
+                    if (closestRow.node() && closestRow.node().querySelector('.emp-amount')) {
+                        amt = closestRow.node().querySelector('.emp-amount').value;
+                    } else {
+                        amt = rowData.final_amount;
+                    }
                     let pp = closestRow.node().querySelector('.emp-purpose').value;
-
-
-                    console.log(dv_number);
-                    console.log("AMOUNTTTTT");
-
                     $.ajax({
                         type: 'POST',
                         url: "{% url 'update-amt' %}",
@@ -851,11 +851,7 @@
                                 },
                             })
                         }
-                    });
-
-
-
-                    
+                    });  
                 });
 
       const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {

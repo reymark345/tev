@@ -369,6 +369,7 @@ def checking_load(request):
         def dictfetchall(cursor):
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
+        
         query = """
             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
             FROM tev_incoming t1
@@ -833,12 +834,6 @@ def item_update(request):
         # results = results.values('date_travel')
         # if results:
         #     duplicate_travel.append(cleaned_date)
-
-    print(id)
-    print(duplicate_travel)
-    print("nahhhhh")
-
-
 
     # for date in individual_dates:
     #     cleaned_date = date.strip()

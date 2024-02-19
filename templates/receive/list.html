@@ -675,19 +675,19 @@
                     }
     
                 },
-                {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Forward</span>',
-                    action: function () {
-                        // Get the IDs of checked items
-                        if(selectedCb.length ===0){
-                            toastr.error('Select item first', 'Invalid', toast_options);
-                        }
-                        else{
-                            incoming_out();
-                        }
-                    }
-                },
+                // {
+                //     className: 'btn btn-label-primary me-2',
+                //     text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Forward</span>',
+                //     action: function () {
+                //         // Get the IDs of checked items
+                //         if(selectedCb.length ===0){
+                //             toastr.error('Select item first', 'Invalid', toast_options);
+                //         }
+                //         else{
+                //             incoming_out();
+                //         }
+                //     }
+                // },
 
                 {
                     className: 'btn btn-label-success me-2 waves-effect',
@@ -884,7 +884,10 @@
                 });
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+        // $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0 d-flex align-items-center">'+
+        '<button type="submit" id="forward" class="btn btn-success">Forward</button>' +
+        '</h5>');
 
         const newRecord = document.querySelector('.create-new')
             if (newRecord) {
@@ -1269,6 +1272,14 @@
         })
 
     }
+    $('#forward').on('click', function(){
+        if(selectedCb.length ===0){
+            toastr.error('Selected item first', 'Invalid', toast_options);
+        }
+        else{
+            incoming_out();
+        }
+    });
 
     $('#add_remarks').click(function () {     
         var newRow = $('<div class="row mt-2">' +
