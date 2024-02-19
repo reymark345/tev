@@ -518,11 +518,14 @@ def journal_load(request):
     dv_no_string = f"{last_two_digits:02d}-"
     search_fields = ['dv_no', 'division__name', 'status__name'] 
     filter_conditions = Q()
-
     for field in search_fields:
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if adv_filter:
+
+        def dictfetchall(cursor):
+            columns = [col[0] for col in cursor.description]
+            return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
         FCluster = request.GET.get('FCluster')
         FDivision = request.GET.get('FDivision')
@@ -531,30 +534,119 @@ def journal_load(request):
         FDateForwarded = request.GET.get('FDateForwarded')
         BoxStatus = request.GET.get('BoxStatus')
         dv_list = request.GET.getlist('ListDv[]')
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [11,12,13])
+        query = """
+            SELECT
+                tev_outgoing.id,
+                tev_outgoing.dv_no,
+                tev_outgoing.cluster,
+                division.name AS division,
+                division.chief AS division_chief,
+                tev_outgoing.status_id,
+                tev_outgoing.box_b_in,
+                tev_outgoing.j_d_received,
+                tev_outgoing.j_r_user_id,
+                tev_outgoing.j_d_forwarded,
+                tev_outgoing.j_out_user_id,
+                COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+            FROM
+                tev_incoming
+            JOIN
+                tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+            LEFT JOIN
+                tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                    
+            LEFT JOIN
+                charges ON charges.id = tev_bridge.charges_id
+            LEFT JOIN
+                payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+            LEFT JOIN
+                charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+            LEFT JOIN
+                    division ON division.id = tev_outgoing.division_id
+            WHERE tev_outgoing.status_id IN (11,12,13)
+        """
+
+        params = []
+
         if FCluster:
-            item_data = item_data.filter(cluster=FCluster)
+            query += " AND tev_outgoing.cluster = %s"
+            params.append(FCluster)
 
         if FDivision:
-            item_data = item_data.filter(division_id = FDivision)
+            query += " AND tev_outgoing.division_id = %s"
+            params.append(FDivision)
 
         if FBoxIn:
-            item_data = item_data.filter(box_b_out__icontains=FBoxIn)
-        
+            query += " AND tev_outgoing.box_b_in LIKE %s"
+            params.append(f'%{FBoxIn}%')
+
         if FDateReceived:
-            item_data = item_data.filter(j_d_received__icontains=FDateReceived)
+            query += " AND tev_outgoing.j_d_received = %s"
+            params.append(FDateReceived)
 
         if FDateForwarded:
-            item_data = item_data.filter(j_d_forwarded__icontains=FDateForwarded)
+            query += " AND tev_outgoing.j_d_forwarded = %s"
+            params.append(FDateForwarded)
 
         if BoxStatus:
-            item_data = item_data.filter(status_id=BoxStatus)
+            query += " AND tev_outgoing.status_id = %s"
+            params.append(BoxStatus)
 
         if dv_list:
-            item_data = item_data.filter(id__in=dv_list)
+            placeholders = ', '.join(['%s' for _ in range(len(dv_list))])
+            query += f" AND tev_outgoing.id IN ({placeholders})"
+            params.extend(dv_list)
+
+        query += "GROUP BY tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.box_b_in,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id ORDER BY tev_outgoing.dv_no DESC;"
+
+        with connection.cursor() as cursor:
+            cursor.execute(query, params)
+            item_data = dictfetchall(cursor)
 
     elif _search:
-        item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [11,12,13]).select_related().distinct().order_by(_order_dash + 'id')
+        with connection.cursor() as cursor:
+            query = """
+                SELECT
+                    tev_outgoing.id,
+                    tev_outgoing.dv_no,
+                    tev_outgoing.cluster,
+                    division.name AS division,
+                    division.chief AS division_chief,
+                    tev_outgoing.status_id,
+                    tev_outgoing.box_b_in,
+                    tev_outgoing.j_d_received,
+                    tev_outgoing.j_r_user_id,
+                    tev_outgoing.j_d_forwarded,
+                    tev_outgoing.j_out_user_id,
+                    COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+                FROM
+                    tev_incoming
+                JOIN
+                    tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+                LEFT JOIN
+                    tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                        
+                LEFT JOIN
+                    charges ON charges.id = tev_bridge.charges_id
+                LEFT JOIN
+                    payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+                LEFT JOIN
+                    charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+                LEFT JOIN
+                        division ON division.id = tev_outgoing.division_id
+                WHERE tev_outgoing.status_id IN (11,12,13)
+                AND (
+                    tev_outgoing.dv_no LIKE %s
+                    OR division.name LIKE %s
+                )
+                GROUP BY
+                    tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.box_b_in,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id
+                ORDER BY
+                    tev_outgoing.dv_no DESC;
+            """
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%'])
+            columns = [col[0] for col in cursor.description]
+            item_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
         query = """
             SELECT
@@ -585,7 +677,7 @@ def journal_load(request):
                 charges AS charges2 ON payrolled_charges.charges_id = charges2.id
             LEFT JOIN
                     division ON division.id = tev_outgoing.division_id
-            WHERE tev_outgoing.status_id IN (13,14,15)
+            WHERE tev_outgoing.status_id IN (11,12,13)
             GROUP BY
                     tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.box_b_in,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id
             ORDER BY
@@ -596,106 +688,56 @@ def journal_load(request):
             cursor.execute(query)
             columns = [col[0] for col in cursor.description]
             item_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        data = []
 
-        total = 20
+    data = []
 
-        _start = request.GET.get('start')
-        _length = request.GET.get('length')
-        if _start and _length:
-            start = int(_start)
-            length = int(_length)
-            page = math.ceil(start / length) + 1
-            per_page = length
-            item_data = item_data[start:start + length]
+    total = len(item_data)
 
-        for item in item_data:
-            userData = AuthUser.objects.filter(id=item['j_out_user_id'])
-            if userData.exists():
-                full_name = userData[0].first_name + ' ' + userData[0].last_name
-            else:
-                full_name = ""
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        item_data = item_data[start:start + length]
+
+    for item in item_data:
+        userData = AuthUser.objects.filter(id=item['j_out_user_id'])
+        if userData.exists():
+            full_name = userData[0].first_name + ' ' + userData[0].last_name
+        else:
+            full_name = ""
 
 
-            userData_received = AuthUser.objects.filter(id=item['j_r_user_id'])
-            if userData_received.exists():
-                full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
-            else:
-                full_name_receiver = ""
-            new_item = {
-                'id': item['id'],
-                'dv_no': item['dv_no'],
-                'cluster': item['cluster'],
-                'division_name': item['division'],
-                'division_chief': item['division_chief'],
-                'status': item['status_id'],
-                'box_b_in': item['box_b_in'],
-                'box_b_out': item['j_d_forwarded'],
-                'd_received': item['j_d_received'],
-                'd_forwarded': item['j_d_forwarded'],
-                'amount': item['charges_amount'],
-                'received_by': full_name_receiver,
-                'user_id': full_name,
-                'out_by': full_name
-            }
+        userData_received = AuthUser.objects.filter(id=item['j_r_user_id'])
+        if userData_received.exists():
+            full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
+        else:
+            full_name_receiver = ""
+        new_item = {
+            'id': item['id'],
+            'dv_no': item['dv_no'],
+            'cluster': item['cluster'],
+            'division_name': item['division'],
+            'division_chief': item['division_chief'],
+            'status': item['status_id'],
+            'box_b_in': item['box_b_in'],
+            'box_b_out': item['j_d_forwarded'],
+            'd_received': item['j_d_received'],
+            'd_forwarded': item['j_d_forwarded'],
+            'amount': item['charges_amount'],
+            'received_by': full_name_receiver,
+            'user_id': full_name,
+            'out_by': full_name
+        }
 
-            data.append(new_item)
+        data.append(new_item)
             
 
 
 
 
-
-
-
-
-
-
-        # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [11,12,13]).select_related().distinct().order_by('-id')
-
-    # total = item_data.count()
-
-    # _start = request.GET.get('start')
-    # _length = request.GET.get('length')
-    # if _start and _length:
-    #     start = int(_start)
-    #     length = int(_length)
-    #     page = math.ceil(start / length) + 1
-    #     per_page = length
-    #     item_data = item_data[start:start + length]
-
-    # data = []
-
-    # for item in item_data:
-    #     userData = AuthUser.objects.filter(id=item.j_out_user_id)
-    #     if userData.exists():
-    #         full_name = userData[0].first_name + ' ' + userData[0].last_name
-    #     else:
-    #         full_name = ""
-
-
-    #     userData_received = AuthUser.objects.filter(id=item.j_r_user_id)
-    #     if userData_received.exists():
-    #         full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
-    #     else:
-    #         full_name_receiver = ""
-    #     item = {
-    #         'id': item.id,
-    #         'dv_no': item.dv_no,
-    #         'cluster': item.cluster,
-    #         'division_name': item.division.name,
-    #         'division_chief': item.division.chief,
-    #         'status':item.status_id,
-    #         'box_b_in': item.box_b_in,
-    #         'box_b_out': item.box_b_out,
-    #         'd_received': item.j_d_received,
-    #         'd_forwarded': item.j_d_forwarded,
-    #         'received_by': full_name_receiver,
-    #         'user_id': full_name,
-    #         'out_by': full_name
-    #     }
-
-    #     data.append(item)
 
     response = {
         'data': data,
@@ -1121,6 +1163,10 @@ def employee_journal(request):
     total_amount = 0       
     charges_list = []
     idd = request.GET.get('dv_id')
+
+
+
+
     dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','id').first()
 
     charges = Charges.objects.filter().order_by('name')
@@ -1133,6 +1179,32 @@ def employee_journal(request):
     
     if dv_no is not None:
         dvno = dv_no['dv_no']
+
+    # query = """ 
+    #     SELECT 
+    #         ti.id, 
+    #         code, 
+    #         first_name, 
+    #         middle_name, 
+    #         last_name,
+    #         id_no,
+    #         account_no, 
+    #         final_amount, 
+    #         MAX(tb.purpose) AS purpose,
+    #         dv_no, 
+    #         cl.name as cluster, 
+    #         GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
+    #     FROM tev_incoming AS ti 
+    #     LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+    #     LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+    #     LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
+    #     LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = ti.id
+    #     LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+    #     WHERE ti.status_id IN (1, 2, 4, 5, 6, 7, 12, 13) AND dv_no = %s 
+    #     GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
+    #     ORDER BY ti.updated_at DESC;  
+    # """
+
     query = """ 
         SELECT 
             ti.id, 
@@ -1142,10 +1214,8 @@ def employee_journal(request):
             last_name,
             id_no,
             account_no, 
-            final_amount, 
-            MAX(tb.purpose) AS purpose,  -- Using an aggregate function
-            dv_no, 
-            cl.name as cluster, 
+            final_amount,
+            MAX(tb.purpose) AS purpose,
             GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
         FROM tev_incoming AS ti 
         LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
@@ -1153,9 +1223,9 @@ def employee_journal(request):
         LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
         LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = ti.id
         LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
-        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7, 12, 13) AND dv_no = %s 
-        GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
-        ORDER BY ti.updated_at DESC;  
+        WHERE ti.status_id IN (11,12,13) AND t_o.dv_no = %s
+        GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, cl.name, t_o.dv_no
+        ORDER BY ti.updated_at DESC;      
     """
 
     with connection.cursor() as cursor:
@@ -1168,35 +1238,32 @@ def employee_journal(request):
     for finance_row in results:
         finance_dict = dict(zip(column_names, finance_row))
         data_result.append(finance_dict)
-
-    data = []  
     
+    data = []  
 
-    for row in data_result:
-        first_name = row['first_name'] if row['first_name'] else ''
-        middle_name = row['middle_name'] if row['middle_name'] else ''
-        last_name = row['last_name'] if row['last_name'] else ''
+    for row in results:
+        first_name = row[2] if row[2] else ''  
+        middle_name = row[3] if row[3] else '' 
+        last_name = row[4] if row[4] else '' 
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
-        
-        final_amount_str = row['final_amount']
-        final_amount = Decimal(final_amount_str).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
-        
 
+        final_amount_str = row[7] 
+        final_amount = Decimal(final_amount_str).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         total_amount += final_amount
         item = {
-            'id': row['id'],
-            'code': row['code'],
+            'id': row[0],  
+            'code': row[1], 
             'name': emp_fullname,
-            'id_no': row['id_no'],
-            'account_no': row['account_no'],
+            'id_no': row[5],
+            'account_no': row[6], 
             'final_amount': final_amount,
-            'purpose': row['purpose'],
-            'dv_no': row['dv_no'],
-            'cluster':row['cluster'],
-            'multiple_charges':row['multiple_charges'],
-            'total':final_amount,
+            'purpose': row[8], 
+            'multiple_charges': row[9],
+            'total': final_amount,
         }
         data.append(item)
+
+
     payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))
 
                     
@@ -1732,7 +1799,6 @@ def transmittal_details(request):
     finance_database_name = 'finance'
     data_result = []
     year = request.GET.get('year')
-    # selected_dv = request.GET.getlist('selectedDv[]')
     selected_dv = request.GET.getlist('selectedDv')
 
     if year == '2023':
@@ -1930,6 +1996,53 @@ def add_emp_dv(request):
 
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
+@csrf_exempt
+def add_emp_journal(request):
+    if request.method == 'POST':
+        user_id = request.session.get('user_id', 0)
+        tev_id = request.POST.get('tev_id')
+        dv_no = request.POST.get('dv_no')
+        box_b = TevIncoming.objects.filter(id=tev_id).update(status_id=12, updated_at = date_time.datetime.now())
+        month_mapping = {
+            '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
+            '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Aug',
+            '09': 'Sep', '10': 'Oct', '11': 'Nov', '12': 'Dec'
+        }
+        tev_incoming_object = TevIncoming.objects.get(id=tev_id)
+        travel_dates_str = tev_incoming_object.date_travel
+        travel_dates_list = travel_dates_str.split(',')
+        unique_months_by_year = {}
+
+        for date in travel_dates_list:
+            parts = date.split('-')
+            if len(parts) == 3:
+                year = parts[2]
+                month_abbr = month_mapping.get(parts[1])
+                if month_abbr:
+                    if year not in unique_months_by_year:
+                        unique_months_by_year[year] = set()
+                    unique_months_by_year[year].add(month_abbr)
+
+        ordered_years = sorted(unique_months_by_year.keys())
+
+        def month_order(month_abbr):
+            month_mapping_order = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+            return month_mapping_order.get(month_abbr, 0)
+
+        formatted_result = ', '.join([f"{', '.join(sorted(unique_months_by_year[year], key=month_order))} {year}" for year in ordered_years])
+        purpose = "TE for "+ formatted_result
+        outgoing_obj = TevOutgoing.objects.filter(dv_no=dv_no).first()
+        outgoing_id = outgoing_obj.id
+
+        bridge = TevBridge(purpose = purpose,charges_id = 1, tev_incoming_id = tev_id, tev_outgoing_id = outgoing_id)
+        bridge.save()
+        PayrolledCharges.objects.filter(incoming_id=tev_id).delete()
+        return JsonResponse({'data': 'success'})
+
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
   
 
 @csrf_exempt
@@ -1983,8 +2096,16 @@ def delete_box_list(request):
 @csrf_exempt
 def update_amt(request):
     incoming_id = request.POST.get('emp_id')
+    print("testtupdate")
+    print(incoming_id)
     amt = request.POST.get('amount')
     pp = request.POST.get('purpose')
+
+    data = PayrolledCharges.objects.filter(incoming_id = incoming_id)
+
+    if len(data) == 1:
+        data.update(amount=amt)
+
     TevBridge.objects.filter(tev_incoming_id=incoming_id).update(purpose=pp)
     TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt)
 

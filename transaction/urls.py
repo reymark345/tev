@@ -57,6 +57,7 @@ urlpatterns = [
     path('add_dv', views.add_dv, name='add-dv'),  
     path('retrieve_employee', views.retrieve_employee, name='retrieve-employee'),  
     path('add_emp_dv', views.add_emp_dv, name='add-emp-dv'),  
+    path('add_emp_journal', views.add_emp_journal, name='add-emp-journal'), 
     path('update_purpose', views.update_purpose , name='update-purpose'),  
     path('transmittal_details', views.transmittal_details , name='transmittal-details'),  
     
