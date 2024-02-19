@@ -82,9 +82,13 @@ body {
 .bg-body {
     background: #25293c !important;
 }
-
+/* 
 .text-primary {
     color: #1051d1 !important;
+} */
+
+.text-primary {
+    color: #f1e6e6 !important;
 }
 
 .text-body[href]:hover {
@@ -104,9 +108,13 @@ a.bg-primary:focus {
     background-color: #1051d1;
 }
 
-.bg-label-primary {
+/* .bg-label-primary {
     background-color: #3a3b64 !important;
     color: #1051d1 !important;
+} */
+.bg-label-primary {
+    background-color: #0a204d !important;
+    color: rgba(255, 255, 255, 0.8) !important;
 }
 
 .bg-primary.bg-glow {
@@ -362,10 +370,18 @@ button.list-group-item-primary.active {
 }
 
 .btn-label-primary {
-    color: #1051d1;
+    color: #ffffff;
     border-color: transparent;
     background: #3a3b64;
 }
+
+/* .btn-label-primary {
+    color: #1051d1;
+    border-color: transparent;
+    background: #3a3b64;
+} */
+
+
 .btn-label-primary.waves-effect .waves-ripple {
     background: radial-gradient(
         rgba(115, 103, 240, 0.2) 0,

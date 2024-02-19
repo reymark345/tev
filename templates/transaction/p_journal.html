@@ -90,9 +90,10 @@
                             <th>Division</th>
                             <th>Division Chief</th>
                             <th>Status</th>
+                            <th>Amount</th>
                             <th>Date In</th>
                             <th>Date Received</th>
-                            <th>Date In</th>
+                            <th>Received By</th>
                             <th>Date Forwarded</th>
                             <th>Forwarded by</th>
                             <th>ID</th>
@@ -490,6 +491,7 @@
                 { data: 'division_name' },
                 { data: 'division_chief' },
                 { data: 'status' },
+                { data: 'amount' },
                 { data: 'box_b_in' },
                 { data: 'd_received' },
                 { data: 'received_by' },
@@ -543,13 +545,20 @@
                     }
                   },
                 },
-
                 {
                     targets: 6,
                     render: function (data) {
-                        return (data == null) ? '' : moment(data).format('LLL');
+                        let floatValue = parseFloat(data);
+
+                        var formattedValue = floatValue.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+              
+                        return `<span class="badge bg-label-primary">₱  ${formattedValue}</span>`
                     },
                 },
+
                 {
                     targets: 7,
                     render: function (data) {
@@ -557,7 +566,13 @@
                     },
                 },
                 {
-                    targets: 9,
+                    targets: 8,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+                {
+                    targets: 10,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
@@ -756,26 +771,68 @@
                     })
               });
 
-                $('body').on('click', '.item-delete', function () {
-                let emp_id = $(this).attr('id');
+            $('body').on('click', '.item-delete', function () {
+                    let emp_id = $(this).attr('id');
+                    let dataTable = $('#tbl-items').DataTable();
+                    let dataTable2 = $('#tbl-box-a').DataTable();
+                    let closestRow = dataTable2.row($(this).closest('tr'));
+                    let rowData = closestRow.data();
+                    let p_id = rowData.id;
 
-                let dataTable = $('#tbl-box-a').DataTable();
-                let closestRow = dataTable.row($(this).closest('tr'));
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'delete-box-list' %}",
+                        data:{
+                        emp_id: p_id,
+                        dv_number: dv_number
+                    }
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            employee_list();
+                            dataTable.ajax.reload();
+                            dataTable2.ajax.reload();
+                            toastr.success('Removed Successfully', 'Success', toast_options);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+            });
+
+            $('body').on('click', '.item-amount', function () {
+                let emp_id = $(this).attr('id');
+                let dataTable2 = $('#tbl-box-a').DataTable();
+                let dataTable = $('#tbl-items').DataTable();
+                let closestRow = dataTable2.row($(this).closest('tr'));
                 let rowData = closestRow.data();
                 let p_id = rowData.id;
-
+                let amt;
+                if (closestRow.node() && closestRow.node().querySelector('.emp-amount')) {
+                    amt = closestRow.node().querySelector('.emp-amount').value;
+                } else {
+                    amt = rowData.final_amount;
+                }
+                let pp = closestRow.node().querySelector('.emp-purpose').value;
                 $.ajax({
                     type: 'POST',
-                    url: "{% url 'delete-box-list' %}",
+                    url: "{% url 'update-amt' %}",
                     data:{
                     emp_id: p_id,
-                    dv_number: dv_number
+                    amount: amt,
+                    purpose:pp
                 }
                 }).done(function (data) {
                     if (data.data == 'success') {
-                        employee_list();
+                        dataTable.ajax.reload();
                         dataTable2.ajax.reload();
-                        toastr.success('Removed Successfully', 'Success', toast_options);
+                        toastr.success('Update successfully', 'Success', toast_options);
+    
                     } else {
                         Swal.fire({
                             icon: 'error',
@@ -786,8 +843,8 @@
                             },
                         })
                     }
-                })
-        });
+                });    
+            });
  
       
         $('#tbl-items tbody input[type="checkbox"]').change(function () {
@@ -988,7 +1045,11 @@
                     searchable: false,
                     render: function (data) {
                         var itemId = data;
-                        return '<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>';
+
+                        return (
+                            `<a class="btn btn-sm btn-icon item-delete" id="${itemId.id}"><i class="text-primary ti ti-trash"></i></a>` +
+                            `<a class="btn btn-sm btn-icon item-amount" id="${itemId.id}"><i class="text-primary fa fa-edit"></i></a>`
+                        );
                     },
                 },
                 
@@ -1044,18 +1105,18 @@
         });
 
         search_advance_filter.on('click', function () {
-                FAdvancedFilter.val("true");
-                $("#advance-filter").modal("hide");
-                dataTable.ajax.reload();
-                clear_advfilter();
-                toastr.success('Search successfully', 'Success', toast_options);
+            FAdvancedFilter.val("true");
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            clear_advfilter();
+            toastr.success('Search successfully', 'Success', toast_options);
         });
 
         reset_advance_filter.on('click', function () {
-                FAdvancedFilter.val('');
-                $("#advance-filter").modal("hide");
-                dataTable.ajax.reload();
-                toastr.success('Data has been reset', 'Success', toast_options);
+            FAdvancedFilter.val('');
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Data has been reset', 'Success', toast_options);
         });
 
         clear_advance_filter.on('click', function () {
@@ -1164,7 +1225,7 @@
               else{
                   outgoing(0);
               }
-          });
+        });
   
         $('#forward').on('click', function(){
             if(selectedCb.length ===0){
@@ -1390,7 +1451,7 @@
             let inc_id = $(this).val();
             $.ajax({
                 type: 'POST',
-                url: "{% url 'add-emp-dv' %}",
+                url: "{% url 'add-emp-journal' %}",
                 data:{
                     tev_id: inc_id,
                     dv_no: dv_number
