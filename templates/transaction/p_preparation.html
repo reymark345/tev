@@ -526,27 +526,7 @@
                         $("#advance-filter").modal("show");
                     }
                 
-                },
-                {
-                    className: 'btn btn-primary',
-                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Save</span>',
-                    action: function () {
-                        // Get the IDs of checked items
-                        var selectedItems = [];
-                        DvNumber.val("");
-                        Cluster.val("").trigger('change');
-                        Division.val("").trigger('change');
-                        $('#tbl-items tbody input[type="checkbox"]:checked').each(function () {
-                            selectedItems.push($(this).val());
-                        });
-                        if(selectedItems.length ===0){
-                            toastr.error('Select item first', 'Invalid', toast_options);
-                        }
-                        else{
-                            savepayroll(selectedItems);
-                        }
-                    }
-                },
+                }
             ],
             drawCallback: function (settings) {
                 $('.item-edit').on('click', function () {
@@ -876,54 +856,6 @@
                 return '<input type="text" class="form-control purpose" name="Purpose" disabled />';
             }
             return data;
-        }
-
-        function savepayroll(selected_items){
-            var emptyDataExists = false;
-            $('#tbl-items tbody select.charges').each(function() {
-                var selectedValue = $(this).val();
-                var errorSpan = $(this).closest('tr').find('#charges_error');
-                if (!$(this).is(':disabled')) {
-                    if (!selectedValue) {
-                        errorSpan.text("Required");
-                        emptyDataExists = true;
-                    } else {
-                        errorSpan.text("");
-                    }
-                } else {
-                    errorSpan.text("");
-                }
-            });
-
-            $('#tbl-items tbody input.purpose').each(function() {
-                var purposeValue = $(this).val();
-                var purposeErrorSpan = $(this).closest('tr').find('#purpose_error');
-                if (!$(this).is(':disabled')) {
-        
-                    if (!purposeValue) {
-                        purposeErrorSpan.text("Required");
-                        emptyDataExists = true;
-                    } else {
-                        purposeErrorSpan.text("");
-                    }
-                } else {
-                    purposeErrorSpan.text("");
-                }
-            });
-
-
-
-
-
-            if (!emptyDataExists) {
-                $('#saveModal').modal('show');
-                const currentDate = new Date();
-                const year = currentDate.getFullYear().toString().slice(-2); 
-                const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-                DvNumber.val(`${year}-${month}-`);
-            } else {
-                toastr.error('Please Complete Required Fields', 'Invalid', toast_options);
-            }
         }
 
         $(document).on("change", ".purpose", function() {
