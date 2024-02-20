@@ -419,7 +419,7 @@ def employee_details(request):
 @login_required(login_url='login')
 @csrf_exempt
 def travel_history(request):
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "End user"] 
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "End user", "Outgoing staff"] 
     user_id = request.session.get('user_id', 0)
 
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')

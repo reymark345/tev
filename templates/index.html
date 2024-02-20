@@ -140,12 +140,15 @@
                         {% endif %}
 
                         {% if permissions %}
-                            {% if 'Admin' in permissions or 'Incoming staff' in permissions %}
+                        {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions or 'Outgoing staff' in permissions or 'Budget staff' in permissions or 'Journal staff' in permissions or 'Approval staff' in permissions %}
                             <!-- Inventory -->
                             <li class="menu-header small text-uppercase">
                                 <span class="menu-header-text">Received Document</span>
                             </li>
+                        {% endif %}
 
+                        {% if 'Admin' in permissions or 'Incoming staff' in permissions %}
+                           
                             <li class="menu-item {% if url_name == 'receive-list' %}active{% endif %}">
                                 <a href="{% url 'receive-list' %}" class="menu-link">
                                     <i class="menu-icon tf-icons ti ti-checkbox"></i>
@@ -153,12 +156,18 @@
                                     <div data-i18n="Received">Received</div>
                                 </a>
                             </li>
+                        {% endif %}
+                    
+                           
+                        {% if 'Admin' in permissions or 'Validating staff' in permissions %}
                             <li class="menu-item {% if url_name == 'receive-checking' %}active{% endif %}">
                                 <a href="{% url 'receive-checking' %}" class="menu-link">
                                     <i class="menu-icon tf-icons ti ti-layout-sidebar"></i>
                                     <div data-i18n="Review of Documents">Review of Documents</div>
                                 </a>
                             </li>
+                        {% endif %}
+                        {% if 'Admin' in permissions or 'Payroll staff' in permissions %}
                             <li class="menu-item {% if url_name == 'transaction-payroll' %}active{% endif %}" >
                                 <a href="{% url 'transaction-payroll' %}" class="menu-link">
                                     <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
@@ -172,25 +181,32 @@
                                     <div data-i18n="Payroll Printing">Payroll Printing</div>
                                 </a>
                             </li>
-
+                        {% endif %}
+                        {% if 'Admin' in permissions or 'Outgoing staff' in permissions %}
                             <li class="menu-item {% if url_name == 'outgoing-list' %}active{% endif %}">
                                 <a href="{% url 'outgoing-list' %}" class="menu-link">
                                     <i class="menu-icon tf-icons ti ti-forms"></i>
                                     <div data-i18n="Outgoing">Outgoing</div>
                                 </a>
                             </li>
+                        {% endif %}
+                        {% if 'Admin' in permissions or 'Budget staff' in permissions %}
                             <li class="menu-item {% if url_name == 'budget-list' %}active{% endif %}">
                                 <a href="{% url 'budget-list' %}" class="menu-link">
                                     <i class="menu-icon tf-icons ti ti-text-wrap-disabled"></i>
                                     <div data-i18n="Budget">Budget</div>
                                 </a>
                             </li>
+                        {% endif %}
+                        {% if 'Admin' in permissions or 'Journal staff' in permissions %}
                             <li class="menu-item {% if url_name == 'journal-list' %}active{% endif %}">
                                 <a href="{% url 'journal-list' %}" class="menu-link">
                                     <i class="menu-icon tf-icons ti ti-layout-grid"></i>
                                     <div data-i18n="Journal">Journal</div>
                                 </a>
                             </li>
+                        {% endif %}
+                        {% if 'Admin' in permissions or 'Approval staff' in permissions %}
                             <li class="menu-item {% if url_name == 'approval-list' %}active{% endif %}">
                                 <a href="{% url 'approval-list' %}" class="menu-link">
                                     <i class="menu-icon tf-icons ti ti-map"></i>
@@ -198,6 +214,7 @@
                                 </a>
                             </li>
                             {% endif %}
+                            
                         {% endif %}
                        
                         <!-- Tracking -->

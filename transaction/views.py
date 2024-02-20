@@ -194,7 +194,7 @@ def box_a(request):
 def outgoing_list(request):
     user_details = get_user_details(request)
 
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff"] 
     role = RoleDetails.objects.filter(id=user_details.role_id).first()
 
     user_id = request.session.get('user_id', 0)
