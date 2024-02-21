@@ -83,12 +83,10 @@ def dashboard(request):
         'permissions' : role_names,
     }
     if any(role_name in allowed_roles for role_name in role_names):
-        print("halalalala")
-        print(role_names)
         return render(request, 'dashboard.html',context)
     else:
-        print(role_names)
-        print("nononono")
+        print(role.role_name)
+        print("testttt")
         return redirect("travel-history")
     
     # if role.role_name in allowed_roles:
