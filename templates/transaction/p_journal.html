@@ -848,11 +848,6 @@
                 toastr.error('DV must Received First', 'Invalid', toast_options);
             });
  
-      
-        $('#tbl-items tbody input[type="checkbox"]').change(function () {
-            // Do something when a checkbox in the table body is changed...
-        });
-        
         $('#check-all').change(function () {
             var isChecked = $(this).is(':checked');
             $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
@@ -874,17 +869,6 @@
             }
         });
 
-
-
-
-        // $('#check-all').change(function () {
-        //     // Get the checked state of the "check-all" checkbox
-        //     var isChecked = $(this).is(':checked');
-
-        //     // Set the checked state of all checkboxes in the table body
-        //     $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input"]').prop('checked', isChecked);
-        // });
-
         $('.preview-details').on('click', function () {
             bx_id = $(this).data('id');
 
@@ -899,7 +883,6 @@
         });
         $('#cancel-multiple-charges').click(function() {
             dataTable2.ajax.reload();
-        // updateTransaction(dv_no_id);
         });
     
 
