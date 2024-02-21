@@ -421,7 +421,6 @@
       const table_box_a = $('#tbl-box-a')
       const table = $('#tbl-items');
       const currentDate = new Date();
-  
       let year_now  = "";
 
       if(!year_now){year_now = currentDate.getFullYear().toString();}  
@@ -845,6 +844,9 @@
                     }
                 });    
             });
+            $('body').on('click', '.item-notif', function () {
+                toastr.error('DV must Received First', 'Invalid', toast_options);
+            });
  
       
         $('#tbl-items tbody input[type="checkbox"]').change(function () {
@@ -904,10 +906,6 @@
     },
     });
 
-
-
-
-
     function employee_list(){
         $.ajax({
             type: 'POST',
@@ -917,35 +915,38 @@
             }  
         }).done(function (data) {
             let dv_no = data.dv_no;
+            let status = data.status;
             dv_number = dv_no;
             $('#dv-number').text("DV NUMBER: "+dv_no);
+            if (status === 12){
+                $("#payroll-name").prop("disabled", false);
+                var selectElement = $("#payroll-name");
+                selectElement.empty();
+                selectElement.append($('<option></option>'));
 
-            var selectElement = $("#payroll-name");
-            selectElement.empty();
-            selectElement.append($('<option></option>'));
-
-            $.each(data.data, function (index, item) {
-                selectElement.append($('<option>', {
-                    value: item.id,
-                    text: item.name
-                }));
-            });
-
-            if ($('#payroll-name').length) {
-                $('#payroll-name').wrap('<div class="position-relative"></div>');
-                $('#payroll-name').select2({
-                    placeholder: 'Choose Employee',
-                    dropdownParent: $('#payroll-name').parent(),
-                    allowClear: true,
+                $.each(data.data, function (index, item) {
+                    selectElement.append($('<option>', {
+                        value: item.id,
+                        text: item.name
+                    }));
                 });
+                if ($('#payroll-name').length) {
+                    $('#payroll-name').wrap('<div class="position-relative"></div>');
+                    $('#payroll-name').select2({
+                        placeholder: 'Choose Employee',
+                        dropdownParent: $('#payroll-name').parent(),
+                        allowClear: true,
+                    });
+                }
+            }
+            else{
+                $("#payroll-name").prop("disabled", true);
             }
         });
     }
 
     function table_m (){
         const table2 = $('#tbl-box-a');
-        console.log(dv_no_id);
-        console.log("dv_no_id");
 
         if ($.fn.DataTable.isDataTable('#tbl-box-a')) {
         table2.DataTable().destroy();
@@ -967,11 +968,11 @@
                 { data: 'account_no' },
                 { data: 'id_no' },
                 { data: 'name' },
-                { data: 'final_amount', charges: 'multiple_charges' },
-                { data: 'purpose' },
+                { data: 'final_amount', charges: 'multiple_charges', status: 'status'},
+                { data: 'purpose', status: 'status' },
                 { data: 'dv_no', name: 'dv_no' },
-                { data: 'multiple_charges' },
-                { data: 'total', name: 'total' },
+                { data: 'multiple_charges', status: 'status' },
+                { data: 'total', name: 'total', status: 'status' },
             ],
         
             columnDefs: [
@@ -999,16 +1000,16 @@
                         return '<span class="badge bg-label-primary">' + data + '<span>'
                     },
                 },
-
-                
                 {
                     targets: 5,
                     render: function (data, type, row) {
                         let charges = row.multiple_charges;
-                        if (charges !== null && charges.includes(",")) {
+                        let status = row.status;
+
+                        if (charges !== null && charges.includes(",") || status !==12) {
                             return `&nbsp;&nbsp;&nbsp;&nbsp;${data}`;
                         }
-                        else if (charges == null){
+                        else if (charges == null || status ===12){
                             return `<td><input type="text" class="form-control emp-amount" id="emp-amount" value="${data}" style="width:150px;" ></td>`
                         }
                         else {
@@ -1018,12 +1019,42 @@
                         }
                     },
                 },
+
                 {
                     targets: 6,
-                    render: function (data) {
-                        
-                        return '<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="'+data+'" style="width:500px; margin-right: -150px !important;" ></td>'
+                    render: function (data, type, row) {
+                        let status = row.status;
 
+                        if (status !==12){
+                            return '<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="'+data+'" style="width:500px; margin-right: -150px !important;" disabled></td>'
+                        }
+                        else{
+                            return '<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="'+data+'" style="width:500px; margin-right: -150px !important;" ></td>'
+                        }
+                    },
+                },
+                {
+                    targets: 7,
+                    render: function (data, type, row) {
+                        let status = row.status;
+                        let charges = '';
+                        if (status !==12){
+                            charges =  '<select class="form-select emp-charges" id="emp-charges" disabled>' +
+                            '<option></option>'+
+                            '{% for row in charges %}'+
+                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                            '{% endfor %}'+
+                            '</select>';
+                        }
+                        else{
+                            charges =  '<select class="form-select emp-charges" id="emp-charges">' +
+                            '<option></option>'+
+                            '{% for row in charges %}'+
+                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                            '{% endfor %}'+
+                            '</select>';
+                        }
+                        return charges
                     },
                 },
                 {
@@ -1043,13 +1074,24 @@
                     title: 'Action',
                     orderable: false,
                     searchable: false,
-                    render: function (data) {
+                    render: function (data, type, row) {
                         var itemId = data;
+                        let status = row.status;
 
-                        return (
-                            `<a class="btn btn-sm btn-icon item-delete" id="${itemId.id}"><i class="text-primary ti ti-trash"></i></a>` +
-                            `<a class="btn btn-sm btn-icon item-amount" id="${itemId.id}"><i class="text-primary fa fa-edit"></i></a>`
-                        );
+                        if (status !==12){
+                            return (
+                                `<a class="btn btn-sm btn-icon item-notif"><i class="text-primary ti ti-trash"></i></a>` +
+                                `<a class="btn btn-sm btn-icon item-notif"><i class="text-primary fa fa-edit"></i></a>`
+                            );
+                        }
+                        else{
+                            return (
+                                `<a class="btn btn-sm btn-icon item-delete" id="${itemId.id}"><i class="text-primary ti ti-trash"></i></a>` +
+                                `<a class="btn btn-sm btn-icon item-amount" id="${itemId.id}"><i class="text-primary fa fa-edit"></i></a>`
+                            );
+
+                        }
+                
                     },
                 },
                 

@@ -198,7 +198,7 @@
                                 </a>
                             </li>
                         {% endif %}
-                        {% if 'Admin' in permissions or 'Journal staff' in permissions %}
+                        {% if 'Admin' in permissions or 'Journal staff' in permissions or 'Certified staff' in permissions %}
                             <li class="menu-item {% if url_name == 'journal-list' %}active{% endif %}">
                                 <a href="{% url 'journal-list' %}" class="menu-link">
                                     <i class="menu-icon tf-icons ti ti-layout-grid"></i>
@@ -222,7 +222,7 @@
                             <span class="menu-header-text">Tracking</span>
                         </li>
                         {% if permissions %}
-                            {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions %}
+                            {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions or 'Outgoing staff' in permissions or 'Budget staff' in permissions or 'Journal staff' in permissions or 'Approval staff' in permissions %}
                                 <li class="menu-item {% if url_name == 'tracking-list' %}active{% endif %}" >
                                     <a href="{% url 'tracking-list' %}" class="menu-link">
                                     

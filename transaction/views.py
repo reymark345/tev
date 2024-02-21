@@ -25,9 +25,6 @@ from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 
 
-def get_user_details(request):
-    return StaffDetails.objects.filter(user_id=request.user.id).first()
-
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
         'transaction_code', flat=True
@@ -49,12 +46,16 @@ def generate_code():
 
 @login_required(login_url='login')
 def list(request):
-    user_details = get_user_details(request)
+    user_id = request.session.get('user_id', 0)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+    # if role.role_name in allowed_roles:
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
-            'role_permission' : role.role_name,
+            'role_permission' : role_names,
             'cluster' : Cluster.objects.filter().order_by('name'),
             'division' : Division.objects.filter(status=0).order_by('name'),
         }
@@ -81,22 +82,6 @@ def list_payroll(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-# @login_required(login_url='login')
-# def list_payroll(request):
-#     user_details = get_user_details(request)
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'charges' : Charges.objects.filter().order_by('name'),
-#             'cluster' : Cluster.objects.filter().order_by('name'),
-#             'division' : Division.objects.filter(status=0).order_by('name'),
-#             'role_permission' : role.role_name,
-#         }
-#         return render(request, 'transaction/p_preparation.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-    
 
 @login_required(login_url='login')
 @csrf_exempt
@@ -113,33 +98,21 @@ def assign_payroll(request):
         return render(request, 'transaction/p_preparation.html', context)
     else:
         return render(request, 'pages/unauthorized.html')    
-    
-# @login_required(login_url='login')
-# @csrf_exempt
-# def assign_payroll(request):
-#     user_details = get_user_details(request)
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         user_details = get_user_details(request)
-#         allowed_roles = ["Admin", "Payroll staff"] 
-#         context = {
-#             'role_permission' : role.role_name,
-#         }
-#         return render(request, 'transaction/p_preparation.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')        
+         
     
 @login_required(login_url='login')
 @csrf_exempt
 def save_payroll(request):
-    user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
-        user_details = get_user_details(request)
+    user_id = request.session.get('user_id', 0)
+
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+    # if role.role_name in allowed_roles:
+    if any(role_name in allowed_roles for role_name in role_names):
         allowed_roles = ["Admin", "Payroll staff"] 
-        user_id = request.session.get('user_id', 0)
         formdata = request.POST.get('form_data')
         formdata_dict = parse_qs(formdata)
         cluster_name = formdata_dict.get('Cluster', [None])[0]
@@ -165,16 +138,11 @@ def save_payroll(request):
     
 @login_required(login_url='login')
 def box_a(request):
-    user_details = get_user_details(request)
-
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
-
 
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
@@ -192,11 +160,7 @@ def box_a(request):
     
 @login_required(login_url='login')
 def outgoing_list(request):
-    user_details = get_user_details(request)
-
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
+    allowed_roles = ["Admin","Outgoing staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
@@ -217,11 +181,7 @@ def outgoing_list(request):
     
 @login_required(login_url='login')
 def budget_list(request):
-    user_details = get_user_details(request)
-
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
+    allowed_roles = ["Admin","Budget staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
@@ -244,11 +204,7 @@ def budget_list(request):
     
 @login_required(login_url='login')
 def journal_list(request):
-    user_details = get_user_details(request)
-
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
+    allowed_roles = ["Admin","Journal staff","Certified staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
@@ -269,11 +225,7 @@ def journal_list(request):
     
 @login_required(login_url='login')
 def approval_list(request):
-    user_details = get_user_details(request)
-
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
+    allowed_roles = ["Admin","Approval staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
@@ -1039,14 +991,16 @@ def preview_box_a(request):
         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
 @login_required(login_url='login')
 def checking(request):
-    user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    if role.role_name in allowed_roles:
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'role_permission' : role.role_name,
+            'role_permission' : role_names,
         }
         return render(request, 'receive/checking.html', context)
     else:
@@ -1055,7 +1009,6 @@ def checking(request):
 @login_required(login_url='login')
 @csrf_exempt
 def employee_dv(request):
-    user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     dvno = ''
     total_amount = 0       
@@ -1157,15 +1110,11 @@ def employee_dv(request):
 @login_required(login_url='login')
 @csrf_exempt
 def employee_journal(request):
-    user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     dvno = ''
     total_amount = 0       
     charges_list = []
     idd = request.GET.get('dv_id')
-
-
-
 
     dv_no = TevOutgoing.objects.filter(id=idd).values('dv_no','id').first()
 
@@ -1179,32 +1128,7 @@ def employee_journal(request):
     
     if dv_no is not None:
         dvno = dv_no['dv_no']
-
-    # query = """ 
-    #     SELECT 
-    #         ti.id, 
-    #         code, 
-    #         first_name, 
-    #         middle_name, 
-    #         last_name,
-    #         id_no,
-    #         account_no, 
-    #         final_amount, 
-    #         MAX(tb.purpose) AS purpose,
-    #         dv_no, 
-    #         cl.name as cluster, 
-    #         GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
-    #     FROM tev_incoming AS ti 
-    #     LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-    #     LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-    #     LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
-    #     LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = ti.id
-    #     LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
-    #     WHERE ti.status_id IN (1, 2, 4, 5, 6, 7, 12, 13) AND dv_no = %s 
-    #     GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
-    #     ORDER BY ti.updated_at DESC;  
-    # """
-
+        
     query = """ 
         SELECT 
             ti.id, 
@@ -1215,6 +1139,7 @@ def employee_journal(request):
             id_no,
             account_no, 
             final_amount,
+            ti.status_id,
             MAX(tb.purpose) AS purpose,
             GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
         FROM tev_incoming AS ti 
@@ -1257,8 +1182,9 @@ def employee_journal(request):
             'id_no': row[5],
             'account_no': row[6], 
             'final_amount': final_amount,
-            'purpose': row[8], 
-            'multiple_charges': row[9],
+            'status': row[8], 
+            'purpose': row[9], 
+            'multiple_charges': row[10],
             'total': final_amount,
         }
         data.append(item)
@@ -2071,7 +1997,8 @@ def retrieve_employee(request):
 
     response = {
         'data': data,
-        'dv_no' : dv_number.dv_no
+        'dv_no' : dv_number.dv_no,
+        'status' : dv_number.status_id
     }
 
     return JsonResponse(response)

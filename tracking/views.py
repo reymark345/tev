@@ -23,16 +23,10 @@ import datetime as date_time
 from django.db.models import Subquery, Max, F, Q, Exists, OuterRef
 
 
-
-def get_user_details(request):
-    return StaffDetails.objects.filter(user_id=request.user.id).first()
-
 @login_required(login_url='login')
 @csrf_exempt
 def tracking_list(request):
-    user_details = get_user_details(request)
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff", "Budget staff", "Journal staff", "Approval staff"] 
 
     user_id = request.session.get('user_id', 0)
 
@@ -278,9 +272,7 @@ def tracking_load(request):
 @login_required(login_url='login')
 @csrf_exempt
 def employee_details(request):
-    user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    dvno = ''
     fullname = ''
     total_amount = 0
     charges_list = []
@@ -288,21 +280,6 @@ def employee_details(request):
     
     idd = request.POST.get('dv_id')
     incoming = TevIncoming.objects.filter(id=idd).first()
-    inc_list = TevIncoming.objects.filter(code=incoming.code).order_by('-id')
-
-    print(incoming.code)
-    print("damnnn")
-
-    # query = """
-    #     SELECT ti.id, ti.code, ti.id_no, ti.account_no, ti.original_amount, ti.final_amount, ti.status_id, tb.purpose, ti.remarks, ti.incoming_in,
-    #     t_o.dv_no, ch.name AS charges, cl.name AS cluster FROM tev_incoming AS ti 
-    #     LEFT JOIN tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-    #     LEFT JOIN tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
-    #     LEFT JOIN charges AS ch ON ch.id = tb.charges_id
-    #     LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
-    #     WHERE ti.id = %s
-    # """
-
     query = """ 
         SELECT 
             ti.id, 
@@ -419,22 +396,16 @@ def employee_details(request):
 @login_required(login_url='login')
 @csrf_exempt
 def travel_history(request):
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "End user", "Outgoing staff"] 
     user_id = request.session.get('user_id', 0)
-
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
+    context = {
+        'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+        'permissions' : role_names,
+    }
+    return render(request, 'tracking/travel_history.html', context)
 
-    if any(role_name in allowed_roles for role_name in role_names):
-        context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'permissions' : role_names,
-        }
-        return render(request, 'tracking/travel_history.html', context)
-    else:
-        return render(request, 'pages/unauthorized.html')
-    
 
 @login_required(login_url='login')
 @csrf_exempt

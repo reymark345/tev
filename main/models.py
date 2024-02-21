@@ -230,7 +230,6 @@ class RoleDetails(models.Model):
        
 class StaffDetails(models.Model):
     user = models.OneToOneField(AuthUser, on_delete=models.CASCADE)
-    role = models.ForeignKey(RoleDetails, models.DO_NOTHING)
     id_number = models.CharField(max_length=128, blank=True, null=True)
     division = models.CharField(max_length=128, blank=True, null=True)
     section = models.CharField(max_length=128, blank=True, null=True)

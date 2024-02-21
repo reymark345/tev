@@ -9,10 +9,6 @@ from django.contrib import messages
 from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, RolePermissions)
 
 
-def get_user_details(request):
-    return StaffDetails.objects.filter(user_id=request.user.id).first()
-
-
 def index(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
@@ -50,10 +46,6 @@ def login(request):
 def dashboard(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff" , "Certified staff"] 
     user_id = request.session.get('user_id', 0)
-   
-    user_details = get_user_details(request)
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
 
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
@@ -71,7 +63,7 @@ def dashboard(request):
 
     context = {
         'uploaded': uploaded,
-        'user_role': role.role_name,
+        'user_role': "test",
         'incoming': incoming,
         'checking': checking,
         'approved': approved,
@@ -85,58 +77,8 @@ def dashboard(request):
     if any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'dashboard.html',context)
     else:
-        print(role.role_name)
-        print("testttt")
         return redirect("travel-history")
     
-    # if role.role_name in allowed_roles:
-    #     return render(request, 'dashboard.html',context)
-    # else:
-    #     return redirect("travel-history")
-
-
-# @login_required(login_url='login')
-# def dashboard(request):
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-#     user_id = request.session.get('user_id', 0)
-   
-#     user_details = get_user_details(request)
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
-
-#     print("testttdawrole")
-#     print(user_details.role_id)
-#     print(user_id)
-#     print("ngii")
-
-#     uploaded = TevIncoming.objects.filter(is_upload = 1).count()
-#     incoming = TevIncoming.objects.filter(status_id=1).count()
-#     checking = TevIncoming.objects.filter(status_id=2).count()
-#     approved = TevIncoming.objects.filter(status_id=7).count()
-#     returned = TevIncoming.objects.filter(status_id=3).count()
-#     payroll = TevIncoming.objects.filter(status_id=4).count()
-#     outgoing = TevIncoming.objects.filter(status_id=5).count()
-#     ongoing = TevIncoming.objects.filter(status_id=6).count()
-#     box_a = TevOutgoing.objects.filter().count()
-
-#     context = {
-#         'uploaded': uploaded,
-#         'user_role': role.role_name,
-#         'incoming': incoming,
-#         'checking': checking,
-#         'approved': approved,
-#         'returned': returned,
-#         'payroll': payroll,
-#         'outgoing': outgoing,
-#         'ongoing': ongoing,
-#         'box_a': box_a,
-#         'role_permission' : role.role_name,
-#     }
-#     if role.role_name in allowed_roles:
-#         return render(request, 'dashboard.html',context)
-#     else:
-#         return redirect("travel-history")
-
 @csrf_exempt
 def logout(request):
     auth_logout(request)
