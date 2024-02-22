@@ -98,9 +98,6 @@ def division_update(request):
     ap_designation = request.POST.get('APDesignation')
     user_id = request.session.get('user_id', 0)
 
-    print(id)
-    print("testdibvv")
-
     if Division.objects.filter(name=division, status = 0).exclude(id=id):
         return JsonResponse({'data': 'error', 'message': 'Duplicate Division'})
     else:

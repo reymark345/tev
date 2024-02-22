@@ -788,28 +788,6 @@ def item_update(request):
         if results:
             duplicate_travel.append(cleaned_date)
 
-        # results = TevIncoming.objects.filter(
-        #     Q(first_name=name) & Q(middle_name=middle) & Q(last_name=lname) &
-        #     Q(date_travel__contains=cleaned_date) &  Q(status_id=1)
-        # ).exclude(id=id,status_id=3)
-
-        # results = results.values('date_travel')
-        # if results:
-        #     duplicate_travel.append(cleaned_date)
-
-    # for date in individual_dates:
-    #     cleaned_date = date.strip()
-
-    #     results = TevIncoming.objects.filter(
-    #         Q(first_name=name) & Q(middle_name=middle) & Q(last_name=lname) &
-    #         Q(date_travel__contains=cleaned_date)
-    #     ).values('date_travel').exclude(id=id, status_id = 3)
-
-    #     print(results)
-    #     print("daaaaaaaaaa")
-    #     if results:
-    #         duplicate_travel.append(cleaned_date)
-
     if duplicate_travel:
         formatted_dates = [date.replace("'", "") for date in duplicate_travel]
         result = ",".join(formatted_dates)
