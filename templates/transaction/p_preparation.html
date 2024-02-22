@@ -1341,9 +1341,6 @@
             let totalAmount = amountsAsNumbers.reduce((total, amount) => total + amount, 0);
             if (selectedIDs.length > 0 && hasError ==0) {
                 let selectedAmountNumber = parseFloat(selectedAmount[0]); 
-                console.log(formattedAmount + " selected amt");
-                console.log(totalAmount +" total amt");
-
                 if( formattedAmount > totalAmount){
                     toastr.error('Amount Lacking', 'Invalid', toast_options);
                 }

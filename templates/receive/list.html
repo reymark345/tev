@@ -861,7 +861,6 @@
                     }
 
                     // Log or perform further actions with the selectedCb array
-                    console.log(selectedCb);
                 });
 
                 $('.item-details').on('click', function () {
@@ -1034,8 +1033,6 @@
                     let lname = EmpLastname.val();
                     let hdate_travel = HDateTravel.val();
                     let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
-                    console.log(post_url);
-                    console.log("testttttttttt");
                     let form_data = $('#item-form').serialize()
                     $.ajax({
                         type: 'POST',
