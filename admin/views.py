@@ -24,10 +24,7 @@ from django.db import connection
 
 def is_member_of_inventory_staff(user):
     return user.groups.filter(name='inventory_staff').exists()
-
-def get_user_details(request):
-    return StaffDetails.objects.filter(user_id=request.user.id).first()    
-
+ 
 @login_required(login_url='login')
 def users(request):
     allowed_roles = ["Admin"]    
@@ -44,22 +41,6 @@ def users(request):
         return render(request, 'admin/users.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
-
-# @login_required(login_url='login')
-# def users(request):
-#     user_details = get_user_details(request)
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     allowed_roles = ["Admin"]    
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
-#             'role_permission': role.role_name,
-#             'role_details': RoleDetails.objects.filter().order_by('role_name'),
-#         }
-#         return render(request, 'admin/users.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-
 
 @csrf_exempt
 def adduser(request):
@@ -153,7 +134,7 @@ def user_add(request):
         user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=timezone.now())
         user_add.save()
         max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
-        user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,role_id = 2,user_id = max_id)
+        user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,user_id = max_id)
         user_details_add.save()
 
         auth_max = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']

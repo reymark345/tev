@@ -5,7 +5,7 @@ import numpy as np
 fake = Faker()
 Faker.seed(313)
 middle_name = ['N','A','A','B']
-role_details = ['Admin','Incoming staff','Validating staff','Payroll staff', 'Certified staff','End user']
+role_details = ['Admin','Incoming staff','Validating staff','Payroll staff', 'Certified staff','End user', 'Outgoing staff', 'Budget staff', 'Journal staff', 'Approval staff']
 cluster = ['Cluster 01','Cluster 02','Cluster 03','Cluster 04', 'Cluster 05', 'Cluster 06', 'Cluster 07']
 charges = ['AICS','Socpen','Disaster','CCAM', '4PS', 'Pantawid', 'Multiple']
 division = ['Finance Management Division','Pantawid','DRMD','HRRMD', 'PSD', 'PPD','ORD']
@@ -43,7 +43,7 @@ for i in range(len(remarks)):
 system_configuration_db = SystemConfiguration(name='Acounting Section', transaction_code = '23-05-00000', year='2023')
 system_configuration_db.save()
 
-userdb = StaffDetails(id_number ='16-11810',division='Finance Management Division',section ='Accounting sectiion', position ='CMT II', sex = 'Male', address='J.P. Rizal', user_id = '1', role_id = '1')
+userdb = StaffDetails(id_number ='16-11810',division='Finance Management Division',section ='Accounting sectiion', position ='CMT II', sex = 'Male', address='J.P. Rizal', user_id = '1')
 userdb.save()
 
 role_p = RolePermissions(role_id ='1',user_id='1')

@@ -11,11 +11,7 @@ import math
 from django.core.serializers import serialize
 from django.db import IntegrityError
 import datetime as date
-
-
-def get_user_details(request):
-    return StaffDetails.objects.filter(user_id=request.user.id).first()
-
+ 
 @login_required(login_url='login')
 def division(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
@@ -70,54 +66,6 @@ def remarks(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-
-# @login_required(login_url='login')
-# def division(request):
-#     user_details = get_user_details(request)
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'division' : Division.objects.filter(status=0).order_by('name'),
-#             'cluster' : Cluster.objects.filter().order_by('name'),
-#             'role_permission' : role.role_name,
-#         }
-#         return render(request, 'libraries/division.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-
-# @login_required(login_url='login')
-# def charges(request):
-#     user_details = get_user_details(request)
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'charges' : Charges.objects.filter().order_by('name'),
-#             'cluster' : Cluster.objects.filter().order_by('name'),
-#             'role_permission' : role.role_name,
-#         }
-#         return render(request, 'libraries/charges.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-    
-    
-# @login_required(login_url='login')
-# def remarks(request):
-#     user_details = get_user_details(request)
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'charges' : RemarksLib.objects.filter().order_by('name'),
-#             'cluster' : Cluster.objects.filter().order_by('name'),
-#             'role_permission' : role.role_name,
-#         }
-#         return render(request, 'libraries/remarks.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-
-
 @csrf_exempt
 def division_add(request):
     division = request.POST.get('Division')
@@ -138,27 +86,6 @@ def division_add(request):
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
     
-# @csrf_exempt
-# def division_update(request):
-#     id = request.POST.get('ItemID')
-#     division = request.POST.get('Division')
-#     acrym = request.POST.get('Acronym')
-#     divchief = request.POST.get('Chief')
-#     c_designate = request.POST.get('CDesignation')
-#     approval = request.POST.get('Approval')
-#     ap_designation = request.POST.get('APDesignation')
-#     user_id = request.session.get('user_id', 0)
-
-#     print(id)
-#     print("testdibvv")
-
-#     if Division.objects.filter(name=division, status = 0).exclude(id=id):
-#         return JsonResponse({'data': 'error', 'message': 'Duplicate Division'})
-#     else:
-#         division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id, status=0)
-#         Division.objects.filter(id=id).update(updated_at =date.datetime.now(),status =1)
-#         division_add.save()
-#         return JsonResponse({'data': 'success'})
     
 @csrf_exempt
 def division_update(request):

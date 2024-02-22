@@ -28,10 +28,6 @@ from django.db.models import F, CharField, Value
 from django.db.models.functions import Concat
 
 
-
-def get_user_details(request):
-    return StaffDetails.objects.filter(user_id=request.user.id).first()
-
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
         'transaction_code', flat=True
@@ -55,12 +51,8 @@ def generate_code():
 
 @login_required(login_url='login')
 def list(request):
-    user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-
     user_id = request.session.get('user_id', 0)
-
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
@@ -101,9 +93,7 @@ def api(request):
     
 @login_required(login_url='login')
 def checking(request):
-    user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
     user_id = request.session.get('user_id', 0)
 
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
@@ -120,39 +110,11 @@ def checking(request):
     else:
         return render(request, 'pages/unauthorized.html')
 
-    # if role.role_name in allowed_roles:
-    #     context = {
-    #         'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-    #         'remarks_list' : RemarksLib.objects.filter().order_by('name'),
-    #         'role_permission' : role.role_name,
-    #     }
-    #     return render(request, 'receive/checking.html', context)
-    # else:
-    #     return render(request, 'pages/unauthorized.html')
-    
-# @login_required(login_url='login')
-# def checking(request):
-#     user_details = get_user_details(request)
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-#     role = RoleDetails.objects.filter(id=user_details.role_id).first()
-#     if role.role_name in allowed_roles:
-#         context = {
-#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-#             'remarks_list' : RemarksLib.objects.filter().order_by('name'),
-#             'role_permission' : role.role_name,
-#         }
-#         return render(request, 'receive/checking.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-    
     
 @login_required(login_url='login')
 @csrf_exempt
 def search_list(request):
-    user_details = get_user_details(request)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
-    role = RoleDetails.objects.filter(id=user_details.role_id).first()
-    
     return JsonResponse({'data': "success"})
     
 def item_load(request):
