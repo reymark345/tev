@@ -87,7 +87,6 @@ DATABASES = {
         'HOST': '172.31.240.235',
         'PORT': '3306',
     },
-
     #for server INFIMOS
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
