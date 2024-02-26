@@ -379,6 +379,17 @@
 
             ],
             columnDefs: [
+                 {
+                    targets: 1,
+                    render: function(data) {
+                        if (data){
+                            return '<span class="badge bg-label-primary">' + data + '</span>';
+                        }
+                        else {
+                            return ''
+                        }
+                    },
+                },
                 {
                     targets: 2,
                     render: function(data) {
@@ -488,7 +499,7 @@
                 
                 {
                   targets: -1,
-                  title: 'Actions',
+                  title: 'Action',
                   orderable: false,
                   searchable: false,
                   render: function (data) {
@@ -523,20 +534,7 @@
                         $("#advance-filter-checking").modal("show");
                     }
 
-                },
-                {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Forward</span>',
-                    action: function () {
-                        // Get the IDs of checked items
-                        if(selectedCb.length ===0){
-                            toastr.error('Select item first', 'Invalid', toast_options);
-                        }
-                        else{
-                            incoming_out();
-                        }
-                    }
-                },
+                }
             ],
             drawCallback: function (settings) {
 
@@ -684,7 +682,12 @@
                 });
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+        // $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0 d-flex align-items-center">'+
+        '<button type="submit" id="forward" class="btn btn-primary">Forward</button>' +
+        '</h5>');
+        
+
         function incoming_out(){
             Swal.fire({
                 title: 'Forward?',
@@ -859,6 +862,17 @@
                 }
             });
         });
+
+        $('#forward').on('click', function(){
+            if(selectedCb.length ===0){
+                toastr.error('Selected item first', 'Invalid', toast_options);
+            }
+            else{
+                incoming_out();
+            }
+        });
+
+
         $('#returned').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let selectedIDs = [];

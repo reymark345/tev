@@ -38,13 +38,11 @@ def generate_code():
     year = sample_date.strftime("%y")
     month = sample_date.strftime("%m")
     day = sample_date.strftime("%d")
-
     if last_code[0] == year:
         series = int(last_code[2]) + 1
     else:
         series = 1
     code = year + '-' + month + '-' + f'{series:05d}'
-
     return code
 
 
@@ -64,23 +62,10 @@ def list(request):
             'remarks_list' : RemarksLib.objects.filter().order_by('name'),
             'permissions' : role_names
         }
-        return render(request, 'receive/list.html' , context)
+        return render(request, 'receive/receive.html' , context)
     else:
         return render(request, 'pages/unauthorized.html')
-
-
-    # if role.role_name in allowed_roles:
-    #     context = {
-    #         'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-    #         'remarks_list' : RemarksLib.objects.filter().order_by('name'),
-    #         'role_permission' : role.role_name,
-    #     }
-    #     return render(request, 'receive/list.html' , context)
-    # else:
-    #     return render(request, 'pages/unauthorized.html')
-    
-    
-    
+   
 @csrf_exempt
 def api(request):
     url = "https://caraga-portal.dswd.gov.ph/api/employee/list/search/?q="
@@ -106,7 +91,7 @@ def checking(request):
             'remarks_list' : RemarksLib.objects.filter().order_by('name'),
             'permissions' : role_names,
         }
-        return render(request, 'receive/checking.html', context)
+        return render(request, 'receive/review_docs.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
 
@@ -126,7 +111,6 @@ def item_load(request):
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
     FIncomingIn= request.GET.get('FIncomingIn')
-    # FSLashedOut= request.GET.get('FSLashedOut')
     FOriginalAmount= request.GET.get('FOriginalAmount')
     FFinalAmount= request.GET.get('FFinalAmount')
     FAccountNumber= request.GET.get('FAccountNumber')
@@ -211,6 +195,33 @@ def item_load(request):
             '%' + FStatus + '%' if FStatus else "%%"
         ]
 
+    elif _search:
+        query = """
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
+            FROM tev_incoming t1
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.code, t1.id) IN (
+                    SELECT DISTINCT code, MAX(id)
+                    FROM tev_incoming
+                    GROUP BY code 
+            )
+            AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL)) 
+            AND (first_name LIKE %s
+            OR last_name LIKE %s
+            OR id_no LIKE %s
+            OR original_amount LIKE %s
+            OR final_amount LIKE %s
+            )GROUP BY t1.id ORDER BY id DESC;
+        """
+                
+        params = [
+            '%' + _search + '%' if _search else "%%",
+            '%' + _search + '%' if _search else "%%",
+            '%' + _search + '%' if _search else "%%",
+            '%' + _search + '%' if _search else "%%",
+            '%' + _search + '%' if _search else "%%",
+        ]
     else:
         query = """
             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
@@ -387,6 +398,33 @@ def checking_load(request):
             cursor.execute(query, params)
             results = dictfetchall(cursor)
 
+    if _search:
+        query = """
+            SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
+            FROM tev_incoming t1
+            LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
+            LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+            WHERE (t1.status_id = 2
+                            OR t1.status_id = 7
+                            OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
+            )
+            AND (code LIKE %s
+            OR first_name LIKE %s
+            OR last_name LIKE %s
+            OR id_no LIKE %s
+            OR original_amount LIKE %s
+            OR final_amount LIKE %s
+            )GROUP BY t1.id ORDER BY id DESC;
+        """
+
+        params = [
+            '%' + _search + '%' if _search else "%%",
+            '%' + _search + '%' if _search else "%%",
+            '%' + _search + '%' if _search else "%%",
+            '%' + _search + '%' if _search else "%%",
+            '%' + _search + '%' if _search else "%%",
+            '%' + _search + '%' if _search else "%%",
+        ]
     else:
 
         query = """

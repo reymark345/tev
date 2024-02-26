@@ -64,9 +64,6 @@ def tracking_load(request):
     else:
         finance_database_alias = 'finance_2024' 
 
-    print(DpYear)
-    print("formatted_year")
-
     year = int(DpYear) % 100
     formatted_year = str(year)+"-"
     
@@ -80,8 +77,6 @@ def tracking_load(request):
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if FAdvancedFilter:
-        print(formatted_year)
-        print("formatted_year22")
 
         with connection.cursor() as cursor:
 
@@ -169,8 +164,6 @@ def tracking_load(request):
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
-        print("formatted_year")
-        print(formatted_year)
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
@@ -237,8 +230,6 @@ def tracking_load(request):
         
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
 
-
-        
         item = {
             'code': row['code'],
             'full_name': emp_fullname,
@@ -282,50 +273,56 @@ def employee_details(request):
     incoming = TevIncoming.objects.filter(id=idd).first()
     query = """ 
         SELECT 
-            ti.id, 
-            ti.code, 
-            ti.id_no, 
-            ti.account_no, 
-            ti.original_amount, 
-            ti.final_amount, 
-            ti.status_id, 
-            GROUP_CONCAT(tb.purpose SEPARATOR ', ') AS purposes,
-            ti.incoming_in,
-            t_o.dv_no, 
-            ch.name AS charges, 
-            cl.name AS cluster,
-            GROUP_CONCAT(t3.name SEPARATOR ', ') AS remarks
+                ti.id, 
+                ti.code, 
+                ti.id_no,
+                ti.original_amount, 
+                ti.final_amount, 
+                ti.status_id, 
+                GROUP_CONCAT(tb.purpose SEPARATOR ', ') AS purposes,
+                ti.incoming_in,
+                t_o.dv_no, 
+                t_o.otg_d_forwarded,
+                t_o.b_d_forwarded,
+                t_o.j_d_forwarded,
+                t_o.a_d_forwarded,
+                ch.name AS charges, 
+                cl.name AS cluster,
+                GROUP_CONCAT(t3.name SEPARATOR ', ') AS remarks
         FROM 
-            tev_incoming AS ti 
+                tev_incoming AS ti 
         LEFT JOIN 
-            tev_bridge AS tb ON tb.tev_incoming_id = ti.id
+                tev_bridge AS tb ON tb.tev_incoming_id = ti.id
         LEFT JOIN 
-            tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
+                tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
         LEFT JOIN 
-            charges AS ch ON ch.id = tb.charges_id
+                charges AS ch ON ch.id = tb.charges_id
         LEFT JOIN 
-            cluster AS cl ON cl.id = t_o.cluster
+                cluster AS cl ON cl.id = t_o.cluster
         LEFT JOIN 
-            remarks_r AS t2 ON t2.incoming_id = ti.id
+                remarks_r AS t2 ON t2.incoming_id = ti.id
         LEFT JOIN 
-            remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+                remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
         WHERE 
-            ti.code LIKE %s
+                ti.code LIKE %s
         GROUP BY 
-            ti.id, 
-            ti.code, 
-            ti.id_no, 
-            ti.account_no, 
-            ti.original_amount, 
-            ti.final_amount, 
-            ti.status_id, 
-            ti.remarks, 
-            ti.incoming_in,
-            t_o.dv_no, 
-            ch.name, 
-            cl.name
+                ti.id, 
+                ti.code, 
+                ti.id_no,
+                ti.original_amount, 
+                ti.final_amount, 
+                ti.status_id, 
+                ti.remarks, 
+                ti.incoming_in,
+                t_o.dv_no,
+                t_o.otg_d_forwarded, 
+                t_o.b_d_forwarded,
+                t_o.j_d_forwarded,
+                t_o.a_d_forwarded,
+                ch.name, 
+                cl.name
         ORDER BY 
-            ti.id DESC;
+                ti.id DESC;
     """
 
     with connection.cursor() as cursor:
@@ -334,27 +331,25 @@ def employee_details(request):
 
 
     id_number = incoming.id_no
-    # if incoming:
-    #     first_name = incoming.first_name or ""
-    #     middle_name = incoming.middle_name or ""
-    #     last_name = incoming.last_name or ""
-    #     fullname = first_name + " "+ middle_name + " "+ last_name
         
     for row in results:
         item = {
             'id': row[0],
             'code': row[1],
             'id_no': row[2],
-            'account_no': row[3],
-            'original_amount': row[4],
-            'final_amount': row[5],
-            'status': row[6],
-            'purpose': row[7], 
-            'incoming_in': row[8],
-            'dv_no': row[9],
-            'charges': row[10],
-            'cluster': row[11],
-            'remarks': row[12], 
+            'original_amount': row[3],
+            'final_amount': row[4],
+            'status': row[5],
+            'purpose': row[6], 
+            'incoming_in': row[7],
+            'dv_no': row[8],
+            'otg_d_f': row[9],
+            'b_d_f': row[10],
+            'j_d_f': row[11],
+            'a_d_f': row[12],
+            'charges': row[13],
+            'cluster': row[14],
+            'remarks': row[15], 
         }
         data.append(item)
 

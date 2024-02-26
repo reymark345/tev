@@ -1337,6 +1337,7 @@
                     inputErrorLabel.show();
                 }
             });
+            
             let amountsAsNumbers = selectedAmount.map(amount => parseFloat(amount));
             let totalAmount = amountsAsNumbers.reduce((total, amount) => total + amount, 0);
             if (selectedIDs.length > 0 && hasError ==0) {

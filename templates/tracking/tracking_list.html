@@ -60,13 +60,16 @@
                         <thead>
                             <tr>
                                 <th>Code #</th>
-                                <th>Accnt. No.</th>
                                 <th>Original Amount</th>
                                 <th>Amt. Certified</th>
                                 <th>Status</th>
                                 <th>Purpose</th>
                                 <th>Remarks</th>
-                                <th>Incoming date</th>
+                                <th>Incoming</th>
+                                <th>Outgoing</th>
+                                <th>Budget</th>
+                                <th>Journal</th>
+                                <th>Approval</th>
                             </tr>
                         </thead>    
                         <tbody>
@@ -812,11 +815,43 @@
                       const tableId = 'tbl-history';
                       const tbody = $(`#${tableId} tbody`);
 
+                      console.log("data");
+                      console.log(data);
+
                       let fullname = data.full_name;
                       let id_number = data.id_number;
                       tbody.empty();
+                      
+                      // data.data.forEach(function (item) {
+                      // const formatDate = (dateString) => {
+                      //     const date = new Date(dateString);
+                      //     const months = [
+                      //         "January", "February", "March", "April", "May", "June", "July",
+                      //         "August", "September", "October", "November", "December"
+                      //     ];
+                      //     const month = months[date.getMonth()];
+                      //     const day = date.getDate();
+                      //     const year = date.getFullYear();
+                      //     let hours = date.getHours() % 12 || 12;
+                      //     const minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
+                      //     const ampm = date.getHours() >= 12 ? "PM" : "AM";
+                      //     hours = hours === 0 ? 12 : hours;
+                      //     return `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
+                      // };
+
+                      // const data_date = formatDate(item.incoming_in);
+                      // const outgoing_date = formatDate(item.otg_d_f);
+                      // const budget_date = formatDate(item.b_d_f);
+                      // const journal_date = formatDate(item.j_d_f);
+                      // const approval_date = formatDate(item.a_d_f);
+
                       data.data.forEach(function (item) {
                         let data_date = item.incoming_in;
+                        let outgoing_date = item.otg_d_f;
+                        let budget_date = item.b_d_f;
+                        let journal_date = item.j_d_f;
+                        let approval_date = item.a_d_f;
+
                         let inputDate = new Date(item.incoming_in);
                         const months = [
                           "January", "February", "March", "April", "May", "June", "July",
@@ -826,6 +861,7 @@
                         function padZero(number) {
                           return number < 10 ? "0" + number : number;
                         }
+
                         let month = months[inputDate.getMonth()];
                         let day = inputDate.getDate();
                         let year = inputDate.getFullYear();
@@ -910,12 +946,16 @@
                         const row = `
                             <tr>
                                 <td><span class="badge bg-label-primary">${item.code}</span></td>
-                                <td><span class="badge bg-label-warning">${item.account_no}</span></td>
                                 ${orgAmountColumn}
                                 ${finalAmountColumn}
                                 ${statusColumn}
                                 <td>${purposeColumn}</td>
                                 <td><span class="badge bg-label-danger">${remarks}</span></td>
+                                
+                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
+                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
+                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
+                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
                                 <td><span class="badge bg-label-primary">${formattedDate}</span></td>
                       
                             </tr>
