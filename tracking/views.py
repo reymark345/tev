@@ -54,10 +54,12 @@ def tracking_load(request):
     _order_col_num = request.GET.get('order[0][column]')
 
     FIdNumber= request.GET.get('FIdNumber')
+    FStatus= request.GET.get('FStatus') 
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
     NDVNumber= request.GET.get('NDVNumber') 
     DpYear= request.GET.get('DpYear') 
+
 
     if DpYear == "2023":
         finance_database_alias = 'finance' 
@@ -108,6 +110,38 @@ def tracking_load(request):
             if FDateTravel:
                 query += " AND tev_incoming.date_travel LIKE %s"
                 params.append(f'%{FDateTravel}%')
+
+            if FStatus:
+
+                if FStatus == "5" or FStatus == "6":
+                    FStatus = (5,6)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                elif FStatus == "8" or FStatus == "9":
+                    FStatus = (6,8,9)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                elif FStatus == "10" or FStatus == "11":
+                    FStatus = (9,10,11)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                elif FStatus == "12" or FStatus == "13":
+                    FStatus = (11,12,13)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                elif FStatus == "14":
+                    FStatus = (13,14,15)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                else:
+                    query += " AND tev_incoming.status_id = %s"
+                    params.append(FStatus)
+
 
             if EmployeeList:
                 placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
@@ -331,8 +365,23 @@ def employee_details(request):
 
 
     id_number = incoming.id_no
+
+    def format_date(date_str):
+        if date_str is not None:
+            if isinstance(date_str, datetime):
+                return date_str.strftime("%B %d, %Y %I:%M %p")
+            else:
+                return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f").strftime("%B %d, %Y %I:%M %p")
+        else:
+            return ''
         
     for row in results:
+        incoming = row[7]
+        outgoing = row[9]
+        budget = row[10]
+        journal = row[11]
+        approval = row[12]
+
         item = {
             'id': row[0],
             'code': row[1],
@@ -341,12 +390,12 @@ def employee_details(request):
             'final_amount': row[4],
             'status': row[5],
             'purpose': row[6], 
-            'incoming_in': row[7],
+            'incoming_in': format_date(incoming),
             'dv_no': row[8],
-            'otg_d_f': row[9],
-            'b_d_f': row[10],
-            'j_d_f': row[11],
-            'a_d_f': row[12],
+            'otg_d_f': format_date(outgoing),
+            'b_d_f': format_date(budget),
+            'j_d_f': format_date(journal),
+            'a_d_f': format_date(approval),
             'charges': row[13],
             'cluster': row[14],
             'remarks': row[15], 

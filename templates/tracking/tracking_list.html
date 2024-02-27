@@ -331,6 +331,27 @@
                   />
                   </div>
               </div>
+
+              <div class="col-12 col-md-12">
+                <label class="form-label" for="modalFEmployeeName">Status</label>
+                <select
+                id="f-status"
+                name="FStatus"
+                class="form-select"
+                >
+                    <option></option>
+                    <option value="1">Received</option>
+                    <option value="2">Reviewed</option>
+                    <option value="3">Returned</option>
+                    <option value="5">Payroll</option>
+                    <option value="8">Outgoing</option>
+                    <option value="10">Obligate</option>
+                    <option value="12">Journal</option>
+                    <option value="13">Certified</option>
+                    <option value="14">Approval</option>
+                    <option value="16">Check Issued</option>
+                </select>
+              </div>
   
   
                   <input
@@ -457,6 +478,7 @@
           FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
           FIdNumber = jQuery(document.querySelector('[name="FIdNumber"]')),
           NDVNumber = jQuery(document.querySelector('[name="NDVNumber"]')),
+          FStatus = jQuery(document.querySelector('[name="FStatus"]')),
           FTransactionCode = jQuery(document.querySelector('[name="FTransactionCode"]')),
           DpYear = jQuery(document.querySelector('[name="DpYear"]')),
           search_advance_filter = $('#search-advance-filter'),
@@ -485,6 +507,7 @@
                   d.FIdNumber = FIdNumber.val()
                   d.FTransactionCode = FTransactionCode.val()
                   d.NDVNumber = NDVNumber.val()
+                  d.FStatus = FStatus.val()
                   d.FDateTravel = FDateTravel.val()
                   d.DpYear = year_now
                   d.EmployeeList = employeeList
@@ -814,61 +837,15 @@
                   }).done(function (data) {
                       const tableId = 'tbl-history';
                       const tbody = $(`#${tableId} tbody`);
-
-                      console.log("data");
-                      console.log(data);
-
                       let fullname = data.full_name;
                       let id_number = data.id_number;
                       tbody.empty();
-                      
-                      // data.data.forEach(function (item) {
-                      // const formatDate = (dateString) => {
-                      //     const date = new Date(dateString);
-                      //     const months = [
-                      //         "January", "February", "March", "April", "May", "June", "July",
-                      //         "August", "September", "October", "November", "December"
-                      //     ];
-                      //     const month = months[date.getMonth()];
-                      //     const day = date.getDate();
-                      //     const year = date.getFullYear();
-                      //     let hours = date.getHours() % 12 || 12;
-                      //     const minutes = (date.getMinutes() < 10 ? '0' : '') + date.getMinutes();
-                      //     const ampm = date.getHours() >= 12 ? "PM" : "AM";
-                      //     hours = hours === 0 ? 12 : hours;
-                      //     return `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
-                      // };
-
-                      // const data_date = formatDate(item.incoming_in);
-                      // const outgoing_date = formatDate(item.otg_d_f);
-                      // const budget_date = formatDate(item.b_d_f);
-                      // const journal_date = formatDate(item.j_d_f);
-                      // const approval_date = formatDate(item.a_d_f);
-
                       data.data.forEach(function (item) {
-                        let data_date = item.incoming_in;
+                        let incoming_date = item.incoming_in;
                         let outgoing_date = item.otg_d_f;
                         let budget_date = item.b_d_f;
                         let journal_date = item.j_d_f;
                         let approval_date = item.a_d_f;
-
-                        let inputDate = new Date(item.incoming_in);
-                        const months = [
-                          "January", "February", "March", "April", "May", "June", "July",
-                          "August", "September", "October", "November", "December"
-                        ];
-
-                        function padZero(number) {
-                          return number < 10 ? "0" + number : number;
-                        }
-
-                        let month = months[inputDate.getMonth()];
-                        let day = inputDate.getDate();
-                        let year = inputDate.getFullYear();
-                        let hours = inputDate.getHours() % 12 || 12;
-                        let minutes = padZero(inputDate.getMinutes());
-                        let ampm = inputDate.getHours() >= 12 ? "PM" : "AM";
-                        let formattedDate = `${month} ${day}, ${year} ${hours}:${minutes} ${ampm}`;
 
                         const formattedOriginalAmount = parseFloat(item.original_amount).toFixed(2);
                         const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
@@ -948,11 +925,11 @@
                                 ${statusColumn}
                                 <td>${purposeColumn}</td>
                                 <td><span class="badge bg-label-danger">${remarks}</span></td>
-                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
-                                <td><span class="badge bg-label-primary"></span></td>
-                                <td><span class="badge bg-label-primary"></span></td>
-                                <td><span class="badge bg-label-primary"></span></td>
-                                <td><span class="badge bg-label-primary"></span></td>
+                                <td><span class="badge bg-label-primary">${incoming_date}</span></td>
+                                <td><span class="badge bg-label-primary">${outgoing_date}</span></td>
+                                <td><span class="badge bg-label-primary">${budget_date}</span></td>
+                                <td><span class="badge bg-label-primary">${journal_date}</span></td>
+                                <td><span class="badge bg-label-primary">${approval_date}</span></td>
                       
                             </tr>
                         `;
@@ -1117,6 +1094,7 @@
         FIdNumber.val('');
         FTransactionCode.val('');
         NDVNumber.val('');
+        FStatus.val('').trigger('change');
         dateField.clear();
         FEmployeeName.val('').trigger('change');
       }
