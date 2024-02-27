@@ -88,6 +88,7 @@ DATABASES = {
         'HOST': '172.31.240.235',
         'PORT': '3306',
     },
+
     # #for server local
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
@@ -97,7 +98,7 @@ DATABASES = {
     #     'HOST': '172.31.r240.235',
     #     'PORT': '3306',
     # },
-    #for server INFIMOS
+    # for server INFIMOS
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2023',
@@ -115,6 +116,9 @@ DATABASES = {
         'HOST':'172.31.240.235',
         'PORT':'3306',
     },
+
+
+
 
     # #for localhost main database
     # 'default': {
@@ -142,6 +146,12 @@ DATABASES = {
     #     'HOST':'localhost',
     #     'PORT':'3306',
     # },
+
+
+
+
+
+
 
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',
