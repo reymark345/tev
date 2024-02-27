@@ -113,8 +113,8 @@ def tracking_load(request):
 
             if FStatus:
 
-                if FStatus == "5" or FStatus == "6":
-                    FStatus = (5,6)
+                if FStatus == "5":
+                    FStatus = (4,5,6)
                     query += " AND tev_incoming.status_id IN %s"
                     params.append(FStatus)
 

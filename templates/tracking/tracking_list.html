@@ -650,6 +650,9 @@
                   if (data >= 6 && data !=7 ){
                     return `<span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span>`
                   }
+                  if (data == 4 ){
+                    return `<span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span>`
+                  }
                   else{
                     return ``;;
                   }
