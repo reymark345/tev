@@ -78,7 +78,7 @@ def list_payroll(request):
             'division' : Division.objects.filter(status=0).order_by('name'),
             'permissions' : role_names,
         }
-        return render(request, 'transaction/p_preparation.html', context)
+        return render(request, 'transaction/p_payroll_list.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
