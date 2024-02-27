@@ -937,12 +937,9 @@
                         else {
                           statusColumn = `<td><span class="badge bg-label-primary">${item.status}</span></td>`;
                         }
-                        orgAmountColumn = `<td>${formattedOriginalAmount}</td>`;
-                        finalAmountColumn = `<td>${formattedFinalAmount}</td>`;
-
+                        orgAmountColumn = `<td><span class="badge bg-label-primary">₱ ${formattedOriginalAmount}</span></td>`;
+                        finalAmountColumn = `<td><span class="badge bg-label-primary">₱ ${formattedFinalAmount}</span></td>`;
                         editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
-                        
-          
                         const row = `
                             <tr>
                                 <td><span class="badge bg-label-primary">${item.code}</span></td>
@@ -951,16 +948,16 @@
                                 ${statusColumn}
                                 <td>${purposeColumn}</td>
                                 <td><span class="badge bg-label-danger">${remarks}</span></td>
-                                
                                 <td><span class="badge bg-label-primary">${formattedDate}</span></td>
-                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
-                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
-                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
-                                <td><span class="badge bg-label-primary">${formattedDate}</span></td>
+                                <td><span class="badge bg-label-primary"></span></td>
+                                <td><span class="badge bg-label-primary"></span></td>
+                                <td><span class="badge bg-label-primary"></span></td>
+                                <td><span class="badge bg-label-primary"></span></td>
                       
                             </tr>
                         `;
                         tbody.append(row);
+
                     
                       })
                       $('#employee-id-no').text(id_number);
@@ -971,7 +968,6 @@
               });
           }
       })
-      // $('div.head-label').html('<h5 class="card-title mb-0">List</h5>');
       $('div.head-label').html('<h5 class="card-title mb-0">'+
       '<select id="dp-year" name="DpYear" class="form-select">'+
           '<option value="2023">2023</option>'+
