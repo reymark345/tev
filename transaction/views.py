@@ -258,7 +258,12 @@ def outgoing_load(request):
     dv_no_string = f"{last_two_digits:02d}-"
     search_fields = ['dv_no', 'division__name', 'status__name'] 
     filter_conditions = Q()
-
+    allowed_roles = ["Admin"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    division_id = StaffDetails.objects.filter(user_id= user_id).first().division_id
     for field in search_fields:
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
@@ -271,9 +276,13 @@ def outgoing_load(request):
         FDateForwarded = request.GET.get('FDateForwarded')
         BoxStatus = request.GET.get('BoxStatus')
         dv_list = request.GET.getlist('ListDv[]')
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [6,8,9])
+        if any(role_name in allowed_roles for role_name in role_names):
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [6,8,9])
+        else:
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [6,8,9],division_id = division_id)
+
         if FCluster:
-            item_data = item_data.filter(cluster=FCluster)
+                item_data = item_data.filter(cluster=FCluster)
 
         if FDivision:
             item_data = item_data.filter(division_id = FDivision)
@@ -293,10 +302,17 @@ def outgoing_load(request):
         if dv_list:
             item_data = item_data.filter(id__in=dv_list)
 
+
     elif _search:
-        item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9]).select_related().distinct().order_by(_order_dash + 'id')
+        if any(role_name in allowed_roles for role_name in role_names):
+            item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9]).select_related().distinct().order_by(_order_dash + 'id')
+        else:
+            item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9],division_id = division_id).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9]).select_related().distinct().order_by('-id')
+        if any(role_name in allowed_roles for role_name in role_names):
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9]).select_related().distinct().order_by('-id')
+        else:
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id = division_id).select_related().distinct().order_by('-id')
 
     total = item_data.count()
 
