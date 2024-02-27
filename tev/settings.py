@@ -115,7 +115,6 @@ DATABASES = {
         'HOST':'172.31.240.235',
         'PORT':'3306',
     },
-
     #for localhost main database
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
