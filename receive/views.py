@@ -966,8 +966,6 @@ def item_add(request):
         formatted_dates_string = formatted_dates_string
         
         if date_received:
-            print("dddd11111elseee")
-            print(date_received)
             tev_add = TevIncoming(
                 code=g_code,
                 first_name=name,
@@ -977,12 +975,11 @@ def item_add(request):
                 account_no=acct_no,
                 date_travel=cleaned_dates,
                 original_amount=amount,
+                incoming_in = date_received,
                 remarks=formatted_dates_string,
                 user_id=user_id
             )
         else:
-            print("daaaaaaaaddd11111elseee")
-            print(date_received)
             tev_add = TevIncoming(
                 code=g_code,
                 first_name=name,
@@ -991,6 +988,7 @@ def item_add(request):
                 id_no=idd_no,
                 account_no=acct_no,
                 date_travel=cleaned_dates,
+                incoming_in = date_time.datetime.now(),
                 original_amount=amount,
                 remarks=formatted_dates_string,
                 user_id=user_id
@@ -1015,8 +1013,6 @@ def item_add(request):
 
     else:
         if date_received:
-            print("11111")
-            print(date_received)
             tev_add = TevIncoming(
                 code=g_code,
                 first_name=name,
@@ -1030,8 +1026,6 @@ def item_add(request):
                 user_id=user_id
             )
         else:
-            print("11111elseee")
-            print(date_received)
             tev_add = TevIncoming(
                 code=g_code,
                 first_name=name,
