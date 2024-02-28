@@ -302,14 +302,24 @@
                 <div class="col-md-12 mb-2">
                   <label for="flatpickr-multi" class="form-label">Date Received <small>(Actual/Optional)</small></label>
                   <input
-                  type="date"
+                  type="text"
                   class="form-control dateReceived"
                   name="DateReceived"
-                  placeholder="YYYY-MM-DD to YYYY-MM-DD"
-                  id="flatpickr-range"
+                  placeholder="YYYY-MM-DD HH:MM"
+                  id="flatpickr-datetime"
                 />
                 </div>
             </div>
+
+            <!-- <div class="col-md-6 col-12 mb-4">
+                <label for="flatpickr-datetime" class="form-label">Datetime Picker</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="YYYY-MM-DD HH:MM"
+                  id="flatpickr-datetime"
+                />
+              </div> -->
 
             <!-- <div class="col-sm-12">
                 <label class="form-label" >Remarks <small>(optional)</small></label>
@@ -547,30 +557,38 @@
                         }
                     },
                 },
+
                 {
                     targets: 3,
                     render: function(data) {
                         var floatValue = parseFloat(data);
                         if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
+                            var formattedValue = floatValue.toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                            return '<span class="badge bg-label-primary">₱ ' +formattedValue+'</span>';
                         } else {
                             return "";
                         }
                     },
-                },
+                },  
+
                 {
                     targets: 4,
                     render: function(data) {
                         var floatValue = parseFloat(data);
                         if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
+                            var formattedValue = floatValue.toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                            return '<span class="badge bg-label-primary">₱ ' +formattedValue+'</span>';
                         } else {
                             return "";
                         }
                     },
-                },
+                },  
                 {
                     targets: 5,
                     render: function(data) {
