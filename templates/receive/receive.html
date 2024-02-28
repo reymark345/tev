@@ -1189,7 +1189,6 @@
             dataType: 'json',
         }).done(function (data) {
             let fields = data.data;
-        
             let employees = [];
         
             $.each(fields, function (index, employee) {
@@ -1199,13 +1198,23 @@
                 let lastName = employee.last_name;
                 let idNumber = employee.id_number;
                 let accNumber = employee.account_number;
+                let division = employee.division;
+                let position = employee.position;
+                let gender = employee.gender;
+                let section = employee.section;
+                let image_path = employee.image_path;
         
                 let employeeObj = {
                     firstName: firstName,
                     middleInitial: middleInitial,
                     lastName: lastName,
                     idNumber: idNumber,
-                    accNumber: accNumber
+                    accNumber: accNumber,
+                    division: division,
+                    position: position,
+                    gender: gender,
+                    section: section,
+                    image: image_path
                 };
                 employees.push(employeeObj);
             });
