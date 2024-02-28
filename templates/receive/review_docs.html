@@ -407,25 +407,31 @@
                     render: function(data) {
                         var floatValue = parseFloat(data);
                         if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
+                            var formattedValue = floatValue.toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                            return '<span class="badge bg-label-primary"> ' +formattedValue+'</span>';
                         } else {
                             return "";
                         }
                     },
-                },
+                }, 
                 {
                     targets: 5,
                     render: function(data) {
                         var floatValue = parseFloat(data);
                         if (floatValue !== 0) {
-                            var convertedValue = floatValue.toFixed(2);
-                            return convertedValue;
+                            var formattedValue = floatValue.toLocaleString('en-US', {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2
+                            });
+                            return '<span class="badge bg-label-primary"> ' +formattedValue+'</span>';
                         } else {
                             return "";
                         }
                     },
-                },
+                }, 
                 {
                     targets: 6,
                     render: function(data) {
