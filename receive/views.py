@@ -902,6 +902,7 @@ def item_add(request):
     amount = request.POST.get('OriginalAmount')
     travel_date = request.POST.get('DateTravel')
     range_travel = request.POST.get('RangeTravel')
+    date_received = request.POST.get('DateReceived')
     idd_no = request.POST.get('IdNumber')
     acct_no = request.POST.get('AccountNumber')
     name = request.POST.get('EmpName')
@@ -913,6 +914,9 @@ def item_add(request):
     g_code = generate_code()
     # selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
     # date_values = request.POST.getlist('dateValues[]')
+
+    print(date_received)
+    print("date_received")
 
     if travel_date:
         travel_date = request.POST.get('DateTravel')
@@ -961,19 +965,36 @@ def item_add(request):
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
         
-
-        tev_add = TevIncoming(
-            code=g_code,
-            first_name=name,
-            middle_name=middle,
-            last_name=lname,
-            id_no=idd_no,
-            account_no=acct_no,
-            date_travel=cleaned_dates,
-            original_amount=amount,
-            remarks=formatted_dates_string,
-            user_id=user_id
-        )
+        if date_received:
+            print("dddd11111elseee")
+            print(date_received)
+            tev_add = TevIncoming(
+                code=g_code,
+                first_name=name,
+                middle_name=middle,
+                last_name=lname,
+                id_no=idd_no,
+                account_no=acct_no,
+                date_travel=cleaned_dates,
+                original_amount=amount,
+                remarks=formatted_dates_string,
+                user_id=user_id
+            )
+        else:
+            print("daaaaaaaaddd11111elseee")
+            print(date_received)
+            tev_add = TevIncoming(
+                code=g_code,
+                first_name=name,
+                middle_name=middle,
+                last_name=lname,
+                id_no=idd_no,
+                account_no=acct_no,
+                date_travel=cleaned_dates,
+                original_amount=amount,
+                remarks=formatted_dates_string,
+                user_id=user_id
+            )
         tev_add.save()
 
         if tev_add.id:
@@ -981,14 +1002,6 @@ def item_add(request):
             system_config.transaction_code = g_code
             system_config.save()
             last_added_tevincoming = TevIncoming.objects.latest('id')
-
-            # for selected_value, date_value in zip(selected_values, date_values):
-            #     remarks_lib = Remarks_r(
-            #         date=date_value,
-            #         incoming_id=last_added_tevincoming.id,
-            #         remarks_lib_id=selected_value
-            #     )
-            #     remarks_lib.save()
 
             for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
                 remarks_lib = Remarks_r(
@@ -1001,17 +1014,36 @@ def item_add(request):
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
 
     else:
-        tev_add = TevIncoming(
-            code=g_code,
-            first_name=name,
-            middle_name=middle,
-            last_name=lname,
-            id_no=idd_no,
-            account_no=acct_no,
-            date_travel=cleaned_dates,
-            original_amount=amount,
-            user_id=user_id
-        )
+        if date_received:
+            print("11111")
+            print(date_received)
+            tev_add = TevIncoming(
+                code=g_code,
+                first_name=name,
+                middle_name=middle,
+                last_name=lname,
+                id_no=idd_no,
+                account_no=acct_no,
+                date_travel=cleaned_dates,
+                original_amount=amount,
+                incoming_in = date_received,
+                user_id=user_id
+            )
+        else:
+            print("11111elseee")
+            print(date_received)
+            tev_add = TevIncoming(
+                code=g_code,
+                first_name=name,
+                middle_name=middle,
+                last_name=lname,
+                id_no=idd_no,
+                account_no=acct_no,
+                date_travel=cleaned_dates,
+                original_amount=amount,
+                incoming_in = date_time.datetime.now(),
+                user_id=user_id
+            )
         tev_add.save()
 
         last_added_tevincoming = TevIncoming.objects.latest('id')

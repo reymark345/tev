@@ -131,7 +131,7 @@ class TevIncoming(models.Model):
     date_travel = models.CharField(max_length=512, blank=True, null=True)
     original_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True, default=0)
     final_amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
-    incoming_in = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    incoming_in = models.DateTimeField(blank=True, null=True)
     incoming_out = models.DateTimeField(blank=True, null=True)
     slashed_out = models.DateTimeField(blank=True, null=True)
     remarks = models.TextField(blank=True, null=True)
