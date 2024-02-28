@@ -298,6 +298,19 @@
                 </div>
             </div>
 
+            <div class="col-sm-12">
+                <div class="col-md-12 mb-2">
+                  <label for="flatpickr-multi" class="form-label">Date Received <small>(Actual/Optional)</small></label>
+                  <input
+                  type="date"
+                  class="form-control dateReceived"
+                  name="DateReceived"
+                  placeholder="YYYY-MM-DD to YYYY-MM-DD"
+                  id="flatpickr-range"
+                />
+                </div>
+            </div>
+
             <!-- <div class="col-sm-12">
                 <label class="form-label" >Remarks <small>(optional)</small></label>
                 <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
@@ -441,6 +454,7 @@
             FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
 
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
+            DateReceived = jQuery(document.querySelector('[name="DateReceived"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
             HDateTravel = jQuery(document.querySelector('[name="HDateTravel"]')),
             RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
@@ -941,6 +955,7 @@
                         },
                     },
                 },
+                
 
             },
             plugins: {
@@ -1032,6 +1047,7 @@
                     let middle = EmpMiddle.val();
                     let lname = EmpLastname.val();
                     let hdate_travel = HDateTravel.val();
+                    let date_received = DateReceived.val();
                     let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
                     let form_data = $('#item-form').serialize()
                     $.ajax({
@@ -1051,7 +1067,8 @@
                             HDateTravel: hdate_travel,
                             ItemID:ItemID.val(),
                             selectedRemarks: selectedIDs,
-                            selectedDate: selectedDate
+                            selectedDate: selectedDate,
+                            DateReceived: date_received
                         }
                     }).done(function (data) {                
                         function formatDate(dateString) {
@@ -1082,8 +1099,9 @@
                             EmployeeName.val("").trigger('change');
                             RemarksList.val([]).trigger("change");
                             OriginalAmount.val("");
-                            DateTravel.val("")
-                            RangeTravel.val("")
+                            DateReceived.val("");
+                            DateTravel.val("");
+                            RangeTravel.val("");
                             $("#dateField").prop("disabled", false);
                             $(".rangeTravel").prop("disabled", false);
 
@@ -1093,8 +1111,9 @@
                             dateField.clear();
                             EmployeeName.val("").trigger('change');
                             OriginalAmount.val("");
-                            DateTravel.val("")
-                            RangeTravel.val("")
+                            DateReceived.val("");
+                            DateTravel.val("");
+                            RangeTravel.val("");
                             $("#dateField").prop("disabled", false);
                             $(".rangeTravel").prop("disabled", false);
                             dataTable.ajax.reload();
