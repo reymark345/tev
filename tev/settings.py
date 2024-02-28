@@ -97,7 +97,7 @@ DATABASES = {
     #     'HOST': '172.31.240.235',
     #     'PORT': '3306',
     # },
-    # # for server INFIMOS
+    # for server INFIMOS
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2023',
@@ -124,7 +124,7 @@ DATABASES = {
     #     'HOST': 'localhost',
     #     'PORT': '3306',
     # },
-    # # #for localhost INFIMOS database
+    # #for localhost INFIMOS database
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'finance',
