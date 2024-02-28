@@ -436,6 +436,7 @@ margin-top: 99%;
           </table>
         </div>
         <br>
+
         <div class="container-body2">
           <span class="appendix">Appendix 11</span>
           <table>
@@ -819,6 +820,393 @@ margin-top: 99%;
           </table>
       
         </div><br>
+
+        <div class="container-body2">
+          <span class="appendix">Appendix 11</span>
+          <table>
+            <thead></thead>
+            <tbody>
+              <tr>
+                <td colspan="7" rowspan="3" class="center-text" ><b><span style="font-size: 17px;">OBLIGATION REQUESTS AND STATUS</span></b>
+                  <br>
+                  <br>
+                  <br>
+                  <b>Department of Social Welfare and Development  <br> Entity Name</b>
+                </td>
+                <td style="font-size: 15px;border-bottom: 0;" colspan="4">
+                  Serial No. : _______________ 
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 15px; border-top: 0;border-bottom: 0;" colspan="4">
+                  Date : 
+                </td>
+              </tr>
+              <tr>
+                <td style="font-size: 15px;border-top: 0;" colspan="4">
+                  Fund Cluster : ____________________ 
+                </td>
+              </tr>
+
+              <tr>
+                <td height="30" style="font-size: 13px;text-align: center;">
+                  Payee
+                </td>
+                <td width="150" colspan="10" style="font-size: 15px;">
+                  <b>LBP</b>
+                </td>
+              </tr> 
+              <tr>
+                <td width="50" height="30" style="font-size: 13px;text-align: center;">
+                  Office
+                </td>
+                <td width="150" colspan="10" style="font-size: 15px;">
+                  <b>DSWD, CAPITOL SITE, BUTUAN CITY</b>
+                </td>
+              </tr> 
+              <tr>
+                <td style="font-size: 13px;text-align: center;">
+                  Address
+                </td>
+                <td width="130" colspan="10" style="font-size: 15px;">
+                  <b>DSWD, CAPITOL SITE, BUTUAN CITY</b>
+                </td>
+              </tr> 
+      
+              <tr>
+                <td colspan="1" height="30" style="font-size: 13px;text-align: center;">
+                  Responsibility Center
+                </td>
+                <td width="150" colspan="5" style="font-size: 13px;text-align: center;">
+                  <b>Particulars</b>
+                </td>
+
+                <td width="150"  style="font-size: 13px;text-align: center;">
+                  <b>MFO/PAP</b>
+                </td>
+                <td width="150"  style="font-size: 13px;text-align: center;">
+                  <b>UACS Object Code</b>
+                </td>
+                <td width="150" colspan="3" style="font-size: 13px;text-align: center;">
+                  <b>Amount</b>
+                </td>
+              </tr>
+
+              <tr >
+                <td style="border-bottom: 0;"></td>
+                <td style="font-size: 15px;border-bottom: 0; height:150px;" colspan="5">
+                  <center><b>{{ finance.0.modepayment }}</b></center>
+                  <br><br></td>
+                <td style="border-bottom: 0;"></td>
+                <td style="border-bottom: 0;"></td>
+                <td style="font-size: 15px;border-right: 0;text-align:left;"><b>Php</b></td>
+                <td style="font-size: 15px;border-left: 0;text-align:right;" colspan="2"><b>{{ total_amount|floatformat:2|intcomma }}</b></td>
+                
+              </tr>
+
+              <tr >
+                <td style="border-top: 0;"></td>
+                <td style="font-size: 15px;text-align:right !important; border-top: 0;padding-top: 0;padding-bottom: 0;" colspan="5"><b>Total</b></td>
+                <td style="border-top: 0;"></td>
+                <td style="border-top: 0;"></td>
+                <td style="font-size: 15px;border-top: 0; text-align:left;padding-top: 0;padding-bottom: 0;border-right: 0;"><b>Php</span></b></td>
+                <td style="font-size: 15px;border-top: 0; text-align:right;padding-top: 0;padding-bottom: 0;border-left: 0;" colspan="2"><b><span>{{ total_amount|floatformat:2|intcomma }}</span></b></td>
+              </tr>
+
+              <tr style="font-size: 15px;">
+                <td colspan="6" style="border-bottom: 0;padding: 1px;">A. <b>Certified:</b> Charges to appropriation/alloment are <br> necessary, lawful and under my direct supervision;and supporting documents valid, proper and legal
+                  <br><br><br>
+
+                Signature :  <br><br>
+                </td>
+                
+                <td colspan="6" style="border-bottom: 0;padding: 1px;">B. <b>Certified:</b> Alloment available and obligated for the purpose/adjustment 
+                   necessary as indicated above<br><br><br><br>
+
+                Signature : <br><br> 
+               
+                  </td>
+              </tr>
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
+                  Printed Name 
+                </td>
+                <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
+                  <center><b>{{ details.chief|upper }} </b></center>
+
+                
+                </td>
+
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">Printed Name  
+                  
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
+                  <center><b>TERESA M. BIDAURE</b></center>
+                </td>
+
+              </tr>
+
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
+                  Position :
+                </td>
+                <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
+                  <center>{{ details.c_designation}}</center>
+                </td>
+
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;padding: 1px;">
+                  Position :
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
+                  <center>Administrative Officer IV</center>
+                </td>
+
+              </tr>
+
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;">
+                
+                </td>
+                <td style="border-top: 0;border-left: 0;border-bottom: 0;" colspan="5">
+                  <center>Head, Requesting Office/Authorized Representative</center>
+                </td>
+
+                <td style="border-top: 0;border-right: 0;border-bottom: 0;">
+              
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;border-bottom: 0;" colspan="4">
+                  <center>BUDGET SECTION</center>
+                </td>
+
+              </tr>
+
+
+              <tr style="font-size: 15px;">
+                <td style="border-top: 0;border-right: 0;">
+                  Date
+                </td>
+                <td style="border-top: 0;border-left: 0;" colspan="5">
+                  : _______________________________________
+                </td>
+
+                <td style="border-top: 0;border-right: 0;">
+                  Date
+                </td>
+                <td style="border-top: 0;border-left: 0; border-top: 0;" colspan="4">
+                  : ________________________________
+                </td>
+
+              </tr>
+              <tr style="font-size: 15px;">
+                <td style="font-size: 13px; padding:0">
+                  <b>C.</b>
+                </td>
+                <td colspan="10" style="font-size: 13px; padding:0"><b><center>STATUS OF OBLIGATION</center></b></td>
+
+
+
+              </tr>
+              <tr>
+                <td colspan="5" style="font-size: 13px;text-align: center;padding:0" ><b>Reference</b></td>
+                <td colspan="5" style="font-size: 13px;text-align: center;padding:0"><b>Amount</b></td>
+              </tr>
+            
+              <tr>
+                <td width="140" height="30" style="font-size: 13px; text-align:center;" rowspan="3">
+                  Date
+                </td>
+                <td width="150" colspan="2" style="font-size: 13px; padding:25px" rowspan="3">
+                  Particulars
+                </td>
+
+                <td width="150" colspan="2" style="font-size: 13px;" rowspan="3">
+                  ORS/JEV/Check/<br>ADA/TRA No.
+                </td>
+                <td width="150"  style="font-size: 13px; text-align:center;" rowspan="2">
+                  Obligation
+                </td>
+                <td width="150"  style="font-size: 13px; text-align:center;" rowspan="2">
+                  Payable
+                </td>
+
+                <td width="150"  style="font-size: 13px; text-align:center;" rowspan="2">
+                  Payment
+                </td>
+                <td width="150"  style="font-size: 13px; text-align:center;" colspan="3" class="lastRow">
+                  <center>Balance</center>
+                </td>
+               
+              </tr>
+              <tr>
+                <td  width="60" style="font-size: 13px; text-align:center;">Not Yet Due
+                </td>
+                <td style="font-size: 13px; text-align:center;">Due and Demandable</td>
+              </tr>
+              <tr>
+                <td style="font-size: 13px; text-align:center; padding:0">(a)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(b)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(c)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(a-b)</td>
+                <td style="font-size: 13px; text-align:center; padding:0">(b-c)</td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+              <tr>
+                <td  style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td colspan="2" style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+                <td style="padding: 13px;"></td>
+              </tr>
+            </tbody>
+          </table>
+      
+        </div><br>
+
+
+        
 
         <div class="container-body3">
           <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ dv_number}} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
