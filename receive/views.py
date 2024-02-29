@@ -339,10 +339,6 @@ def checking_load(request):
     id_numbers = EmployeeList if EmployeeList else []
 
     if FAdvancedFilter:
-        def dictfetchall(cursor):
-            columns = [col[0] for col in cursor.description]
-            return [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
         query = """
             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
             FROM tev_incoming t1
@@ -353,6 +349,10 @@ def checking_load(request):
                 OR (t1.status_id = 3 AND t1.slashed_out IS NULL))
         """
         params = []
+
+        if FStatus:
+            query += " AND t1.status_id = %s"
+            params.append(FStatus)
 
         if FTransactionCode:
             query += " AND t1.code = %s"
@@ -370,11 +370,6 @@ def checking_load(request):
             query += " AND t1.incoming_in = %s"
             params.append(FIncomingIn)
 
-        if FStatus:
-            query += " AND t1.status_id = %s"
-            params.append(FStatus)
-
-            
         if FAccountNumber:
             query += " AND t1.account_no = %s"
             params.append(FAccountNumber)
@@ -391,14 +386,11 @@ def checking_load(request):
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
             query += f" AND t1.id_no IN ({placeholders})"
             params.extend(EmployeeList)
-
         query += " GROUP BY t1.id ORDER BY t1.incoming_out DESC;"
 
-        with connection.cursor() as cursor:
-            cursor.execute(query, params)
-            results = dictfetchall(cursor)
 
-    if _search:
+
+    elif _search:
         query = """
             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
             FROM tev_incoming t1
