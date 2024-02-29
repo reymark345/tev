@@ -1081,9 +1081,6 @@
             const employees = JSON.parse(localStorage.getItem('employees'));
             if (employees) {
                 $.each(employees, function (index, employee) {
-                    console.log(employee);
-                    console.log("Test");
-                    
                     const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
                     const $option = $('<option>', {
                         value: optionText,
