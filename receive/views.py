@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, RemarksLib, Remarks_r, RolePermissions)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, RemarksLib, Remarks_r, RolePermissions, Division, Section)
 import json 
 from django.core import serializers
 from datetime import date as datetime_date
@@ -902,15 +902,11 @@ def item_add(request):
     middle = request.POST.get('EmpMiddle')
     lname = request.POST.get('EmpLastname')
     user_id = request.session.get('user_id', 0)
+    division = request.POST.get('Division')
+    section = request.POST.get('Section')
     selected_remarks = request.POST.getlist('selectedRemarks[]')
     selected_dates = request.POST.getlist('selectedDate[]')
     g_code = generate_code()
-    # selected_values = request.POST.getlist('selectedValues[]')  # Assuming selectedValues is an array
-    # date_values = request.POST.getlist('dateValues[]')
-
-    print(date_received)
-    print("date_received")
-
     if travel_date:
         travel_date = request.POST.get('DateTravel')
     else :
@@ -957,7 +953,21 @@ def item_add(request):
         formatted_dates = [format_date(date) for date in date_components]
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
-        
+        _division = Division.objects.filter(name = division)
+        _section = Section.objects.filter(name = section)
+
+        if not _division:
+            Division(name=division,created_by = user_id, status = 2).save()
+            div_id = Division.objects.latest('id').id
+        else:
+            div_id = _division.values_list('id', flat=True).first()
+
+        if not _section:
+            Section(name=section,created_by = user_id, status = 2).save()
+            sec_id = Section.objects.latest('id').id
+        else:
+            sec_id = _section.values_list('id', flat=True).first()
+
         if date_received:
             tev_add = TevIncoming(
                 code=g_code,
@@ -970,7 +980,9 @@ def item_add(request):
                 original_amount=amount,
                 incoming_in = date_received,
                 remarks=formatted_dates_string,
-                user_id=user_id
+                user_id=user_id,
+                division_id = div_id,
+                section_id = sec_id
             )
         else:
             tev_add = TevIncoming(
@@ -984,7 +996,9 @@ def item_add(request):
                 incoming_in = date_time.datetime.now(),
                 original_amount=amount,
                 remarks=formatted_dates_string,
-                user_id=user_id
+                user_id=user_id,
+                division_id = div_id,
+                section_id = sec_id
             )
         tev_add.save()
 
@@ -1005,6 +1019,22 @@ def item_add(request):
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
 
     else:
+        _division = Division.objects.filter(name = division)
+        _section = Section.objects.filter(name = section)
+        if not _division:
+            Division(name=division,created_by = user_id, status = 2).save()
+            div_id = Division.objects.latest('id').id
+
+        else:
+            div_id = _division.values_list('id', flat=True).first()
+
+        if not _section:
+            Section(name=section,created_by = user_id, status = 2).save()
+            sec_id = Section.objects.latest('id').id
+        else:
+            sec_id = _section.values_list('id', flat=True).first()
+
+
         if date_received:
             tev_add = TevIncoming(
                 code=g_code,
@@ -1016,7 +1046,9 @@ def item_add(request):
                 date_travel=cleaned_dates,
                 original_amount=amount,
                 incoming_in = date_received,
-                user_id=user_id
+                user_id=user_id,
+                division_id = div_id,
+                section_id = sec_id
             )
         else:
             tev_add = TevIncoming(
@@ -1029,7 +1061,9 @@ def item_add(request):
                 date_travel=cleaned_dates,
                 original_amount=amount,
                 incoming_in = date_time.datetime.now(),
-                user_id=user_id
+                user_id=user_id,
+                division_id = div_id,
+                section_id = sec_id
             )
         tev_add.save()
 
