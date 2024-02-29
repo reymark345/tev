@@ -120,6 +120,33 @@ class Status(models.Model):
     class Meta:
         managed = True
         db_table = 'status'
+
+class Division(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    acronym = models.CharField(max_length=128, blank=True, null=True)
+    chief = models.CharField(max_length=128, blank=True, null=True)
+    c_designation = models.CharField(max_length=128, blank=True, null=True)
+    approval = models.CharField(max_length=128, blank=True, null=True)
+    ap_designation = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True, default=0)
+
+    class Meta:
+        managed = True
+        db_table = 'division'
+
+class Section(models.Model):
+    name = models.CharField(max_length=128, blank=True, null=True)
+    status = models.CharField(max_length=50, blank=True, null=True, default=0)
+    created_by = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'section'
         
 class TevIncoming(models.Model):
     code = models.CharField(max_length=128, blank=True, null=True)
@@ -139,26 +166,14 @@ class TevIncoming(models.Model):
     user_id = models.CharField(max_length=128, blank=True, null=True)
     is_upload = models.BooleanField(default=False)
     updated_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
+    division_id = models.CharField(max_length=128, blank=True, null=True)
+    section_id = models.CharField(max_length=128, blank=True, null=True)
     
     class Meta:
         managed = True
         db_table = 'tev_incoming'
         
-class Division(models.Model):
-    name = models.CharField(max_length=128, blank=True, null=True)
-    acronym = models.CharField(max_length=128, blank=True, null=True)
-    chief = models.CharField(max_length=128, blank=True, null=True)
-    c_designation = models.CharField(max_length=128, blank=True, null=True)
-    approval = models.CharField(max_length=128, blank=True, null=True)
-    ap_designation = models.CharField(max_length=128, blank=True, null=True)
-    created_by = models.IntegerField()
-    created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
-    updated_at = models.DateTimeField(blank=True, null=True)
-    status = models.CharField(max_length=50, blank=True, null=True, default=0)
 
-    class Meta:
-        managed = True
-        db_table = 'division'
         
 class TevOutgoing(models.Model):
     dv_no = models.CharField(max_length=128, blank=True, null=True)
