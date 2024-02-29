@@ -35,7 +35,8 @@
   if (flatpickrDateTime) {
     flatpickrDateTime.flatpickr({
       enableTime: true,
-      dateFormat: 'Y-m-d H:i'
+      dateFormat: 'Y-m-d H:i',
+      minuteIncrement: 1
     });
   }
 
