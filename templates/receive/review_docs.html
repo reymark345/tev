@@ -37,6 +37,7 @@
                             <th>Reviewed</th>
                             <th>Duplicate</th>
                             <th>Remarks</th>
+                            <th>Created By</th>
                             <th>ID</th>
                         </tr>
                     </thead>
@@ -375,7 +376,9 @@
                 { data: 'slashed_out' },
                 { data: 'remarks' },
                 { data: 'lacking' },
+                { data: 'user_id' },
                 { data: 'id' },
+                
 
             ],
             columnDefs: [
@@ -474,13 +477,13 @@
                   },
                 },
                 {
-                    targets: -5,
+                    targets: -6,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
                 },
                 {
-                    targets: -3,
+                    targets: -4,
                     render: function (data) {
                         if (data === null || data === undefined || data === "") {
                             return ''; 
@@ -492,13 +495,24 @@
                 },
 
                 {
-                    targets: -2,
+                    targets: -3,
                     render: function (data) {
                         if (data === null || data === undefined || data === "") {
                             return ''; 
                         } 
                         else {
                             return '<span class="badge bg-label-danger">' + data + '</span>';
+                        }
+                    },
+                },
+                {
+                    targets: -2,
+                    render: function (data) {
+                        if (data === null || data === undefined || data === "") {
+                            return ''; 
+                        } 
+                        else {
+                            return '<span class="badge bg-label-primary">' + data + '</span>';
                         }
                     },
                 },
