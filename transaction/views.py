@@ -23,6 +23,7 @@ import datetime as date_time
 from decimal import Decimal
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
+from django.db import transaction
 
 
 def generate_code():
@@ -2210,6 +2211,10 @@ def forward_journal(request):
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
+
+    year = request.GET.get('year')
+    finance_database_name = 'finance' if year == '2023' else 'infimos_2024'
+
     for status_id in out_list_int:
         check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
         if check_status:
@@ -2222,6 +2227,19 @@ def forward_journal(request):
         TevIncoming.objects.filter(id__in=ids).update(status_id=13)
         for item_id  in out_list:
             TevOutgoing.objects.filter(id=item_id).update(status_id=13,j_out_user_id = user_id,j_d_forwarded=timezone.now())
+
+        dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
+        with transaction.atomic():
+            for dv in dv_no_values:
+                print(dv)
+                with connection.cursor() as cursor:
+                    actual_date = timezone.now()
+                    query = f"""
+                    UPDATE {finance_database_name}.transactions SET approval_date = %s WHERE dv_no = %s
+                    """
+                    params = [actual_date, dv]
+                    cursor.execute(query, params)
+
         return JsonResponse({'data': 'success'})
     
 @csrf_exempt
