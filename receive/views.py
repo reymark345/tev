@@ -775,6 +775,7 @@ def item_update(request):
     selected_dates = request.POST.getlist('selectedDate[]')
     travel_date = request.POST.get('DateTravel')
     range_travel = request.POST.get('RangeTravel')
+    date_received = request.POST.get('DateReceived')
 
     if travel_date:
         travel_date = request.POST.get('DateTravel')
@@ -831,7 +832,7 @@ def item_update(request):
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
         
-        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, date_travel = travel_date, original_amount=amount, remarks = formatted_dates_string)
+        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, date_travel = travel_date, original_amount=amount, incoming_in = date_received, remarks = formatted_dates_string)
         Remarks_r.objects.filter(incoming_id=id).delete()
         for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             remarks_lib = Remarks_r(
@@ -843,7 +844,7 @@ def item_update(request):
         
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
     else:
-        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,date_travel = travel_date, original_amount=amount, remarks = None)
+        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,date_travel = travel_date, original_amount=amount, incoming_in = date_received, remarks = None)
         Remarks_r.objects.filter(incoming_id=id).delete()
         for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             remarks_lib = Remarks_r(

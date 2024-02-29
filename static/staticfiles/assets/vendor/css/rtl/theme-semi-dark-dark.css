@@ -95,6 +95,11 @@ body {
     color: #685dd8 !important;
 }
 
+.select2-container--default .select2-results__option--highlighted:not([aria-selected='true']) {
+    background-color: rgba(115, 103, 240, 0.08) !important;
+    color: #ffffff !important;
+}
+
 .bg-primary {
     background-color: #1051d1 !important;
 }
