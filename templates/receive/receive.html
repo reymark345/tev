@@ -355,6 +355,8 @@
             <input id="emp-middle" name="EmpMiddle" class="form-control accn" type="hidden" placeholder="middle"/>
             <input id="emp-lastname" name="EmpLastname" class="form-control accn" type="hidden" placeholder="lastname"/>
             <input id="hdate-travel" name="HDateTravel" class="form-control accn" type="hidden" placeholder="Date Travel"/>
+            <input id="division-user" name="DivisionUser" class="form-control accn" type="hidden" placeholder="Division"/>
+            <input id="section-user" name="SectionUser" class="form-control accn" type="hidden" placeholder="Section"/>
         </form>
     </div>
 </div>
@@ -372,15 +374,15 @@
     $(document).ready(function () {
 
         $('#f-employee-name').on('select2:open', function() {
-        $('.select2-search__field').keydown(function(e) {
-            if (e.keyCode === 9) { // Check if Tab key is pressed
-            var selectedValue = $('#f-employee-name').val();
-            if (selectedValue) {
-                // Assuming the option value is "reymark"
-                $('#f-employee-name').val(['2']).trigger('change.select2');
-            }
-            }
-        });
+            $('.select2-search__field').keydown(function(e) {
+                if (e.keyCode === 9) { // Check if Tab key is pressed
+                var selectedValue = $('#f-employee-name').val();
+                if (selectedValue) {
+                    // Assuming the option value is "reymark"
+                    $('#f-employee-name').val(['2']).trigger('change.select2');
+                }
+                }
+            });
         });
 
 
@@ -469,6 +471,8 @@
             HDateTravel = jQuery(document.querySelector('[name="HDateTravel"]')),
             RangeTravel = jQuery(document.querySelector('[name="RangeTravel"]')),
             IdNumber = jQuery(document.querySelector('[name="IdNumber"]')),
+            DivisionUser = jQuery(document.querySelector('[name="DivisionUser"]')),
+            SectionUser = jQuery(document.querySelector('[name="SectionUser"]')),
             AccountNumber = jQuery(document.querySelector('[name="AccountNumber"]')),
             EmpName = jQuery(document.querySelector('[name="EmpName"]')),
             EmpMiddle = jQuery(document.querySelector('[name="EmpMiddle"]')),
@@ -697,7 +701,6 @@
                         $selectElement.empty();
                         fetchEmployee($selectElement);
                         FEmployeeName.val('').trigger('change');
-
                         setTimeout(function() {
                             if (FEmployeeName.length) {
                                 FEmployeeName.wrap('<div class="position-relative"></div>')
@@ -1079,6 +1082,8 @@
                     let middle = EmpMiddle.val();
                     let lname = EmpLastname.val();
                     let hdate_travel = HDateTravel.val();
+                    let division = DivisionUser.val();
+                    let section = SectionUser.val();
                     let date_received = DateReceived.val();
                     let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
                     let form_data = $('#item-form').serialize()
@@ -1097,6 +1102,8 @@
                             form_data: form_data,
                             dateValues: dateValues,
                             HDateTravel: hdate_travel,
+                            Division: division,
+                            Section: section,
                             ItemID:ItemID.val(),
                             selectedRemarks: selectedIDs,
                             selectedDate: selectedDate,
@@ -1584,14 +1591,14 @@
         if (employees) {
             const selectedEmployeeId = selectedOption.attr('id');
             const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
-
-            
             if (selectedEmployee) {
                 $('#id-number').val(selectedEmployee.idNumber);
                 $('#acct-number').val(selectedEmployee.accNumber);
                 $('#emp-name').val(selectedEmployee.firstName);
                 $('#emp-middle').val(selectedEmployee.middleInitial);
                 $('#emp-lastname').val(selectedEmployee.lastName);
+                $('#division-user').val(selectedEmployee.division);
+                $('#section-user').val(selectedEmployee.section);
             }
         } else {
             console.log("No employee data found in local storage.");
