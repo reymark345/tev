@@ -55,6 +55,21 @@ def list(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
 
+    # data = []
+    # user_name = RolePermissions.objects.filter(role_id = 2) 
+    # get_id = user_name.values_list('user_id', flat=True)
+    
+    # for item in get_id:
+    #     item_entry = {
+    #         'status': item['status_id'],
+    #         'user_id': full_name
+    #     }
+
+    #     data.append(item_entry)
+    
+
+    # print(get_id)
+    # print("get_id")
 
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
