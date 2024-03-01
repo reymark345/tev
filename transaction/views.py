@@ -151,7 +151,7 @@ def box_a(request):
             'permissions' : role_names,
             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
             'cluster' : Cluster.objects.filter().order_by('id'),
-            'division' : Division.objects.filter(status=0).order_by('id'),
+            'division' : Division.objects.filter().order_by('id'),
             'charges' : Charges.objects.filter().order_by('name')
 
         }
