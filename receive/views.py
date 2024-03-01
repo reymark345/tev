@@ -968,21 +968,7 @@ def item_add(request):
         formatted_dates = [format_date(date) for date in date_components]
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
-        _division = Division.objects.filter(name = division)
-        _section = Section.objects.filter(name = section)
-
-        if not _division:
-            Division(name=division,created_by = user_id, status = 2).save()
-            div_id = Division.objects.latest('id').id
-        else:
-            div_id = _division.values_list('id', flat=True).first()
-
-        if not _section:
-            Section(name=section,created_by = user_id, status = 2).save()
-            sec_id = Section.objects.latest('id').id
-        else:
-            sec_id = _section.values_list('id', flat=True).first()
-
+        
         if date_received:
             tev_add = TevIncoming(
                 code=g_code,
@@ -996,8 +982,8 @@ def item_add(request):
                 incoming_in = date_received,
                 remarks=formatted_dates_string,
                 user_id=user_id,
-                division_id = div_id,
-                section_id = sec_id
+                division = division,
+                section = section
             )
         else:
             tev_add = TevIncoming(
@@ -1012,8 +998,8 @@ def item_add(request):
                 original_amount=amount,
                 remarks=formatted_dates_string,
                 user_id=user_id,
-                division_id = div_id,
-                section_id = sec_id
+                division = division,
+                section = section
             )
         tev_add.save()
 
@@ -1034,22 +1020,6 @@ def item_add(request):
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
 
     else:
-        _division = Division.objects.filter(name = division)
-        _section = Section.objects.filter(name = section)
-        if not _division:
-            Division(name=division,created_by = user_id, status = 2).save()
-            div_id = Division.objects.latest('id').id
-
-        else:
-            div_id = _division.values_list('id', flat=True).first()
-
-        if not _section:
-            Section(name=section,created_by = user_id, status = 2).save()
-            sec_id = Section.objects.latest('id').id
-        else:
-            sec_id = _section.values_list('id', flat=True).first()
-
-
         if date_received:
             tev_add = TevIncoming(
                 code=g_code,
@@ -1062,8 +1032,8 @@ def item_add(request):
                 original_amount=amount,
                 incoming_in = date_received,
                 user_id=user_id,
-                division_id = div_id,
-                section_id = sec_id
+                division = division,
+                section = section
             )
         else:
             tev_add = TevIncoming(
@@ -1077,8 +1047,8 @@ def item_add(request):
                 original_amount=amount,
                 incoming_in = date_time.datetime.now(),
                 user_id=user_id,
-                division_id = div_id,
-                section_id = sec_id
+                division = division,
+                section = section
             )
         tev_add.save()
 

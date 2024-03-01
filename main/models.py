@@ -166,15 +166,13 @@ class TevIncoming(models.Model):
     user_id = models.CharField(max_length=128, blank=True, null=True)
     is_upload = models.BooleanField(default=False)
     updated_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
-    division_id = models.CharField(max_length=128, blank=True, null=True)
-    section_id = models.CharField(max_length=128, blank=True, null=True)
+    division = models.CharField(max_length=128, blank=True, null=True)
+    section = models.CharField(max_length=128, blank=True, null=True)
     
     class Meta:
         managed = True
         db_table = 'tev_incoming'
-        
-
-        
+                
 class TevOutgoing(models.Model):
     dv_no = models.CharField(max_length=128, blank=True, null=True)
     cluster = models.CharField(max_length=128, blank=True, null=True)
