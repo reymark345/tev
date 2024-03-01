@@ -118,7 +118,7 @@ def division_edit(request):
     
     
 def division_load(request):
-    division_data = Division.objects.select_related().filter(status=0).order_by('-created_at').reverse()
+    division_data = Division.objects.select_related().filter().order_by('-created_at').reverse()
     total = division_data.count()
 
     _start = request.GET.get('start')
