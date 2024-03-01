@@ -165,7 +165,7 @@ table.myClass * { /*new*/
     -webkit-print-color-adjust: exact;
     color: black; /* Make sure text remains readable */
     border: 1.8px solid;
-    font-size: 10px;
+    font-size: 15px;
   }
 
 .container-body2,.container-body3,.container-body4 {
@@ -1322,140 +1322,8 @@ margin-top: 99%;
             </tbody>
           </table>
            
-          <div class="footer">
-            Cash Unit's Copy
-          </div>
         </div>
         <br>
-
-        
-        <div class="container-body4">
-          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS FMD<br> Regular / Contractual / MOA<br> DV# {{ dv_number }} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
-          <table style="font-family: Calibri, sans-serif;" >
-            <thead></thead>
-            <tbody>
-              <tr >
-                <td><b>No.</b></td>
-                <td><b>Account Number</b></td>
-                <td><b>ID NUMBER</b></td>
-                <td><b><center>NAME</center></b></td>
-                <td><b>AMOUNT</b></td>
-                <td><b>CHARGE</b></td>
-                <td><b><center>PURPOSE</center></b></td>
-              
-              </tr>              
-              {% for emp in data %}
-              <tr>
-                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
-                <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
-                <td  class="align-text-left" style="padding: 4;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
-                <td style="padding: 4;" class="align-text-right">{{ emp.charges_amount|floatformat:2|intcomma }}</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.charges_name }}</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.purpose }}</td>
-              </tr>
-              {% endfor %}
-
-
-              <tr >
-                <td style="padding: 0;"></td>
-                <td style="padding: 2;"><b>TOTAL</b></td>
-                <td style="padding: 0;"></td>
-                <td style="padding: 0;"></td>
-                <td style="padding: 4;" class="align-text-right"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
-                <td style="padding: 0;"></td>
-                <td style="padding: 0;"><center><b>{{ total_count }}</b></center></td>
-              </tr>
-            </tbody>
-          </table>
-
-          <table  style="border: 0; font-family: Calibri, sans-serif;" class="myClass" cellspacing="0" cellpadding="0" width="100%">
-            <tbody>
-              <tr>
-                <td>
-                  <table style="border: 0;">
-                    <tbody>
-                      <tr>
-                        <td style="width: 0px;border:0;"></td>
-                        <td style="width: 30px;border:0;"></td>
-                        <td style="width: 100px;border:0;"></td>
-                      </tr>
-                      <tr>
-                        <td style="font-size: 13px;padding: 0;" colspan="2" class="no-border">PREPARED BY:</td>
-      
-                      </tr>
-                      <tr>
-                        <td class="no-border"></td>
-      
-                      </tr>
-                      <tr>
-                        <td class="no-border"></td>
-                        <td class="no-border" colspan="2" >
-                          <!-- <center><b><u>Janice Lamorin</u></b></center> -->
-                          <center><b><u><span contenteditable="true" id="editableName">{{ user }}</span></u></b></center>
-                        </td>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td class="no-border"></td>
-                        <td class="no-border" colspan="2">
-                            <center><span contenteditable="true" id="editablePosition">{{ position }}</span></center>
-                        </td>
-                      </tr>
-      
-      
-                    </tbody>
-                  </table>
-                </td>
-                <td>
-                  <table style="border: 0;">
-                    <tbody>
-                      <tr>
-                        <td style="width: 140px;border:0;"></td>
-                        <td style="width:80px;border:0;"></td>
-                        <td style="width:72px;border:0;"></td>
-                        <td style="border:0;"></td>
-      
-                      </tr>
-                      <tr>
-                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0;" class="no-border coloredrow"><b>CHARGE</b></td>
-                        <td style="font-size: 15;background-color:rgb(158, 198, 255); padding: 0; text-align: right;" colspan="2" class="no-border coloredrow"><b>Sum of AMOUNT</b></td>
-                      </tr>
-      
-                      {% for emp in charges_list %}
-                      <tr>
-                        <td style="padding: 0;" class="no-border"> {{ emp.charges|upper }}</td>
-                        <td style="padding: 0; text-align: right;" class="no-border" colspan="2">
-                          {{ emp.final_amount|floatformat:2|intcomma }} 
-                        </td>
-      
-                      </tr>
-                      {% endfor %}
-                      
-                      
-      
-                      <tr>
-                        <td style="padding: 0;;background-color:rgb(158, 198, 255);" class="no-border coloredrow"><b>GRAND Total</b></td>
-                        <td style="padding: 0;background-color:rgb(158, 198, 255); text-align: right;"  class="no-border coloredrow" colspan="2"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-           
-          <div class="footer">
-            COA's Copy
-          </div>
-        </div>
-
-        
-    
-      </div>
-
-
-      
 
         </div>
       </div>
