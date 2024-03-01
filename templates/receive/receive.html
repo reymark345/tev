@@ -156,19 +156,13 @@
             </div>
             <div class="col-12 col-md-6">
                 <label class="form-label" for="modalFEmployeeName">Created By</label>
-                <select
-                id="f-createdby"
-                name="FCreatedBy"
-                class="form-select"
-                >
+                <select class="select2 form-select" name="FCreatedBy" id="f-createdby">
                     <option></option>
-                    <option value="1">Coming soon wait for a moment</option>
-                    <option value="3">Coming soon wait for a moment</option>
+                    {% for row in created_by %}
+                    <option value="{{ row.id }}">{{ row.full_name }}</option>
+                    {% endfor %}
                 </select>
             </div>
-
-
-
                 <input
                 type="hidden"
                 id="f-first-name"
@@ -472,6 +466,7 @@
             FFinalAmount= jQuery(document.querySelector('[name="FFinalAmount"]')),
             FAccountNumber= jQuery(document.querySelector('[name="FAccountNumber"]')),
             FStatus= jQuery(document.querySelector('[name="FStatus"]')),
+            FCreatedBy= jQuery(document.querySelector('[name="FCreatedBy"]')),
             FFirstName= jQuery(document.querySelector('[name="FFirstName"]')),
             FMiddleName= jQuery(document.querySelector('[name="FMiddleName"]')),
             FLastName= jQuery(document.querySelector('[name="FLastName"]')),
@@ -521,6 +516,7 @@
                     d.FFinalAmount = FFinalAmount.val()
                     d.FAccountNumber = FAccountNumber.val()
                     d.FStatus = FStatus.val()
+                    d.FCreatedBy = FCreatedBy.val()
                     d.FFirstName = FFirstName.val()
                     d.FMiddleName = FMiddleName.val()
                     d.FLastName = FLastName.val()
@@ -534,14 +530,10 @@
                     render: function (data, type, row) {
                         let isChecked = selectedCb.includes(data.toString());
                         var status = row.status;
-
-
-                        var status = row.status; // Access the 'status' value from the 'row' object
-
+                        var status = row.status;
                         if (status == 3) {
                             return '<input type="checkbox" disabled="disabled" class="dt-checkboxes form-check-input">';
                         } else {
-                            // Render a checkbox for each row with the item ID as its value
                             return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
                         }
 
@@ -559,7 +551,6 @@
                 { data: 'lacking' },
                 { data: 'user_id' },
                 { data: 'id' },
-
             ],
             columnDefs: [
                 {
@@ -573,7 +564,6 @@
                         }
                     },
                 },
-
                 {
                     targets: 3,
                     render: function(data) {
@@ -589,7 +579,6 @@
                         }
                     },
                 },  
-
                 {
                     targets: 4,
                     render: function(data) {
@@ -1574,6 +1563,7 @@
         fdateField.clear();
         FEmployeeName.val('').trigger('change');
         FStatus.val('').trigger('change');
+        FCreatedBy.val('').trigger('change');
     }
 
     $('#approved').click(function() {
@@ -1699,6 +1689,15 @@
         FStatus.select2({
             placeholder: 'Choose Status',
             dropdownParent: FStatus.parent(),
+            allowClear: true,
+        })
+    }
+
+    if (FCreatedBy.length) {
+        FCreatedBy.wrap('<div class="position-relative"></div>')
+        FCreatedBy.select2({
+            placeholder: 'Choose Name',
+            dropdownParent: FCreatedBy.parent(),
             allowClear: true,
         })
     }

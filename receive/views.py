@@ -54,28 +54,23 @@ def list(request):
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
-
-    # data = []
-    # user_name = RolePermissions.objects.filter(role_id = 2) 
-    # get_id = user_name.values_list('user_id', flat=True)
-    
-    # for item in get_id:
-    #     item_entry = {
-    #         'status': item['status_id'],
-    #         'user_id': full_name
-    #     }
-
-    #     data.append(item_entry)
-    
-
-    # print(get_id)
-    # print("get_id")
-
+    data = []
+    user_name = RolePermissions.objects.filter(role_id=2) 
+    get_id = user_name.values_list('user_id', flat=True)
+    for user_id in get_id:
+        userData = AuthUser.objects.filter(id=user_id)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
+        item_entry = {
+            'id': userData[0].id,
+            'full_name': full_name
+        }
+        data.append(item_entry)
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'remarks_list' : RemarksLib.objects.filter().order_by('name'),
-            'permissions' : role_names
+            'permissions' : role_names,
+            'created_by' :  data
         }
         return render(request, 'receive/receive.html' , context)
     else:
@@ -135,6 +130,7 @@ def item_load(request):
     FLastName= request.GET.get('FLastName')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
     FStatus = request.GET.get('FStatus')
+    FCreatedBy = request.GET.get('FCreatedBy')
     EmployeeList = request.GET.getlist('EmployeeList[]')
     status_txt = ''
     if _search in "returned":
@@ -162,6 +158,7 @@ def item_load(request):
             AND final_amount LIKE %s
             AND incoming_in LIKE %s
             AND status_id LIKE %s
+            AND user_id LIKE %s
             )GROUP BY t1.id ORDER BY id DESC;
         """
 
@@ -173,7 +170,8 @@ def item_load(request):
             '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
             '%' + FFinalAmount + '%' if FFinalAmount else "%%",
             '%' + FIncomingIn + '%' if FIncomingIn else "%%",
-            '%' + FStatus + '%' if FStatus else "%%"
+            '%' + FStatus + '%' if FStatus else "%%",
+            '%' + FCreatedBy + '%' if FCreatedBy else "%%"
         ]
 
     elif FAdvancedFilter:
@@ -196,6 +194,7 @@ def item_load(request):
             AND final_amount LIKE %s
             AND incoming_in LIKE %s
             AND status_id LIKE %s
+            AND user_id LIKE %s
             )GROUP BY t1.id ORDER BY id DESC;
         """
 
@@ -207,7 +206,8 @@ def item_load(request):
             '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
             '%' + FFinalAmount + '%' if FFinalAmount else "%%",
             '%' + FIncomingIn + '%' if FIncomingIn else "%%",
-            '%' + FStatus + '%' if FStatus else "%%"
+            '%' + FStatus + '%' if FStatus else "%%",
+            '%' + FCreatedBy + '%' if FCreatedBy else "%%"
         ]
 
     elif _search:
