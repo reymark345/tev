@@ -33,16 +33,22 @@ def tracking_list(request):
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
+    context = {
+        'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+        'permissions' : role_names,
+    }
+    return render(request, 'tracking/tracking_list.html', context)
+
               
 
-    if any(role_name in allowed_roles for role_name in role_names):
-        context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'permissions' : role_names,
-        }
-        return render(request, 'tracking/tracking_list.html', context)
-    else:
-        return render(request, 'pages/unauthorized.html')
+    # if any(role_name in allowed_roles for role_name in role_names):
+    #     context = {
+    #         'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+    #         'permissions' : role_names,
+    #     }
+    #     return render(request, 'tracking/tracking_list.html', context)
+    # else:
+    #     return render(request, 'pages/unauthorized.html')
 
 
 def tracking_load(request):

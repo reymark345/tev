@@ -77,7 +77,8 @@ def dashboard(request):
     if any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'dashboard.html',context)
     else:
-        return redirect("travel-history")
+        return redirect("tracking-list")
+    
     
 @csrf_exempt
 def logout(request):

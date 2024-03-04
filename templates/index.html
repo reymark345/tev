@@ -221,7 +221,7 @@
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Tracking</span>
                         </li>
-                        {% if permissions %}
+                        <!-- {% if permissions %}
                             {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions or 'Outgoing staff' in permissions or 'Budget staff' in permissions or 'Journal staff' in permissions or 'Approval staff' in permissions %}
                                 <li class="menu-item {% if url_name == 'tracking-list' %}active{% endif %}" >
                                     <a href="{% url 'tracking-list' %}" class="menu-link">
@@ -231,14 +231,28 @@
                                     </a>
                                 </li>
                             {% endif %}
-                        {% endif %}
+                        {% endif %} -->
 
-                        <li class="menu-item {% if url_name == 'travel-history' %}active{% endif %}">
-                            <a href="{% url 'travel-history' %}" class="menu-link">
-                                <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
-                                <div data-i18n="Travel History">Travel History</div>
+                        
+                        <li class="menu-item {% if url_name == 'tracking-list' %}active{% endif %}" >
+                            <a href="{% url 'tracking-list' %}" class="menu-link">
+                            
+                                <i class="menu-icon tf-icons ti ti-lifebuoy"></i>
+                                <div data-i18n="Status">Status</div>
                             </a>
                         </li>
+
+                        {% if permissions %}
+                            {% if 'Admin' in permissions %}
+                            <li class="menu-item {% if url_name == 'travel-history' %}active{% endif %}">
+                                <a href="{% url 'travel-history' %}" class="menu-link">
+                                    <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
+                                    <div data-i18n="Travel History">Travel History</div>
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endif %}
+                        
                         {% if permissions %}
                             {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions %}
                                 <li class="menu-item {% if url_name == 'travel-calendar' %}active{% endif %}">
@@ -247,9 +261,7 @@
                                         <div data-i18n="Travel Calendar">Travel Calendar</div>
                                     </a>
                                 </li>
-                            
-
-                            {% endif %}
+                        {% endif %}
                             {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions %}
                                 <!-- Libraries -->
                                 <li class="menu-header small text-uppercase">
