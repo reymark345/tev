@@ -63,7 +63,6 @@
                                 <th>Original Amount</th>
                                 <th>Amt. Certified</th>
                                 <th>Status</th>
-                                <th>Purpose</th>
                                 <th>Remarks</th>
                                 <th>Incoming</th>
                                 <th>Outgoing</th>
@@ -852,16 +851,16 @@
                         let orgAmountColumn = '';
                         let finalAmountColumn = '';
                         let editColumn = '';
-                        let purposeColumn = '';
+                        // let purposeColumn = '';
                         let statusColumn = '';
                         let status = item.status;
                         let remarks = '';
                         if (item.remarks) {remarks = item.remarks;} 
                         else {remarks = remarks = '';}
 
-                        if (item.purpose) {
-                          purposeColumn = item.purpose;
-                        }
+                        // if (item.purpose) {
+                        //   purposeColumn = item.purpose;
+                        // }
 
                         if (status ==1){
                           statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
@@ -923,7 +922,6 @@
                                 ${orgAmountColumn}
                                 ${finalAmountColumn}
                                 ${statusColumn}
-                                <td>${purposeColumn}</td>
                                 <td><span class="badge bg-label-danger">${remarks}</span></td>
                                 <td><span class="badge bg-label-primary">${incoming_date}</span></td>
                                 <td><span class="badge bg-label-primary">${outgoing_date}</span></td>
