@@ -26,6 +26,7 @@ from tablib import Dataset
 import ast
 from django.db.models import F, CharField, Value
 from django.db.models.functions import Concat
+from django.utils import timezone
 
 
 def generate_code():
@@ -880,6 +881,7 @@ def item_returned(request):
     travel_date = request.POST.get('HDateTravel')
     selected_remarks = request.POST.getlist('selectedRemarks[]')
     selected_dates = request.POST.getlist('selectedDate[]')
+    date_received = request.POST.get('DateReceived')
 
 
     
@@ -887,8 +889,10 @@ def item_returned(request):
     travel_date_spaces = travel_date_stripped.replace(' ', '')
     id = request.POST.get('ItemID')
 
+    print()
+
     data = TevIncoming.objects.filter(id=id).first()
-    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,user_id=data.user_id)
+    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,incoming_in =data.incoming_in,user_id=data.user_id)
     tev_add.save()
 
     last_added_tevincoming = TevIncoming.objects.latest('id')
