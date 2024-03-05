@@ -88,7 +88,6 @@
                             <th>Dv Number</th>
                             <th>Cluster</th>
                             <th>Division</th>
-                            <th>Division Chief</th>
                             <th>Status</th>
                             <th>Amount</th>
                             <th>Date In</th>
@@ -488,7 +487,6 @@
                 { data: 'dv_no', id : 'id' },
                 { data: 'cluster' },
                 { data: 'division_name' },
-                { data: 'division_chief' },
                 { data: 'status' },
                 { data: 'amount' },
                 { data: 'box_b_in' },
@@ -531,7 +529,7 @@
                     },
                 },
                 {
-                  targets: 5,
+                  targets: 4,
                   render: function (data) {
                     if(data==11){
                           return '<span class="badge bg-label-warning">For Receive</span>'
@@ -545,7 +543,7 @@
                   },
                 },
                 {
-                    targets: 6,
+                    targets: 5,
                     render: function (data) {
                         let floatValue = parseFloat(data);
 
@@ -559,19 +557,19 @@
                 },
 
                 {
+                    targets: 6,
+                    render: function (data) {
+                        return (data == null) ? '' : moment(data).format('LLL');
+                    },
+                },
+                {
                     targets: 7,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
                 {
-                    targets: 8,
-                    render: function (data) {
-                        return (data == null) ? '' : moment(data).format('LLL');
-                    },
-                },
-                {
-                    targets: 10,
+                    targets: 9,
                     render: function (data) {
                         return (data == null) ? '' : moment(data).format('LLL');
                     },

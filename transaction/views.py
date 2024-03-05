@@ -341,6 +341,8 @@ def outgoing_load(request):
             full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
         else:
             full_name_receiver = ""
+
+            
         item = {
             'id': item.id,
             'dv_no': item.dv_no,
@@ -352,9 +354,9 @@ def outgoing_load(request):
             'box_b_out': item.box_b_out,
             'd_received': item.otg_d_received,
             'd_forwarded': item.otg_d_forwarded,
-            'received_by': full_name_receiver,
-            'user_id': full_name,
-            'out_by': full_name
+            'received_by': full_name_receiver.title(),
+            'user_id': full_name.title(),
+            'out_by': full_name.title()
         }
 
         data.append(item)
@@ -459,9 +461,9 @@ def budget_load(request):
             'box_b_out': item.box_b_out,
             'd_received': item.b_d_received,
             'd_forwarded': item.b_d_forwarded,
-            'received_by': full_name_receiver,
-            'user_id': full_name,
-            'out_by': full_name
+            'received_by': full_name_receiver.title(),
+            'user_id': full_name.title(),
+            'out_by': full_name.title()
         }
 
         data.append(item)
@@ -696,9 +698,9 @@ def journal_load(request):
             'd_received': item['j_d_received'],
             'd_forwarded': item['j_d_forwarded'],
             'amount': item['charges_amount'],
-            'received_by': full_name_receiver,
-            'user_id': full_name,
-            'out_by': full_name
+            'received_by': full_name_receiver.title(),
+            'user_id': full_name.title(),
+            'out_by': full_name.title()
         }
 
         data.append(new_item)
@@ -807,9 +809,9 @@ def approval_load(request):
             'box_b_out': item.box_b_out,
             'd_received': item.a_d_received,
             'd_forwarded': item.a_d_forwarded,
-            'received_by': full_name_receiver,
-            'user_id': full_name,
-            'out_by': full_name
+            'received_by': full_name_receiver.title(),
+            'user_id': full_name.title(),
+            'out_by': full_name.title()
         }
 
         data.append(item)
@@ -2263,7 +2265,7 @@ def receive_approval(request):
         TevIncoming.objects.filter(id__in=ids).update(status_id=14)
         
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=14,j_d_received=timezone.now(), j_r_user_id = user_id)
+            TevOutgoing.objects.filter(id=item_id).update(status_id=14,a_d_received=timezone.now(), a_r_user_id = user_id)
         return JsonResponse({'data': 'success'})
      
 
@@ -2284,7 +2286,7 @@ def forward_approval(request):
         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
         TevIncoming.objects.filter(id__in=ids).update(status_id=15)
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=15,j_out_user_id = user_id,j_d_forwarded=timezone.now())
+            TevOutgoing.objects.filter(id=item_id).update(status_id=15,a_out_user_id = user_id,a_d_forwarded=timezone.now())
         return JsonResponse({'data': 'success'})
 
 
