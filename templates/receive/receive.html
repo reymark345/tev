@@ -1300,8 +1300,6 @@
             buttonsStyling: false,
         }).then(function (result) {
             if (result.value) {
-                let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-    
                 $.ajax({
                     type: 'POST',
                     url: "{% url 'out-pending-tev' %}",
