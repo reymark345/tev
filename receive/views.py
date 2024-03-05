@@ -27,6 +27,7 @@ import ast
 from django.db.models import F, CharField, Value
 from django.db.models.functions import Concat
 from django.utils import timezone
+from django.template.defaultfilters import date
 
 
 def generate_code():
@@ -482,7 +483,7 @@ def checking_load(request):
         last_name = item['last_name'] if item['last_name'] else ''
         
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
-
+        formatted_date = date(item['incoming_out'], "F j, Y g:i A")  # "F j, Y g:i A" is the desired format
         item_entry = {
             'id': item['id'],
             'code': item['code'],
@@ -493,7 +494,7 @@ def checking_load(request):
             'original_amount': item['original_amount'],
             'final_amount': item['final_amount'],
             'incoming_in': item['incoming_in'],
-            'incoming_out': item['incoming_out'],
+            'incoming_out': formatted_date,
             'slashed_out': item['slashed_out'],
             'remarks': item['remarks'],
             'lacking': item['lacking'],
@@ -1076,10 +1077,8 @@ def item_add(request):
 @csrf_exempt
 def out_pending_tev(request):
     out_list = request.POST.getlist('out_list[]')
-    print("testtttt")
-
     for item_id  in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=timezone.now())
+        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=date_time.datetime.now())
     return JsonResponse({'data': 'success'})
 
 
