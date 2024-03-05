@@ -29,7 +29,6 @@
                               <th>Dv Number</th>
                               <th>Cluster</th>	
                               <th>Division</th>
-                              <th>Division Chief</th>
                               <th>Status</th>
                               <th>Date In</th>
                               <th>Date Received</th>
@@ -352,7 +351,6 @@
                   { data: 'dv_no'},
                   { data: 'cluster' },
                   { data: 'division_name' },
-                  { data: 'division_chief' },
                   { data: 'status' },
                   { data: 'box_b_out' },
                   { data: 'd_received' },
@@ -389,8 +387,9 @@
                           return '<span class="badge bg-label-info">'+data+'</span>'
                       },
                   },
+                  
                   {
-                    targets: 5,
+                    targets: 4,
                     render: function (data) {
                         if(data==9){
                           return '<span class="badge bg-label-warning">For Receive</span>'
