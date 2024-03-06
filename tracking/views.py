@@ -21,6 +21,12 @@ from datetime import datetime,timedelta
 from receive.filters import UserFilter
 import datetime as date_time
 from django.db.models import Subquery, Max, F, Q, Exists, OuterRef
+import pandas as pd
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
+from django.utils import timezone
+
 
 
 @login_required(login_url='login')
@@ -406,26 +412,7 @@ def employee_details(request):
             'cluster': row[14],
             'remarks': row[15], 
         }
-        data.append(item)
-
-
-    # for row in results:
-    #     item = {
-    #         'id': row.id,
-    #         'code': row.code,
-    #         'id_no': row.id_no,
-    #         'account_no': row.account_no,
-    #         'date_travel': row.date_travel,
-    #         'original_amount': row.original_amount,
-    #         'final_amount': row.final_amount,
-    #         'incoming_in': row.incoming_in,
-    #         'remarks': row.remarks,
-    #         'status': row.status_id,
-    #         'purpose': "",
-    #     }
-    #     data.append(item)
-        
-               
+        data.append(item)      
     total = len(data)    
 
           
@@ -441,8 +428,6 @@ def employee_details(request):
     }
     return JsonResponse(response)
 
-    
-
 @login_required(login_url='login')
 @csrf_exempt
 def travel_history(request):
@@ -456,6 +441,80 @@ def travel_history(request):
     }
     return render(request, 'tracking/travel_history.html', context)
 
+@csrf_exempt
+def export_status(request):
+    tris_queryset = TevIncoming.objects.all()
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = 'attachment; filename={date}-TRIS-REPORT.xlsx'.format(
+        date=datetime.now().strftime('%Y-%m-%d'),
+    )
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = 'REPORT'
+
+    header_font = Font(name='Calibri', bold=True)
+    centered_alignment = Alignment(horizontal='center')
+    border_bottom = Border(
+        bottom=Side(border_style='medium', color='FF000000'),
+    )
+    wrapped_alignment = Alignment(
+        vertical='top',
+        wrap_text=True
+    )
+    columns = [
+        'CODE',
+        'FIRSTNAME',
+        'MIDDLENAME',
+        'LASTNAME',
+        'ID NO',
+        'ACCOUNT NO',
+        'DATE TRAVEL',
+        'ORIGINAL AMOUNT',
+        'FINAL_AMOUNT',
+        'DATE ACTUAL RECEIVED',
+        'DATE ENTRY',
+        'DIVISION',
+        'SECTION',
+        'USER ID',
+        'STATUS ID',
+    ]
+    row_num = 1
+    for col_num, (column_title) in enumerate(columns, 1):
+        cell = worksheet.cell(row=row_num, column=col_num)
+        cell.value = column_title
+        cell.font = header_font
+        column_letter = get_column_letter(col_num)
+        column_dimensions = worksheet.column_dimensions[column_letter]
+
+    for tris in tris_queryset:
+        row_num += 1
+        row = [
+            tris.code,
+            tris.first_name,
+            tris.middle_name,
+            tris.last_name,
+            tris.id_no,
+            tris.account_no,
+            tris.date_travel,
+            tris.original_amount,
+            tris.final_amount,
+            tris.incoming_in.astimezone(timezone.utc).replace(tzinfo=None) if tris.incoming_in else None,
+            tris.updated_at.astimezone(timezone.utc).replace(tzinfo=None) if tris.updated_at else None,
+            tris.division,
+            tris.section,
+            tris.user_id,
+            tris.status_id,
+        ]        
+        for col_num, cell_value in enumerate(row, 1):
+            cell = worksheet.cell(row=row_num, column=col_num)
+            cell.value = cell_value
+            column_letter = get_column_letter(col_num)
+            column_dimensions = worksheet.column_dimensions[column_letter]
+            column_dimensions.width = 17
+    workbook.save(response)
+    return response
 
 @login_required(login_url='login')
 @csrf_exempt
