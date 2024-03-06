@@ -107,6 +107,7 @@ DATABASES = {
         'PORT':'3306',
     },
 
+
     'finance_2024': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2024',
