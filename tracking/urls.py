@@ -9,5 +9,6 @@ urlpatterns = [
     path('tracking_load', views.tracking_load, name='tracking-load'),
     path('travel_history_load', views.travel_history_load, name='travel-history-load'),
     path('employee_details', views.employee_details, name='employee-details'),
+    path('export_status', views.export_status, name='export-status'),
     
 ]
