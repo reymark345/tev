@@ -98,6 +98,7 @@ DATABASES = {
     #     'PORT': '3306',
     # },
     #for server INFIMOS
+    
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2023',
