@@ -471,7 +471,6 @@
             FMiddleName= jQuery(document.querySelector('[name="FMiddleName"]')),
             FLastName= jQuery(document.querySelector('[name="FLastName"]')),
             FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
-
             OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
             DateReceived = jQuery(document.querySelector('[name="DateReceived"]')),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
@@ -1585,27 +1584,27 @@
 
 
     $('#employee-name').change(function() {
-    var selectedOption = $(this).find('option:selected');
-    var optionText = selectedOption.attr('id');
-    if (optionText) {
-        const employees = JSON.parse(localStorage.getItem('employees'));
-        if (employees) {
-            const selectedEmployeeId = selectedOption.attr('id');
-            const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
-            if (selectedEmployee) {
-                $('#id-number').val(selectedEmployee.idNumber);
-                $('#acct-number').val(selectedEmployee.accNumber);
-                $('#emp-name').val(selectedEmployee.firstName);
-                $('#emp-middle').val(selectedEmployee.middleInitial);
-                $('#emp-lastname').val(selectedEmployee.lastName);
-                $('#division-user').val(selectedEmployee.division);
-                $('#section-user').val(selectedEmployee.section);
+        var selectedOption = $(this).find('option:selected');
+        var optionText = selectedOption.attr('id');
+        if (optionText) {
+            const employees = JSON.parse(localStorage.getItem('employees'));
+            if (employees) {
+                const selectedEmployeeId = selectedOption.attr('id');
+                const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
+                if (selectedEmployee) {
+                    $('#id-number').val(selectedEmployee.idNumber);
+                    $('#acct-number').val(selectedEmployee.accNumber);
+                    $('#emp-name').val(selectedEmployee.firstName);
+                    $('#emp-middle').val(selectedEmployee.middleInitial);
+                    $('#emp-lastname').val(selectedEmployee.lastName);
+                    $('#division-user').val(selectedEmployee.division);
+                    $('#section-user').val(selectedEmployee.section);
+                }
+            } else {
+                console.log("No employee data found in local storage.");
             }
-        } else {
-            console.log("No employee data found in local storage.");
         }
-    }
-});
+    });
 
     $('#f-employee-name').change(function() {
         var selectedOptions = $(this).find('option:selected');
