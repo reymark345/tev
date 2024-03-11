@@ -1889,7 +1889,7 @@ def add_dv(request):
         cluster_id = request.POST.get('Cluster')
         div_id = request.POST.get('Division')
         
-        outgoing = TevOutgoing(dv_no=dv_number, cluster=cluster_id, box_b_in=timezone.now(), user_id=user_id, division_id=div_id)
+        outgoing = TevOutgoing(dv_no=dv_number, cluster=cluster_id, box_b_in=date_time.datetime.now(), user_id=user_id, division_id=div_id)
         outgoing.save()
         
         return JsonResponse({'data': 'success'})
@@ -2087,7 +2087,7 @@ def out_box_a(request):
             ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
             TevIncoming.objects.filter(id__in=ids).update(status_id=6)
             for item_id  in out_list:
-                TevOutgoing.objects.filter(id=item_id).update(status_id=6,box_b_out=timezone.now(), out_by = user_id)
+                TevOutgoing.objects.filter(id=item_id).update(status_id=6,box_b_out=date_time.datetime.now(), out_by = user_id)
             return JsonResponse({'data': 'success'})
 
 @csrf_exempt
@@ -2111,7 +2111,7 @@ def receive_otg(request):
         TevIncoming.objects.filter(id__in=ids).update(status_id=8)
         
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=8,otg_d_received=timezone.now(), otg_r_user_id = user_id)
+            TevOutgoing.objects.filter(id=item_id).update(status_id=8,otg_d_received=date_time.datetime.now(), otg_r_user_id = user_id)
         return JsonResponse({'data': 'success'})
 
 @csrf_exempt
@@ -2131,7 +2131,7 @@ def forward_otg(request):
         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
         TevIncoming.objects.filter(id__in=ids).update(status_id=9)
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=timezone.now())
+            TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=date_time.datetime.now())
         return JsonResponse({'data': 'success'})
 
 
@@ -2156,7 +2156,7 @@ def receive_budget(request):
         TevIncoming.objects.filter(id__in=ids).update(status_id=10)
         
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=10,b_d_received=timezone.now(), b_r_user_id = user_id)
+            TevOutgoing.objects.filter(id=item_id).update(status_id=10,b_d_received=date_time.datetime.now(), b_r_user_id = user_id)
         return JsonResponse({'data': 'success'})
     
 
@@ -2178,7 +2178,7 @@ def forward_budget(request):
         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
         TevIncoming.objects.filter(id__in=ids).update(status_id=11)
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=11,b_out_user_id = user_id,b_d_forwarded=timezone.now())
+            TevOutgoing.objects.filter(id=item_id).update(status_id=11,b_out_user_id = user_id,b_d_forwarded=date_time.datetime.now())
         return JsonResponse({'data': 'success'})
 
 
@@ -2203,7 +2203,7 @@ def receive_journal(request):
         TevIncoming.objects.filter(id__in=ids).update(status_id=12)
         
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=12,j_d_received=timezone.now(), j_r_user_id = user_id)
+            TevOutgoing.objects.filter(id=item_id).update(status_id=12,j_d_received=date_time.datetime.now(), j_r_user_id = user_id)
         return JsonResponse({'data': 'success'})
      
 
@@ -2228,14 +2228,14 @@ def forward_journal(request):
         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
         TevIncoming.objects.filter(id__in=ids).update(status_id=13)
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=13,j_out_user_id = user_id,j_d_forwarded=timezone.now())
+            TevOutgoing.objects.filter(id=item_id).update(status_id=13,j_out_user_id = user_id,j_d_forwarded=date_time.datetime.now())
 
         dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
         with transaction.atomic():
             for dv in dv_no_values:
                 print(dv)
                 with connection.cursor() as cursor:
-                    actual_date = timezone.now()
+                    actual_date = date_time.datetime.now()
                     query = f"""
                     UPDATE {finance_database_name}.transactions SET approval_date = %s WHERE dv_no = %s
                     """
@@ -2265,7 +2265,7 @@ def receive_approval(request):
         TevIncoming.objects.filter(id__in=ids).update(status_id=14)
         
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=14,a_d_received=timezone.now(), a_r_user_id = user_id)
+            TevOutgoing.objects.filter(id=item_id).update(status_id=14,a_d_received=date_time.datetime.now(), a_r_user_id = user_id)
         return JsonResponse({'data': 'success'})
      
 
@@ -2286,7 +2286,7 @@ def forward_approval(request):
         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
         TevIncoming.objects.filter(id__in=ids).update(status_id=15)
         for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=15,a_out_user_id = user_id,a_d_forwarded=timezone.now())
+            TevOutgoing.objects.filter(id=item_id).update(status_id=15,a_out_user_id = user_id,a_d_forwarded=date_time.datetime.now())
         return JsonResponse({'data': 'success'})
 
 

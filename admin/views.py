@@ -14,6 +14,7 @@ from main.models import (AuthUser, StaffDetails,RoleDetails, RolePermissions )
 import json 
 from django.core.serializers import serialize
 import datetime
+import datetime as date_time
 from django.contrib.auth.hashers import make_password
 import math
 from django.db.models import Max
@@ -131,7 +132,7 @@ def user_add(request):
         return JsonResponse({'data': 'error', 'message': 'Username Taken'})
     
     else:
-        user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=timezone.now())
+        user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=date_time.datetime.now())
         user_add.save()
         max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
         user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,user_id = max_id)
