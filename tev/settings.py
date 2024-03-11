@@ -79,7 +79,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tev.wsgi.application'
 DATABASES = {
-    # for server to server
+    ##for server to server
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tris',
@@ -88,15 +88,6 @@ DATABASES = {
         'HOST': '172.31.240.235',
         'PORT': '3306',
     },
-    ##for server local
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'tris',
-    #     'USER': 'fmdDeveloper',
-    #     'PASSWORD': 'M@tth3w6fmd-developer',
-    #     'HOST': '172.31.240.235',
-    #     'PORT': '3306',
-    # },
     #for server INFIMOS
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
@@ -107,7 +98,6 @@ DATABASES = {
         'PORT':'3306',
     },
 
-
     'finance_2024': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2024',
@@ -116,7 +106,17 @@ DATABASES = {
         'HOST':'172.31.240.235',
         'PORT':'3306',
     },
-    # #for localhost main database
+
+    ##for server local but live database
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'tris',
+    #     'USER': 'fmdDeveloper',
+    #     'PASSWORD': 'M@tth3w6fmd-developer',
+    #     'HOST': '172.31.240.235',
+    #     'PORT': '3306',
+    # },
+    ##for localhost main database
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'tev_db',
@@ -187,7 +187,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Manila'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
