@@ -14,6 +14,7 @@ urlpatterns = [
     path('item_edit', views.item_edit, name='item-edit'),
     path('preview_received', views.preview_received, name='preview-received'),
     path('item_update', views.item_update, name='item-update'),
+    path('item_rod_update', views.item_rod_update, name='item-rod-update'),
     path('item_add', views.item_add, name='item-add'),
     path('item_returned', views.item_returned, name='item-returned'),
     
