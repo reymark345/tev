@@ -883,46 +883,17 @@ def item_rod_update(request):
     lname = request.POST.get('EmpLastname')
     travel_date = request.POST.get('DateTravel')
     date_received = request.POST.get('DateReceived')
-
-    print("wahhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
-    print(id)
-    print(name)
-    print(middle)
-    print(lname)
-    print(travel_date)
-    print(date_received)
- 
-
-    # if travel_date:
-    #     travel_date = request.POST.get('DateTravel')
-    # else :
-    #     start_date_str, end_date_str = range_travel.split(' to ')
-        
-    #     start_date = datetime.strptime(start_date_str.strip(), '%Y-%m-%d')
-    #     end_date = datetime.strptime(end_date_str.strip(), '%Y-%m-%d')
-        
-    #     formatted_dates = []
-
-    #     current_date = start_date
-    #     while current_date <= end_date:
-    #         formatted_dates.append(current_date.strftime('%d-%m-%Y'))
-    #         current_date += timedelta(days=1)
-
-    #     formatted_dates_str = ', '.join(formatted_dates)
-    #     travel_date = formatted_dates_str
+    id_no = request.POST.get('IdNumber')
+    acc_no = request.POST.get('AccountNumber')
+    div = request.POST.get('Division')
+    sec = request.POST.get('Section')
 
     duplicate_travel = []
     individual_dates = travel_date.split(',')
     cleaned_dates = ','.join(date.strip() for date in individual_dates)
 
-
-    print(individual_dates)
     for date in individual_dates:
         cleaned_date = date.strip()
-
-        print(cleaned_date)
-        print("cleaned_date")
-
         results = Q(first_name=name) & \
           Q(middle_name=middle) & \
           Q(last_name=lname) & \
@@ -948,28 +919,10 @@ def item_rod_update(request):
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
         
-        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string)
-        # Remarks_r.objects.filter(incoming_id=id).delete()
-        # for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
-        #     remarks_lib = Remarks_r(
-        #         date=selected_dates,
-        #         incoming_id=id,
-        #         remarks_lib_id=selected_remarks
-        #     )
-        #     remarks_lib.save()
-        
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec)
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
     else:
-        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,date_travel = travel_date, incoming_in = date_received, remarks = None)
-        # Remarks_r.objects.filter(incoming_id=id).delete()
-        # for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
-        #     remarks_lib = Remarks_r(
-        #         date=selected_dates,
-        #         incoming_id=id,
-        #         remarks_lib_id=selected_remarks
-        #     )
-        #     remarks_lib.save()
-        # tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount)
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec)
         return JsonResponse({'data': 'success'})
 
 @csrf_exempt

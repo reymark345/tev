@@ -154,9 +154,7 @@
                         <option value="3">Returned</option>
                     </select>
                 </div>
-    
-    
-    
+
                     <input
                     type="hidden"
                     id="f-first-name"
@@ -303,6 +301,15 @@
                 />
                 </div>
             </div>
+
+            <div class="col-sm-12">
+                <div class="col-sm-12">
+                    <label class="form-label" for="employee-name">Employee Name</label>
+                    <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
+                        <option></option>
+                    </select>
+                </div>
+            </div>
         
             <div class="col-sm-12">
     
@@ -321,14 +328,14 @@
                 <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
                 <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
             </div>
-            <input id="id-number" name="IdNumber" class="form-control idn" type="text" placeholder="16-0000"/>
-            <input id="acct-number" name="AccountNumber" class="form-control accn" type="text" placeholder="000000"/>
-            <input id="emp-name" name="EmpName" class="form-control accn" type="text" placeholder="nane"/>
-            <input id="emp-middle" name="EmpMiddle" class="form-control accn" type="text" placeholder="middle"/>
-            <input id="emp-lastname" name="EmpLastname" class="form-control accn" type="text" placeholder="lastname"/>
-            <input id="hdate-travel" name="HDateTravel" class="form-control accn" type="text" placeholder="Date Travel"/>
-            <input id="division-user" name="DivisionUser" class="form-control accn" type="text" placeholder="Division"/>
-            <input id="section-user" name="SectionUser" class="form-control accn" type="text" placeholder="Section"/>
+            <input id="id-number" name="IdNumber" class="form-control idn" type="hidden" placeholder="16-0000"/>
+            <input id="acct-number" name="AccountNumber" class="form-control accn" type="hidden" placeholder="000000"/>
+            <input id="emp-name" name="EmpName" class="form-control accn" type="hidden" placeholder="nane"/>
+            <input id="emp-middle" name="EmpMiddle" class="form-control accn" type="hidden" placeholder="middle"/>
+            <input id="emp-lastname" name="EmpLastname" class="form-control accn" type="hidden" placeholder="lastname"/>
+            <input id="hdate-travel" name="HDateTravel" class="form-control accn" type="hidden" placeholder="Date Travel"/>
+            <input id="division-user" name="DivisionUser" class="form-control accn" type="hidden" placeholder="Division"/>
+            <input id="section-user" name="SectionUser" class="form-control accn" type="hidden" placeholder="Section"/>
         </form> 
     </div>
 </div>
@@ -927,16 +934,15 @@
                     DateReceived: date_received
                 }
             }).done(function (data) { 
-                console.log(data);
-                console.log("resultttt");
                 dataTable.ajax.reload();               
-                // function formatDate(dateString) {
-                //     const [day, month, year] = dateString.split("-");
-                //     const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
-                //     const monthName = months[parseInt(month, 10) - 1];
-                //     return `${monthName} ${day}, ${year}`;
-                // }
+                function formatDate(dateString) {
+                    const [day, month, year] = dateString.split("-");
+                    const months = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                    const monthName = months[parseInt(month, 10) - 1];
+                    return `${monthName} ${day}, ${year}`;
+                }
                 if (data.data == 'success') {
+                    toastr.success('Update successfully', 'Success', toast_options);
                     // dateField.clear();
                 //     let code = data.g_code;
                 //     if (code){
@@ -964,6 +970,15 @@
                 //     $(".rangeTravel").prop("disabled", false);
 
                 //     dataTable.ajax.reload();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Update Successfully!',
+                        html:
+                        'Successfully <b>Update!</b>',
+                        customClass: {
+                            confirmButton: 'btn btn-success',
+                        },
+                    })
                 } else {
                     let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
                     dateField.clear();
@@ -972,7 +987,7 @@
                     DateReceived.val("");
                     DateTravel.val("");
                     $("#dateField").prop("disabled", false);
-                    dataTable.ajax.reload();
+                    
                     Swal.fire({
                         icon: 'error',
                         title: 'Duplicate Travel!',
@@ -982,6 +997,8 @@
                         },
                     })
                 }
+                dataTable.ajax.reload();
+                offCanvasEl.hide()
             })
             
         });
@@ -1191,8 +1208,6 @@
             var optionText = selectedOption.attr('id');
             if (optionText) {
                 const employees = JSON.parse(localStorage.getItem('employees'));
-                console.log(employees);
-                console.log("employees");
                 if (employees) {
                     const selectedEmployeeId = selectedOption.attr('id');
                     const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
