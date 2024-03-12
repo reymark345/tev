@@ -872,6 +872,58 @@ def item_update(request):
             remarks_lib.save()
         # tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount)
         return JsonResponse({'data': 'success'})
+    
+
+@csrf_exempt
+def item_rod_update(request):
+
+    id = request.POST.get('ItemID')
+    name = request.POST.get('EmpName')
+    middle = request.POST.get('EmpMiddle')
+    lname = request.POST.get('EmpLastname')
+    travel_date = request.POST.get('DateTravel')
+    date_received = request.POST.get('DateReceived')
+    id_no = request.POST.get('IdNumber')
+    acc_no = request.POST.get('AccountNumber')
+    div = request.POST.get('Division')
+    sec = request.POST.get('Section')
+
+    duplicate_travel = []
+    individual_dates = travel_date.split(',')
+    cleaned_dates = ','.join(date.strip() for date in individual_dates)
+
+    for date in individual_dates:
+        cleaned_date = date.strip()
+        results = Q(first_name=name) & \
+          Q(middle_name=middle) & \
+          Q(last_name=lname) & \
+          Q(date_travel__icontains=cleaned_date) & \
+          ~Q(status_id=3) & \
+          ~Q(id=id)
+        
+        results = TevIncoming.objects.filter(results).values('date_travel')
+        
+        if results:
+            duplicate_travel.append(cleaned_date)
+
+    if duplicate_travel:
+        formatted_dates = [date.replace("'", "") for date in duplicate_travel]
+        result = ",".join(formatted_dates)
+
+        date_components = result.split(',')
+        def format_date(date_str):
+            date_object = datetime.strptime(date_str, '%d-%m-%Y')
+            formatted_date = date_object.strftime('%b. %d, %Y')
+            return formatted_date
+        formatted_dates = [format_date(date) for date in date_components]
+        formatted_dates_string = ', '.join(formatted_dates)
+        formatted_dates_string = formatted_dates_string
+        
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec)
+        return JsonResponse({'data': 'error', 'message': duplicate_travel})
+    else:
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec)
+        return JsonResponse({'data': 'success'})
 
 @csrf_exempt
 def item_returned(request):
