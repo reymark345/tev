@@ -304,9 +304,11 @@
 
             <div class="col-sm-12">
                 <div class="col-sm-12">
-                    <label class="form-label" for="employee-name">Employee Name</label>
-                    <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
-                        <option></option>
+                    <label class="form-label" for="employee-name">Duplicate</label>
+                    <select id="duplicate" name="Duplicate" class="form-select" data-allow-clear="true">
+                        <option ></option>
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
                     </select>
                 </div>
             </div>
@@ -400,6 +402,7 @@
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
             HDateTravel = jQuery(document.querySelector('[name="HDateTravel"]')),
             DateReceived = jQuery(document.querySelector('[name="DateReceived"]')),
+            Duplicate = jQuery(document.querySelector('[name="Duplicate"]')),
 
             IdNumber = jQuery(document.querySelector('[name="IdNumber"]')),
             DivisionUser = jQuery(document.querySelector('[name="DivisionUser"]')),
@@ -915,6 +918,7 @@
             let division = DivisionUser.val();
             let section = SectionUser.val();
             let date_received = DateReceived.val();
+            let duplicate = Duplicate.val();
             let form_data = $('#item-form').serialize()
             $.ajax({
                 type: 'POST',
@@ -931,7 +935,8 @@
                     Division: division,
                     Section: section,
                     ItemID:ItemID.val(),
-                    DateReceived: date_received
+                    DateReceived: date_received,
+                    Duplicate: duplicate
                 }
             }).done(function (data) { 
                 dataTable.ajax.reload();               
@@ -985,6 +990,7 @@
                     EmployeeName.val("").trigger('change');
                     OriginalAmount.val("");
                     DateReceived.val("");
+                    Duplicate.val("").trigger('change');
                     DateTravel.val("");
                     $("#dateField").prop("disabled", false);
                     
