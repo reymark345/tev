@@ -883,6 +883,7 @@ def item_rod_update(request):
     lname = request.POST.get('EmpLastname')
     travel_date = request.POST.get('DateTravel')
     date_received = request.POST.get('DateReceived')
+    duplicate = request.POST.get('Duplicate')
     id_no = request.POST.get('IdNumber')
     acc_no = request.POST.get('AccountNumber')
     div = request.POST.get('Division')
@@ -919,7 +920,10 @@ def item_rod_update(request):
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
         
-        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec)
+        if duplicate:
+            TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec)
+        else:
+            TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec)
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
     else:
         TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec)
@@ -979,9 +983,14 @@ def item_add(request):
     selected_remarks = request.POST.getlist('selectedRemarks[]')
     selected_dates = request.POST.getlist('selectedDate[]')
     g_code = generate_code()
+    print(travel_date)
+    print("travel_date")
+    print(range_travel)
     if travel_date:
+        print("1sttt")
         travel_date = request.POST.get('DateTravel')
     else :
+        print("2ndddd")
         start_date_str, end_date_str = range_travel.split(' to ')
         
         start_date = datetime.strptime(start_date_str.strip(), '%Y-%m-%d')
