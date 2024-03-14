@@ -883,7 +883,6 @@ def item_rod_update(request):
     lname = request.POST.get('EmpLastname')
     travel_date = request.POST.get('DateTravel')
     date_received = request.POST.get('DateReceived')
-    duplicate = request.POST.get('Duplicate')
     id_no = request.POST.get('IdNumber')
     acc_no = request.POST.get('AccountNumber')
     div = request.POST.get('Division')
@@ -919,11 +918,7 @@ def item_rod_update(request):
         formatted_dates = [format_date(date) for date in date_components]
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
-        
-        if duplicate:
-            TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec)
-        else:
-            TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec)
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec)
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
     else:
         TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec)
@@ -1271,14 +1266,14 @@ def addtev(request):
 
 @csrf_exempt
 def updatetevdetails(request):
-
+    user_id = request.session.get('user_id', 0)
     if request.method == 'POST':
         amount = request.POST.get('final_amount')
         status = request.POST.get('status')
         transaction_id = request.POST.get('transaction_id')
         selected_remarks = request.POST.getlist('selected_remarks[]')
         selected_dates = request.POST.getlist('selected_dates[]')
-        tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status)
+        tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status, reviewed_by =user_id)
         Remarks_r.objects.filter(incoming_id=transaction_id).delete()
         for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             Remarks_r.objects.create(
