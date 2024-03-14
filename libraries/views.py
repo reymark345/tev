@@ -106,10 +106,6 @@ def division_update(request):
 
         return JsonResponse({'data': 'success'})
     
-
-
-    
-    
 def division_edit(request):
     id = request.GET.get('id')
     items = Division.objects.get(pk=id)
@@ -136,9 +132,11 @@ def division_load(request):
     for item in division_data:
         userData = AuthUser.objects.filter(id=item.created_by)
         full_name = userData[0].first_name + ' ' + userData[0].last_name
+        name = item.name
+        chief = item.chief
         item = {
             'id': item.id,
-            'name': item.name,
+            'name': name.upper(),
             'acronym': item.acronym,
             'chief': item.chief,
             'c_designation': item.c_designation,
@@ -213,10 +211,11 @@ def charges_load(request):
         full_name = userData[0].first_name + ' ' + userData[0].last_name
 
         if item.name != "Multiple":
+            name = item.name
             item = {
                 'id': item.id,
-                'name': item.name,
-                'created_by': full_name,
+                'name': name.upper(),
+                'created_by': full_name.upper(),
                 'created_at': item.created_at
             }
             data.append(item)
@@ -284,10 +283,11 @@ def remarks_load(request):
     for item in charges_data:
         userData = AuthUser.objects.filter(id=item.created_by)
         full_name = userData[0].first_name + ' ' + userData[0].last_name
+        name = item.name
         item = {
             'id': item.id,
-            'name': item.name,
-            'created_by': full_name,
+            'name': name.upper(),
+            'created_by': full_name.upper(),
             'created_at': item.created_at
         }
 
