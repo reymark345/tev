@@ -444,6 +444,8 @@ def travel_history(request):
 @csrf_exempt
 def export_status(request):
     tris_queryset = TevIncoming.objects.all()
+
+    
     response = HttpResponse(
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     )
