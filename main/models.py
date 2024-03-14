@@ -164,7 +164,7 @@ class TevIncoming(models.Model):
     remarks = models.TextField(blank=True, null=True)
     status = models.ForeignKey(Status, models.DO_NOTHING,default=1)
     user_id = models.CharField(max_length=128, blank=True, null=True)
-    reviewed_by = models.CharField(max_length=128, blank=True, null=True)
+    reviewed_by = models.CharField(max_length=255, blank=True, null=True)
     is_upload = models.BooleanField(default=False)
     updated_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     division = models.CharField(max_length=128, blank=True, null=True)
