@@ -567,21 +567,16 @@
 
                   },
                 },
-                // {
-                //     targets: -6,
-                //     render: function (data) {
-                //         return moment(data).format('LLL')
-                //     },
-                // },
                 {
                     targets: -4,
                     render: function (data) {
-                        if (data === null || data === undefined || data === "") {
-                            return ''; 
-                        } 
-                        else {
-                            return '<span class="badge bg-label-danger">' + data + '</span>';
-                        }
+                        return data;
+                        // if (data === null || data === undefined || data === "") {
+                        //     return ''; 
+                        // } 
+                        // else {
+                        //     return '<span class="badge bg-label-success">' + data + '</span>';
+                        // }
                     },
                 },
 

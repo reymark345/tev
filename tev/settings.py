@@ -88,7 +88,7 @@ DATABASES = {
         'HOST': '172.31.240.235',
         'PORT': '3306',
     },
-    # #for server INFIMOS
+    #for server INFIMOS
     
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
@@ -117,7 +117,7 @@ DATABASES = {
     #     'HOST': '172.31.240.235',
     #     'PORT': '3306',
     # },
-    #for localhost main database
+    ##for localhost main database
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'tev_db',
