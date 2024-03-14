@@ -821,8 +821,7 @@
                       type: 'POST',
                       url: "{% url 'export-status' %}"
                     }).done(function (data) {
-
-
+                      window.location.href = "{% url 'export-status' %}";
                     });
                   }
                 },

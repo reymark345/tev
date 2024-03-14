@@ -443,15 +443,36 @@ def travel_history(request):
 
 @csrf_exempt
 def export_status(request):
-    tris_queryset = TevIncoming.objects.all()
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no, tev_incoming.first_name, tev_incoming.middle_name,
+                    tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.division, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
+                    tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry,
+                    tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes
+            FROM tev_incoming
+            INNER JOIN (
+                    SELECT MAX(id) AS max_id
+                    FROM tev_incoming
+                    GROUP BY code
+            ) AS latest_ids
+            ON tev_incoming.id = latest_ids.max_id
+            LEFT JOIN tev_bridge
+            ON tev_incoming.id = tev_bridge.tev_incoming_id
+            LEFT JOIN tev_outgoing
+            ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+            LEFT JOIN auth_user AS au
+            ON au.id = tev_incoming.user_id
+            LEFT JOIN auth_user AS rb
+            ON rb.id = tev_incoming.reviewed_by
+            ORDER BY tev_incoming.id DESC;
+        """)
+        rows = cursor.fetchall()
 
-    
-    response = HttpResponse(
-        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    )
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename={date}-TRIS-REPORT.xlsx'.format(
         date=datetime.now().strftime('%Y-%m-%d'),
     )
+
     workbook = Workbook()
     worksheet = workbook.active
     worksheet.title = 'REPORT'
@@ -466,57 +487,227 @@ def export_status(request):
         wrap_text=True
     )
     columns = [
+        'DV NO',
         'CODE',
+        'ACCOUNT NO',
+        'ID NO',
         'FIRSTNAME',
         'MIDDLENAME',
         'LASTNAME',
-        'ID NO',
-        'ACCOUNT NO',
         'DATE TRAVEL',
+        'DIVISION',
+        'SECTION',
+        'STATUS ID',
+        'INCOMING BY',
+        'REVIEWED BY',
         'ORIGINAL AMOUNT',
         'FINAL_AMOUNT',
         'DATE ACTUAL RECEIVED',
         'DATE ENTRY',
-        'DIVISION',
-        'SECTION',
-        'USER ID',
-        'STATUS ID',
+        'DATE REVIEWED FORWARDED',
+        'PURPOSE',
     ]
     row_num = 1
-    for col_num, (column_title) in enumerate(columns, 1):
+    for col_num, column_title in enumerate(columns, 1):
         cell = worksheet.cell(row=row_num, column=col_num)
         cell.value = column_title
         cell.font = header_font
         column_letter = get_column_letter(col_num)
         column_dimensions = worksheet.column_dimensions[column_letter]
 
-    for tris in tris_queryset:
+    for tris in rows:
         row_num += 1
         row = [
-            tris.code,
-            tris.first_name,
-            tris.middle_name,
-            tris.last_name,
-            tris.id_no,
-            tris.account_no,
-            tris.date_travel,
-            tris.original_amount,
-            tris.final_amount,
-            tris.incoming_in.astimezone(timezone.utc).replace(tzinfo=None) if tris.incoming_in else None,
-            tris.updated_at.astimezone(timezone.utc).replace(tzinfo=None) if tris.updated_at else None,
-            tris.division,
-            tris.section,
-            tris.user_id,
-            tris.status_id,
-        ]        
+            tris[1],  # dv_no
+            tris[2],  # code
+            tris[3],  # account_no
+            tris[4],  # id_no
+            tris[5],  # first_name
+            tris[6],  # middle_name
+            tris[7],  # last_name
+            tris[8],  # date_travel
+            tris[9],  # division
+            tris[10],  # section
+            tris[11],  # status_id
+            tris[12],  # incoming_by
+            tris[13],  # reviewed_by
+            tris[14],  # original_amount
+            tris[15],  # final_amount
+            tris[16],
+            tris[17],
+            tris[18],  # date_reviewed_forwarded
+            tris[19],  # purposes
+        ]       
         for col_num, cell_value in enumerate(row, 1):
             cell = worksheet.cell(row=row_num, column=col_num)
             cell.value = cell_value
             column_letter = get_column_letter(col_num)
             column_dimensions = worksheet.column_dimensions[column_letter]
-            column_dimensions.width = 17
+            column_dimensions.width = 19
     workbook.save(response)
     return response
+    # return JsonResponse({'data': 'success'})
+
+# @csrf_exempt
+# def export_status(request):
+#     tris_queryset = TevIncoming.objects.all()
+#     response = HttpResponse(
+#         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+#     )
+#     response['Content-Disposition'] = 'attachment; filename={date}-TRIS-REPORT.xlsx'.format(
+#         date=datetime.now().strftime('%Y-%m-%d'),
+#     )
+#     workbook = Workbook()
+#     worksheet = workbook.active
+#     worksheet.title = 'REPORT'
+
+#     header_font = Font(name='Calibri', bold=True)
+#     centered_alignment = Alignment(horizontal='center')
+#     border_bottom = Border(
+#         bottom=Side(border_style='medium', color='FF000000'),
+#     )
+#     wrapped_alignment = Alignment(
+#         vertical='top',
+#         wrap_text=True
+#     )
+#     columns = [
+#         'DV NO',
+#         'CODE',
+#         'ACCOUNT NO',
+#         'ID NO',
+#         'FIRSTNAME',
+#         'MIDDLENAME',
+#         'LASTNAME',
+#         'DATE TRAVEL',
+#         'DIVISION',
+#         'SECTION',
+#         'STATUS ID',
+#         'INCOMING BY',
+#         'REVIEWED BY',
+#         'ORIGINAL AMOUNT',
+#         'FINAL_AMOUNT',
+#         'DATE ACTUAL RECEIVED',
+#         'DATE ENTRY',
+#         'DATE REVIEWED FORWARDED',
+#         'USER ID',
+#     ]
+#     row_num = 1
+#     for col_num, (column_title) in enumerate(columns, 1):
+#         cell = worksheet.cell(row=row_num, column=col_num)
+#         cell.value = column_title
+#         cell.font = header_font
+#         column_letter = get_column_letter(col_num)
+#         column_dimensions = worksheet.column_dimensions[column_letter]
+
+#     for tris in tris_queryset:
+#         row_num += 1
+#         row = [
+#             tris.dv_no,
+#             tris.code,
+#             tris.account_no,
+#             tris.id_no,
+#             tris.first_name,
+#             tris.middle_name,
+#             tris.last_name,
+#             tris.date_travel,
+#             tris.division,
+#             tris.section,
+#             tris.status_id,
+#             tris.incoming_by,
+#             tris.reviewed_by,
+#             tris.original_amount,
+#             tris.final_amount,
+#             tris.date_actual.astimezone(timezone.utc).replace(tzinfo=None) if tris.incoming_in else None,
+#             tris.date_entry.astimezone(timezone.utc).replace(tzinfo=None) if tris.updated_at else None,
+#             tris.date_reviewed_forwarded,
+#             tris.purposes,
+#         ]        
+#         for col_num, cell_value in enumerate(row, 1):
+#             cell = worksheet.cell(row=row_num, column=col_num)
+#             cell.value = cell_value
+#             column_letter = get_column_letter(col_num)
+#             column_dimensions = worksheet.column_dimensions[column_letter]
+#             column_dimensions.width = 19
+#     workbook.save(response)
+#     return response
+
+
+# @csrf_exempt
+# def export_status(request):
+#     tris_queryset = TevIncoming.objects.all()
+
+    
+#     response = HttpResponse(
+#         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+#     )
+#     response['Content-Disposition'] = 'attachment; filename={date}-TRIS-REPORT.xlsx'.format(
+#         date=datetime.now().strftime('%Y-%m-%d'),
+#     )
+#     workbook = Workbook()
+#     worksheet = workbook.active
+#     worksheet.title = 'REPORT'
+
+#     header_font = Font(name='Calibri', bold=True)
+#     centered_alignment = Alignment(horizontal='center')
+#     border_bottom = Border(
+#         bottom=Side(border_style='medium', color='FF000000'),
+#     )
+#     wrapped_alignment = Alignment(
+#         vertical='top',
+#         wrap_text=True
+#     )
+#     columns = [
+#         'CODE',
+#         'FIRSTNAME',
+#         'MIDDLENAME',
+#         'LASTNAME',
+#         'ID NO',
+#         'ACCOUNT NO',
+#         'DATE TRAVEL',
+#         'ORIGINAL AMOUNT',
+#         'FINAL_AMOUNT',
+#         'DATE ACTUAL RECEIVED',
+#         'DATE ENTRY',
+#         'DIVISION',
+#         'SECTION',
+#         'USER ID',
+#         'STATUS ID',
+#     ]
+#     row_num = 1
+#     for col_num, (column_title) in enumerate(columns, 1):
+#         cell = worksheet.cell(row=row_num, column=col_num)
+#         cell.value = column_title
+#         cell.font = header_font
+#         column_letter = get_column_letter(col_num)
+#         column_dimensions = worksheet.column_dimensions[column_letter]
+
+#     for tris in tris_queryset:
+#         row_num += 1
+#         row = [
+#             tris.code,
+#             tris.first_name,
+#             tris.middle_name,
+#             tris.last_name,
+#             tris.id_no,
+#             tris.account_no,
+#             tris.date_travel,
+#             tris.original_amount,
+#             tris.final_amount,
+#             tris.incoming_in.astimezone(timezone.utc).replace(tzinfo=None) if tris.incoming_in else None,
+#             tris.updated_at.astimezone(timezone.utc).replace(tzinfo=None) if tris.updated_at else None,
+#             tris.division,
+#             tris.section,
+#             tris.user_id,
+#             tris.status_id,
+#         ]        
+#         for col_num, cell_value in enumerate(row, 1):
+#             cell = worksheet.cell(row=row_num, column=col_num)
+#             cell.value = cell_value
+#             column_letter = get_column_letter(col_num)
+#             column_dimensions = worksheet.column_dimensions[column_letter]
+#             column_dimensions.width = 17
+#     workbook.save(response)
+#     return response
 
 @login_required(login_url='login')
 @csrf_exempt
