@@ -648,12 +648,13 @@
                 {
                     targets: -4,
                     render: function (data) {
-                        if (data === null || data === undefined || data === "") {
-                            return ''; // Return an empty string if data is null, undefined, or empty
-                        } 
-                        else {
-                            return '<span class="badge bg-label-danger">' + data + '</span>';
-                        }
+                        return data;
+                        // if (data === null || data === undefined || data === "") {
+                        //     return ''; // Return an empty string if data is null, undefined, or empty
+                        // } 
+                        // else {
+                        //     return '<span class="badge bg-label-danger">' + data + '</span>';
+                        // }
                     },
                 },
                 {
