@@ -1,0 +1,1202 @@
+{% extends 'index.html' %} {% block content %} {% load staticfiles %}
+
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Users /</span> List</h4>
+
+        <!-- DataTable with Buttons -->
+        <div class="card">
+            <div class="card-datatable table-responsive pt-0">
+                <table id="tbl-items" class="table">
+                    <thead>
+                        <tr>
+                            
+                            <th>Username</th>
+                            <th>Firstname</th>
+                            <th>Lastname</th>
+                            <th>Position</th>
+                            <th>Email</th>
+                            <th>Sex</th>
+                            <th>Address</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                          
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="changepassword" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+    <div class="modal-content p-3 p-md-5">
+    <div class="modal-body">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="text-center mb-4">
+        <h3 class="mb-2">Change Password</h3>
+        <p>Change your password with confirmation</p>
+        </div>
+        <p>Enter your password for your account, please make sure to remember your password.</p>
+        <form id="update-password" class="row g-3" onsubmit="return false">
+        <input type="hidden" id="password-id" name="PasswordID" />
+
+        <div class="col-sm-12 form-password-toggle">
+            <label class="form-label" for="modalEnableOTPPhone">Password</label><br>
+            <div class="input-group">
+            <input
+                type="password"
+                id="modalpassword"
+                class="form-control dt-password"
+                name="ModalPassword"
+                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                aria-describedby="password"
+            />
+            <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+            </div>
+        </div>
+        <div class="col-sm-12 form-password-toggle">
+            <label class="form-label" for="modalEnableOTPPhone">Confirm Password</label>
+            <div class="input-group">
+       
+            <input
+                type="password"
+                id="modalconfirmpassword"
+                class="form-control dt-password"
+                name="ModalConfirmPassword"
+                placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                aria-describedby="password"
+            />
+        <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+            </div>
+        </div>
+        <div class="col-12">
+            <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+            <button
+            type="reset"
+            class="btn btn-label-secondary"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            >
+            Cancel
+            </button>
+        </div>
+        </form>
+    </div>
+    </div>
+</div>
+</div>
+<!--/ Enable OTP Modal -->
+
+
+<!-- Edit Permission Modal -->
+<div class="modal fade" id="editPermissionModal" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3 p-md-5">
+    <button
+        type="button"
+        class="btn-close btn-pinned"
+        data-bs-dismiss="modal"
+        aria-label="Close"
+    ></button>
+    <div class="modal-body">
+        <div class="text-center mb-4">
+        <h3 class="mb-2">Edit Permission</h3>
+        <p class="text-muted">Edit permission as per your requirements.</p>
+        </div>
+        <div class="alert alert-warning" role="alert">
+        <h6 class="alert-heading mb-2">Warning</h6>
+        <p class="mb-0">
+            By editing the permission name, you might break the system permissions functionality. Please
+            ensure you're absolutely certain before proceeding.
+        </p>
+        </div>
+        <form id="update-role" class="row" onsubmit="return false">
+            <input type="hidden" id="role-id" name="RoleID" />
+            <div class="col-sm-9">
+                <label class="form-label" for="modalEditUserStatus">Status</label>+
+                <select id="modalrole" class="select2 form-select roles" name="ModalRole" multiple>
+                    {% for row in role_details %}
+                    <option value="{{ row.id }}">{{ row.role_name }}</option>
+                    {% endfor %}
+                </select>
+                <!-- <select
+                    id="modalrole"
+                    name="ModalRole"
+                    class="form-select"
+                    aria-label="Default select example"
+                    >
+                    {% for row in role_details %}
+                    <option value="{{ row.id }}">{{ row.role_name }}</option>
+                    {% endfor %}
+                </select> -->
+            </div>
+            <div class="col-sm-3 mb-3">
+                <label class="form-label invisible d-none d-sm-inline-block">Button</label>
+                <button type="submit" class="btn btn-primary mt-1 mt-sm-0">Update</button>
+            </div>
+        </form>
+    </div>
+    </div>
+</div>
+</div>
+<!--/ Edit Permission Modal -->
+
+
+
+<!-- modal edit -->
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUser" tabindex="-1" aria-hidden="true">
+<div class="modal-dialog modal-lg modal-simple modal-edit-user">
+    <div class="modal-content p-3 p-md-5">
+    <div class="modal-body">
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="text-center mb-4">
+        <h3 class="mb-2">Edit User Information</h3>
+        <p class="text-muted">Updating user details will receive a privacy audit.</p>
+        </div>
+        <form id="update-form" class="row g-3" onsubmit="return false">
+        <input type="hidden" id="modal-id" name="ModalID" />
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="modalEditUserFirstName">First Name</label>
+            <input
+            type="text"
+            id="modalfname"
+            name="ModalFname"
+            class="form-control"
+            placeholder="John"
+            />
+        </div>
+        <div class="col-6">
+            <label class="form-label" for="modalEditUserName">Lastname</label>
+            <input
+            type="text"
+            id="modallname"
+            name="ModalLname"
+            class="form-control"
+            placeholder="john.doe.007"
+            />
+        </div>
+        <div class="col-6">
+            <label class="form-label" for="modalEditUserName">Username</label>
+            <input
+            type="text"
+            id="modalusername"
+            name="ModalUsername"
+            class="form-control"
+            placeholder="john.doe.007"
+            />
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="modalEditUserStatus">Status</label>
+            <select
+            id="modalstatus"
+            name="ModalStatus"
+            class="form-select"
+            aria-label="Default select example"
+            >
+            <option ></option>
+            <option value="1">Active</option>
+            <option value="0">Inactive</option>
+            </select>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <label class="form-label">Sex </label>
+            <select
+            id="modalsex"
+            name="ModalSex"
+            class="form-select"
+            aria-label="Default select example"
+            >
+            <option></option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            </select>
+        </div>
+
+        
+        <div class="col-12 col-md-6">
+            <label class="form-label" for="modalEditTaxID">Email</label>
+            <input
+            type="text"
+            id="modalemail"
+            name="ModalEmail"
+            class="form-control modal-edit-tax-id"
+            placeholder="john@gmail.com"
+            />
+        </div>
+
+        <div class="col-6">
+            <label class="form-label" for="modalEditUserName">Address</label>
+            <input
+            type="text"
+            id="modaladdress"
+            name="ModalAddress"
+            class="form-control"
+            placeholder="john.doe.007"
+            />
+        </div>
+
+        <div class="col-6">
+            <label class="form-label" for="modalEditUserName">Position</label>
+            <input
+            type="text"
+            id="modalposition"
+            name="ModalPosition"
+            class="form-control"
+            placeholder="Administrative Assistant"
+            />
+        </div>
+
+        <div class="col-12">
+            <label class="switch">
+            <input type="checkbox" class="switch-input" />
+            <span class="switch-toggle-slider">
+                <span class="switch-on"></span>
+                <span class="switch-off"></span>
+            </span>
+            <span class="switch-label">Change Password?</span>
+            </label>
+        </div>
+
+        <div class="col-12 text-center">
+            <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+            <button
+            type="reset"
+            class="btn btn-label-secondary"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+            >
+            Cancel
+            </button>
+        </div>
+        </form>
+    </div>
+    </div>
+</div>
+</div>
+<!--/ Edit User Modal -->
+
+
+<!-- end -->
+
+      <!-- Modal to add new record -->
+<div class="offcanvas offcanvas-end" id="add-new-record">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="exampleModalLabel"><p class="title-name">Add Record</p></h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body flex-grow-1">
+        <form class="add-new-record pt-0 row g-2" id="item-form">
+            <input type="hidden" id="item-id" name="ItemID" />
+
+            <div class="col-sm-12">
+                <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                <select
+                id="f-employee-name"
+                name="FEmployeeName"
+                class="form-select"
+                aria-label="Default select example"
+                >
+                <option></option>
+                </select>
+            </div>
+              <div class="col-sm-12">
+                  <label class="form-label" for="Lastname">User Name</label>
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="text"
+                      id="username"
+                      class="form-control dt-user-name"
+                      name="Username"
+                      placeholder="Enter Username"
+                      aria-describedby="user2"
+                    />
+                  </div>
+              </div>
+      
+              <div class="col-sm-12 form-password-toggle">
+                  <label class="form-label" for="Password" name="title-password" id="title-password">Password</label>
+                  <div class="input-group input-group-merge">
+                    <input
+                      type="password"
+                      id="password"
+                      class="form-control dt-password"
+                      name="Password"
+                      placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                      aria-describedby="password"
+                    />
+                      <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                  </div>
+              </div>
+      
+              <div class="col-sm-12 form-password-toggle">
+                <label class="form-label" for="Confirm_password">Confirm password</label>
+                <div class="input-group input-group-merge">
+                  <input
+                    type="password"
+                    id="confirm_password"
+                    class="form-control dt-confirm-password"
+                    name="ConfirmPassword"
+                    placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                    aria-describedby="confirm_password2"
+                  />
+                  <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                </div>
+            </div>
+      
+            <div class="col-sm-12 user-roles">
+              <label class="form-label" for="status">Roles</label>
+              <div class="input-group input-group-merge">
+                <div class="col-12 col-xxl-12 col-xl-12">
+                  <select id="roles" class="select2 form-select roles" name="Roles" multiple>
+                    {% for row in role_details %}
+                    <option value="{{ row.id }}">{{ row.role_name }}</option>
+                    {% endfor %}
+                </select>
+                </div>
+              </div>
+            </div>
+              
+              <div class="col-sm-12 user-status">
+                <label class="form-label" for="status">Status</label>
+                <div class="input-group input-group-merge">
+                    <div class="col-12 col-xxl-12 col-xl-12">
+                      <select class="select2 form-select select-status" id="select" name="Status">
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                      </select>
+                    </div>
+                </div>
+              </div>
+
+              <div class="col-sm-12 user-sex">
+                <label class="form-label" for="Sex">Sex</label>
+                <div class="input-group input-group-merge">
+                    <div class="col-12 col-xxl-12 col-xl-12">
+                      <select class="select2 form-select dt-sex" id="sex" name="Sex">
+                        <option></option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+      
+                </div>
+              </div>
+      
+              <div class="col-sm-12">
+                <label class="form-label" for="Email">Email <small> <i>(optional)</i></small></label>
+                <div class="input-group input-group-merge">
+                  <input
+                    type="text"
+                    id="email"
+                    class="form-control dt-email"
+                    name="Email"
+                    placeholder="Enter Email"
+                    aria-describedby="email2"
+                  />
+                </div>
+              </div>
+    
+              <div class="col-sm-12">
+                <label class="form-label" for="Address">Address <small> <i>(optional)</i></small></label>
+                <div class="input-group input-group-merge">
+                  <input
+                    type="text"
+                    id="address"
+                    class="form-control dt-address"
+                    name="Address"
+                    placeholder="Enter Address"
+                    aria-describedby="address2"
+                  />
+                </div>
+              </div>
+      
+              <div class="col-sm-12">
+                <label class="form-label" for="Position">Position <small> <i>(optional)</i></small></label>
+                <div class="input-group input-group-merge">
+                  <input
+                    type="text"
+                    id="position"
+                    class="form-control dt-position"
+                    name="Position"
+                    placeholder="Enter Position"
+                    aria-describedby="position2"
+                  />
+                </div>
+              </div>
+
+            <input
+                type="hidden"
+                id="firstname"
+                class="form-control dt-first-name"
+                name="Firstname"
+                placeholder="Enter firstname"
+                aria-describedby="firstname2"
+                />
+
+            <input
+                type="hidden"
+                id="lastname"
+                class="form-control dt-last-name"
+                name="Lastname"
+                placeholder="Enter Lastname"
+                aria-describedby="lastname2"
+            />
+
+            <input
+                type="hidden"
+                id="id-no"
+                class="form-control dt-id-no"
+                name="IdNo"
+                placeholder="Enter Id NO"
+                />
+                
+              <div class="col-sm-12 update-div-user">
+                <br>
+                <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
+                <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+              </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %} {% block footer_scripts %}
+<script>
+    let clicked_id = 0;
+    $(document).ready(function () {
+        const table = $('#tbl-items')
+        const ItemFormValidation = document.getElementById('item-form'),
+            FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
+            Firstname = jQuery(document.querySelector('[name="Firstname"]')),
+            Lastname = jQuery(document.querySelector('[name="Lastname"]')),
+            Username = jQuery(document.querySelector('[name="Username"]')),
+            Password = jQuery(document.querySelector('[name="Password"]')),
+            ConfirmPassword = jQuery(document.querySelector('[name="ConfirmPassword"]')),
+            Roles = jQuery(document.querySelector('[name="Roles"]')),
+            Email = jQuery(document.querySelector('[name="Email"]')),
+            Sex = jQuery(document.querySelector('[name="Sex"]')),
+            Address = jQuery(document.querySelector('[name="Address"]')),
+            Position = jQuery(document.querySelector('[name="Position"]')),
+            Status = jQuery(document.querySelector('[name="Status"]')),
+            offCanvasElement = document.querySelector('#add-new-record');
+
+        const UpdateFormValidation = document.getElementById('update-form'),
+            ModalFname = jQuery(document.querySelector('[name="ModalFname"]')),
+            ModalLname = jQuery(document.querySelector('[name="ModalLname"]')),
+            ModalUsername = jQuery(document.querySelector('[name="ModalUsername"]')),
+            ModalStatus = jQuery(document.querySelector('[name="ModalStatus"]')),
+            ModalSex = jQuery(document.querySelector('[name="ModalSex"]')),
+            ModalEmail = jQuery(document.querySelector('[name="ModalEmail"]')),
+            ModalAddress = jQuery(document.querySelector('[name="ModalAddress"]')),
+            ModalPosition = jQuery(document.querySelector('[name="ModalPosition"]'));
+
+        const UpdateRoleFormValidation = document.getElementById('update-role'),
+            ModalRole = jQuery(document.querySelector('[name="ModalRole"]'));
+
+        const UpdatePasswordFormValidation = document.getElementById('update-password'),
+            ModalPassword = jQuery(document.querySelector('[name="ModalPassword"]')),
+            ModalConfirmPassword = jQuery(document.querySelector('[name="ModalConfirmPassword"]'));
+
+        const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
+        const toast_options = (toastr.options = {
+            maxOpened: 1,
+            autoDismiss: true,
+            closeButton: true,
+            newestOnTop: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            rtl: isRtl,
+      });
+        let ItemID = $('#item-id');
+        let ModalID = $('#modal-id');
+        let RoleID = 0;
+        let PasswordID = $('#password-id')
+
+        let dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{% url 'user-load' %}",
+            columns: [
+                { data: 'username' },
+                { data: 'first_name'},
+                { data: 'last_name' },
+                { data: 'position' },
+                { data: 'email' },
+                { data: 'sex' },
+                { data: 'address' },
+                { data: 'role_name' },
+                { data: 'is_active' },
+                { data: 'id' },
+                
+                // Additional columns
+            ],
+            columnDefs: [
+                {
+                    targets: 1,
+                    render: function (data) {
+                        return data
+                    },
+                },
+                {
+                  targets: 3,
+                  render: function (data) {
+                    return data
+                  },
+                },
+
+                {
+                    targets: -3,
+                    render: function (data) {
+                        if (data =="Management") {
+                            return '<span class="badge bg-label-warning">'+data+'</span>'
+                        }
+                        else if(data =="Inventory Staff"){
+                            return '<span class="badge bg-label-primary">'+data+'</span>'
+                        }
+                        else if(data =="Sales Staff"){
+                            return '<span class="badge bg-label-info">'+data+'</span>'
+                        }
+                        else{
+                            return '<span class="badge bg-label-primary">'+data+'</span>'
+                        }
+                    },
+                },
+                {
+                    targets: -2,
+                    render: function (data) {
+                        if (data) {
+                            return '<span class="badge bg-label-success">Active</span>'
+                        }
+                        else{
+                            return '<span class="badge bg-label-danger">Inactive</span>'
+                        }
+                    },
+                },
+                {
+                  targets: -1,
+                  title: 'Action',
+                  orderable: false,
+                  searchable: false,
+                  render: function (data) {
+                      return (
+                          //'<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'+
+
+                          '<a href="javascript:;" data-id="' + data + '" class="modal-edit text-body" ><i class="text-primary ti ti-pencil"></i></a>'+
+
+                          '<a href="javascript:;" data-id="' + data + '" class="modal-roles text-body"><i class="text-primary ti ti-settings"></i></a>'
+                      )
+                  },
+              },
+            ],
+            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            buttons: [
+                {
+                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
+                    className: 'create-new btn btn-primary',
+                },
+            ],
+            drawCallback: function (settings) {
+                $('.modal-edit').on('click', function () {
+                    let id = $(this).data('id');
+                    $('.switch-input').prop('checked', false);
+                    $('#editUser').modal('show');
+                    $.ajax({
+                        type: 'GET',
+                        url: "{% url 'user-edit' %}?id=" + id,
+                        dataType: 'json',
+                    }).done(function (data) {
+                        if (data.length > 0) {
+                            let fields = data[0].fields
+                            let pk = data[0].pk
+                            let user = $('#user')
+        
+                            ModalFname.val(fields.first_name);
+                            ModalLname.val(fields.last_name);
+                            ModalUsername.val(fields.username);
+                            ModalStatus.val(fields.is_active === true ? 1 : 0).trigger('change');
+                            ModalSex.val(fields.sex).trigger('change');
+                            ModalEmail.val(fields.email);
+                            ModalAddress.val(fields.address);
+                            ModalPosition.val(fields.position);
+                            ModalID.val(pk);
+                         
+                        }
+                    })
+                }),
+                $('.modal-roles').on('click', function () {
+                    let id = $(this).data('id');
+                    $('#editPermissionModal').modal('show');
+                    
+                    $.ajax({
+                        type: 'GET',
+                        url: "{% url 'role-edit' %}?id=" + id,
+                        dataType: 'json',
+                    }).done(function (data) {
+                        if (data.length > 0) {
+                            let user_id = data[0].user_id;
+                            RoleID = user_id;
+                            ModalRole.val(null).trigger('change');
+                            for (let i = 0; i < data.length; i++) {
+                                let role_id = data[i].role_id;
+                                ModalRole.find('option[value="' + role_id + '"]').prop('selected', true);
+                            }
+                            ModalRole.trigger('change');
+                            if (ModalRole.length) {
+                                ModalRole.wrap('<div class="position-relative"></div>')
+                                ModalRole.select2({
+                                placeholder: 'Choose Roles',
+                                dropdownParent: ModalRole.parent(),
+                                allowClear: true,
+                                })
+                            }	
+                        }
+                    })
+                }),
+                $('.item-details').on('click', function () {
+                    clicked_id = $(this).data('id')
+                });
+
+                $('.switch-input').on('change', function() {
+                    if ($(this).is(':checked')) {
+                      // If the switch is on, show the modal
+                      $('#editUser').modal('hide');
+                      let id = ModalID.val();
+                      PasswordID.val(id);
+                      ModalPassword.val('');
+                      ModalConfirmPassword.val('');
+                      $('#changepassword').modal('show');
+                    } else {
+                      // If the switch is off, hide the modal
+                      $('#changepassword').modal('hide');
+                    }
+                });
+            },
+        })
+        $('div.head-label').html('<h5 class="card-title mb-0">User</h5>')
+
+        const newRecord = document.querySelector('.create-new')
+
+        setTimeout(() => {
+            if (newRecord) {
+                newRecord.addEventListener('click', function () {
+                    ItemID.val(0);
+                    ModalID.val(0);
+                    const $selectElement = $('#f-employee-name');
+                    fetchEmployee($selectElement);
+                    FEmployeeName.val('').trigger('change');
+                    $('.user-status').hide();
+                    $('.title-name').text('Add User');
+                    $('#title-password').text('Password');
+                    $('#roles').val("").trigger('change');
+                    $('#sex').val("").trigger('change');
+                    Firstname.val('').trigger('change');
+                    $('.form-control').val('');
+                    offCanvasEl.show();
+                })
+            }
+        }, 200);
+
+        // Form validation for update user details
+        const updatefv = FormValidation.formValidation(UpdateFormValidation, {
+            fields: {
+                ModalFname: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Firstname',
+                        },
+                    },
+                },
+                ModalLname: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Lastname',
+                        },
+                    },
+                },
+                ModalUsername: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Username',
+                        },
+                    },
+                },
+                ModalStatus: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Select Status',
+                        },
+                    },
+                },
+                ModalSex: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Select Sex',
+                        },
+                    },
+                },
+            },
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                submitButton: new FormValidation.plugins.SubmitButton(),
+                autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: (instance) => {
+                instance.on('plugins.message.placed', function (e) {
+                    if (e.element.parentElement.classList.contains('input-group')) {
+                        e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                    }
+                })
+            },
+        }).on('core.form.valid', function () {
+            $('#editUser').modal('hide');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Update it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+                allowOutsideClick: false,
+            }).then(function (result) {
+                if (result.value) {
+                    var form_data = $('#update-form').serialize()
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'user-update' %}",
+                        data: form_data,
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'User has been update',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                            dataTable.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            });
+        });
+
+
+    // Form validation for update password
+    const updatepassword = FormValidation.formValidation(UpdatePasswordFormValidation, {
+        fields: {
+            ModalPassword: {
+                validators: {
+                    notEmpty: {
+                        message: 'Please Enter Password',
+                    },
+                },
+            },
+            ModalConfirmPassword: {
+                validators: {
+                    notEmpty: {
+                        message: 'Please Enter Confirm password',
+                    },
+                },
+            },
+        },
+        plugins: {
+            trigger: new FormValidation.plugins.Trigger(),
+            bootstrap5: new FormValidation.plugins.Bootstrap5(),
+            submitButton: new FormValidation.plugins.SubmitButton(),
+            autoFocus: new FormValidation.plugins.AutoFocus(),
+        },
+        init: (instance) => {
+            instance.on('plugins.message.placed', function (e) {
+                if (e.element.parentElement.classList.contains('input-group')) {
+                    e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                }
+            })
+        },
+    }).on('core.form.valid', function () {
+        $('#changepassword').modal('hide');
+        let password = ModalPassword.val();
+        let confirm_password = ModalConfirmPassword.val();
+        if (password ==confirm_password){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Update it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+                allowOutsideClick: false,
+            }).then(function (result) {
+                if (result.value) {
+                    var form_data = $('#update-password').serialize();
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'update-password' %}",
+                        data: form_data,
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'User has been update',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                            dataTable.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            });
+        }
+        else{
+            toastr.error('Password not match', 'Invalid!', toast_options);
+        }
+    });
+
+        // Form validation for Add new record
+        const fv = FormValidation.formValidation(ItemFormValidation, {
+            fields: {
+
+                FEmployeeName: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Select Employee',
+                        },
+                    },
+                },
+                Username: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Username',
+                        },
+                    },
+                },
+                Password: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Password',
+                        },
+                    },
+                },
+                ConfirmPassword: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Enter Confirm Password',
+                        },
+                    },
+                },
+                Roles: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Enter Roles',
+                        },
+                    },
+                },
+                Sex: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Enter Sex',
+                        },
+                    },
+                },
+
+            },
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                submitButton: new FormValidation.plugins.SubmitButton(),
+                autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: (instance) => {
+                instance.on('plugins.message.placed', function (e) {
+                    if (e.element.parentElement.classList.contains('input-group')) {
+                        e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                    }
+                })
+            },
+        }).on('core.form.valid', function () {
+            
+            let password = Password.val();
+            let confirmpassword = ConfirmPassword.val();
+            if (password ==confirmpassword){
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, save it!',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-3',
+                        cancelButton: 'btn btn-label-secondary',
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (result.value) {
+                        var form_data = $('#item-form').serialize()
+                        let post_url = ItemID.val() != '0' ? "{% url 'user-update' %}" : "{% url 'user-add' %}"
+                        $.ajax({
+                            type: 'POST',
+                            url: post_url,
+                            data: form_data,
+                        }).done(function (data) {
+                            if (data.data == 'success') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Successfully save!',
+                                    text: 'Item has been save.',
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                                offCanvasEl.hide();
+                                dataTable.ajax.reload();
+                             
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error saving!',
+                                    text: data.message,
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                            }
+                        })
+                    }
+                });
+            }
+            else{
+                toastr.error('Password not match', 'Invalid!', toast_options);
+            }
+        });
+
+
+        // Form validation for Add new record
+        const fvrole = FormValidation.formValidation(UpdateRoleFormValidation, {
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                submitButton: new FormValidation.plugins.SubmitButton(),
+                autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: (instance) => {
+                instance.on('plugins.message.placed', function (e) {
+                    if (e.element.parentElement.classList.contains('input-group')) {
+                        e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                    }
+                })
+            },
+        }).on('core.form.valid', function () {
+            let role = ModalRole.val();
+            $('#editPermissionModal').modal('hide');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, save it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    let RoleList = ModalRole.val();
+                    var form_data = $('#update-role').serialize();
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'role-update' %}",
+                        data:{
+                            role_id : RoleID,
+                            modal_role : RoleList,
+                        }
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Item has been save.',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            });
+                            dataTable.ajax.reload();
+                            
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            });
+        });
+
+        function fetchEmployee($selectElement) {
+            $selectElement.empty();
+            const employees = JSON.parse(localStorage.getItem('employees'));
+            if (employees) {
+                $.each(employees, function (index, employee) {
+                    const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                    const $option = $('<option>', {
+                        value: optionText,
+                        text: optionText,
+                        id: employee.idNumber
+                    });
+                    $selectElement.append($option);
+                });
+            } else {
+                console.log("No employee data found in local storage.");
+            }
+        }
+
+        $('#f-employee-name').change(function() {
+            var selectedOption = $(this).find('option:selected');
+            var optionText = selectedOption.attr('id');
+            if (optionText) {
+                const employees = JSON.parse(localStorage.getItem('employees'));
+                if (employees) {
+                    const selectedEmployeeId = selectedOption.attr('id');
+                    const selectedEmployee = employees.find(employee => employee.idNumber === selectedEmployeeId);
+                    if (selectedEmployee) {
+                        $('#firstname').val(selectedEmployee.firstName);
+                        $('#lastname').val(selectedEmployee.lastName);
+                        $('#id-no').val(selectedEmployee.idNumber);
+                    }
+                } else {
+                    console.log("No employee data found in local storage.");
+                }
+            }
+        });
+
+        $('#approved').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 1; 
+              if (final_amount === "") {  
+                $("#amount_error").text("Please enter Amount");
+                $("#remarks_error").text("");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              } else {
+                $("#amount_error").text("");
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+              }
+          });
+          
+          $('#returned').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 2;
+              if (correctness_remarks === "") {
+                $("#amount_error").text("");
+                $("#remarks_error").text("Please enter Remarks for returned.");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              } else {
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+              }
+              
+            });
+
+        function tev_details(amount,remarks,status,emp_id){
+            $.ajax({
+                type: "POST",
+                data:{
+                    final_amount: amount,
+                    correctness_remarks: remarks,
+                    status : status,
+                    transaction_id : emp_id
+                }
+                }).done(function(data){
+                if (data.data == 'success') {
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    offCanvasEl.hide()
+                } else {
+                    toastr.danger('Data not saved', 'Danger', toast_options);
+                }
+            });
+        }
+        if (FEmployeeName.length) {
+            FEmployeeName.wrap('<div class="position-relative"></div>')
+            FEmployeeName.select2({
+                placeholder: 'Choose employee',
+                dropdownParent: FEmployeeName.parent(),
+                allowClear: true,
+            })
+        }
+        if (Roles.length) {
+            Roles.wrap('<div class="position-relative"></div>')
+            Roles.select2({
+                placeholder: 'Choose Roles',
+                dropdownParent: Roles.parent(),
+                allowClear: true,
+            })
+        }	
+        // if (Roles.length) {
+        //     Roles.wrap('<div class="position-relative"></div>')
+        //     Roles.select2({
+        //         placeholder: 'Choose Roles',
+        //         dropdownParent: Roles.parent(),
+        //         allowClear: true,
+        //     })
+        // }
+        if (Sex.length) {
+            Sex.wrap('<div class="position-relative"></div>')
+            Sex.select2({
+                placeholder: 'Choose Sex',
+                dropdownParent: Sex.parent(),
+                allowClear: true,
+            })
+        }
+    })
+</script>
+{% endblock footer_scripts %}

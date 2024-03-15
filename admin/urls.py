@@ -6,6 +6,7 @@ urlpatterns = [
 
     path('updateuser', views.updateuser, name='update-user'),
     path('users', views.users, name='users'),
+    path('permissions', views.permissions, name='permissions'),
     path('user_add', views.user_add, name='user-add'),
     path('user_edit', views.user_edit, name='user-edit'),
     path('role_edit', views.role_edit, name='role-edit'),

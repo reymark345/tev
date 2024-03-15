@@ -43,6 +43,23 @@ def users(request):
     else:
         return render(request, 'pages/unauthorized.html')
 
+@login_required(login_url='login')
+def permissions(request):
+    allowed_roles = ["Admin"]    
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
+            'permissions' : role_names,
+            'role_details': RoleDetails.objects.filter().order_by('role_name'),
+        }
+        return render(request, 'admin/permissions.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+
 @csrf_exempt
 def adduser(request):
     if request.method == 'POST':
