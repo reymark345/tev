@@ -303,7 +303,7 @@
                                         <div data-i18n="Users">Users</div>
                                     </a>
                                 </li>
-                                <li class="menu-item">
+                                <li class="menu-item {% if url_name == 'permissions' %}active{% endif %}">
                                     <a href="{% url 'permissions' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-lock"></i>
                                         <div data-i18n="Permissions">Permissions</div>

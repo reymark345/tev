@@ -327,6 +327,7 @@ def employee_details(request):
                 ti.status_id, 
                 GROUP_CONCAT(tb.purpose SEPARATOR ', ') AS purposes,
                 ti.incoming_in,
+                ti.incoming_out,
                 t_o.dv_no, 
                 t_o.otg_d_forwarded,
                 t_o.b_d_forwarded,
@@ -360,6 +361,7 @@ def employee_details(request):
                 ti.status_id, 
                 ti.remarks, 
                 ti.incoming_in,
+                ti.incoming_out,
                 t_o.dv_no,
                 t_o.otg_d_forwarded, 
                 t_o.b_d_forwarded,
@@ -388,11 +390,12 @@ def employee_details(request):
             return ''
         
     for row in results:
-        incoming = row[7]
-        outgoing = row[9]
-        budget = row[10]
-        journal = row[11]
-        approval = row[12]
+        incoming_in = row[7]
+        incoming_out = row[8]
+        outgoing = row[10]
+        budget = row[11]
+        journal = row[12]
+        approval = row[13]
 
         item = {
             'id': row[0],
@@ -402,15 +405,16 @@ def employee_details(request):
             'final_amount': row[4],
             'status': row[5],
             'purpose': row[6], 
-            'incoming_in': format_date(incoming),
-            'dv_no': row[8],
+            'incoming_in': format_date(incoming_in),
+            'incoming_out': format_date(incoming_out),
+            'dv_no': row[9],
             'otg_d_f': format_date(outgoing),
             'b_d_f': format_date(budget),
             'j_d_f': format_date(journal),
             'a_d_f': format_date(approval),
-            'charges': row[13],
-            'cluster': row[14],
-            'remarks': row[15], 
+            'charges': row[14],
+            'cluster': row[15],
+            'remarks': row[16], 
         }
         data.append(item)      
     total = len(data)    
@@ -445,8 +449,8 @@ def travel_history(request):
 def export_status(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no, tev_incoming.first_name, tev_incoming.middle_name,
-                    tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.division, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
+            SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
+                    tev_incoming.date_travel, tev_incoming.division, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
                     tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry,
                     tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes
             FROM tev_incoming
@@ -491,9 +495,9 @@ def export_status(request):
         'CODE',
         'ACCOUNT NO',
         'ID NO',
+        'LASTNAME',
         'FIRSTNAME',
         'MIDDLENAME',
-        'LASTNAME',
         'DATE TRAVEL',
         'DIVISION',
         'SECTION',
@@ -522,9 +526,9 @@ def export_status(request):
             tris[2],  # code
             tris[3],  # account_no
             tris[4],  # id_no
-            tris[5],  # first_name
+            tris[5],  # last_name
             tris[6],  # middle_name
-            tris[7],  # last_name
+            tris[7],  # first_name
             tris[8],  # date_travel
             tris[9],  # division
             tris[10],  # section
