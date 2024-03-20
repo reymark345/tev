@@ -844,6 +844,7 @@
                       console.log(data);
                       console.log("testt");
                       $('.existing-container').empty();
+
                       data.data.forEach(function (item) {
                         let received_date = item.incoming_in ;
                         let forward_date = item.incoming_out ;
@@ -933,6 +934,7 @@
                                   <!-- <h6 class="mb-0">Forwarded By: Sonny Gocela</h6> -->
                                   <span class="text-muted">Date Forwarded : ${forward_date}</span>
                                 </div>
+                                
                               </div>
                             </li>
                           </ul>

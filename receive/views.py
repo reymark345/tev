@@ -1155,7 +1155,8 @@ def add_existing_record(request):
 
 @csrf_exempt
 def out_checking_tev(request):
-    out_list = request.POST.getlist('out_list[]')   
+    out_list = request.POST.getlist('out_list[]')  
+    user_id = request.session.get('user_id', 0) 
     for item_id in out_list:
         tev_update = TevIncoming.objects.filter(id=item_id).first()  
 
@@ -1164,6 +1165,7 @@ def out_checking_tev(request):
                 tev_update.slashed_out = date_time.datetime.now()
             else:
                 tev_update.status_id = 4
+            tev_update.forwarded_by = user_id
             tev_update.save()
         else:
             pass 
