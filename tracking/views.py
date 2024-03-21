@@ -26,6 +26,7 @@ from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from django.utils import timezone
+from django.template.defaultfilters import date
 
 
 
@@ -327,6 +328,8 @@ def employee_details(request):
                 ti.status_id, 
                 GROUP_CONCAT(tb.purpose SEPARATOR ', ') AS purposes,
                 ti.incoming_in,
+                ti.incoming_out,
+                ti.user_id AS incoming_by,
                 t_o.dv_no, 
                 t_o.otg_d_forwarded,
                 t_o.b_d_forwarded,
@@ -334,7 +337,10 @@ def employee_details(request):
                 t_o.a_d_forwarded,
                 ch.name AS charges, 
                 cl.name AS cluster,
-                GROUP_CONCAT(t3.name SEPARATOR ', ') AS remarks
+                GROUP_CONCAT(t3.name SEPARATOR ', ') AS remarks,
+                CONCAT_WS(' ', au.first_name, au.last_name) AS forwarded_by,
+                CONCAT_WS(' ', rb.first_name, rb.last_name) AS reviewed_by,
+                ti.date_reviewed
         FROM 
                 tev_incoming AS ti 
         LEFT JOIN 
@@ -349,6 +355,10 @@ def employee_details(request):
                 remarks_r AS t2 ON t2.incoming_id = ti.id
         LEFT JOIN 
                 remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
+        LEFT JOIN 
+				auth_user AS au ON au.id = ti.forwarded_by
+        LEFT JOIN 
+				auth_user AS rb ON rb.id = ti.reviewed_by
         WHERE 
                 ti.code LIKE %s
         GROUP BY 
@@ -360,6 +370,7 @@ def employee_details(request):
                 ti.status_id, 
                 ti.remarks, 
                 ti.incoming_in,
+                ti.incoming_out,
                 t_o.dv_no,
                 t_o.otg_d_forwarded, 
                 t_o.b_d_forwarded,
@@ -388,11 +399,13 @@ def employee_details(request):
             return ''
         
     for row in results:
-        incoming = row[7]
-        outgoing = row[9]
-        budget = row[10]
-        journal = row[11]
-        approval = row[12]
+        incoming_in = row[7]
+        incoming_out = row[8]
+        outgoing = row[11]
+        budget = row[12]
+        journal = row[13]
+        approval = row[14]
+        date_reviewed = date(row[20], "F j, Y g:i A")
 
         item = {
             'id': row[0],
@@ -402,15 +415,20 @@ def employee_details(request):
             'final_amount': row[4],
             'status': row[5],
             'purpose': row[6], 
-            'incoming_in': format_date(incoming),
-            'dv_no': row[8],
+            'incoming_in': format_date(incoming_in),
+            'incoming_out': format_date(incoming_out),
+            'incoming_by': row[9],
+            'dv_no': row[10],
             'otg_d_f': format_date(outgoing),
             'b_d_f': format_date(budget),
             'j_d_f': format_date(journal),
             'a_d_f': format_date(approval),
-            'charges': row[13],
-            'cluster': row[14],
-            'remarks': row[15], 
+            'charges': row[15],
+            'cluster': row[16],
+            'remarks': row[17], 
+            'received_forwarded_by': row[18], 
+            'reviewed_by': row[19],
+            'date_reviewed': date_reviewed, 
         }
         data.append(item)      
     total = len(data)    
@@ -445,9 +463,9 @@ def travel_history(request):
 def export_status(request):
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no, tev_incoming.first_name, tev_incoming.middle_name,
-                    tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.division, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
-                    tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry,
+            SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
+                    tev_incoming.date_travel, tev_incoming.division, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
+                    tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
                     tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes
             FROM tev_incoming
             INNER JOIN (
@@ -491,9 +509,9 @@ def export_status(request):
         'CODE',
         'ACCOUNT NO',
         'ID NO',
+        'LASTNAME',
         'FIRSTNAME',
         'MIDDLENAME',
-        'LASTNAME',
         'DATE TRAVEL',
         'DIVISION',
         'SECTION',
@@ -504,8 +522,10 @@ def export_status(request):
         'FINAL_AMOUNT',
         'DATE ACTUAL RECEIVED',
         'DATE ENTRY',
+        'DATE REVIEWED',
         'DATE REVIEWED FORWARDED',
         'PURPOSE',
+
     ]
     row_num = 1
     for col_num, column_title in enumerate(columns, 1):
@@ -522,9 +542,9 @@ def export_status(request):
             tris[2],  # code
             tris[3],  # account_no
             tris[4],  # id_no
-            tris[5],  # first_name
+            tris[5],  # last_name
             tris[6],  # middle_name
-            tris[7],  # last_name
+            tris[7],  # first_name
             tris[8],  # date_travel
             tris[9],  # division
             tris[10],  # section
@@ -535,15 +555,16 @@ def export_status(request):
             tris[15],  # final_amount
             tris[16],
             tris[17],
-            tris[18],  # date_reviewed_forwarded
-            tris[19],  # purposes
+            tris[18],
+            tris[19],  
+            tris[20],  
         ]       
         for col_num, cell_value in enumerate(row, 1):
             cell = worksheet.cell(row=row_num, column=col_num)
             cell.value = cell_value
             column_letter = get_column_letter(col_num)
             column_dimensions = worksheet.column_dimensions[column_letter]
-            column_dimensions.width = 19
+            column_dimensions.width = 20
     workbook.save(response)
     return response
     # return JsonResponse({'data': 'success'})
