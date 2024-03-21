@@ -1353,7 +1353,6 @@
             let rowData = closestRow.data();
             let tev_id = rowData.id;
             let purpose = $(this).val();
-
             $.ajax({
                 type: 'POST',
                 url: "{% url 'update-purpose' %}",
@@ -1369,7 +1368,6 @@
                     toastr.error('Cannot Saved Please Contact IT Administrator', 'Invalid', toast_options);
                 }
             });
-
         });
 
 

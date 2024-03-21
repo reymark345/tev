@@ -88,7 +88,7 @@ DATABASES = {
         'HOST': '172.31.240.235',
         'PORT': '3306',
     },
-    #for server INFIMOS
+    # #for server INFIMOS
     
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
@@ -117,7 +117,7 @@ DATABASES = {
     #     'HOST': '172.31.240.235',
     #     'PORT': '3306',
     # },
-    ##for localhost main database
+    #for localhost main database
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'tev_db',
@@ -188,11 +188,19 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+
+# USE_I18N = True
+
+# USE_TZ = True
+
+TIME_ZONE = 'Asia/Manila'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_L10N = True
+
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

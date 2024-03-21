@@ -303,19 +303,21 @@
                                         <div data-i18n="Users">Users</div>
                                     </a>
                                 </li>
+                                <li class="menu-item {% if url_name == 'permissions' %}active{% endif %}">
+                                    <a href="{% url 'permissions' %}" class="menu-link">
+                                        
+                                        <i class="menu-icon tf-icons ti ti-settings"></i>
+                                        <div data-i18n="Form Controls">Form Controls</div>
+                                    </a>
+                                </li>
                                 
                                 <li class="menu-item">
                                     <a href="#" class="menu-link">
-                                        <i class="menu-icon tf-icons ti ti-settings"></i>
-                                        <div data-i18n="Roles">Roles</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item">
-                                    <a href="#" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-lock"></i>
-                                        <div data-i18n="Permissions">Permissions</div>
+                                        <div data-i18n="Logs">Logs</div>
                                     </a>
                                 </li>
+
                             </ul>
                         {% endif %}
                     {% endif %}
