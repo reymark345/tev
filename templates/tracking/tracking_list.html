@@ -1,5 +1,18 @@
+<div id="loading-screen">
+  <center>
+      <div class="col">
+          <!-- Fold -->
+          <div class="sk-fold sk-primary">
+            <div class="sk-fold-cube"></div>
+            <div class="sk-fold-cube"></div>
+            <div class="sk-fold-cube"></div>
+            <div class="sk-fold-cube"></div>
+          </div>
+        </div>  
+  </center>
+</div>
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
-
+<link rel="stylesheet" href="{% static 'custom/custom.css' %}" />
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -53,7 +66,36 @@
                 <div class="col-xl-12">
                   <div class="card">
                     <h5 class="card-header">Status</h5>
-                    <div class="existing-container"></div>
+
+                    <div class="card-body pb-0">
+                      <ul class="timeline mt-3 mb-0">
+                        <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                          <span class="timeline-point timeline-point-primary"></span>
+                          <!-- <span class="timeline-indicator timeline-indicator-primary">
+                            <i class="ti ti-send"></i>
+                          </span> -->
+                          <div class="timeline-event">
+                             <div class="received-container"></div>
+                          </div>
+                        </li>
+
+                        <li class="timeline-item timeline-item-warning pb-4 border-left-dashed">
+                          <span class="timeline-point timeline-point-warning"></span>
+                          <!-- <span class="timeline-indicator timeline-indicator-primary">
+                            <i class="ti ti-send"></i>
+                          </span> -->
+                          <div class="timeline-event">
+                            <div class="reviewed-container"></div>
+                          </div>
+                        </li>
+                        <div class="main-container"></div>
+                      </ul>
+                    </div>
+
+
+                    <!-- <div class="existing-container"></div> -->
+
+                    
                   </div>
                 </div>
                 <!-- /Timeline Advanced-->
@@ -466,6 +508,7 @@
                 'firstDayOfWeek': 1 // start week on Monday
             },
       });
+      $('#loading-screen').hide();
       const currentDate = new Date();
       let year_now  = "";
       if(!year_now){year_now = currentDate.getFullYear().toString();}  
@@ -842,106 +885,229 @@
                       }
                   }).done(function (data) {
                       console.log(data);
-                      console.log("testt");
-                      $('.existing-container').empty();
+                      let latest_object = data.data[0];
+                      let l_status = latest_object.status;
+                      console.log(l_status);
+                      $('.received-container').empty();
+                      $('.reviewed-container').empty();
+                      $('.main-container').empty();
 
                       data.data.forEach(function (item) {
                         let received_date = item.incoming_in ;
                         let forward_date = item.incoming_out ;
+                        let r_forwarded_by = item.received_forwarded_by;
+                        let reviewed_by = item.reviewed_by;
+                        let date_reviewed = item.date_reviewed;
                         let status = item.status;
+                        let remarks = item.remarks;
+                        let original_amt = parseFloat(item.original_amount).toFixed(2);
+                        let final_amt = parseFloat(item.final_amount).toFixed(2);
 
-                        // if (status ==3){
-                        //   status = `<span class="badge bg-label-danger">Returned</span>`
-                        // }
-                        // else{
-                        //   status = `<span class="badge bg-label-success">Forwarded</span>`
-                        // }
+                        if (!r_forwarded_by){
+                          r_forwarded_by = `<span class="badge bg-label-danger">N/A</span>`
+                        }
+                        if (!forward_date){
+                          forward_date = `<span class="badge bg-label-danger">N/A</span>`
+                        }
+                        if (!reviewed_by){
+                          reviewed_by = `<span class="badge bg-label-danger">N/A</span>`
+                        }
+
+                        if (!date_reviewed){
+                          date_reviewed = `<span class="badge bg-label-danger">N/A</span>`
+                        }
+
+                        if (!remarks){
+                          remarks = `None`
+                        }
+                        else{
+                          remarks = `<span class="badge bg-label-danger">${remarks}</span>`
+                        }
+
 
                         if (status ==1){
-                          statusColumn = `<span class="badge bg-label-warning">Pending</span>`;
+                          receive_statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
+                          review_statusColumn = `<td><span class="badge bg-label-warning">N/A</span></td>`;
                         }
                         else if (status ==2){
-                          statusColumn = `<span class="badge bg-label-warning">For Checking</span>`;
+                          receive_statusColumn = `<td><span class="badge bg-label-warning">For Checking</span></td>`;
+                          review_statusColumn = `<td><span class="badge bg-label-warning">N/A</span></td>`;
                         }
                         else if (status ==3){
-                          statusColumn = `<span class="badge bg-label-danger">Returned</span>`;
-                        }
-                        else if (status ==7){
-                          statusColumn = `<span class="badge bg-label-success">Approved</span>`;
-                        }
-                        else if (status ==4){
-                          statusColumn = `<span class="badge bg-label-primary">Payroll</span>`;
-                        }
-                        else if (status ==5){
-                          statusColumn = `<span class="badge bg-label-warning">Outgoing</span>`;
-                        }
-                        else if (status ==6){
-                          statusColumn = `<span class="badge bg-label-success">Ongoing</span>`;
-                        }
-                        else if (status ==7){
-                          statusColumn = `<span class="badge bg-label-success">For Approval</span>`;
-                        }
-                        else if (status ==8){
-                          statusColumn = `<span class="badge bg-label-success">Received</span>`;
-                        }
-                        else if (status ==9){
-                          statusColumn = `<span class="badge bg-label-success">Forwarded</span>`;
-                        }
-                        else if (status ==10){
-                          statusColumn = `<span class="badge bg-label-success">Received</span>`;
-                        }
-                        else if (status ==11){
-                          statusColumn = `<span class="badge bg-label-success">Forwarded</span>`;
-                        }
-                        else if (status ==12){
-                          statusColumn = `<span class="badge bg-label-success">Received</span>`;
-                        }
-                        else if (status ==13){
-                          statusColumn = `<span class="badge bg-label-success">Forwarded</span>`;
-                        }
-                        else if (status ==14){
-                          statusColumn = `<span class="badge bg-label-success">Received</span>`;
-                        }
-                        else if (status ==15){
-                          statusColumn = `<span class="badge bg-label-success">Forwarded</span>`;
-                        }
-                        else {
-                          statusColumn = `<td><span class="badge bg-label-primary">${item.status}</span>`;
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          review_statusColumn = `<td><span class="badge bg-label-danger">Returned</span></td>`;
                         }
 
+                        else if (status > 3){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          review_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+
+                        else if (status ==7){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Approved</span></td>`;
+                        }
+                        else if (status ==4){
+                          receive_statusColumn = `<td><span class="badge bg-label-primary">Payroll</span></td>`;
+                        }
+                        else if (status ==5){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (status ==6){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Ongoing</span></td>`;
+                        }
+                        else if (status ==7){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">For Approval</span></td>`;
+                        }
+                        else if (status ==8){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
+                        }
+                        else if (status ==9){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (status ==10){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
+                        }
+                        else if (status ==11){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (status ==12){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
+                        }
+                        else if (status ==13){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (status ==14){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
+                        }
+                        else if (status ==15){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else {
+                          receive_statusColumn = `<td><span class="badge bg-label-primary">${item.status}</span></td>`;
+                        }
+
+                        if (l_status == 4){
+                          payroll_statusColumn = `<td><span class="badge bg-label-warning">For Payroll</span></td>`;
+
+                        }
+                        else if (l_status < 4){
+                          payroll_statusColumn = `<td><span class="badge bg-label-warning">N/A</span></td>`;
+
+                        }
+                        else if (l_status == 7){
+                          payroll_statusColumn = `<td><span class="badge bg-label-warning">N/A</span></td>`;
+
+                        }
+                        else{
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        
+
+                        // if(status ==1){
+                        //   receive_statusColumn = `<span class="badge bg-label-success">Received</span>`;
+                        // }
+                        // else if(status >1){
+                        //   receive_statusColumn = `<span class="badge bg-label-success">Forwarded</span>`;
+                        //   review_statusColumn = `<span class="badge bg-label-danger">Returned</span>`;
+                        // }
+                        // else {
+                        //   receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span>`;
+                        // }
+
             
-                        var timelineEvent = `
-                          <div class="card-body pb-0">
-                          <ul class="timeline mt-3 mb-0">
-                            <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
-                              <span class="timeline-point timeline-point-primary"></span>
-                              <!-- <span class="timeline-indicator timeline-indicator-primary">
-                                <i class="ti ti-send"></i>
-                              </span> -->
-                              <div class="timeline-event">
-                                <div class="timeline-header border-bottom mb-3">
-                                  <h6 class="mb-0">Received </h6>
-                                  <span class="text-muted">Date Received : ${received_date}</span>
-                                </div>
-                                <div class="d-flex justify-content-between flex-wrap mb-2">
-                                  <div>
-                                    <span>Received By: Reymark Valdehueza</span>
-                                    <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${statusColumn}
-                                  </div>
-                                </div>
-                                <div class="timeline-header border-bottom mb-3">
-                                  <span>Forwarded By: Sonny Gocela</span>
-                                  <!-- <h6 class="mb-0">Forwarded By: Sonny Gocela</h6> -->
-                                  <span class="text-muted">Date Forwarded : ${forward_date}</span>
-                                </div>
-                                
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
+                        var received_status = `
+                          <div class="timeline-header border-bottom mb-3">
+                            <h6 class="mb-0">Received </h6>
+                            <span class="text-muted">Date Received : ${received_date}</span>
+                          </div>
+                          <div class="d-flex justify-content-between flex-wrap mb-2">
+                            <div>
+                              <span>Received By: Reymark Valdehueza</span>
+                              <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${receive_statusColumn}
+                            </div>
+                          </div>
+                          <div class="timeline-header border-bottom mb-3">
+                            <span>Forwarded By: ${r_forwarded_by}</span>
+                            <!-- <h6 class="mb-0">Forwarded By: </h6> -->
+                            <span class="text-muted">Date Forwarded : ${forward_date}</span>
+                            </div>
                         `;
-                        $('.existing-container').append(timelineEvent);
+
+                        var reviewed_status = `
+                          <div class="timeline-header border-bottom mb-3">
+                            <h6 class="mb-0">Reviewed </h6>
+                            <span class="text-muted">Date Reviewed : ${date_reviewed}</span>
+                          </div>
+                          <div class="d-flex justify-content-between flex-wrap mb-2">
+                            <div>
+                              <span>Reviewed By: ${reviewed_by}</span>
+                              <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${review_statusColumn}
+                            </div>
+                          </div>
+                          <div class="timeline-header border-bottom mb-3">
+                            <span>Forwarded By: ${r_forwarded_by}</span>
+                            <span class="text-muted">Date Forwarded : ${forward_date}</span>
+                          </div>
+                          
+                          <div class="d-flex justify-content-between flex-wrap mb-2">
+                            <div>
+                              
+                            <span class="text-muted">Remarks : </span>${remarks}<br>
+                            <span class="text-muted">Original Amt : </span>₱ ${original_amt} <br>
+                            <span class="text-muted">Amt Certified : </span>₱ ${final_amt}<br>
+                            </div>
+                          </div>
+                          <br>
+
+
+
+
+  
+                        `;
+
+                        $('.received-container').append(received_status);
+                        $('.reviewed-container').append(reviewed_status);
                       })
+
+                      var main_container =`
+                        <li class="timeline-item timeline-item-success pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-point-success"></span>
+                            <!-- <span class="timeline-indicator timeline-indicator-success">
+                              <i class="ti ti-send"></i>
+                            </span> -->
+                            <div class="timeline-event">
+
+
+                              <div class="timeline-header border-bottom mb-3">
+                                <h6 class="mb-0">Payroll</h6>
+                                <span class="text-muted">Date Payroll : </span>
+                              </div>
+                              <div class="d-flex justify-content-between flex-wrap mb-2">
+                                <div>
+                                  <span>Payroll By: Reymark Valdehueza</span>
+                                  <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${payroll_statusColumn}
+                                </div>
+                              </div>
+                              <div class="timeline-header border-bottom mb-3">
+                                <span>Forwarded By:</span>
+                                <span class="text-muted">Date Forwarded : </span>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="timeline-item timeline-item-warning pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-point-warning"></span>
+                            <!-- <span class="timeline-indicator timeline-indicator-success">
+                              <i class="ti ti-send"></i>
+                            </span> -->
+                            <div class="timeline-event">
+                              <h3>Soon!</h3>
+
+                            </div>
+                        </li>
+                      `;
+                      $('.main-container').append(main_container);
+
                       const tableId = 'tbl-history';
                       const tbody = $(`#${tableId} tbody`);
                       let fullname = data.full_name;

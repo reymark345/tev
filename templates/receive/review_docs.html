@@ -34,7 +34,6 @@
                             <th>Travel Date</th>
                             <th>Status</th>
                             <th>Forwarded</th>
-                            <th>Reviewed</th>
                             <th>Duplicate</th>
                             <th>Remarks</th>
                             <th>Created By</th>
@@ -464,7 +463,6 @@
                 { data: 'date_travel'},
                 { data: 'status' },
                 { data: 'incoming_out' },
-                { data: 'slashed_out' },
                 { data: 'remarks' },
                 { data: 'lacking' },
                 { data: 'user_id' },
@@ -567,18 +565,18 @@
 
                   },
                 },
-                {
-                    targets: -4,
-                    render: function (data) {
-                        return data;
-                        // if (data === null || data === undefined || data === "") {
-                        //     return ''; 
-                        // } 
-                        // else {
-                        //     return '<span class="badge bg-label-success">' + data + '</span>';
-                        // }
-                    },
-                },
+                // {
+                //     targets: -4,
+                //     render: function (data) {
+                //         return data;
+                //         // if (data === null || data === undefined || data === "") {
+                //         //     return ''; 
+                //         // } 
+                //         // else {
+                //         //     return '<span class="badge bg-label-success">' + data + '</span>';
+                //         // }
+                //     },
+                // },
 
                 {
                     targets: -3,
@@ -1304,7 +1302,6 @@
                     toastr.danger('Data not saved', 'Danger', toast_options);
                 }
             });
-            
         }
 
         if (EmployeeName.length) {

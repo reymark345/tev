@@ -483,7 +483,8 @@ def checking_load(request):
         last_name = item['last_name'] if item['last_name'] else ''
         
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
-        formatted_date = date(item['incoming_out'], "F j, Y g:i A")  # "F j, Y g:i A" is the desired format
+        formatted_date_out = date(item['incoming_out'], "F j, Y g:i A")
+
         item_entry = {
             'id': item['id'],
             'code': item['code'],
@@ -494,8 +495,7 @@ def checking_load(request):
             'original_amount': item['original_amount'],
             'final_amount': item['final_amount'],
             'incoming_in': item['incoming_in'],
-            'incoming_out': formatted_date,
-            'slashed_out': item['slashed_out'],
+            'incoming_out': formatted_date_out,
             'remarks': item['remarks'],
             'lacking': item['lacking'],
             'status': item['status_id'],
@@ -1275,7 +1275,7 @@ def updatetevdetails(request):
         transaction_id = request.POST.get('transaction_id')
         selected_remarks = request.POST.getlist('selected_remarks[]')
         selected_dates = request.POST.getlist('selected_dates[]')
-        tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status, reviewed_by =user_id)
+        tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status, reviewed_by =user_id, date_reviewed =date_time.datetime.now())
         Remarks_r.objects.filter(incoming_id=transaction_id).delete()
         for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             Remarks_r.objects.create(
