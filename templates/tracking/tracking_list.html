@@ -79,8 +79,8 @@
                           </div>
                         </li>
 
-                        <li class="timeline-item timeline-item-warning pb-4 border-left-dashed">
-                          <span class="timeline-point timeline-point-warning"></span>
+                        <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                          <span class="timeline-point timeline-point-primary"></span>
                           <!-- <span class="timeline-indicator timeline-indicator-primary">
                             <i class="ti ti-send"></i>
                           </span> -->
@@ -870,9 +870,6 @@
                     });
                   }
                 },
-
-
-
           ],
           drawCallback: function (settings) { 
               $('.view-data').on('click', function () {
@@ -884,15 +881,30 @@
                           dv_id: id
                       }
                   }).done(function (data) {
-                      console.log(data);
+                      // console.log(data);
                       let latest_object = data.data[0];
                       let l_status = latest_object.status;
-                      console.log(l_status);
+                      // console.log(l_status);
                       $('.received-container').empty();
                       $('.reviewed-container').empty();
                       $('.main-container').empty();
 
-                      data.data.forEach(function (item) {
+                      let len = data.data.length;
+                      // console.log(len);
+                      // console.log("len");
+
+                      data.data.forEach(function (item, index) {
+                        let message = '';
+                        // let id = item.id ;
+
+                        let len = data.data.length;
+                        // console.log(len);
+
+                        message = (index == 0) ? `<span ><i>(Latest)</i></span>` : `<span><i>(Old)</i></span>`;
+                        console.log("index here");
+                        console.log(index);
+                        // let data = (index === len - 1) ? "Latest" : "Old";
+
                         let received_date = item.incoming_in ;
                         let forward_date = item.incoming_out ;
                         let r_forwarded_by = item.received_forwarded_by;
@@ -938,13 +950,14 @@
                           review_statusColumn = `<td><span class="badge bg-label-danger">Returned</span></td>`;
                         }
 
-                        else if (status > 3){
+                        else if (status > 3 && status!=7){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                           review_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         }
 
                         else if (status ==7){
-                          receive_statusColumn = `<td><span class="badge bg-label-success">Approved</span></td>`;
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          review_statusColumn = `<td><span class="badge bg-label-success">Approved</span></td>`;
                         }
                         else if (status ==4){
                           receive_statusColumn = `<td><span class="badge bg-label-primary">Payroll</span></td>`;
@@ -954,9 +967,6 @@
                         }
                         else if (status ==6){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Ongoing</span></td>`;
-                        }
-                        else if (status ==7){
-                          receive_statusColumn = `<td><span class="badge bg-label-success">For Approval</span></td>`;
                         }
                         else if (status ==8){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
@@ -1017,7 +1027,7 @@
             
                         var received_status = `
                           <div class="timeline-header border-bottom mb-3">
-                            <h6 class="mb-0">Received </h6>
+                            <h6 class="mb-0">Received ${message}</h6>
                             <span class="text-muted">Date Received : ${received_date}</span>
                           </div>
                           <div class="d-flex justify-content-between flex-wrap mb-2">
@@ -1035,13 +1045,13 @@
 
                         var reviewed_status = `
                           <div class="timeline-header border-bottom mb-3">
-                            <h6 class="mb-0">Reviewed </h6>
+                            <h6 class="mb-0">Reviewed ${message} </h6>
                             <span class="text-muted">Date Reviewed : ${date_reviewed}</span>
                           </div>
                           <div class="d-flex justify-content-between flex-wrap mb-2">
                             <div>
                               <span>Reviewed By: ${reviewed_by}</span>
-                              <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${review_statusColumn}
+                              <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${review_statusColumn}
                             </div>
                           </div>
                           <div class="timeline-header border-bottom mb-3">
@@ -1070,9 +1080,9 @@
                       })
 
                       var main_container =`
-                        <li class="timeline-item timeline-item-success pb-4 border-left-dashed">
-                            <span class="timeline-point timeline-point-success"></span>
-                            <!-- <span class="timeline-indicator timeline-indicator-success">
+                        <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-point-primary"></span>
+                            <!-- <span class="timeline-indicator timeline-indicator-primary">
                               <i class="ti ti-send"></i>
                             </span> -->
                             <div class="timeline-event">
@@ -1095,8 +1105,8 @@
                             </div>
                         </li>
 
-                        <li class="timeline-item timeline-item-warning pb-4 border-left-dashed">
-                            <span class="timeline-point timeline-point-warning"></span>
+                        <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-point-primary"></span>
                             <!-- <span class="timeline-indicator timeline-indicator-success">
                               <i class="ti ti-send"></i>
                             </span> -->
