@@ -2398,7 +2398,6 @@ def add_existing_record(request):
 
 @csrf_exempt
 def addtevdetails(request):
-    print("naaaaaaaaaaaaaaaaaaaaaaaaaaa")
     amount = request.POST.get('final_amount')
     remarks = request.POST.get('remarks')
     status = request.POST.get('status')
