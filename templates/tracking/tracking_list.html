@@ -889,25 +889,15 @@
                       $('.reviewed-container').empty();
                       $('.main-container').empty();
 
-                      let len = data.data.length;
-                      // console.log(len);
-                      // console.log("len");
+                      console.log(data);
 
                       data.data.forEach(function (item, index) {
                         let message = '';
-                        // let id = item.id ;
-
-                        let len = data.data.length;
-                        // console.log(len);
-
                         message = (index == 0) ? `<span ><i>(Latest)</i></span>` : `<span><i>(Old)</i></span>`;
-                        console.log("index here");
-                        console.log(index);
-                        // let data = (index === len - 1) ? "Latest" : "Old";
-
                         let received_date = item.incoming_in ;
                         let forward_date = item.incoming_out ;
                         let r_forwarded_by = item.received_forwarded_by;
+                        let incoming_by = item.incoming_by ;
                         let reviewed_by = item.reviewed_by;
                         let date_reviewed = item.date_reviewed;
                         let status = item.status;
@@ -1032,13 +1022,12 @@
                           </div>
                           <div class="d-flex justify-content-between flex-wrap mb-2">
                             <div>
-                              <span>Received By: Reymark Valdehueza</span>
-                              <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${receive_statusColumn}
+                              <span>RECEIVED BY: ${incoming_by} </span>
+                              <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> STATUS :  ${receive_statusColumn}
                             </div>
                           </div>
                           <div class="timeline-header border-bottom mb-3">
-                            <span>Forwarded By: ${r_forwarded_by}</span>
-                            <!-- <h6 class="mb-0">Forwarded By: </h6> -->
+                            <span>FORWARDED BY: ${r_forwarded_by}</span>
                             <span class="text-muted">Date Forwarded : ${forward_date}</span>
                             </div>
                         `;
@@ -1050,12 +1039,12 @@
                           </div>
                           <div class="d-flex justify-content-between flex-wrap mb-2">
                             <div>
-                              <span>Reviewed By: ${reviewed_by}</span>
-                              <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${review_statusColumn}
+                              <span>REVIEWED BY: ${reviewed_by}</span>
+                              <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> STATUS : ${review_statusColumn}
                             </div>
                           </div>
                           <div class="timeline-header border-bottom mb-3">
-                            <span>Forwarded By: ${r_forwarded_by}</span>
+                            <span>FORWARDED BY: ${r_forwarded_by}</span>
                             <span class="text-muted">Date Forwarded : ${forward_date}</span>
                           </div>
                           
@@ -1068,11 +1057,6 @@
                             </div>
                           </div>
                           <br>
-
-
-
-
-  
                         `;
 
                         $('.received-container').append(received_status);
@@ -1095,7 +1079,7 @@
                               <div class="d-flex justify-content-between flex-wrap mb-2">
                                 <div>
                                   <span>Payroll By: Reymark Valdehueza</span>
-                                  <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${payroll_statusColumn}
+                                  <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> STATUS :  ${payroll_statusColumn}
                                 </div>
                               </div>
                               <div class="timeline-header border-bottom mb-3">
