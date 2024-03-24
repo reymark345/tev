@@ -515,7 +515,7 @@ def export_status(request):
         'ID NO',
         'LASTNAME',
         'FIRSTNAME',
-        'MIDDLENAME',
+        'MIDDLE INITIAL',
         'DATE TRAVEL',
         'DIVISION',
         'SECTION',

@@ -8,10 +8,11 @@
     data-theme="theme-default"
     data-assets-path="{% static 'assets/' %}"
     data-template="vertical-menu-template"
+    
 >	
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=0.5, user-scalable=yes, minimum-scale=0.5, maximum-scale=0.5" />
+        <meta name="viewport" content="width=device-width, initial-scale=0.6, user-scalable=yes, minimum-scale=0.6, maximum-scale=0.6" />
 
         <title>TRIS</title>
 
@@ -303,8 +304,8 @@
                                         <div data-i18n="Users">Users</div>
                                     </a>
                                 </li>
-                                <li class="menu-item {% if url_name == 'permissions' %}active{% endif %}">
-                                    <a href="{% url 'permissions' %}" class="menu-link">
+                                <li class="menu-item {% if url_name == 'form_controls' %}active{% endif %}">
+                                    <a href="{% url 'form_controls' %}" class="menu-link">
                                         
                                         <i class="menu-icon tf-icons ti ti-settings"></i>
                                         <div data-i18n="Form Controls">Form Controls</div>
@@ -441,11 +442,12 @@
                             <div class="container-fluid">
                                 <div class="footer-container d-flex align-items-center justify-content-between py-2 flex-md-row flex-column">
                                     <div>
+                                        DEVELOPER : REYMARK N. VALDEHUEZA 
                                         ©
                                         <script>
                                             document.write(new Date().getFullYear())
                                         </script>
-                                        <a href="#" target="_blank" class="fw-semibold">TRIS</a>
+                                        <a href="#" target="_blank" class="fw-semibold">TRIS</a> 
                                     </div>
                                     <div></div>
                                 </div>
