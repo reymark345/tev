@@ -9,46 +9,67 @@
         <!-- Basic Custom Radios -->
         <div class="col-xl-6 mb-4">
             <div class="card">
-                <h5 class="card-header">Received Document / Received</h5>
+                <h5 class="card-header">Received Document / Received / Date Receive</h5>
                 <div class="card-body">
                 <div class="row">
                     <div class="col-md mb-md-0 mb-2">
                     <div class="form-check custom-option custom-option-basic">
-                        <label class="form-check-label custom-option-content" for="customRadioTemp1">
-                        <input
-                            name="customRadioTemp"
-                            class="form-check-input"
-                            type="radio"
-                            value=""
-                            id="customRadioTemp1"
-                            checked
-                        />
+                        <label class="form-check-label custom-option-content" for="date_receive_en">
+                        {% if is_actual_date %}
+                            <input
+                                name="customRadioTemp"
+                                class="form-check-input"
+                                type="radio"
+                                value=""
+                                id="date_receive_en"
+                                checked
+                            />
+                        {% else %}
+                            <input
+                                name="customRadioTemp"
+                                class="form-check-input"
+                                type="radio"
+                                value=""
+                                id="date_receive_en"
+                            />
+                        {% endif %}
                         <span class="custom-option-header">
                             <span class="h6 mb-0">Enabled</span>
                             <!-- <span class="text-muted">Free</span> -->
                         </span>
                         <span class="custom-option-body">
-                            <small>Date Actual Received</small>
+                            <small>Date Actual Receive</small>
                         </span>
                         </label>
                     </div>
                     </div>
                     <div class="col-md">
                     <div class="form-check custom-option custom-option-basic">
-                        <label class="form-check-label custom-option-content" for="customRadioTemp2">
+                        <label class="form-check-label custom-option-content" for="date_receive_ds">
+                        {% if is_actual_date %}
                         <input
                             name="customRadioTemp"
                             class="form-check-input"
                             type="radio"
                             value=""
-                            id="customRadioTemp2"
+                            id="date_receive_ds"
                         />
+                        {% else %}
+                        <input
+                            name="customRadioTemp"
+                            class="form-check-input"
+                            type="radio"
+                            value=""
+                            id="date_receive_ds"
+                            checked
+                        />
+                        {% endif %}
                         <span class="custom-option-header">
                             <span class="h6 mb-0">Disable</span>
                             <!-- <span class="text-muted">$ 5.00</span> -->
                         </span>
                         <span class="custom-option-body">
-                            <small>Date Actual Received</small>
+                            <small>Date Actual Receive</small>
                         </span>
                         </label>
                     </div>
@@ -57,60 +78,53 @@
                 </div>
             </div>
         </div>
-        <!-- /Basic Custom Radios -->
-
-                <!-- Basic Custom Radios -->
-                <div class="col-xl-6 mb-4">
-                    <div class="card">
-                        <h5 class="card-header">Received Document / Received</h5>
-                        <div class="card-body">
-                        <div class="row">
-                            <div class="col-md mb-md-0 mb-2">
-                            <div class="form-check custom-option custom-option-basic">
-                                <label class="form-check-label custom-option-content" for="customRadioTemp1">
-                                <input
-                                    name="DateLimit1"
-                                    class="form-check-input"
-                                    type="radio"
-                                    value=""
-                                    id="dateLimit1"
-                                    checked
-                                />
-                                <span class="custom-option-header">
-                                    <span class="h6 mb-0">Enabled</span>
-                                    <!-- <span class="text-muted">Free</span> -->
-                                </span>
-                                <span class="custom-option-body">
-                                    <small>Limit travel received 1 month</small>
-                                </span>
-                                </label>
-                            </div>
-                            </div>
-                            <div class="col-md">
-                            <div class="form-check custom-option custom-option-basic">
-                                <label class="form-check-label custom-option-content" for="customRadioTemp2">
-                                <input
-                                    name="DateLimit2"
-                                    class="form-check-input"
-                                    type="radio"
-                                    value=""
-                                    id="dateLimit2"
-                                />
-                                <span class="custom-option-header">
-                                    <span class="h6 mb-0">Disable</span>
-                                    <!-- <span class="text-muted">$ 5.00</span> -->
-                                </span>
-                                <span class="custom-option-body">
-                                    <small>Limit travel received 1 month</small>
-                                </span>
-                                </label>
-                            </div>
-                            </div>
-                        </div>
+        <div class="col-xl-6 mb-4">
+            <div class="card">
+                <h5 class="card-header">Received Document / Received / Date Travel </h5> 
+                <div class="card-body">
+                <div class="row">
+                    <div class="col-md mb-md-0 mb-2">
+                    <div class="form-check custom-option custom-option-basic">
+                        <label class="form-check-label custom-option-content" for="date-limit-en">
+                        <input
+                            name="DateLimit"
+                            class="form-check-input"
+                            type="radio"
+                            value=""
+                            id="date-limit-en"
+                        />
+                        <span class="custom-option-header">
+                            <span class="h6 mb-0">Enabled</span>
+                        </span>
+                        <span class="custom-option-body">
+                            <small>Limit travel receive 1 month</small>
+                        </span>
+                        </label>
+                    </div>
+                    </div>
+                    <div class="col-md">
+                        <div class="form-check custom-option custom-option-basic">
+                            <label class="form-check-label custom-option-content" for="date-limit-ds">
+                            <input
+                                name="DateLimit"
+                                class="form-check-input"
+                                type="radio"
+                                value=""
+                                id="date-limit-ds"
+                            />
+                            <span class="custom-option-header">
+                                <span class="h6 mb-0">Disable</span>
+                            </span>
+                            <span class="custom-option-body">
+                                <small>Limit travel receive 1 month</small>
+                            </span>
+                            </label>
                         </div>
                     </div>
                 </div>
-                <!-- /Basic Custom Radios -->
+                </div>
+            </div>
+        </div>
 
     
         <!-- Custom SVG Icon Checkbox -->
@@ -244,10 +258,102 @@
 
 
 {% endblock %} {% block footer_scripts %}
-<!-- <script>
+<script>
     $(document).ready(function () {
-        const table = $('#tbl-items')
+        $("#date_receive_en").click(function(){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Enable it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+                allowOutsideClick: false,
+            }).then(function (result) {
+                if (result.value) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'date-actual-update' %}",
+                        data: {
+                            'status': 1
+                        },
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Date actual has been enabled',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                            dataTable.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            });
+        });
+
+        $("#date_receive_ds").click(function(){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Disable it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+                allowOutsideClick: false,
+            }).then(function (result) {
+                if (result.value) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'date-actual-update' %}",
+                        data: {
+                            'status': 0
+                        },
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Date actual has been disabled',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                            dataTable.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            });
+        });
    
     })
-</script> -->
+</script>
 {% endblock footer_scripts %}

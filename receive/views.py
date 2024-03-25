@@ -28,6 +28,7 @@ from django.db.models import F, CharField, Value
 from django.db.models.functions import Concat
 from django.utils import timezone
 from django.template.defaultfilters import date
+from decimal import Decimal
 
 
 def generate_code():
@@ -59,6 +60,7 @@ def list(request):
     data = []
     user_name = RolePermissions.objects.filter(role_id=2) 
     get_id = user_name.values_list('user_id', flat=True)
+    date_actual = SystemConfiguration.objects.filter().first().date_actual
     for user_id in get_id:
         userData = AuthUser.objects.filter(id=user_id)
         full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
@@ -71,6 +73,7 @@ def list(request):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'remarks_list' : RemarksLib.objects.filter().order_by('name'),
+            'is_actual_date': date_actual,
             'permissions' : role_names,
             'created_by' :  data
         }
@@ -96,12 +99,13 @@ def checking(request):
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
-
+    date_actual = SystemConfiguration.objects.filter().first().date_actual
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'remarks_list' : RemarksLib.objects.filter().order_by('name'),
             'permissions' : role_names,
+            'is_actual_date': date_actual
         }
         return render(request, 'receive/review_docs.html', context)
     else:
@@ -757,6 +761,9 @@ def preview_received(request):
 
     # Convert the result to a dictionary for JsonResponse
     if result:
+
+        orig_amt =  Decimal(result[8])
+        orig_amt = orig_amt.quantize(Decimal("0.01"))
         data = {
             'id': result[0],
             'code': result[1],
@@ -766,7 +773,7 @@ def preview_received(request):
             'id_no': result[5],
             'account_no': result[6],
             'date_travel': result[7],
-            'original_amount': result[8],
+            'original_amount': orig_amt,
             'final_amount': result[9],
             'incoming_in': result[10],
             'incoming_out': result[11],
@@ -815,15 +822,8 @@ def item_update(request):
     duplicate_travel = []
     individual_dates = travel_date.split(',')
     cleaned_dates = ','.join(date.strip() for date in individual_dates)
-
-
-    print(individual_dates)
     for date in individual_dates:
         cleaned_date = date.strip()
-
-        print(cleaned_date)
-        print("cleaned_date")
-
         results = Q(first_name=name) & \
           Q(middle_name=middle) & \
           Q(last_name=lname) & \
@@ -887,6 +887,7 @@ def item_rod_update(request):
     acc_no = request.POST.get('AccountNumber')
     div = request.POST.get('Division')
     sec = request.POST.get('Section')
+    orig_amnt = request.POST.get('FAmount')
 
     duplicate_travel = []
     individual_dates = travel_date.split(',')
@@ -918,10 +919,10 @@ def item_rod_update(request):
         formatted_dates = [format_date(date) for date in date_components]
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
-        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec)
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec, original_amount = orig_amnt)
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
     else:
-        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec)
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec, original_amount = orig_amnt)
         return JsonResponse({'data': 'success'})
 
 @csrf_exempt
@@ -940,8 +941,6 @@ def item_returned(request):
     travel_date_stripped = travel_date.strip()
     travel_date_spaces = travel_date_stripped.replace(' ', '')
     id = request.POST.get('ItemID')
-
-    print()
 
     data = TevIncoming.objects.filter(id=id).first()
     tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,incoming_in =data.incoming_in,user_id=data.user_id)
@@ -969,6 +968,7 @@ def item_add(request):
     date_received = request.POST.get('DateReceived')
     idd_no = request.POST.get('IdNumber')
     acct_no = request.POST.get('AccountNumber')
+    contact = request.POST.get('Contact')
     name = request.POST.get('EmpName')
     middle = request.POST.get('EmpMiddle')
     lname = request.POST.get('EmpLastname')
@@ -978,14 +978,9 @@ def item_add(request):
     selected_remarks = request.POST.getlist('selectedRemarks[]')
     selected_dates = request.POST.getlist('selectedDate[]')
     g_code = generate_code()
-    print(travel_date)
-    print("travel_date")
-    print(range_travel)
     if travel_date:
-        print("1sttt")
         travel_date = request.POST.get('DateTravel')
     else :
-        print("2ndddd")
         start_date_str, end_date_str = range_travel.split(' to ')
         
         start_date = datetime.strptime(start_date_str.strip(), '%Y-%m-%d')
@@ -1044,7 +1039,8 @@ def item_add(request):
                 remarks=formatted_dates_string,
                 user_id=user_id,
                 division = division,
-                section = section
+                section = section,
+                contact_no = contact
             )
         else:
             tev_add = TevIncoming(
@@ -1060,7 +1056,8 @@ def item_add(request):
                 remarks=formatted_dates_string,
                 user_id=user_id,
                 division = division,
-                section = section
+                section = section,
+                contact_no = contact
             )
         tev_add.save()
 
@@ -1094,7 +1091,8 @@ def item_add(request):
                 incoming_in = date_received,
                 user_id=user_id,
                 division = division,
-                section = section
+                section = section,
+                contact_no = contact
             )
         else:
             tev_add = TevIncoming(
@@ -1109,7 +1107,8 @@ def item_add(request):
                 incoming_in = date_time.datetime.now(),
                 user_id=user_id,
                 division = division,
-                section = section
+                section = section,
+                contact_no = contact
             )
         tev_add.save()
 
@@ -1133,9 +1132,6 @@ def item_add(request):
 @csrf_exempt
 def out_pending_tev(request):
     out_list = request.POST.getlist('out_list[]')
-    print(date_time.datetime.now())
-    print(timezone.now())
-    print("testtttimezone")
     for item_id  in out_list:
         tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=date_time.datetime.now())
     return JsonResponse({'data': 'success'})

@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, StaffDetails,RoleDetails, RolePermissions )
+from main.models import (AuthUser, StaffDetails,RoleDetails, RolePermissions, SystemConfiguration )
 import json 
 from django.core.serializers import serialize
 import datetime
@@ -44,19 +44,21 @@ def users(request):
         return render(request, 'pages/unauthorized.html')
 
 @login_required(login_url='login')
-def permissions(request):
+def form_controls(request):
     allowed_roles = ["Admin"]    
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
+    date_actual = SystemConfiguration.objects.filter().first().date_actual
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
+            'is_actual_date': date_actual,
             'permissions' : role_names,
             'role_details': RoleDetails.objects.filter().order_by('role_name'),
         }
-        return render(request, 'admin/permissions.html', context)
+        return render(request, 'admin/form_controls.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
 
@@ -116,13 +118,19 @@ def updateuser(request):
             StaffDetails.objects.filter(user_id=user_id_).update(sex=sex_, address = address_, position = position_, role_id = roles)
             return JsonResponse({'data': 'success'})
         
+@csrf_exempt
+def date_actual_update(request):
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        SystemConfiguration.objects.filter(id =1).update(date_actual=status)
+        return JsonResponse({'data': 'success'})
         
 
 #start User function ---------------->
+        
 
 @csrf_exempt
 def user_add(request):
-
     user_name = request.POST.get('Username')
     firstname = request.POST.get('Firstname')
     middlename = request.POST.get('Middlename')
