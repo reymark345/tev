@@ -275,6 +275,8 @@ class SystemConfiguration(models.Model):
     year = models.CharField(max_length=128, blank=True, null=True)
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True, auto_now=True)
+    date_actual = models.BooleanField(default=True)
+    date_limit = models.BooleanField(default=True)
 
     class Meta:
         managed = True

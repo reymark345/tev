@@ -329,7 +329,7 @@ def employee_details(request):
                 GROUP_CONCAT(tb.purpose SEPARATOR ', ') AS purposes,
                 ti.incoming_in,
                 ti.incoming_out,
-                ti.user_id AS incoming_by,
+                CONCAT_WS(' ', ui.first_name, ui.last_name) AS incoming_by,
                 t_o.dv_no, 
                 t_o.otg_d_forwarded,
                 t_o.b_d_forwarded,
@@ -359,6 +359,8 @@ def employee_details(request):
 				auth_user AS au ON au.id = ti.forwarded_by
         LEFT JOIN 
 				auth_user AS rb ON rb.id = ti.reviewed_by
+        LEFT JOIN 
+				auth_user AS ui ON ui.id = ti.user_id
         WHERE 
                 ti.code LIKE %s
         GROUP BY 
@@ -406,6 +408,8 @@ def employee_details(request):
         journal = row[13]
         approval = row[14]
         date_reviewed = date(row[20], "F j, Y g:i A")
+        incoming = row[9]
+        forwarded_by = row[18]
 
         item = {
             'id': row[0],
@@ -417,7 +421,7 @@ def employee_details(request):
             'purpose': row[6], 
             'incoming_in': format_date(incoming_in),
             'incoming_out': format_date(incoming_out),
-            'incoming_by': row[9],
+            'incoming_by': incoming.upper(),
             'dv_no': row[10],
             'otg_d_f': format_date(outgoing),
             'b_d_f': format_date(budget),
@@ -426,7 +430,7 @@ def employee_details(request):
             'charges': row[15],
             'cluster': row[16],
             'remarks': row[17], 
-            'received_forwarded_by': row[18], 
+            'received_forwarded_by': forwarded_by.upper(), 
             'reviewed_by': row[19],
             'date_reviewed': date_reviewed, 
         }
@@ -511,7 +515,7 @@ def export_status(request):
         'ID NO',
         'LASTNAME',
         'FIRSTNAME',
-        'MIDDLENAME',
+        'MIDDLE INITIAL',
         'DATE TRAVEL',
         'DIVISION',
         'SECTION',

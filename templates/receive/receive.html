@@ -304,6 +304,7 @@
                 </div>
             </div>
 
+            {% if is_actual_date %}
             <div class="col-sm-12">
                 <div class="col-md-12 mb-2">
                   <label for="flatpickr-multi" class="form-label">Date Received <small>(Actual/Optional)</small></label>
@@ -316,6 +317,7 @@
                 />
                 </div>
             </div>
+            {% endif %}
 
             <!-- <div class="col-md-6 col-12 mb-4">
                 <label for="flatpickr-datetime" class="form-label">Datetime Picker</label>
@@ -362,6 +364,7 @@
             <input id="emp-lastname" name="EmpLastname" class="form-control accn" type="hidden" placeholder="lastname"/>
             <input id="hdate-travel" name="HDateTravel" class="form-control accn" type="hidden" placeholder="Date Travel"/>
             <input id="division-user" name="DivisionUser" class="form-control accn" type="hidden" placeholder="Division"/>
+            <input id="contact-no" name="ContactNo" class="form-control accn" type="hidden" placeholder="09+"/>
             <input id="section-user" name="SectionUser" class="form-control accn" type="hidden" placeholder="Section"/>
         </form>
     </div>
@@ -479,6 +482,7 @@
             IdNumber = jQuery(document.querySelector('[name="IdNumber"]')),
             DivisionUser = jQuery(document.querySelector('[name="DivisionUser"]')),
             SectionUser = jQuery(document.querySelector('[name="SectionUser"]')),
+            ContactNo = jQuery(document.querySelector('[name="ContactNo"]')),
             AccountNumber = jQuery(document.querySelector('[name="AccountNumber"]')),
             EmpName = jQuery(document.querySelector('[name="EmpName"]')),
             EmpMiddle = jQuery(document.querySelector('[name="EmpMiddle"]')),
@@ -731,13 +735,13 @@
                 //     }
                 // },
 
-                {
-                    className: 'btn btn-label-success me-2 waves-effect',
-                    text: '<i class="ti ti-file-import me-sm-1"></i> <span class="d-none d-sm-inline-block">Import xlsx</span>',
-                    action: function () {
-                        $("#import-excel").modal("show");              
-                    }
-                },
+                // {
+                //     className: 'btn btn-label-success me-2 waves-effect',
+                //     text: '<i class="ti ti-file-import me-sm-1"></i> <span class="d-none d-sm-inline-block">Import xlsx</span>',
+                //     action: function () {
+                //         $("#import-excel").modal("show");              
+                //     }
+                // },
 
 
                 {
@@ -1086,6 +1090,7 @@
                     let hdate_travel = HDateTravel.val();
                     let division = DivisionUser.val();
                     let section = SectionUser.val();
+                    let contact = ContactNo.val();
                     let date_received = DateReceived.val();
                     let post_url = (status_val == 3)? "{% url 'item-returned' %}": (ItemID.val() !== '0')? "{% url 'item-update' %}": "{% url 'item-add' %}";
                     let form_data = $('#item-form').serialize()
@@ -1106,6 +1111,7 @@
                             HDateTravel: hdate_travel,
                             Division: division,
                             Section: section,
+                            Contact: contact,
                             ItemID:ItemID.val(),
                             selectedRemarks: selectedIDs,
                             selectedDate: selectedDate,
@@ -1250,7 +1256,6 @@
         }).done(function (data) {
             let fields = data.data;
             let employees = [];
-        
             $.each(fields, function (index, employee) {
                 let firstName = employee.first_name;
                 let middleName = employee.middle_name;
@@ -1263,6 +1268,7 @@
                 let gender = employee.gender;
                 let section = employee.section;
                 let image_path = employee.image_path;
+                let contact = employee.contact_number;
         
                 let employeeObj = {
                     firstName: firstName,
@@ -1274,7 +1280,8 @@
                     position: position,
                     gender: gender,
                     section: section,
-                    image: image_path
+                    image: image_path,
+                    contact_no: contact
                 };
                 employees.push(employeeObj);
             });
@@ -1600,6 +1607,7 @@
                     $('#emp-lastname').val(selectedEmployee.lastName);
                     $('#division-user').val(selectedEmployee.division);
                     $('#section-user').val(selectedEmployee.section);
+                    $('#contact-no').val(selectedEmployee.contact_no);
                 }
             } else {
                 console.log("No employee data found in local storage.");

@@ -2042,8 +2042,6 @@ def delete_box_list(request):
 @csrf_exempt
 def update_amt(request):
     incoming_id = request.POST.get('emp_id')
-    print("testtupdate")
-    print(incoming_id)
     amt = request.POST.get('amount')
     pp = request.POST.get('purpose')
 
@@ -2233,7 +2231,6 @@ def forward_journal(request):
         dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
         with transaction.atomic():
             for dv in dv_no_values:
-                print(dv)
                 with connection.cursor() as cursor:
                     actual_date = date_time.datetime.now()
                     query = f"""
