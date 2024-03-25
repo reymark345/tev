@@ -978,6 +978,7 @@ def item_add(request):
     selected_remarks = request.POST.getlist('selectedRemarks[]')
     selected_dates = request.POST.getlist('selectedDate[]')
     g_code = generate_code()
+
     if travel_date:
         travel_date = request.POST.get('DateTravel')
     else :

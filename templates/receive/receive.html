@@ -1256,6 +1256,9 @@
         }).done(function (data) {
             let fields = data.data;
             let employees = [];
+            console.log("testtttt-API");
+            console.log(fields);
+           
             $.each(fields, function (index, employee) {
                 let firstName = employee.first_name;
                 let middleName = employee.middle_name;
@@ -1268,7 +1271,7 @@
                 let gender = employee.gender;
                 let section = employee.section;
                 let image_path = employee.image_path;
-                let contact = employee.contact_number;
+                let contact = employee.contact;
         
                 let employeeObj = {
                     firstName: firstName,
