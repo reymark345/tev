@@ -800,6 +800,12 @@ def item_update(request):
     travel_date = request.POST.get('DateTravel')
     range_travel = request.POST.get('RangeTravel')
     date_received = request.POST.get('DateReceived')
+    id_no = request.POST.get('IdNumber')
+    acc_no = request.POST.get('AccountNumber')
+    div = request.POST.get('Division')
+    sec = request.POST.get('Section')
+    contact = request.POST.get('Contact')
+
 
     if travel_date:
         travel_date = request.POST.get('DateTravel')
@@ -849,7 +855,7 @@ def item_update(request):
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
         
-        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, date_travel = travel_date, original_amount=amount, incoming_in = date_received, remarks = formatted_dates_string)
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no, date_travel = travel_date, original_amount=amount, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec, contact_no = contact)
         Remarks_r.objects.filter(incoming_id=id).delete()
         for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             remarks_lib = Remarks_r(
@@ -861,7 +867,7 @@ def item_update(request):
         
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
     else:
-        tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,date_travel = travel_date, original_amount=amount, incoming_in = date_received, remarks = None)
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no, date_travel = travel_date, original_amount=amount, incoming_in = date_received, remarks = None, division = div, section = sec, contact_no = contact)
         Remarks_r.objects.filter(incoming_id=id).delete()
         for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             remarks_lib = Remarks_r(
@@ -919,7 +925,7 @@ def item_rod_update(request):
         formatted_dates = [format_date(date) for date in date_components]
         formatted_dates_string = ', '.join(formatted_dates)
         formatted_dates_string = formatted_dates_string
-        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no,account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec, original_amount = orig_amnt)
+        TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = formatted_dates_string, division = div, section = sec, original_amount = orig_amnt)
         return JsonResponse({'data': 'error', 'message': duplicate_travel})
     else:
         TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec, original_amount = orig_amnt)
