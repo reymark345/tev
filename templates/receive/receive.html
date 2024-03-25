@@ -1256,9 +1256,6 @@
         }).done(function (data) {
             let fields = data.data;
             let employees = [];
-            console.log("testttapi");
-            console.log(data);
-        
             $.each(fields, function (index, employee) {
                 let firstName = employee.first_name;
                 let middleName = employee.middle_name;
