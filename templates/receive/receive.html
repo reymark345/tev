@@ -1151,10 +1151,10 @@
                             RangeTravel.val("");
                             $("#dateField").prop("disabled", false);
                             $(".rangeTravel").prop("disabled", false);
-
                             dataTable.ajax.reload();
                         } else {
                             if (status_val== 0){
+                                dateField.clear();
                                 EmployeeName.val("").trigger('change');
                                 RemarksList.val([]).trigger("change");
                                 OriginalAmount.val("");
@@ -1177,7 +1177,6 @@
                         }
                     })
                 }
-
             }
         });
 
