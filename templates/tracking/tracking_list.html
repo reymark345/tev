@@ -883,6 +883,8 @@
                   }).done(function (data) {
                       let latest_object = data.data[0];
                       let l_status = latest_object.status;
+                      console.log(data.data);
+                      console.log("testt");
                       $('.received-container').empty();
                       $('.reviewed-container').empty();
                       $('.main-container').empty();
