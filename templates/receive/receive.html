@@ -758,8 +758,6 @@
                         url: "{% url 'preview-received' %}?id=" + id,
                         dataType: 'json',
                     }).done(function (data) {
-                        console.log("data");
-                        console.log(data);
                         let arraydetails = [];
                         let lacking_ = data.lacking;
                         let date_remarks_ = data.date_remarks;
@@ -1156,6 +1154,14 @@
 
                             dataTable.ajax.reload();
                         } else {
+                            if (status_val== 0){
+                                EmployeeName.val("").trigger('change');
+                                RemarksList.val([]).trigger("change");
+                                OriginalAmount.val("");
+                                DateReceived.val("");
+                                DateTravel.val("");
+                                RangeTravel.val("");
+                            }
                             let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
                             $("#dateField").prop("disabled", false);
                             $(".rangeTravel").prop("disabled", false);
