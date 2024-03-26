@@ -1154,6 +1154,14 @@
 
                             dataTable.ajax.reload();
                         } else {
+                            if (status_val== 0){
+                                EmployeeName.val("").trigger('change');
+                                RemarksList.val([]).trigger("change");
+                                OriginalAmount.val("");
+                                DateReceived.val("");
+                                DateTravel.val("");
+                                RangeTravel.val("");
+                            }
                             let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
                             $("#dateField").prop("disabled", false);
                             $(".rangeTravel").prop("disabled", false);
