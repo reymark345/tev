@@ -632,12 +632,14 @@
               targets: 5,
               render: function (data) {
                   data = parseInt(data); 
-
-                  let tooltip = 'Forwarded';
                   if (data == 1) {
-                      tooltip = "Pending";
+                      return '<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-warning" title="Received"><i class="ti ti-check"></i></span></center>';
                   }
-                  return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span></center>';
+                  else{
+                    return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>';
+                  }
+                  
+                  
                 },
           },
           {
@@ -883,6 +885,8 @@
                   }).done(function (data) {
                       let latest_object = data.data[0];
                       let l_status = latest_object.status;
+                      console.log(data.data);
+                      console.log("testt");
                       $('.received-container').empty();
                       $('.reviewed-container').empty();
                       $('.main-container').empty();
