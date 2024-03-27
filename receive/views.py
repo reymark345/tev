@@ -942,8 +942,6 @@ def item_returned(request):
     selected_dates = request.POST.getlist('selectedDate[]')
     date_received = request.POST.get('DateReceived')
 
-
-    
     travel_date_stripped = travel_date.strip()
     travel_date_spaces = travel_date_stripped.replace(' ', '')
     id = request.POST.get('ItemID')
@@ -1138,9 +1136,10 @@ def item_add(request):
 
 @csrf_exempt
 def out_pending_tev(request):
+    user_id = request.session.get('user_id', 0) 
     out_list = request.POST.getlist('out_list[]')
     for item_id  in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=date_time.datetime.now())
+        tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=date_time.datetime.now(), forwarded_by = user_id)
     return JsonResponse({'data': 'success'})
 
 

@@ -421,7 +421,7 @@ def employee_details(request):
             'purpose': row[6], 
             'incoming_in': format_date(incoming_in),
             'incoming_out': format_date(incoming_out),
-            'incoming_by': incoming.upper(),
+            'incoming_by': incoming.title(),
             'dv_no': row[10],
             'otg_d_f': format_date(outgoing),
             'b_d_f': format_date(budget),
@@ -430,7 +430,7 @@ def employee_details(request):
             'charges': row[15],
             'cluster': row[16],
             'remarks': row[17], 
-            'received_forwarded_by': forwarded_by.upper(), 
+            'received_forwarded_by': forwarded_by.title(), 
             'reviewed_by': row[19],
             'date_reviewed': date_reviewed, 
         }
