@@ -933,7 +933,6 @@ def item_rod_update(request):
 
 @csrf_exempt
 def item_returned(request):
-
     id = request.POST.get('ItemID')
     emp_name = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
@@ -947,7 +946,7 @@ def item_returned(request):
     id = request.POST.get('ItemID')
 
     data = TevIncoming.objects.filter(id=id).first()
-    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,incoming_in =data.incoming_in,user_id=data.user_id)
+    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,incoming_in =date_time.datetime.now(),user_id=data.user_id)
     tev_add.save()
 
     last_added_tevincoming = TevIncoming.objects.latest('id')
