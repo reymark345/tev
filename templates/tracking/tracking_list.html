@@ -865,6 +865,14 @@
                       let payrolled_by = latest_object.p_by;
                       let payrolled_d_forwarded = latest_object.p_d_f;
                       let payrolled_f_by = latest_object.p_f_by;
+                      let outgoing_r_by = latest_object.otg_r_by;
+                      let outgoing_d_r = latest_object.otg_d_received;
+                      let outgoing_d_f = latest_object.otg_d_f;
+                      let outgoing_f_user = latest_object.otg_f_user;
+                      let payroll_statusColumn = '';
+                      let outgoing_statusColumn = '';
+
+                      
                       console.log(data.data);
                       $('.main-container').empty();
 
@@ -883,9 +891,39 @@
                         payroll_statusColumn = `<td><span class="badge bg-label-warning">For Payroll</span></td>`;
 
                       }
+                      else if (l_status == 6){
+                        payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        outgoing_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
+                        outgoing_d_r = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        outgoing_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        outgoing_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                      }
                       else{
+                        outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                       }
+
+                      var outgoing_status =`
+                        <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                          <span class="timeline-point timeline-p oint-primary"></span>
+                          <div class="timeline-event">
+                            <div class="timeline-header border-bottom mb-3">
+                              <h6 class="mb-0">Outgoing</h6>
+                              <span class="text-muted">Date Outgoing : ${outgoing_d_r} </span>
+                            </div>
+                            <div class="d-flex justify-content-between flex-wrap mb-2">
+                              <div>
+                                <span>Outgoing By: ${outgoing_r_by} </span>
+                                <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${outgoing_statusColumn}
+                              </div>
+                            </div>
+                            <div class="timeline-header border-bottom mb-3">
+                              <span>Forwarded By: ${outgoing_f_user}</span>
+                              <span class="text-muted">Date Forwarded : ${outgoing_d_f}</span>
+                              </div>
+                          </div>
+                        </li>
+                      `;
 
                       var payroll_status =`
                         <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
@@ -908,6 +946,9 @@
                           </div>
                         </li>
                       `;
+                      if (l_status >=6 && l_status !=7 ){
+                        $('.main-container').append(outgoing_status);
+                      }
 
                       if (l_status >=4 && l_status !=7 ){
                         $('.main-container').append(payroll_status);
@@ -929,17 +970,17 @@
                         let final_amt = parseFloat(item.final_amount).toFixed(2);
 
                         if (!r_forwarded_by){
-                          r_forwarded_by = `<span class="badge bg-label-danger">N/A</span>`
+                          r_forwarded_by = `<span class="badge bg-label-primary">Not Applicable</span>`
                         }
                         if (!forward_date){
-                          forward_date = `<span class="badge bg-label-danger">N/A</span>`
+                          forward_date = `<span class="badge bg-label-primary">Not Applicable</span>`
                         }
                         if (!reviewed_by){
-                          reviewed_by = `<span class="badge bg-label-danger">N/A</span>`
+                          reviewed_by = `<span class="badge bg-label-primary">Not Applicable</span>`
                         }
 
                         if (!date_reviewed){
-                          date_reviewed = `<span class="badge bg-label-danger">N/A</span>`
+                          date_reviewed = `<span class="badge bg-label-primary">Not Applicable</span>`
                         }
 
                         if (!remarks){

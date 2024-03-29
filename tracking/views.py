@@ -334,7 +334,10 @@ def employee_details(request):
                 CONCAT_WS(' ', pb.first_name, pb.last_name) AS payrolled_by,
                 t_o.dv_no, 
                 t_o.box_b_out,
+                t_o.otg_d_received,
+                CONCAT_WS(' ', ot_r.first_name, ot_r.last_name) AS otg_r_user_id,
                 t_o.otg_d_forwarded,
+                CONCAT_WS(' ', ot_f.first_name, ot_f.last_name) AS otg_out_user_id,
                 t_o.b_d_forwarded,
                 t_o.j_d_forwarded,
                 t_o.a_d_forwarded,
@@ -369,6 +372,10 @@ def employee_details(request):
 				auth_user AS ui ON ui.id = ti.user_id
         LEFT JOIN 
 				auth_user AS pb ON pb.id = ti.payrolled_by
+        LEFT JOIN 
+				auth_user AS ot_r ON ot_r.id = t_o.otg_r_user_id
+        LEFT JOIN 
+				auth_user AS ot_f ON ot_f.id = t_o.otg_out_user_id
         WHERE 
                 ti.code LIKE %s
         GROUP BY 
@@ -385,7 +392,10 @@ def employee_details(request):
                 ti.payrolled_by,
                 t_o.dv_no,
                 t_o.box_b_out,
+                t_o.otg_d_received,
+                t_o.otg_r_user_id,
                 t_o.otg_d_forwarded, 
+                t_o.otg_out_user_id,
                 t_o.b_d_forwarded,
                 t_o.j_d_forwarded,
                 t_o.a_d_forwarded,
@@ -415,16 +425,18 @@ def employee_details(request):
     for row in results:
         incoming_in = row[7]
         incoming_out = row[8]
-        box_b_out = row[13]
-        outgoing = row[14]
-        budget = row[15]
-        journal = row[16]
-        approval = row[17]
-        date_reviewed = date(row[24], "F j, Y g:i A")
         incoming = row[9]
-        forwarded_by = row[22]
-
         p_date = row[10]
+        box_b_out = row[13]
+        otg_d_received = row[14]
+        otg_r_by = row[15]
+        otg_d_f = row[16]
+        otg_f_user_id = row[17]
+        budget = row[18]
+        journal = row[19]
+        approval = row[20]
+        date_reviewed = date(row[27], "F j, Y g:i A")
+        forwarded_by = row[25]
 
         item = {
             'id': row[0],
@@ -441,16 +453,19 @@ def employee_details(request):
             'p_by': row[11],
             'dv_no': row[12],
             'p_d_f': format_date(box_b_out),
-            'otg_d_f': format_date(outgoing),
+            'otg_d_received': format_date(otg_d_received),
+            'otg_r_by': otg_r_by.title(),
+            'otg_d_f': format_date(otg_d_f),
+            'otg_f_user': otg_f_user_id.title(),
             'b_d_f': format_date(budget),
             'j_d_f': format_date(journal),
             'a_d_f': format_date(approval),
-            'p_f_by': row[18],
-            'charges': row[19],
-            'cluster': row[20],
-            'remarks': row[21], 
+            'p_f_by': row[21],
+            'charges': row[22],
+            'cluster': row[23],
+            'remarks': row[24], 
             'received_forwarded_by': forwarded_by.title(), 
-            'reviewed_by': row[23],
+            'reviewed_by': row[26],
             'date_reviewed': date_reviewed, 
         }
         data.append(item)      
