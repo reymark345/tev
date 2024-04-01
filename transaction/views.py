@@ -1902,7 +1902,7 @@ def add_emp_dv(request):
         user_id = request.session.get('user_id', 0)
         tev_id = request.POST.get('tev_id')
         dv_no = request.POST.get('dv_no')
-        box_b = TevIncoming.objects.filter(id=tev_id).update(status_id=5, updated_at = date_time.datetime.now())
+        TevIncoming.objects.filter(id=tev_id).update(status_id=5, updated_at = date_time.datetime.now(), date_payrolled = date_time.datetime.now(), payrolled_by = user_id)
         month_mapping = {
             '01': 'Jan', '02': 'Feb', '03': 'Mar', '04': 'Apr',
             '05': 'May', '06': 'Jun', '07': 'Jul', '08': 'Aug',
@@ -2022,17 +2022,12 @@ def retrieve_employee(request):
 
     return JsonResponse(response)
 
-
-
-
 @csrf_exempt
 def delete_box_list(request):
     incoming_id = request.POST.get('emp_id')
     dv_no = request.POST.get('dv_number')
-    
     TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
-    TevIncoming.objects.filter(id=incoming_id).update(status_id=4)
-
+    TevIncoming.objects.filter(id=incoming_id).update(status_id=4, date_payrolled = None, payrolled_by = None)
     response = {
         'data': 'success'
     }
