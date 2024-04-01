@@ -172,6 +172,8 @@ class TevIncoming(models.Model):
     updated_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     division = models.CharField(max_length=128, blank=True, null=True)
     section = models.CharField(max_length=128, blank=True, null=True)
+    date_payrolled = models.DateTimeField(blank=True, null=True)
+    payrolled_by = models.CharField(max_length=255, blank=True, null=True)
     
     class Meta:
         managed = True
