@@ -881,7 +881,6 @@
                       let payroll_statusColumn = '';
                       let outgoing_statusColumn = '';
                       let obligate_statusColumn = '';
-                      console.log(data.data);
                       $('.main-container').empty();
 
                       if (l_status == 4){
@@ -1053,8 +1052,6 @@
                       if (l_status >=4 && l_status !=7 ){
                         $('.main-container').append(payroll_status);
                       }
-                      console.log(l_status);
-                      console.log("status");
                       data.data.forEach(function (item, index) {
                         let message = '';
                         message = (index == 0) ? `<span ><i>(Latest)</i></span>` : `<span><i>(Old)</i></span>`;
