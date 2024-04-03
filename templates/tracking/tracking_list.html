@@ -859,6 +859,10 @@
                           dv_id: id
                       }
                   }).done(function (data) {
+
+                      console.log(data);
+                      console.log("data");
+                      
                       let latest_object = data.data[0];
                       let l_status = latest_object.status;
                       let payrolled_date = latest_object.p_d;
@@ -877,11 +881,20 @@
                       let journal_r_by = latest_object.j_r_by;
                       let journal_d_r = latest_object.j_d_r;
                       let journal_d_f = latest_object.j_d_f;
+
+                      let approval_r_by = latest_object.a_r_by;
+                      let approval_d_r = latest_object.a_d_received;
+                      let approval_d_f = latest_object.a_d_f;
+                      let approval_f_user = latest_object.a_f_by;
+                      
+                      let approval_statusColumn = '';
                       let journal_statusColumn = '';
                       let payroll_statusColumn = '';
                       let outgoing_statusColumn = '';
                       let obligate_statusColumn = '';
                       $('.main-container').empty();
+
+                      console.log(l_status);
 
                       if (l_status == 4){
                         payroll_statusColumn = `<td><span class="badge bg-label-warning">For Payroll</span></td>`;
@@ -940,16 +953,84 @@
                         payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                       }
                       else if (l_status == 13){
+
+                        approval_d_r = `<span class="badge bg-label-primary">Not Applicable</span>`
+                        approval_r_by = `<span class="badge bg-label-primary">Not Applicable</span>`
+                        approval_f_user = `<span class="badge bg-label-primary">Not Applicable</span>`
+                        approval_d_f = `<span class="badge bg-label-primary">Not Applicable</span>`
+                        approval_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
                         journal_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                      
                       }
+
+                      else if (l_status == 14){
+                        approval_d_f = `<span class="badge bg-label-primary">Not Applicable</span>`
+                        approval_f_user = `<span class="badge bg-label-primary">Not Applicable</span>`
+                        approval_statusColumn = `<td><span class="badge bg-label-primary">Received</span></td>`;
+                        journal_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+
+                      }
+
+                      else if (l_status == 15){
+                        approval_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        journal_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+
+                      }
+
                       else{
                         outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                       }
+
+                      var approval_status =`
+                        <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                          <span class="timeline-point timeline-p oint-primary"></span>
+                          <div class="timeline-event">
+                            <div class="timeline-header border-bottom mb-3">
+                              <h6 class="mb-0">Approval</h6>
+                              <span class="text-muted">Date Receive : ${approval_d_r} </span>
+                            </div>
+                            <div class="d-flex justify-content-between flex-wrap mb-2">
+                              <div>
+                                <span>Receive By: ${approval_r_by} </span>
+                                <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${approval_statusColumn}
+                              </div>
+                            </div>
+                            <div class="timeline-header border-bottom mb-3">
+                              <span>Forwarded By: ${approval_f_user}</span>
+                              <span class="text-muted">Date Forwarded : ${approval_d_f}</span>
+                              </div>
+                          </div>
+                        </li>
+                      `;
+
+                      var certified_status =`
+                        <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                          <span class="timeline-point timeline-p oint-primary"></span>
+                          <div class="timeline-event">
+                            <div class="timeline-header border-bottom mb-3">
+                              <h6 class="mb-0">Certified</h6>
+                              <span class="text-muted">Date Forwarded : ${journal_d_f} </span>
+                            </div>
+                            <div class="d-flex justify-content-between flex-wrap mb-2">
+                              <div>
+                                <span>Forwarded By: ${journal_f_user} </span>
+                                <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${journal_statusColumn}
+                              </div>
+                            </div>
+                           
+                        </li>
+                      `;
 
                       var journal_status =`
                         <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
@@ -1038,6 +1119,11 @@
                           </div>
                         </li>
                       `;
+
+                      if (l_status >=13 ){
+                        $('.main-container').append(approval_status);
+                        $('.main-container').append(certified_status);
+                      }
                       if (l_status >=11 ){
                         $('.main-container').append(journal_status);
                       }

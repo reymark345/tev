@@ -342,13 +342,14 @@ def employee_details(request):
 				CONCAT_WS(' ', b_r.first_name, b_r.last_name) AS b_r_user_id,
                 t_o.b_d_forwarded,
                 CONCAT_WS(' ', b_f.first_name, b_f.last_name) AS b_out_user_id,
-
                 t_o.j_d_received,
 				CONCAT_WS(' ', j_r.first_name, j_r.last_name) AS j_r_user_id,
                 t_o.j_d_forwarded,
                 CONCAT_WS(' ', j_f.first_name, j_f.last_name) AS j_out_user_id,
-
+                t_o.a_d_received,
+				CONCAT_WS(' ', a_r.first_name, a_r.last_name) AS a_r_user_id,
                 t_o.a_d_forwarded,
+                CONCAT_WS(' ', a_f.first_name, a_f.last_name) AS a_out_user_id,
                 CONCAT_WS(' ', ob.first_name, ob.last_name) AS out_by,
                 ch.name AS charges, 
                 cl.name AS cluster,
@@ -392,6 +393,10 @@ def employee_details(request):
                 auth_user AS j_r ON j_r.id = t_o.j_r_user_id
         LEFT JOIN 
                 auth_user AS j_f ON j_f.id = t_o.j_out_user_id
+        LEFT JOIN 
+                auth_user AS a_r ON a_r.id = t_o.a_r_user_id
+        LEFT JOIN 
+                auth_user AS a_f ON a_f.id = t_o.a_out_user_id
         WHERE 
                 ti.code LIKE %s
         GROUP BY 
@@ -420,7 +425,10 @@ def employee_details(request):
 				t_o.j_r_user_id,
                 t_o.j_d_forwarded,
                 t_o.j_out_user_id,
+                t_o.a_d_received,
+				t_o.a_r_user_id,
                 t_o.a_d_forwarded,
+                t_o.a_out_user_id,
                 t_o.out_by,
                 ch.name, 
                 cl.name
@@ -454,20 +462,20 @@ def employee_details(request):
         otg_r_by = row[15]
         otg_d_f = row[16]
         otg_f_user_id = row[17]
-
         budget_d_r = row[18]
         budget_r_by = row[19]
         budget = row[20]
         budget_f_by = row[21]
-
         journal_d_r = row[22]
         journal_r_by = row[23]
         journal = row[24]
         journal_f_by = row[25]
-
-        approval = row[26]
-        forwarded_by = row[31]
-        date_reviewed = date(row[33], "F j, Y g:i A")
+        approval_d_r = row[26]
+        approval_r_by = row[27]
+        approval = row[28]
+        approval_f_by = row[29]
+        forwarded_by = row[34]
+        date_reviewed = date(row[36], "F j, Y g:i A")
 
 
         item = {
@@ -493,19 +501,20 @@ def employee_details(request):
             'b_r_by': budget_r_by.title(),
             'b_d_f': format_date(budget),
             'b_f_by': budget_f_by.title(),
-
             'j_d_r': format_date(journal_d_r),
             'j_r_by': journal_r_by.title(),
             'j_d_f': format_date(journal),
             'j_f_by': journal_f_by.title(),
-
+            'a_d_received': format_date(approval_d_r),
+            'a_r_by': approval_r_by.title(),
             'a_d_f': format_date(approval),
-            'p_f_by': row[27],
-            'charges': row[28],
-            'cluster': row[29],
-            'remarks': row[30], 
+            'a_f_by': approval_f_by.title(),
+            'p_f_by': row[30],
+            'charges': row[31],
+            'cluster': row[32],
+            'remarks': row[33], 
             'received_forwarded_by': forwarded_by.title(), 
-            'reviewed_by': row[32],
+            'reviewed_by': row[35],
             'date_reviewed': date_reviewed, 
         }
         data.append(item)      
