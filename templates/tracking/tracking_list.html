@@ -856,7 +856,8 @@
                       type: 'POST',
                       url: "{% url 'employee-details' %}",
                       data:{
-                          dv_id: id
+                          dv_id: id,
+                          DpYear: year_now
                       }
                   }).done(function (data) {
 

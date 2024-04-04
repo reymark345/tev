@@ -310,6 +310,8 @@ def tracking_load(request):
 @login_required(login_url='login')
 @csrf_exempt
 def employee_details(request):
+    DpYear= request.GET.get('DpYear') 
+    finance_database_alias = 'finance' if DpYear == "2023" else 'finance_2024' 
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     fullname = ''
     total_amount = 0
@@ -452,6 +454,25 @@ def employee_details(request):
         else:
             return ''
         
+
+    # finance_query = """
+    #     SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
+    #     FROM transactions AS ts
+    #     LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
+    # """
+    # if row['dv_no']:
+    #     with connections[finance_database_alias].cursor() as cursor2:
+    #         cursor2.execute(finance_query, (row['dv_no'],))
+    #         finance_results = cursor2.fetchall()
+
+    #     if finance_results:
+    #         amt_certified = finance_results[0][1]
+    #         amt_journal = finance_results[0][2]
+    #         amt_budget = finance_results[0][3]
+    #         amt_check = finance_results[0][4]
+    #         approved_date = finance_results[0][5]
+
+
     for row in results:
         incoming_in = row[7]
         incoming_out = row[8]
