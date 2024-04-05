@@ -500,9 +500,10 @@ def employee_details(request):
                 amt_budget = finance_results[0][3]
                 amt_check = finance_results[0][4]
                 approved_date = finance_results[0][5]
-                approved_date = datetime.strptime(str(approved_date), "%Y-%m-%d")
-                formatted_date = approved_date.strftime("%B %d, %Y")
-                ap_date = f"{formatted_date}"
+                if approved_date:
+                    approved_date = datetime.strptime(str(approved_date), "%Y-%m-%d")
+                    formatted_date = approved_date.strftime("%B %d, %Y")
+                    ap_date = f"{formatted_date}"
 
         item = {
             'id': row[0],
