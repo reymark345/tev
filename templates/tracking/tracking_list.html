@@ -859,11 +859,7 @@
                           dv_id: id,
                           DpYear: year_now
                       }
-                  }).done(function (data) {
-
-                      console.log(data);
-                      console.log("data");
-                      
+                  }).done(function (data) {                      
                       let latest_object = data.data[0];
                       let l_status = latest_object.status;
                       let payrolled_date = latest_object.p_d;
@@ -887,6 +883,8 @@
                       let approval_d_r = latest_object.a_d_received;
                       let approval_d_f = latest_object.a_d_f;
                       let approval_f_user = latest_object.a_f_by;
+
+                      let check_issued_date = latest_object.check_issued_date;
                       
                       let approval_statusColumn = '';
                       let journal_statusColumn = '';
@@ -992,6 +990,23 @@
                         payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                       }
+
+                      var check_issued_status =`
+                        <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                          <span class="timeline-point timeline-p oint-primary"></span>
+                          <div class="timeline-event">
+                            <div class="timeline-header border-bottom mb-3">
+                              <h6 class="mb-0">Check Issued</h6>
+                            </div>
+                            <div class="d-flex justify-content-between flex-wrap mb-2">
+                              <div>
+                                Date Issued : <span class="badge bg-label-success">${check_issued_date}</span>
+      
+                              </div>
+                            </div>
+                           
+                        </li>
+                      `;
 
                       var approval_status =`
                         <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
@@ -1121,7 +1136,13 @@
                         </li>
                       `;
 
+
+                      if (check_issued_date){
+                        $('.main-container').append(check_issued_status);
+                      }
+
                       if (l_status >=13 ){
+                        
                         $('.main-container').append(approval_status);
                         $('.main-container').append(certified_status);
                       }
