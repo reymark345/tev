@@ -29,6 +29,7 @@ from django.db.models.functions import Concat
 from django.utils import timezone
 from django.template.defaultfilters import date
 from decimal import Decimal
+from suds.client import Client
 
 
 def generate_code():
@@ -1152,16 +1153,54 @@ def add_existing_record(request):
     return JsonResponse({'data': 'success'})
 
 
+def send_notification(message, contact_number):
+    url = 'https://wiserv.dswd.gov.ph/soap/?wsdl'
+    try:
+        client = Client(url)
+        result = client.service.sendMessage(UserName='crgwiservuser', PassWord='#w153rvcr9!', WSID='0',
+                                            MobileNo=contact_number, Message=message)
+    except Exception:
+        pass
+
+def convert_date_string(date_str):
+    date_list = date_str.split(',')
+    formatted_dates = []
+    for date in date_list:
+        d, m, y = date.split('-')
+        month_name = datetime.strptime(m, '%m').strftime('%B')
+        formatted_date = f"{month_name} {d} {y}"
+        formatted_dates.append(formatted_date)
+    return ', '.join(formatted_dates)
+
 
 
 @csrf_exempt
 def out_checking_tev(request):
+
     out_list = request.POST.getlist('out_list[]')  
     user_id = request.session.get('user_id', 0) 
     for item_id in out_list:
         tev_update = TevIncoming.objects.filter(id=item_id).first()  
 
         if tev_update:
+            first_name = tev_update.first_name
+            contact_no = tev_update.contact_no
+            date_travel = tev_update.date_travel
+
+            print(date_travel)
+            print("date_travel")
+            
+            formatted_dates = convert_date_string(date_travel)
+            # formatted_dates = ", ".join([datetime.strptime(date.strip(), "%d-%m-%Y").strftime("%b. %d, %Y") for date in date_travel])
+            contact_numbers = [{first_name: ['09518149919']}]
+
+            for contact in contact_numbers:
+                for k, vs in contact.items():
+                    for v in vs:
+                        send_notification('Good day,{}! Your Travel From January 25 2024 is being Forwarded to Budget Section and Ready to Obligate - DSWD CARAGA TRIS SYSTEM'.format(k, formatted_dates), v)
+
+            contact_numbers.clear()
+
             if tev_update.status_id == 3:
                 tev_update.slashed_out = date_time.datetime.now()
             else:

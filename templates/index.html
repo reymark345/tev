@@ -79,14 +79,17 @@
         <link rel="stylesheet" href="{% static 'assets/vendor/css/pages/cards-advance.css' %}" />
         <script src="{% static 'assets/vendor/js/helpers.js'%}"></script>
 
+        <link rel="stylesheet" href="{% static 'assets/vendor/css/pages/page-profile.css'%}" />
+
+ 
         <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
         <!--? Template customizer: To hide customizer set displayCustomizer value false in config.js.  -->
         <script src="{% static 'assets/vendor/js/template-customizer.js'%}"></script>
         <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
 
         <!-- Custom made CSS -->
-
-
+       
+            
         <script src="{% static 'assets/js/config.js'%}"></script>
         <link rel="stylesheet" href="{% static 'custom/custom.css'%}" />
     </head>
@@ -115,19 +118,6 @@
                     <div class="menu-inner-shadow"></div>
                     {% with request.resolver_match.url_name as url_name %}
                     <ul class="menu-inner py-1">
-                        {% comment %} {% if role_permission %}
-                            {% if 'admin' in role_permission or 'Incoming staff' in role_permission or 'Payroll staff' in role_permission or 'Validating staff' in role_permission or 'Certified staff' in role_permission %}
-                                <!-- Dashboard -->
-                                <li class="menu-item {% if url_name == 'dashboard' %}active{% endif %}">
-                                    <a href="{% url 'dashboard' %}" class="menu-link">
-                                        <i class="menu-icon tf-icons ti ti-smart-home"></i>
-                                        <div data-i18n="Dashboard">Dashboard</div>
-                                    </a>
-                                </li>
-                            {% endif %}
-                        {% endif %} {% endcomment %}
-                        
-
                         {% if permissions %}
                             {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions %}
                                 <!-- Dashboard -->
@@ -137,8 +127,19 @@
                                         <div data-i18n="Dashboard">Dashboard</div>
                                     </a>
                                 </li>
+
+                                <li class="menu-item {% if url_name == 'profile' %}active{% endif %}">
+                                    <a href="{% url 'profile' %}" class="menu-link">
+                                     
+                                        <i class="menu-icon ti ti-user-check me-2 ti-sm"></i>
+                                        <div data-i18n="My Profile">My Profile</div>
+                                    </a>
+                                </li>
+                                
                             {% endif %}
                         {% endif %}
+
+
 
                         {% if permissions %}
                         {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions or 'Outgoing staff' in permissions or 'Budget staff' in permissions or 'Journal staff' in permissions or 'Approval staff' in permissions %}
@@ -561,6 +562,11 @@
         <script src="{% static 'assets/js/app-calendar-events.js' %}"></script>
         <script src="{% static 'assets/js/app-calendar.js' %}"></script>
         <script src="{% static 'assets/js/dashboards-ecommerce.js' %}"></script>
+
+        <script src="{% static 'assets/js/pages-profile.js' %}"></script>
+        
+
+
 
 
         <!-- <script src="../../assets/js/modal-add-new-address.js"></script>
