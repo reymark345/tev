@@ -79,7 +79,10 @@
         <link rel="stylesheet" href="{% static 'assets/vendor/css/pages/cards-advance.css' %}" />
         <script src="{% static 'assets/vendor/js/helpers.js'%}"></script>
 
+
+        <link rel="stylesheet" href="{% static 'assets/vendor/libs/bootstrap-maxlength/bootstrap-maxlength.css'%}" />
         <link rel="stylesheet" href="{% static 'assets/vendor/css/pages/page-profile.css'%}" />
+        <link rel="stylesheet" href="{% static 'assets/vendor/css/pages/app-chat.css'%}" /> 
 
  
         <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
@@ -320,6 +323,13 @@
                                     </a>
                                 </li>
 
+                                <li class="menu-item {% if url_name == 'sms' %}active{% endif %}">
+                                    <a href="{% url 'sms' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-lock"></i>
+                                        <div data-i18n="SMS">SMS</div>
+                                    </a>
+                                </li>
+
                             </ul>
                         {% endif %}
                     {% endif %}
@@ -557,6 +567,8 @@
         {% endcomment %}
         <script src="{% static 'assets/js/wizard-ex-checkout.js' %}"></script>
 
+        <script src="{% static 'assets/vendor/libs/bootstrap-maxlength/bootstrap-maxlength.js' %}"></script>
+
         
         <script src="{% static 'assets/vendor/libs/fullcalendar/fullcalendar.js' %}"></script>
         <script src="{% static 'assets/js/app-calendar-events.js' %}"></script>
@@ -564,6 +576,10 @@
         <script src="{% static 'assets/js/dashboards-ecommerce.js' %}"></script>
 
         <script src="{% static 'assets/js/pages-profile.js' %}"></script>
+
+        <script src="{% static 'assets/js/app-chat.js' %}"></script>
+
+
         
 
 
