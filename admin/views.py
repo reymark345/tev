@@ -20,6 +20,7 @@ import math
 from django.db.models import Max
 from django.utils import timezone
 from django.db import connection
+from suds.client import Client
 
 
 
@@ -61,7 +62,51 @@ def form_controls(request):
         return render(request, 'admin/form_controls.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def sms(request):
+    allowed_roles = ["Admin"]    
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    date_actual = SystemConfiguration.objects.filter().first().date_actual
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
+            'is_actual_date': date_actual,
+            'permissions' : role_names,
+            'role_details': RoleDetails.objects.filter().order_by('role_name'),
+        }
+        return render(request, 'admin/sms.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+def send_notification(message, contact_number):
+    url = 'https://wiserv.dswd.gov.ph/soap/?wsdl'
+    try:
+        client = Client(url)
+        result = client.service.sendMessage(UserName='crgwiservuser', PassWord='#w153rvcr9!', WSID='0',
+                                            MobileNo=contact_number, Message=message)
+    except Exception:
+        pass
+    
+@csrf_exempt
+@login_required(login_url='login')
+def send_sms(request):
+    allowed_roles = ["Admin"]    
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    contact = request.POST.get('contact')
+    message = request.POST.get('message')
 
+    if any(role_name in allowed_roles for role_name in role_names):
+        send_notification(message,contact)
+        return JsonResponse({'data': 'success'})
+    else:
+        return JsonResponse({'data': 'error'})
 @csrf_exempt
 def adduser(request):
     if request.method == 'POST':
