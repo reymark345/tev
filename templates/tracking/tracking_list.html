@@ -62,7 +62,6 @@
               <h5 class="modal-title"><span class="badge bg-label-warning" id="employee-id-no"></span>&nbsp;&nbsp;&nbsp;<span class="badge bg-label-primary" id="employee-full-name"></span></h5>
             </div>
             <div class="modal-body">
-                <!-- Timeline Advanced-->
                 <div class="col-xl-12">
                   <div class="card">
                     <h5 class="card-header">Status</h5>
@@ -74,221 +73,6 @@
                     </div>                    
                   </div>
                 </div>
-                <!-- /Timeline Advanced-->
-
-                <!-- <div class="col-12">
-                  <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
-                    <div class="bs-stepper-content">
-                       <div class="card-datatable table-responsive pt-0">
-                    <table id="tbl-history" class="table display compact">
-                        <thead>
-                            <tr>
-                                <th>Code #</th>
-                                <th>Original Amount</th>
-                                <th>Amt. Certified</th>
-                                <th>Status</th>
-                                <th>Remarks</th>
-                                <th>Incoming</th>
-                                <th>Outgoing</th>
-                                <th>Budget</th>
-                                <th>Journal</th>
-                                <th>Approval</th>
-                            </tr>
-                        </thead>    
-                        <tbody>
-                        </tbody>               
-                    </table>
-                    </div>
-                      <form onSubmit="return false">
-                        <div id="account-details-modern-vertical" class="content">
-                          <div class="content-header mb-3">
-                            <h6 class="mb-0">Account Details</h6>
-                            <small>Enter Your Account Details.</small>
-                          </div>
-                          <div class="row g-3">
-                            <div class="col-sm-6">
-                              <label class="form-label" for="username-modern-vertical">Username</label>
-                              <input
-                                type="text"
-                                id="username-modern-vertical"
-                                class="form-control"
-                                placeholder="johndoe"
-                              />
-                            </div>
-                            <div class="col-sm-6">
-                              <label class="form-label" for="email-modern-vertical">Email</label>
-                              <input
-                                type="email"
-                                id="email-modern-vertical"
-                                class="form-control"
-                                placeholder="john.doe@email.com"
-                                aria-label="john.doe"
-                              />
-                            </div>
-                            <div class="col-sm-6 form-password-toggle">
-                              <label class="form-label" for="password-modern-vertical">Password</label>
-                              <div class="input-group input-group-merge">
-                                <input
-                                  type="password"
-                                  id="password-modern-vertical"
-                                  class="form-control"
-                                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                  aria-describedby="password2-modern-vertical"
-                                />
-                                <span class="input-group-text cursor-pointer" id="password2-modern-vertical"
-                                  ><i class="ti ti-eye-off"></i
-                                ></span>
-                              </div>
-                            </div>
-                            <div class="col-sm-6 form-password-toggle">
-                              <label class="form-label" for="confirm-password-modern-vertical">Confirm Password</label>
-                              <div class="input-group input-group-merge">
-                                <input
-                                  type="password"
-                                  id="confirm-password-modern-vertical"
-                                  class="form-control"
-                                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
-                                  aria-describedby="confirm-password-modern-vertical2"
-                                />
-                                <span class="input-group-text cursor-pointer" id="confirm-password-modern-vertical2"
-                                  ><i class="ti ti-eye-off"></i
-                                ></span>
-                              </div>
-                            </div>
-                            <div class="col-12 d-flex justify-content-between">
-                              <button class="btn btn-label-secondary btn-prev" disabled>
-                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
-                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                              </button>
-                              <button class="btn btn-primary btn-next">
-                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
-                                <i class="ti ti-arrow-right"></i>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <div id="personal-info-modern-vertical" class="content">
-                          <div class="content-header mb-3">
-                            <h6 class="mb-0">Personal Info</h6>
-                            <small>Enter Your Personal Info.</small>
-                          </div>
-                          <div class="row g-3">
-                            <div class="col-sm-6">
-                              <label class="form-label" for="first-name-modern-vertical">First Name</label>
-                              <input
-                                type="text"
-                                id="first-name-modern-vertical"
-                                class="form-control"
-                                placeholder="John"
-                              />
-                            </div>
-                            <div class="col-sm-6">
-                              <label class="form-label" for="last-name-modern-vertical">Last Name</label>
-                              <input
-                                type="text"
-                                id="last-name-modern-vertical"
-                                class="form-control"
-                                placeholder="Doe"
-                              />
-                            </div>
-                            <div class="col-sm-6">
-                              <label class="form-label" for="country-modern-vertical">Country</label>
-                              <select class="select2" id="country-modern-vertical">
-                                <option label=" "></option>
-                                <option>UK</option>
-                                <option>USA</option>
-                                <option>Spain</option>
-                                <option>France</option>
-                                <option>Italy</option>
-                                <option>Australia</option>
-                              </select>
-                            </div>
-                            <div class="col-sm-6">
-                              <label class="form-label" for="language-modern-vertical">Language</label>
-                              <select
-                                class="selectpicker w-auto"
-                                id="language-modern-vertical"
-                                data-style="btn-transparent"
-                                data-icon-base="ti"
-                                data-tick-icon="ti-check text-white"
-                                multiple
-                              >
-                                <option>English</option>
-                                <option>French</option>
-                                <option>Spanish</option>
-                              </select>
-                            </div>
-                            <div class="col-12 d-flex justify-content-between">
-                              <button class="btn btn-label-secondary btn-prev">
-                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
-                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                              </button>
-                              <button class="btn btn-primary btn-next">
-                                <span class="align-middle d-sm-inline-block d-none me-sm-1">Next</span>
-                                <i class="ti ti-arrow-right"></i>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <div id="social-links-modern-vertical" class="content">
-                          <div class="content-header mb-3">
-                            <h6 class="mb-0">Social Links</h6>
-                            <small>Enter Your Social Links.</small>
-                          </div>
-                          <div class="row g-3">
-                            <div class="col-sm-6">
-                              <label class="form-label" for="twitter-modern-vertical">Twitter</label>
-                              <input
-                                type="text"
-                                id="twitter-modern-vertical"
-                                class="form-control"
-                                placeholder="https://twitter.com/abc"
-                              />
-                            </div>
-                            <div class="col-sm-6">
-                              <label class="form-label" for="facebook-modern-vertical">Facebook</label>
-                              <input
-                                type="text"
-                                id="facebook-modern-vertical"
-                                class="form-control"
-                                placeholder="https://facebook.com/abc"
-                              />
-                            </div>
-                            <div class="col-sm-6">
-                              <label class="form-label" for="google-modern-vertical">Google+</label>
-                              <input
-                                type="text"
-                                id="google-modern-vertical"
-                                class="form-control"
-                                placeholder="https://plus.google.com/abc"
-                              />
-                            </div>
-                            <div class="col-sm-6">
-                              <label class="form-label" for="linkedin-modern-vertical">LinkedIn</label>
-                              <input
-                                type="text"
-                                id="linkedin-modern-vertical"
-                                class="form-control"
-                                placeholder="https://linkedin.com/abc"
-                              />
-                            </div>
-                            <div class="col-12 d-flex justify-content-between">
-                              <button class="btn btn-label-secondary btn-prev">
-                                <i class="ti ti-arrow-left me-sm-1 me-0"></i>
-                                <span class="align-middle d-sm-inline-block d-none">Previous</span>
-                              </button>
-                              <button class="btn btn-success btn-submit">Submit</button>
-                            </div>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div> -->
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -1247,142 +1031,39 @@
                         `;
 
                         var receive_status =`
-                        <li class="timeline-item timeline-item-primary pb-3 border-0">
-                              <span class="timeline-point timeline-p oint-primary"></span>
-                              <div class="timeline-event">
-                                <div class="timeline-header border-bottom mb-3">
-                                  <h6 class="mb-0">Receive</h6>
-                                  <span class="text-muted">Date Received : ${received_date} </span>
-                                </div>
-                                <div class="d-flex justify-content-between flex-wrap mb-2">
-                                  <div>
-                                    <span>Received By: ${incoming_by} </span>
-                                    <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${receive_statusColumn }
+                          <li class="timeline-item timeline-item-primary pb-3 border-0">
+                                <span class="timeline-point timeline-p oint-primary"></span>
+                                <div class="timeline-event">
+                                  <div class="timeline-header border-bottom mb-3">
+                                    <h6 class="mb-0">Receive</h6>
+                                    <span class="text-muted">Date Received : ${received_date} </span>
                                   </div>
-                                </div>
-                                <div class="timeline-header border-bottom mb-3">
-                                  <span>Forwarded By: ${r_forwarded_by}</span>
-                                  <span class="text-muted">Date Forwarded : ${forward_date}</span>
+                                  <div class="d-flex justify-content-between flex-wrap mb-2">
+                                    <div>
+                                      <span>Received By: ${incoming_by} </span>
+                                      <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${receive_statusColumn }
+                                    </div>
                                   </div>
-                              </div>
-                          </li>
-                        `;
+                                  <div class="timeline-header border-bottom mb-3">
+                                    <span>Forwarded By: ${r_forwarded_by}</span>
+                                    <span class="text-muted">Date Forwarded : ${forward_date}</span>
+                                    </div>
+                                </div>
+                            </li>
+                          `;
 
                   
                       if (status !=1){
                         $('.main-container').append(reviewed_status);
-                      }
-                      $('.main-container').append(receive_status);
-
-                    })
+                        }
+                        $('.main-container').append(receive_status);
+                      })
                       
                       const tableId = 'tbl-history';
                       const tbody = $(`#${tableId} tbody`);
                       let fullname = data.full_name;
                       let id_number = data.id_number;
                       tbody.empty();
-
-                      // const tableId = 'tbl-history';
-                      // const tbody = $(`#${tableId} tbody`);
-                      // let fullname = data.full_name;
-                      // let id_number = data.id_number;
-                      // tbody.empty();
-                      // data.data.forEach(function (item) {
-                      //   let incoming_date = item.incoming_in;
-                      //   let outgoing_date = item.otg_d_f;
-                      //   let budget_date = item.b_d_f;
-                      //   let journal_date = item.j_d_f;
-                      //   let approval_date = item.a_d_f;
-
-                      //   const formattedOriginalAmount = parseFloat(item.original_amount).toFixed(2);
-                      //   const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
-                      //   let orgAmountColumn = '';
-                      //   let finalAmountColumn = '';
-                      //   let editColumn = '';
-                      //   // let purposeColumn = '';
-                      //   let statusColumn = '';
-                      //   let status = item.status;
-                      //   let remarks = '';
-                      //   if (item.remarks) {remarks = item.remarks;} 
-                      //   else {remarks = remarks = '';}
-
-                      //   // if (item.purpose) {
-                      //   //   purposeColumn = item.purpose;
-                      //   // }
-
-                      //   if (status ==1){
-                      //     statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
-                      //   }
-                      //   else if (status ==2){
-                      //     statusColumn = `<td><span class="badge bg-label-warning">For Checking</span></td>`;
-                      //   }
-                      //   else if (status ==3){
-                      //     statusColumn = `<td><span class="badge bg-label-danger">Returned</span></td>`;
-                      //   }
-                      //   else if (status ==7){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Approved</span></td>`;
-                      //   }
-                      //   else if (status ==4){
-                      //     statusColumn = `<td><span class="badge bg-label-primary">Payroll</span></td>`;
-                      //   }
-                      //   else if (status ==5){
-                      //     statusColumn = `<td><span class="badge bg-label-warning">Outgoing</span></td>`;
-                      //   }
-                      //   else if (status ==6){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Ongoing</span></td>`;
-                      //   }
-                      //   else if (status ==7){
-                      //     statusColumn = `<td><span class="badge bg-label-success">For Approval</span></td>`;
-                      //   }
-                      //   else if (status ==8){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
-                      //   }
-                      //   else if (status ==9){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
-                      //   }
-                      //   else if (status ==10){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
-                      //   }
-                      //   else if (status ==11){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
-                      //   }
-                      //   else if (status ==12){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
-                      //   }
-                      //   else if (status ==13){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
-                      //   }
-                      //   else if (status ==14){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Received</span></td>`;
-                      //   }
-                      //   else if (status ==15){
-                      //     statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
-                      //   }
-                      //   else {
-                      //     statusColumn = `<td><span class="badge bg-label-primary">${item.status}</span></td>`;
-                      //   }
-                      //   orgAmountColumn = `<td><span class="badge bg-label-primary">₱ ${formattedOriginalAmount}</span></td>`;
-                      //   finalAmountColumn = `<td><span class="badge bg-label-primary">₱ ${formattedFinalAmount}</span></td>`;
-                      //   editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
-                      //   const row = `
-                      //       <tr>
-                      //           <td><span class="badge bg-label-primary">${item.code}</span></td>
-                      //           ${orgAmountColumn}
-                      //           ${finalAmountColumn}
-                      //           ${statusColumn}
-                      //           <td><span class="badge bg-label-danger">${remarks}</span></td>
-                      //           <td><span class="badge bg-label-primary">${incoming_date}</span></td>
-                      //           <td><span class="badge bg-label-primary">${outgoing_date}</span></td>
-                      //           <td><span class="badge bg-label-primary">${budget_date}</span></td>
-                      //           <td><span class="badge bg-label-primary">${journal_date}</span></td>
-                      //           <td><span class="badge bg-label-primary">${approval_date}</span></td>
-                      
-                      //       </tr>
-                      //   `;
-                      //   tbody.append(row);
-
-                    
-                      // })
                       $('#employee-id-no').text(id_number);
                       $('#employee-full-name').text(fullname);
                       $('#tracking-history').modal('show');
