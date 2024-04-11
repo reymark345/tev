@@ -324,6 +324,9 @@ def employee_details(request):
     amt_budget = ''
     amt_check = ''
     ap_date = ''
+    check_issued_status = ''
+    check_issued_date = ''
+    check_issued_released = ''
 
     query = """ 
         SELECT 
@@ -486,9 +489,10 @@ def employee_details(request):
 
         if row[12]:
             finance_query = """
-                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
+                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date, tp.check_id, tp.check_issued, tp.check_released
                 FROM transactions AS ts
-                LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
+                LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no
+                LEFT JOIN trans_payeename AS tp ON tp.dv_no = ts.dv_no  WHERE ts.dv_no = %s
             """
             with connections[finance_database_alias].cursor() as cursor2:
                 cursor2.execute(finance_query, (row[12],))
@@ -500,10 +504,21 @@ def employee_details(request):
                 amt_budget = finance_results[0][3]
                 amt_check = finance_results[0][4]
                 approved_date = finance_results[0][5]
+                check_issued_status = finance_results[0][6]
+                check_issued_date = finance_results[0][7]
+                check_issued_released = finance_results[0][8]
                 if approved_date:
                     approved_date = datetime.strptime(str(approved_date), "%Y-%m-%d")
                     formatted_date = approved_date.strftime("%B %d, %Y")
                     ap_date = f"{formatted_date}"
+                if check_issued_date:
+                    check_issued_date = datetime.strptime(str(check_issued_date), "%Y-%m-%d")
+                    formatted_date = check_issued_date.strftime("%B %d, %Y")
+                    check_issued_date = f"{formatted_date}"
+                if check_issued_released:
+                    check_issued_released = datetime.strptime(str(check_issued_released), "%Y-%m-%d")
+                    formatted_date = check_issued_released.strftime("%B %d, %Y")
+                    check_issued_released = f"{formatted_date}"
 
         item = {
             'id': row[0],
@@ -547,7 +562,10 @@ def employee_details(request):
             'amt_journal': amt_journal,
             'amt_budget': amt_budget,
             'amt_check': amt_check,
-            'check_issued_date' : ap_date
+            'certified_date': ap_date,
+            'check_issued_status': check_issued_status,
+            'check_issued_date' : check_issued_date,
+            'check_issued_released' : check_issued_released,
         }
         data.append(item)   
 
