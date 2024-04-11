@@ -604,7 +604,7 @@ def export_status(request):
             SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
                     tev_incoming.date_travel, tev_incoming.division, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
                     tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
-                    tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, au.first_name AS payrolled_by, tev_incoming.date_payrolled
+                    tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
             FROM tev_incoming
             INNER JOIN (
                     SELECT MAX(id) AS max_id
