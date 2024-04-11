@@ -699,6 +699,18 @@
                         outgoing_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         outgoing_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                       }
+                      else if (l_status == 8){
+                        obligate_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
+                        obligate_d_r = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        obligate_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        obligate_r_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        obligate_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        outgoing_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        outgoing_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+
+                        outgoing_statusColumn = `<td><span class="badge bg-label-primary">Received</span></td>`;
+                        payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                      }
                       else if (l_status == 9){
                         obligate_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
                         obligate_d_r = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
@@ -708,6 +720,7 @@
                         outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                         payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                       }
+
                       else if (l_status == 10){
                         obligate_statusColumn = `<td><span class="badge bg-label-primary">Receive</span></td>`;
                         obligate_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
@@ -880,7 +893,7 @@
                           <div class="timeline-event">
                             <div class="timeline-header border-bottom mb-3">
                               <h6 class="mb-0">Outgoing</h6>
-                              <span class="text-muted">Date Outgoing : ${outgoing_d_r} </span>
+                              <span class="text-muted">Date Received : ${outgoing_d_r} </span>
                             </div>
                             <div class="d-flex justify-content-between flex-wrap mb-2">
                               <div>
@@ -973,9 +986,7 @@
                         if (!remarks){
                           remarks = `<span class="badge bg-label-primary">None</span>`
                         }
-                        else{
-                          remarks = `<span class="badge bg-label-danger">${remarks}</span>`
-                        }
+
                         if (status ==1){
                           receive_statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
                           review_statusColumn = `<td><span class="badge bg-label-warning">N/A</span></td>`;
