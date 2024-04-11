@@ -107,6 +107,7 @@ DATABASES = {
         'HOST':'172.31.240.235',
         'PORT':'3306',
     },
+    
 
     ##for server local but live database
     # 'default': {
