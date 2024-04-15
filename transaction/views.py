@@ -849,7 +849,7 @@ def preview_box_a(request):
 
     userData = AuthUser.objects.filter(id=user_id)
     full_name = userData[0].first_name + ' ' + userData[0].last_name
-
+    
     designation = StaffDetails.objects.filter(user_id= user_id)
     position = designation[0].position
     
@@ -916,9 +916,9 @@ def preview_box_a(request):
                     }
                     data_result.append(data_dict)
         
-        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__chief','division__c_designation','division__approval','division__ap_designation').first()
+        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__acronym','division__chief','division__c_designation','division__approval','division__ap_designation').first()
         dvno = outgoing['dv_no']
-
+        div_acronym = outgoing['division__acronym']
         te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
                 'code',
                 'first_name',
@@ -960,10 +960,7 @@ def preview_box_a(request):
                     "charges": item['tevbridge__charges__name'],
                 }
             emp_list_lname.append(list_lname)
-            
 
-        
-        
         box_b_in  = outgoing['box_b_in']
         
         query = """
@@ -994,6 +991,7 @@ def preview_box_a(request):
         context = {
             'data' : data_result,
             'dv_number':dvno,
+            'acronym':div_acronym,
             'charges_list':charges_list,
             'payroll_date':box_b_in,
             'total_amount':total_final_amount,
@@ -1008,6 +1006,7 @@ def preview_box_a(request):
         return render(request, 'transaction/preview_print.html', context)
     else:
         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
+    
 @login_required(login_url='login')
 def checking(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
