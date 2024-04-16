@@ -46,17 +46,7 @@ def tracking_list(request):
     }
     return render(request, 'tracking/tracking_list.html', context)
 
-              
-
-    # if any(role_name in allowed_roles for role_name in role_names):
-    #     context = {
-    #         'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-    #         'permissions' : role_names,
-    #     }
-    #     return render(request, 'tracking/tracking_list.html', context)
-    # else:
-    #     return render(request, 'pages/unauthorized.html')
-
+        
 
 def tracking_load(request):
     total = 0
