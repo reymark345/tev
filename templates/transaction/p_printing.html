@@ -12,7 +12,8 @@
   </center>
 </div>
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
-<style>
+<link rel="stylesheet" href="{% static 'custom/custom.css' %}" />
+{% comment %} <style>
   #loading-screen {
       position: fixed;
       background: rgba(255, 255, 255, 0.7);
@@ -71,7 +72,7 @@
   .blur-modal-backdrop {
     backdrop-filter: blur(5px); /* Adjust the blur value as needed */
 }
-</style>
+</style> {% endcomment %}
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
