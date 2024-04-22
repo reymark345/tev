@@ -35,6 +35,7 @@
                               <th>Received By</th>
                               <th>Date Forwarded</th>
                               <th>Forwarded By</th>
+                              <th>Action</th>
                           </tr>
                       </thead>
                       <tbody></tbody>
@@ -144,58 +145,48 @@
   <!--/ Edit User Modal -->
   
   <div class="modal fade" id="update-transaction" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-xl modal-dialog-centered" style="min-width: 90%; min-height: 70%;" role="document">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <!-- <h5 class="modal-title" id="exampleModalLabel4">Update Transaction</h5> -->
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-  
-                  <!-- Modern Vertical Wizard -->
-                  <div class="col-12">
-                    <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
-                      <div class="bs-stepper-content">
-                         <div class="card-datatable table-responsive pt-0">  <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label> <span id="dv-number" class="badge bg-label-primary"><i></i></span>
-                      <table id="tbl-box-a" class="table display compact">
-                          <thead>
-                              <tr>
-                                  <th>ID</th>
-                                  <th>Code #</th>
-                                  <th>Accnt. No.</th>
-                                  <th>ID Number</th>
-                                  <th>Name</th>
-                                  <th>Amount</th>
-                                  <th>Purpose</th>
-                                  <th>Assign Charges</th>
-                                  <th>Charges</th>
-                                  <th>Action</th>
-                              </tr>
-                          </thead>    
-                          <tbody>
-                          </tbody> 
-                          <tfoot>
-                              <br><br>
-                              <div style="width:40%;">
-                                  <label class="form-label" for="modalFEmployeeName"><i>Add Employee</i></label>
-                                  <select id="payroll-name" name="PayrollName" class="form-select payroll-name" data-allow-clear="true" ><option></option></select>
-                              </div>
-                          </tfoot>              
-                      </table>
-                     
+    <div class="modal-dialog modal-xl modal-dialog-centered" style="min-width: 90%; min-height: 70%;" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <!-- Modern Vertical Wizard -->
+                <div class="col-12">
+                  <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
+                    <div class="bs-stepper-content">
+                       <div class="card-datatable table-responsive pt-0"> <span id="dv-number" class="badge bg-label-primary"><i></i></span>
+                    <table id="tbl-box-a" class="table display compact">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Code #</th>
+                                <th>Accnt. No.</th>
+                                <th>ID Number</th>
+                                <th>Name</th>
+                                <th>Amount</th>
+                                <th>Purpose</th>
+                                <th>Charges</th>
+                            </tr>
+                        </thead>    
+                        <tbody>
+                        </tbody>               
+                    </table>
                       </div>
                     </div>
                   </div>
-                  <!-- /Modern Vertical Wizard -->
-                 
-              </div>
-              <div class="modal-footer">
-                  <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5>
-                  <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-              </div>
-          </div>
-      </div>
-  </div>
+                </div>
+                <!-- /Modern Vertical Wizard -->
+               
+            </div>
+            <div class="modal-footer">
+                <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
   
   
   <!-- Enable OTP Modal -->
@@ -356,7 +347,8 @@
                   { data: 'd_received' },
                   { data: 'received_by' },
                   { data: 'd_forwarded' },
-                  { data: 'out_by' }
+                  { data: 'out_by' },
+                  { data: 'id' }
               ],
               columnDefs: [
                   {
@@ -404,28 +396,41 @@
                     },
                   },
                   {
-                      targets: -3,
-                      render: function (data) {
-                          return data;
-                      },
-                  },
-                  {
-                      targets: -2,
+                      targets: -6,
                       render: function (data) {
                           return (data == null) ? '' : moment(data).format('LLL');
                       },
                   },
-                  {
-                      targets: -4,
-                      render: function (data) {
-                          return (data == null) ? '' : moment(data).format('LLL');
-                      },
-                  },
+
                   {
                       targets: -5,
                       render: function (data) {
                           return (data == null) ? '' : moment(data).format('LLL');
                       },
+                  },
+
+                  {
+                      targets: -4,
+                      render: function (data) {
+                          return data;
+                      },
+                  },
+                  {
+                      targets: -3,
+                      render: function (data) {
+                          return (data == null) ? '' : moment(data).format('LLL');
+                      },
+                  },
+
+                  {
+                    targets: -1,
+                    title: 'Action',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data) {
+                        let itemId = data;
+                        return '<a class="btn btn-sm btn-icon view-data" id="'+itemId+'"><i class="text-primary fa fa-eye"></i></a>';
+                    },
                   },
               ],
               dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
@@ -776,25 +781,22 @@
                   { data: 'account_no' },
                   { data: 'id_no' },
                   { data: 'name' },
-                  { data: 'final_amount' },
+                  { data: 'total', final_amount: 'final_amount' },
                   { data: 'purpose' },
-                  { data: 'dv_no', name: 'dv_no' },
-                  { data: 'multiple_charges' },
-                  { data: 'total', name: 'total' },
+                  { data: 'multiple_charges'},
               ],
           
               columnDefs: [
                   {
                       targets: 0,
                       render: function(data, type, row, meta) {
-                          // Assuming meta.row is the 0-based index of the current row
                           return meta.row + 1;
                       },
                   },
                   {
                       targets: 1,
                       render: function(data) {
-                          return data
+                        return '<span class="badge bg-label-primary">' + data + '<span>';
                       },
                   },
                   {
@@ -809,53 +811,27 @@
                           return '<span class="badge bg-label-primary">' + data + '<span>'
                       },
                   },
-  
-                  
+
                   {
-                      targets: 5,
-                      render: function (data) {
-                          return data
-  
-                      },
-                  },
+                    targets: 5,
+                    render: function (data) {
+                        return data
+                        },
+                    },
                   {
                       targets: 6,
                       render: function (data) {
-                          
-                          return '<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="'+data+'" style="width:500px; margin-right: -150px !important;" ></td>'
-  
+                          return data
                       },
                   },
-                  {
-                      targets: 7,
-                      render: function (data) {
-                          let charges =  '<select class="form-select emp-charges" id="emp-charges">' +
-                          '<option></option>'+
-                          '{% for row in charges %}'+
-                          '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                          '{% endfor %}'+
-                          '</select>';
-                          return charges
-                      },
-                  },
-                  {
-                      targets: -1,
-                      title: 'Action',
-                      orderable: false,
-                      searchable: false,
-                      render: function (data) {
-                          var itemId = data;
-                          return '<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>';
-                      },
-                  },
-                  
               ],
               dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
               buttons: [],
               drawCallback: function (settings) {
                   let myDataTable = $('#tbl-box-a').DataTable();
                   let totalAmount = 0;
-                  myDataTable.column(9, { search: 'applied' }).data().each(function (value) {
+
+                  myDataTable.column(5, { search: 'applied' }).data().each(function (value) {
                       totalAmount += parseFloat(value);
                   });
                   let formattedTotalAmount = totalAmount.toLocaleString('en-US', {
@@ -866,8 +842,6 @@
               }
           });
       }
-   
-  
       $('div.head-label').html('<h5 class="card-title mb-0 d-flex align-items-center">'+
           '<select id="dp-year" name="DpYear" class="form-select me-3">'+
               '<option value="2023">2023</option>'+
