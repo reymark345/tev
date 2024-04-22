@@ -553,7 +553,7 @@
                 { data: 'remarks' },
                 { data: 'lacking' },
                 { data: 'user_id' },
-                { data: 'id' },
+                { data: 'id', is_latest: 'is_latest' },
             ],
             columnDefs: [
                 {
@@ -689,10 +689,22 @@
                   title: 'Action',
                   orderable: false,
                   searchable: false,
-                  render: function (data) {
-                      return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'
+                  render: function (data, type, row) {
+                    var is_latest = row.is_latest; 
+                    console.log(is_latest);
+                    if (is_latest =='1'){
+                        return (
+                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>' +
+                          '<a href="javascript:;" data-id="' + data + '" class="item-delete text-body"><i class="text-primary ti ti-trash"></i></a>'
                       )
+                    }
+                    else{
+                        return (
+                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>' +
+                          '<a href="javascript:;" data-id="' + data + '" class="item-delete-off text-body"><i class="text-primary ti ti-trash-off"></i></a>'
+                      )
+                    }
+
                   },
               },
             ],
@@ -874,6 +886,62 @@
                         offCanvasEl.show()
                         
                     })
+                }),
+
+                $('.item-delete').on('click', function () {
+                    let id = $(this).data('id');
+
+                    Swal.fire({
+                    title: 'Delete?',
+                    text: "You won't be able to revert this!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Remove it!',
+                    customClass: {
+                        confirmButton: 'btn btn-primary me-3',
+                        cancelButton: 'btn btn-label-secondary',
+                    },
+                    buttonsStyling: false,
+                }).then(function (result) {
+                    if (result.value) {
+                        $.ajax({
+                            type: 'POST',
+                            url: "{% url 'delete-entry' %}",
+                            data:{
+                                item_id: id
+                            }
+                        }).done(function (data) {
+                            if (data.data == 'success') {
+                                selectedCb = [];
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Successfully deleted!',
+                                    text: 'Item has been deleted.',
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+
+                                dateField.clear();
+                                dataTable.ajax.reload()
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error saving!',
+                                    text: data.message,
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                            }
+                        })
+                    }
+                })   
+                    
+                }),
+
+                $('.item-delete-off').on('click', function () {
+                    toastr.error('Item must not delete', 'Invalid', toast_options);
                 }),
 
                 $('#tbl-items').on('click', '.dt-checkboxes', function () {
@@ -1135,7 +1203,7 @@
                                 offCanvasEl.hide()
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Update Successfullass!',
+                                    title: 'Update Successfully!',
                                     html:
                                     'Successfully <b>Save!</b>',
                                     customClass: {
