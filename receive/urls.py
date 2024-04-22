@@ -28,5 +28,9 @@ urlpatterns = [
     path('search_list', views.search_list, name='search-list'),
     path('upload_tev', views.upload_tev, name='upload-tev'),
 
+    path('delete_entry', views.delete_entry, name='delete-entry'),
+
+    
+
     
 ]
