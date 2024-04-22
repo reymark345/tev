@@ -204,7 +204,7 @@ margin-top: 99%;
         <div class="container">
           <h3></h3>
 
-          <button class="print-button" onclick="printForms('{{ finance.0.dv_no }}')">Print</button>
+          <button class="print-button" onclick="printForms()">Print</button>
 
         </div>
         <div class="container-body">
@@ -1340,13 +1340,10 @@ $(document).ready(function () {
   $('#loading-screen').hide();
 });
 
-  function printForms(dv_number) {
+  function printForms() {
       $.ajax({
         type: 'POST',
         url: "{% url 'update-status' %}",
-        data:{
-            dv_id: dv_number
-        }
     }).done(function (data) {
       window.print();
     })

@@ -171,7 +171,6 @@
                                   <th>Name</th>
                                   <th>Amount</th>
                                   <th>Purpose</th>
-                                  <th>Assign Charges</th>
                                   <th>Charges</th>
                               </tr>
                           </thead>    
@@ -785,9 +784,8 @@
                   { data: 'account_no' },
                   { data: 'id_no' },
                   { data: 'name' },
-                  { data: 'final_amount' },
+                  { data: 'total', final_amount: 'final_amount' },
                   { data: 'purpose' },
-                  { data: 'total'},
                   { data: 'multiple_charges'},
               ],
           
@@ -795,14 +793,13 @@
                   {
                       targets: 0,
                       render: function(data, type, row, meta) {
-                          // Assuming meta.row is the 0-based index of the current row
                           return meta.row + 1;
                       },
                   },
                   {
                       targets: 1,
                       render: function(data) {
-                          return data
+                        return '<span class="badge bg-label-primary">' + data + '<span>';
                       },
                   },
                   {
@@ -817,37 +814,27 @@
                           return '<span class="badge bg-label-primary">' + data + '<span>'
                       },
                   },
-  
-                  
+
                   {
-                      targets: 5,
-                      render: function (data) {
-                          return data
-  
-                      },
-                  },
+                    targets: 5,
+                    render: function (data) {
+                        return data
+                        },
+                    },
                   {
                       targets: 6,
                       render: function (data) {
-                          
                           return data
-  
                       },
                   },
-                  {
-                      targets: 7,
-                      render: function (data) {
-                          return ''
-                      },
-                  },
-                  
               ],
               dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
               buttons: [],
               drawCallback: function (settings) {
                   let myDataTable = $('#tbl-box-a').DataTable();
                   let totalAmount = 0;
-                  myDataTable.column(7, { search: 'applied' }).data().each(function (value) {
+
+                  myDataTable.column(5, { search: 'applied' }).data().each(function (value) {
                       totalAmount += parseFloat(value);
                   });
                   let formattedTotalAmount = totalAmount.toLocaleString('en-US', {
