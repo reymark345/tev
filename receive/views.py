@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, RemarksLib, Remarks_r, RolePermissions, Division, Section)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, RemarksLib, Remarks_r, RolePermissions, Division, Section, TransactionLogs )
 import json 
 from django.core import serializers
 from datetime import date as datetime_date
@@ -314,7 +314,8 @@ def item_load(request):
             'remarks': item['remarks'],
             'lacking': item['lacking'],
             'status': item['status_id'],
-            'user_id': full_name
+            'user_id': full_name,
+            'is_latest': item['is_latest'],
         }
 
         data.append(item_entry)
@@ -1275,7 +1276,6 @@ def review_details(request):
         }
         return JsonResponse(data)
     else:
-        # Handle the case where no results are found
         return JsonResponse({'error': 'No data found for the given ID'}, status=404)
 
 
@@ -1304,6 +1304,7 @@ def addtev(request):
 
 @csrf_exempt
 def updatetevdetails(request):
+
     user_id = request.session.get('user_id', 0)
     if request.method == 'POST':
         amount = request.POST.get('final_amount')
@@ -1311,7 +1312,8 @@ def updatetevdetails(request):
         transaction_id = request.POST.get('transaction_id')
         selected_remarks = request.POST.getlist('selected_remarks[]')
         selected_dates = request.POST.getlist('selected_dates[]')
-        tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status, reviewed_by =user_id, date_reviewed =date_time.datetime.now())
+        is_latest = 0 if status == '3' else 1
+        TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status, reviewed_by =user_id, date_reviewed =date_time.datetime.now(), is_latest = is_latest)
         Remarks_r.objects.filter(incoming_id=transaction_id).delete()
         for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             Remarks_r.objects.create(
@@ -1324,7 +1326,19 @@ def updatetevdetails(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
+@csrf_exempt
+def delete_entry(request):
 
+    user_id = request.session.get('user_id', 0)
+    item_id = request.POST.get('item_id')
+    data = TevIncoming.objects.get(id=item_id)
+    description = '{}'.format(
+        "This transaction is being deleted with code number " + data.code + " and ID Number :" + data.id_no + " with Original amount: " + str(data.original_amount)
+    )
+    tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
+    tev_add.save()
+    data.delete()
+    return JsonResponse({'data': 'success'})
 
 @csrf_exempt
 def addtevdetails(request):
