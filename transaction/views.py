@@ -1054,7 +1054,7 @@ def employee_dv(request):
             id_no,
             account_no, 
             final_amount, 
-            MAX(tb.purpose) AS purpose,  -- Using an aggregate function
+            MAX(tb.purpose) AS purpose,  
             dv_no, 
             cl.name as cluster, 
             GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
@@ -1064,7 +1064,7 @@ def employee_dv(request):
         LEFT JOIN cluster AS cl ON cl.id = t_o.cluster
         LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = ti.id
         LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
-        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7) AND dv_no = %s 
+        WHERE ti.status_id IN (1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16) AND dv_no = %s 
         GROUP BY ti.id, code, first_name, middle_name, last_name, id_no, account_no, final_amount, dv_no, cl.name
         ORDER BY ti.updated_at DESC;  
     """
@@ -1079,10 +1079,7 @@ def employee_dv(request):
     for finance_row in results:
         finance_dict = dict(zip(column_names, finance_row))
         data_result.append(finance_dict)
-
     data = []  
-    
-
     for row in data_result:
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
@@ -1092,7 +1089,6 @@ def employee_dv(request):
         final_amount_str = row['final_amount']
         final_amount = Decimal(final_amount_str).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
         
-
         total_amount += final_amount
         item = {
             'id': row['id'],
@@ -1108,16 +1104,14 @@ def employee_dv(request):
             'total':final_amount,
         }
         data.append(item)
-    payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))
-
-                    
+    payrolled_list = serialize('json', TevIncoming.objects.filter(status_id=4).order_by('first_name'))              
     total = len(data)  
- 
     response = {
         'data': data,
         'charges': charges_list,
         'dv_number':dv_no['dv_no'],
         'outgoing_id':dv_no['id'],
+        'total':total_amount,
         'payrolled_list': payrolled_list,
         'recordsTotal': total,
         'recordsFiltered': total
@@ -1579,8 +1573,6 @@ def item_edit(request):
 
 @csrf_exempt
 def update_status(request):
-    id = request.POST.get('dv_id')
-    # tev_update = TevOutgoing.objects.filter(dv_no=id).update(is_print=True)
     return JsonResponse({'data': 'success'})
 
 

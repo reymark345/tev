@@ -260,16 +260,5 @@ $(document).ready(function () {
   $('#loading-screen').hide();
 });
 
-  function printForms(dv_number) {
-      $.ajax({
-        type: 'POST',
-        url: "{% url 'update-status' %}",
-        data:{
-            dv_id: dv_number
-        }
-    }).done(function (data) {
-      window.print();
-    })
-  }
 </script>
 </html>

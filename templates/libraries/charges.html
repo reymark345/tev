@@ -202,6 +202,7 @@
                 buttonsStyling: false,
             }).then(function (result) {
                 if (result.value) {
+                 
                     var form_data = $('#item-form').serialize()
                     let post_url = ItemID.val() != '0' ? "{% url 'charges-update' %}" : "{% url 'charges-add' %}"
                     $.ajax({

@@ -331,7 +331,7 @@
               { data: 'amt_budget', status : 'status' },
               { data: 'amt_journal', status : 'status' },
               { data: 'approved_date', status : 'status' },
-              { data: 'amt_check' },
+              { data: 'amt_check', status : 'status' },
               { data: 'id' },
 
           ],
@@ -559,29 +559,24 @@
           {
               targets: 13,
               orderable: false,
-              render: function (data) {
-                  if (data){
-                    return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success"><i class="ti ti-check"></i></span></center>`
-                  }
-                  else{
-                    return ``;    
-                  }
+              render: function (data, type, row) {
+                var status = row.status; 
+
+                console.log(status);
+                console.log("status");
+
+
+                if (data){
+                  return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success"><i class="ti ti-check"></i></span></center>`
+                }
+                else if (status == 15){
+                  return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-warning"><i class="ti ti-check"></i></span></center>`
+                }
+                else{
+                  return ``;    
+                }
               },
           },
-
-
-
-          // {
-          //     targets: 13,
-          //     render: function (data) {
-          //         if (data){
-          //             return '<span class="badge bg-label-primary">' + data + '</span>'
-          //         }
-          //         else{
-          //             return data;
-          //         }
-          //     },
-          // },
           { 
               targets: -1,
               title: 'Action',
