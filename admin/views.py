@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, StaffDetails,RoleDetails, RolePermissions, SystemConfiguration )
+from main.models import (AuthUser, StaffDetails,RoleDetails, RolePermissions, SystemConfiguration, TransactionLogs, Division )
 import json 
 from django.core.serializers import serialize
 import datetime
@@ -178,20 +178,18 @@ def date_actual_update(request):
 def user_add(request):
     user_name = request.POST.get('Username')
     firstname = request.POST.get('Firstname')
-    middlename = request.POST.get('Middlename')
+    middleinitial = request.POST.get('MiddleInitial')
     id_no = request.POST.get('IdNo')
     lastname = request.POST.get('Lastname')
     password = request.POST.get('Password')
     email = request.POST.get('Email')
-    
-    # role_id = request.POST.get('Roles')
+    image = request.POST.get('ImagePath')
     role_ids = request.POST.getlist('Roles')
     superuser = 0
-    
-
     sex = request.POST.get('Sex')
     address = request.POST.get('Address')
     position = request.POST.get('Position')
+    division = request.POST.get('Division')
     password = make_password(password)
     user_id = request.session.get('user_id', 0)
 
@@ -199,24 +197,44 @@ def user_add(request):
         superuser = 1
         
     if AuthUser.objects.filter(username=user_name):
-        return JsonResponse({'data': 'error', 'message': 'Username Taken'})
+        return JsonResponse({'data': 'error', 'message': 'Username Already Exists'})
     
     else:
-        user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=date_time.datetime.now())
-        user_add.save()
-        max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
-        user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,user_id = max_id)
-        user_details_add.save()
+        division_name = Division.objects.filter(name=division).first()
+        if division_name:
+            user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=date_time.datetime.now())
+            user_add.save()
+            max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
+            
+            user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,image_path = image, added_by = user_id, middle_initial = middleinitial, division_id = division_name.id, user_id = max_id)
+            user_details_add.save()
 
-        auth_max = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
-        for role_id in role_ids:
-            role_p_lib = RolePermissions(
-                role_id=int(role_id), 
-                user_id=auth_max
-            )
-            role_p_lib.save()
+            auth_max = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
+            for role_id in role_ids:
+                role_p_lib = RolePermissions(
+                    role_id=int(role_id), 
+                    user_id=auth_max
+                )
+                role_p_lib.save()
+            return JsonResponse({'data': 'success'})
+        else:
+            user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=date_time.datetime.now())
+            user_add.save()
+            max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
+            
+            user_details_add = StaffDetails(id_number = id_no,sex=sex,position=position,address=address,image_path = image, added_by = user_id, middle_initial = middleinitial, user_id = max_id)
+            user_details_add.save()
 
-        return JsonResponse({'data': 'success'})
+            auth_max = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
+            for role_id in role_ids:
+                role_p_lib = RolePermissions(
+                    role_id=int(role_id), 
+                    user_id=auth_max
+                )
+                role_p_lib.save()
+
+            return JsonResponse({'data': 'error','message': 'Division in Table not Exists'})
+            
 
     
 #End User function ---------------->
@@ -355,3 +373,20 @@ def user_load(request):
         'recordsFiltered': total,
     }
     return JsonResponse(response)
+
+@login_required(login_url='login')
+def transaction_logs(request):
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'transaction_logs' : TransactionLogs.objects.filter().order_by('id'),
+            'permissions' : role_names,
+        }
+        return render(request, 'admin/logs.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
