@@ -941,7 +941,7 @@
                 }),
 
                 $('.item-delete-off').on('click', function () {
-                    toastr.error('Item must not delete', 'Invalid', toast_options);
+                    toastr.error('This item cannot delete!', 'Invalid', toast_options);
                 }),
 
                 $('#tbl-items').on('click', '.dt-checkboxes', function () {
@@ -1040,6 +1040,7 @@
                     $(".rangeTravel").prop("disabled", false);
                     OriginalAmount.prop("disabled", false);
                     $('.title-name').text('Add Travel Data');
+                    status_val = 0;
                     EmployeeName.val('').trigger('change').prop("disabled", false);
                     $('.form-control').val('');
                     updateSelectedDates();

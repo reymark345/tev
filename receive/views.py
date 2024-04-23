@@ -339,7 +339,6 @@ def checking_load(request):
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
     FIncomingIn= request.GET.get('FIncomingIn')
-    # FSLashedOut= request.GET.get('FSLashedOut')
     FOriginalAmount= request.GET.get('FOriginalAmount')
     FFinalAmount= request.GET.get('FFinalAmount')
     FAccountNumber= request.GET.get('FAccountNumber')
@@ -528,17 +527,15 @@ def read_excel_file(excel_file):
     for row in worksheet.iter_rows(min_row=2, values_only=True):
         id_no, amount, date_travel = row
         
-        # Handle empty or missing values in the "AMOUNT" column
         if amount is None:
             amount = 0
         
         dates = []
-        # Split dates and convert them into datetime objects
         if date_travel:
             date_list = date_travel.split(',')
             for date_str in date_list:
                 date_obj = datetime.strptime(date_str.strip(), '%d-%m-%Y')
-                dates.append(date_obj.strftime('%d-%m-%Y'))  # Store dates as strings or use date_obj if you need datetime objects
+                dates.append(date_obj.strftime('%d-%m-%Y')) 
 
         excel_data.append({
             'id_no': id_no,
@@ -547,9 +544,7 @@ def read_excel_file(excel_file):
         })
 
     for record in excel_data:
-    # Check if any of the fields is empty (None, 0, or [])
         if record['id_no'] is None or record['amount'] == 0 or not record['date_travel']:
-            # If any field is empty, set the flag variable to True and break the loop
             has_empty_fields = True
             break
 
@@ -761,9 +756,7 @@ def preview_received(request):
         cursor.execute(query, [id])
         result = cursor.fetchone()
 
-    # Convert the result to a dictionary for JsonResponse
     if result:
-
         orig_amt =  Decimal(result[8])
         orig_amt = orig_amt.quantize(Decimal("0.01"))
         data = {
@@ -807,7 +800,6 @@ def item_update(request):
     div = request.POST.get('Division')
     sec = request.POST.get('Section')
     contact = request.POST.get('Contact')
-
 
     if travel_date:
         travel_date = request.POST.get('DateTravel')
@@ -878,7 +870,6 @@ def item_update(request):
                 remarks_lib_id=selected_remarks
             )
             remarks_lib.save()
-        # tev_update = TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname,original_amount=amount)
         return JsonResponse({'data': 'success'})
     
 
@@ -896,10 +887,8 @@ def item_rod_update(request):
     div = request.POST.get('Division')
     sec = request.POST.get('Section')
     orig_amnt = request.POST.get('FAmount')
-
     duplicate_travel = []
     individual_dates = travel_date.split(',')
-    cleaned_dates = ','.join(date.strip() for date in individual_dates)
 
     for date in individual_dates:
         cleaned_date = date.strip()
@@ -936,12 +925,9 @@ def item_rod_update(request):
 @csrf_exempt
 def item_returned(request):
     id = request.POST.get('ItemID')
-    emp_name = request.POST.get('EmployeeName')
-    amount = request.POST.get('OriginalAmount')
     travel_date = request.POST.get('HDateTravel')
     selected_remarks = request.POST.getlist('selectedRemarks[]')
     selected_dates = request.POST.getlist('selectedDate[]')
-    date_received = request.POST.get('DateReceived')
 
     travel_date_stripped = travel_date.strip()
     travel_date_spaces = travel_date_stripped.replace(' ', '')
@@ -966,7 +952,6 @@ def item_returned(request):
 
 @csrf_exempt
 def item_add(request):
-    employeename = request.POST.get('EmployeeName')
     amount = request.POST.get('OriginalAmount')
     travel_date = request.POST.get('DateTravel')
     range_travel = request.POST.get('RangeTravel')
@@ -1328,16 +1313,17 @@ def updatetevdetails(request):
 
 @csrf_exempt
 def delete_entry(request):
-
     user_id = request.session.get('user_id', 0)
     item_id = request.POST.get('item_id')
     data = TevIncoming.objects.get(id=item_id)
+    remarks = Remarks_r.objects.filter(incoming_id=item_id)
     description = '{}'.format(
-        "This transaction is being deleted with code number " + data.code + " and ID Number :" + data.id_no + " with Original amount: " + str(data.original_amount)
+        "This Transaction is being deleted with code number " + data.code + " and ID Number :" + data.id_no + " with Original amount: " + str(data.original_amount) + " and Date Travel: "+ data.date_travel
     )
     tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
     tev_add.save()
     data.delete()
+    remarks.delete()
     return JsonResponse({'data': 'success'})
 
 @csrf_exempt
