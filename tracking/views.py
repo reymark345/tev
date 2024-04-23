@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, Charges, RolePermissions)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, Charges, RolePermissions, Division)
 import json 
 from django.core import serializers
 from datetime import date as datetime_date
@@ -43,8 +43,26 @@ def tracking_list(request):
     context = {
         'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
         'permissions' : role_names,
+        'division' : Division.objects.filter().order_by('name'),
     }
     return render(request, 'tracking/tracking_list.html', context)
+
+@login_required(login_url='login')
+def users(request):
+    allowed_roles = ["Admin"]    
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
+            'permissions' : role_names,
+            'role_details': RoleDetails.objects.filter().order_by('role_name'),
+        }
+        return render(request, 'admin/users.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
 
         
 
@@ -60,6 +78,7 @@ def tracking_load(request):
     FStatus= request.GET.get('FStatus') 
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
+    FDivision = request.GET.get('FDivision')
     NDVNumber= request.GET.get('NDVNumber') 
     DpYear= request.GET.get('DpYear') 
 
@@ -89,8 +108,8 @@ def tracking_load(request):
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
                     tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
                     tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
-                    tev_incoming.incoming_out, tev_bridge.purpose AS purposes,
-                    tev_outgoing.dv_no AS dv_no
+                    tev_incoming.incoming_out, tev_incoming.division, tev_incoming.section,
+                    tev_bridge.purpose AS purposes, tev_outgoing.dv_no AS dv_no
                 FROM tev_incoming
                 INNER JOIN (
                     SELECT MAX(id) AS max_id
@@ -114,8 +133,11 @@ def tracking_load(request):
                 query += " AND tev_incoming.date_travel LIKE %s"
                 params.append(f'%{FDateTravel}%')
 
-            if FStatus:
+            if FDivision:
+                query += " AND tev_incoming.division = %s"
+                params.append(FDivision)
 
+            if FStatus:
                 if FStatus == "5":
                     FStatus = (4,5,6)
                     query += " AND tev_incoming.status_id IN %s"
@@ -173,7 +195,9 @@ def tracking_load(request):
                     tev_incoming.incoming_in,
                     tev_incoming.incoming_out,
                     tev_bridge.purpose AS purposes,
-                    tev_outgoing.dv_no AS dv_no
+                    tev_outgoing.dv_no AS dv_no,
+                    tev_incoming.division,
+                    tev_incoming.section
                 FROM
                     tev_incoming
                 INNER JOIN (
@@ -192,12 +216,14 @@ def tracking_load(request):
                     (tev_incoming.code LIKE %s
                     OR tev_incoming.first_name LIKE %s
                     OR tev_incoming.last_name LIKE %s
+                    OR tev_incoming.division LIKE %s
+                    OR tev_incoming.section LIKE %s
                     OR tev_outgoing.dv_no LIKE %s)
                     AND (tev_outgoing.dv_no LIKE %s OR dv_no IS NULL)
                 ORDER BY
                     tev_incoming.id DESC;
             """
-            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{formatted_year}%'])
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{formatted_year}%'])
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
@@ -206,8 +232,8 @@ def tracking_load(request):
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
                     tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
                     tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
-                    tev_incoming.incoming_out, tev_bridge.purpose AS purposes,
-                    tev_outgoing.dv_no AS dv_no
+                    tev_incoming.incoming_out, tev_incoming.division, tev_incoming.section,
+                    tev_bridge.purpose AS purposes, tev_outgoing.dv_no AS dv_no
                 FROM tev_incoming
                 INNER JOIN (
                     SELECT MAX(id) AS max_id
@@ -268,6 +294,7 @@ def tracking_load(request):
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
 
         item = {
+            'division': row['division'],
             'code': row['code'],
             'full_name': emp_fullname,
             'date_travel': row['date_travel'],
@@ -284,6 +311,7 @@ def tracking_load(request):
             'amt_budget': amt_budget,
             'amt_check': amt_check,
             'approved_date': approved_date,
+            'section': row['section']
         }
         data.append(item)
         

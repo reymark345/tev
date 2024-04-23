@@ -374,6 +374,45 @@ def user_load(request):
     }
     return JsonResponse(response)
 
+def logs_load(request):    
+    data = []
+    user_data = TransactionLogs.objects.all()  # Filter conditions should be added here
+
+    total = len(user_data)
+    page = 1
+    per_page = total
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        user_data = user_data[start:start + length]
+        
+    for item in user_data:
+        userData = AuthUser.objects.filter(id=item.user_id)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name
+       
+        user_data_item = {
+            'description': item.description,
+            'user': full_name.upper(),
+            'created_at': item.created_at,
+        }
+        data.append(user_data_item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+
 @login_required(login_url='login')
 def transaction_logs(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
