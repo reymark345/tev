@@ -17,6 +17,5 @@ urlpatterns = [
     path('update_password', views.update_password, name='update-password'),
     path('user_load', views.user_load, name='user-load'),
     path('date_actual_update', views.date_actual_update, name='date-actual-update'),
-
-
+    path('transaction_logs', views.transaction_logs, name='transaction-logs'),
 ]
