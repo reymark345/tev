@@ -266,6 +266,9 @@ class StaffDetails(models.Model):
     address = models.CharField(max_length=128, blank=True, null=True)
     created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     updated_at = models.DateTimeField(blank=True, null=True)
+    image_path = models.CharField(max_length=128, blank=True, null=True)
+    added_by = models.CharField(max_length=128, blank=True, null=True)
+    middle_initial = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
         managed = True
