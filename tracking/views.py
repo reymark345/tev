@@ -296,7 +296,7 @@ def tracking_load(request):
         acronym = row['division']
         section = row['section']
 
-        acr = ("FMD" if acronym == 'PANTAWID PAMILYANG PILIPINO PROGRAM' else 
+        acr = ("4Ps" if acronym == 'Pantawid Pamilyang Pilipino Program' else 
           "AD" if acronym == 'Administrative Division' else
           "FMD" if acronym == 'Financial Management Division' else
           "DRMD" if acronym == 'Disaster Response Management Division' else
