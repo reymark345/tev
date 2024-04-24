@@ -293,8 +293,24 @@ def tracking_load(request):
         
         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
 
+        acronym = row['division']
+        section = row['section']
+
+        acr = ("FMD" if acronym == 'PANTAWID PAMILYANG PILIPINO PROGRAM' else 
+          "AD" if acronym == 'Administrative Division' else
+          "FMD" if acronym == 'Financial Management Division' else
+          "DRMD" if acronym == 'Disaster Response Management Division' else
+          "HRMDD" if acronym == 'Human Resource Management and Development Division' else
+          "PSD" if acronym == 'Protective Services Division' else
+          "PPD" if acronym == 'Policy and Plans Division' else
+          "ORD" if acronym == 'Office of the Regional Director' else
+          "AD" if acronym == 'Administrative Division' else
+          "PD/SLP" if acronym == 'Promotive Services Division' and section == 'Sustainable Livelihood Program'  else
+          "PD" if acronym == 'Promotive Services Division'else
+          "")
+        
         item = {
-            'division': row['division'],
+            'division': acr,
             'code': row['code'],
             'full_name': emp_fullname,
             'date_travel': row['date_travel'],

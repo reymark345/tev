@@ -691,7 +691,6 @@
                   searchable: false,
                   render: function (data, type, row) {
                     var is_latest = row.is_latest; 
-                    console.log(is_latest);
                     if (is_latest =='1'){
                         return (
                           '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>' +
@@ -1326,9 +1325,6 @@
         }).done(function (data) {
             let fields = data.data;
             let employees = [];
-            console.log("testtttt-API");
-            console.log(fields);
-           
             $.each(fields, function (index, employee) {
                 let firstName = employee.first_name;
                 let middleName = employee.middle_name;

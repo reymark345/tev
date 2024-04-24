@@ -29,7 +29,7 @@
                             <th>Dv No</th>
                             <th>Employee Name</th>
                             <th>Date Travel</th>
-                            <th>Division</th>
+                            <th>Offices</th>
                             <th>Amt. Certified</th>
                             <th>Received</th>
                             <th>Reviewed</th>
@@ -579,11 +579,6 @@
               orderable: false,
               render: function (data, type, row) {
                 var status = row.status; 
-
-                console.log(status);
-                console.log("status");
-
-
                 if (data){
                   return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success"><i class="ti ti-check"></i></span></center>`
                 }
