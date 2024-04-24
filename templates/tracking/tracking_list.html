@@ -17,7 +17,7 @@
 <div class="content-wrapper">
     <!-- Content -->
     <div class="container-fluid flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Received /</span> Tracking</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tracking /</span> Status</h4>
 
         <!-- DataTable with Buttons -->
         <div class="card">
@@ -29,6 +29,7 @@
                             <th>Dv No</th>
                             <th>Employee Name</th>
                             <th>Date Travel</th>
+                            <th>Offices</th>
                             <th>Amt. Certified</th>
                             <th>Received</th>
                             <th>Reviewed</th>
@@ -135,13 +136,9 @@
                   </div>
               </div>
 
-              <div class="col-12 col-md-12">
-                <label class="form-label" for="modalFEmployeeName">Status</label>
-                <select
-                id="f-status"
-                name="FStatus"
-                class="form-select"
-                >
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="modalFStatus">Status</label>
+                <select id="f-status" name="FStatus" class="form-select">
                     <option></option>
                     <option value="1">Received</option>
                     <option value="2">Reviewed</option>
@@ -155,8 +152,16 @@
                     <option value="16">Check Issued</option>
                 </select>
               </div>
-  
-  
+
+              <div class="col-12 col-md-6">
+                <label class="form-label" for="modalDivision">Division</label>
+                <select id="f-division" name="FDivision" class="form-select">
+                    <option></option>
+                    {% for row in division %}
+                      <option value="{{ row.name }}">{{ row.name }}</option>
+                    {% endfor %}
+                </select>
+              </div>
                   <input
                   type="hidden"
                   id="f-first-name"
@@ -189,8 +194,6 @@
                   placeholder="AdvFilter"
                   />
           
-  
-  
               <div class="col-12 text-center">
                   <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
                   <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
@@ -280,6 +283,7 @@
           FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
           FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
           FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
+          FDivision= jQuery(document.querySelector('[name="FDivision"]')),
           FIdNumber = jQuery(document.querySelector('[name="FIdNumber"]')),
           NDVNumber = jQuery(document.querySelector('[name="NDVNumber"]')),
           FStatus = jQuery(document.querySelector('[name="FStatus"]')),
@@ -315,6 +319,7 @@
                   d.FDateTravel = FDateTravel.val()
                   d.DpYear = year_now
                   d.EmployeeList = employeeList
+                  d.FDivision = FDivision.val()
               },
           },
           columns: [
@@ -322,6 +327,7 @@
               { data: 'dv_no' },
               { data: 'full_name' },
               { data: 'date_travel'},
+              { data: 'division' },
               { data: 'final_amount'},
               { data: 'status'},
               { data: 'status' },
@@ -336,6 +342,7 @@
 
           ],
           columnDefs: [
+
           {
               targets: 0,
               render: function (data) {
@@ -375,6 +382,17 @@
           },
           {
               targets: 4,
+              render: function (data) {
+                if (data){
+                  return '<span class="badge bg-label-primary">' + data + '</span>'
+                }
+                else{
+                  return ''
+                } 
+              },
+          },
+          {
+              targets: 5,
               render: function(data) {
                   var floatValue = parseFloat(data);
                   if (floatValue !== 0) {
@@ -389,7 +407,7 @@
               },
           },            
           {
-              targets: 5,
+              targets: 6,
               render: function (data) {
                   data = parseInt(data); 
                   if (data == 1) {
@@ -403,7 +421,7 @@
                 },
           },
           {
-              targets: 6,
+              targets: 7,
               render: function (data) {
                   data = parseInt(data); 
                   let tooltip = '';
@@ -433,7 +451,7 @@
               },
           },
           {
-              targets: 7,
+              targets: 8,
               render: function (data) {
                   data = parseInt(data); 
                   let tooltip = '';
@@ -454,7 +472,7 @@
               },
           },
           {
-              targets: 8,
+              targets: 9,
               render: function (data) {
                   data = parseInt(data); 
                   let tooltip = '';
@@ -477,7 +495,7 @@
           },
 
           {
-              targets: 9,
+              targets: 10,
               orderable: false,
               render: function (data, type, row) {
                   var status = row.status; 
@@ -498,7 +516,7 @@
           },
 
           {
-              targets: 10,
+              targets: 11,
               orderable: false,
               render: function (data, type, row) {
                   var status = row.status; 
@@ -520,7 +538,7 @@
 
           
           {
-              targets: 11,
+              targets: 12,
               orderable: false,
               render: function (data, type, row) {
                   var status = row.status; 
@@ -535,7 +553,7 @@
           
           //approval
           {
-              targets: 12,
+              targets: 13,
               orderable: false,
               render: function (data, type, row) {
                   var status = row.status; 
@@ -557,15 +575,10 @@
            //check issued
 
           {
-              targets: 13,
+              targets: 14,
               orderable: false,
               render: function (data, type, row) {
                 var status = row.status; 
-
-                console.log(status);
-                console.log("status");
-
-
                 if (data){
                   return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success"><i class="ti ti-check"></i></span></center>`
                 }
@@ -615,18 +628,20 @@
                       $("#advance-filter").modal("show");
                   }
               },
-              {
-                  className: 'btn btn-label-primary me-2',
-                  text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
-                  action: function () {
-                    $.ajax({
-                      type: 'POST',
-                      url: "{% url 'export-status' %}"
-                    }).done(function (data) {
-                      window.location.href = "{% url 'export-status' %}";
-                    });
-                  }
+              {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions %}
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
+                    action: function () {
+                      $.ajax({
+                        type: 'POST',
+                        url: "{% url 'export-status' %}"
+                      }).done(function (data) {
+                        window.location.href = "{% url 'export-status' %}";
+                      });
+                    }
                 },
+              {% endif %}
           ],
           drawCallback: function (settings) { 
               $('.view-data').on('click', function () {
@@ -1249,8 +1264,27 @@
         FTransactionCode.val('');
         NDVNumber.val('');
         FStatus.val('').trigger('change');
+        FDivision.val('').trigger('change');
         dateField.clear();
         FEmployeeName.val('').trigger('change');
+      }
+
+      if (FStatus.length) {
+        FStatus.wrap('<div class="position-relative"></div>')
+        FStatus.select2({
+            placeholder: 'Choose Status',
+            dropdownParent: FStatus.parent(),
+            allowClear: true,
+        })
+      }
+
+      if (FDivision.length) {
+        FDivision.wrap('<div class="position-relative"></div>')
+        FDivision.select2({
+            placeholder: 'Choose Division',
+            dropdownParent: FDivision.parent(),
+            allowClear: true,
+        })
       }
 
     })

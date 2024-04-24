@@ -4,7 +4,7 @@
 <div class="content-wrapper">
     <!-- Content -->
     <div class="container-xxl flex-grow-1 container-p-y">
-        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Libraries/</span> Offices</h4>
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Admin/</span> Logs</h4>
 
         <!-- DataTable with Buttons -->
         <div class="card">
@@ -12,15 +12,9 @@
                 <table id="tbl-items" class="table">
                     <thead>
                         <tr>
-                            <th>Office</th>
-                            <th>Acronym</th>
-                            <th>Name</th>
-                            <th>Designation</th>
-                            <th>Approval</th>
-                            <th>Approval Designation</th>
-                            <th>Created by</th>
-                            <th>Date added</th>
-                            <th>Actions</th>
+                            <th>Description</th>
+                            <th>User</th>
+                            <th>Created at</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -151,17 +145,11 @@
         let dataTable = table.DataTable({
             processing: true,
             serverSide: true,
-            ajax: "{% url 'division-load' %}",
+            ajax: "{% url 'logs-load' %}",
             columns: [
-                { data: 'name' },
-                { data: 'acronym' },
-                { data: 'chief' },
-                { data: 'c_designation' },
-                { data: 'approval' },
-                { data: 'ap_designation' },
+                { data: 'description' },
+                { data: 'user' },
                 { data: 'created_by' },
-                { data: 'updated_at' },
-                { data: 'id' },
             ],
             columnDefs: [
                 {
@@ -171,30 +159,22 @@
                     },
                 },
                 {
-                    targets: 7,
+                    targets: 1,
+                    render: function (data) {
+
+                        return `<span class="badge bg-label-primary">${data}</span>`;
+                    },
+                },
+                {
+                    targets: 2,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
                 },
-                {
-                  targets: -1,
-                  title: 'Action',
-                  orderable: false,
-                  searchable: false,
-                  render: function (data) {
-                      return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'
-                      )
-                  },
-              },
+              
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-            buttons: [
-                {
-                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                    className: 'create-new btn btn-primary',
-                },
-            ],
+            buttons: [],
             drawCallback: function (settings) {
                 $('.item-edit').on('click', function () {
                     let id = $(this).data('id');
@@ -227,7 +207,7 @@
 
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">OFFICES</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0">Transaction Logs</h5>')
 
         const newRecord = document.querySelector('.create-new')
 
