@@ -30,6 +30,7 @@ from django.utils import timezone
 from django.template.defaultfilters import date
 from decimal import Decimal
 from suds.client import Client
+from django.db import transaction
 
 
 def generate_code():
@@ -1311,21 +1312,46 @@ def updatetevdetails(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
+# @csrf_exempt
+# def delete_entry(request):
+#     user_id = request.session.get('user_id', 0)
+#     item_id = request.POST.get('item_id')
+#     data = TevIncoming.objects.get(id=item_id)
+#     remarks = Remarks_r.objects.filter(incoming_id=item_id)
+#     description = '{}'.format(
+#         "This Transaction is being deleted with code number " + data.code + " and ID Number :" + data.id_no + " fullname :" + data.first_name +" "+ data.middle_name +" "+data.last_name+ " with Original amount: " + str(data.original_amount) + " and Date Travel: "+ data.date_travel
+#     )
+#     tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
+#     tev_add.save()
+#     data.delete()
+#     remarks.delete()
+#     return JsonResponse({'data': 'success'})
+
+
+
 @csrf_exempt
 def delete_entry(request):
-    user_id = request.session.get('user_id', 0)
     item_id = request.POST.get('item_id')
-    data = TevIncoming.objects.get(id=item_id)
-    remarks = Remarks_r.objects.filter(incoming_id=item_id)
-    description = '{}'.format(
-        "This Transaction is being deleted with code number " + data.code + " and ID Number :" + data.id_no + " with Original amount: " + str(data.original_amount) + " and Date Travel: "+ data.date_travel
-    )
-    tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
-    tev_add.save()
-    data.delete()
-    remarks.delete()
-    return JsonResponse({'data': 'success'})
-
+    user_id = request.session.get('user_id', 0)
+    userData = AuthUser.objects.filter(id=user_id).first()
+    full_name = userData.first_name + ' ' + userData.last_name
+    try:
+        with transaction.atomic():
+            data = TevIncoming.objects.get(id=item_id)
+            remarks = Remarks_r.objects.filter(incoming_id=item_id)
+            description = '{}'.format(
+                "This Transaction from RECEIVED module is deleted with code number " + data.code + " and ID Number : " + data.id_no + " Fullname : " + data.first_name +" "+ data.middle_name +" "+data.last_name+ " with Original amount : " + str(data.original_amount) + " and Date Travel : "+ data.date_travel + " deleted by " + full_name
+            )
+            tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
+            tev_add.save()
+            data.delete()
+            remarks.delete()
+            return JsonResponse({'data': 'success'})
+            
+    except Exception as e:
+        transaction.rollback()
+        return JsonResponse({'error': str(e)})
+    
 @csrf_exempt
 def addtevdetails(request):
     return JsonResponse({'data': 'success'})
