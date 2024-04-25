@@ -376,7 +376,7 @@ def user_load(request):
 
 def logs_load(request):    
     data = []
-    user_data = TransactionLogs.objects.all()  # Filter conditions should be added here
+    user_data = TransactionLogs.objects.all().order_by('-id')
 
     total = len(user_data)
     page = 1
