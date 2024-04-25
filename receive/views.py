@@ -315,8 +315,7 @@ def item_load(request):
             'remarks': item['remarks'],
             'lacking': item['lacking'],
             'status': item['status_id'],
-            'user_id': full_name,
-            'is_latest': item['is_latest'],
+            'user_id': full_name
         }
 
         data.append(item_entry)
@@ -1290,7 +1289,6 @@ def addtev(request):
 
 @csrf_exempt
 def updatetevdetails(request):
-
     user_id = request.session.get('user_id', 0)
     if request.method == 'POST':
         amount = request.POST.get('final_amount')
@@ -1298,8 +1296,7 @@ def updatetevdetails(request):
         transaction_id = request.POST.get('transaction_id')
         selected_remarks = request.POST.getlist('selected_remarks[]')
         selected_dates = request.POST.getlist('selected_dates[]')
-        is_latest = 0 if status == '3' else 1
-        TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status, reviewed_by =user_id, date_reviewed =date_time.datetime.now(), is_latest = is_latest)
+        TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status, reviewed_by =user_id, date_reviewed =date_time.datetime.now())
         Remarks_r.objects.filter(incoming_id=transaction_id).delete()
         for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             Remarks_r.objects.create(
@@ -1311,24 +1308,7 @@ def updatetevdetails(request):
     
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-
-# @csrf_exempt
-# def delete_entry(request):
-#     user_id = request.session.get('user_id', 0)
-#     item_id = request.POST.get('item_id')
-#     data = TevIncoming.objects.get(id=item_id)
-#     remarks = Remarks_r.objects.filter(incoming_id=item_id)
-#     description = '{}'.format(
-#         "This Transaction is being deleted with code number " + data.code + " and ID Number :" + data.id_no + " fullname :" + data.first_name +" "+ data.middle_name +" "+data.last_name+ " with Original amount: " + str(data.original_amount) + " and Date Travel: "+ data.date_travel
-#     )
-#     tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
-#     tev_add.save()
-#     data.delete()
-#     remarks.delete()
-#     return JsonResponse({'data': 'success'})
-
-
-
+    
 @csrf_exempt
 def delete_entry(request):
     item_id = request.POST.get('item_id')
@@ -1338,16 +1318,21 @@ def delete_entry(request):
     try:
         with transaction.atomic():
             data = TevIncoming.objects.get(id=item_id)
-            remarks = Remarks_r.objects.filter(incoming_id=item_id)
-            description = '{}'.format(
-                "This Transaction from RECEIVED module is deleted with code number " + data.code + " and ID Number : " + data.id_no + " Fullname : " + data.first_name +" "+ data.middle_name +" "+data.last_name+ " with Original amount : " + str(data.original_amount) + " and Date Travel : "+ data.date_travel + " deleted by " + full_name
-            )
-            tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
-            tev_add.save()
-            data.delete()
-            remarks.delete()
+            dl_codes = TevIncoming.objects.filter(code=data.code)
+
+            for dl_code in dl_codes:
+                remark_data = Remarks_r.objects.filter(incoming_id=dl_code.id)
+                for remark in remark_data:
+                    remarks_lib = RemarksLib.objects.filter(id=remark.remarks_lib_id).first()
+                    description = '{}'.format(
+                        "This Transaction from RECEIVED module is deleted with code number " + data.code + " and ID Number : " + data.id_no + " Fullname : " + data.first_name +" "+ data.middle_name +" "+data.last_name+ " with Original amount : " + str(data.original_amount) + " and Date Travel : "+ data.date_travel + " deleted by " + full_name + " with remarks " + remarks_lib.name
+                    )
+                    tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
+                    remark.delete()
+                    tev_add.save()
+                dl_code.delete()
+
             return JsonResponse({'data': 'success'})
-            
     except Exception as e:
         transaction.rollback()
         return JsonResponse({'error': str(e)})
