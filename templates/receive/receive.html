@@ -553,7 +553,7 @@
                 { data: 'remarks' },
                 { data: 'lacking' },
                 { data: 'user_id' },
-                { data: 'id', is_latest: 'is_latest' },
+                { data: 'id'},
             ],
             columnDefs: [
                 {
@@ -689,21 +689,11 @@
                   title: 'Action',
                   orderable: false,
                   searchable: false,
-                  render: function (data, type, row) {
-                    var is_latest = row.is_latest; 
-                    if (is_latest =='1'){
-                        return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>' +
-                          '<a href="javascript:;" data-id="' + data + '" class="item-delete text-body"><i class="text-primary ti ti-trash"></i></a>'
-                      )
-                    }
-                    else{
-                        return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>' +
-                          '<a href="javascript:;" data-id="' + data + '" class="item-delete-off text-body"><i class="text-primary ti ti-trash-off"></i></a>'
-                      )
-                    }
-
+                  render: function (data) {
+                    return (
+                        '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>' +
+                        '<a href="javascript:;" data-id="' + data + '" class="item-delete text-body"><i class="text-primary ti ti-trash"></i></a>'
+                    )
                   },
               },
             ],
@@ -927,7 +917,7 @@
                                 Swal.fire({
                                     icon: 'error',
                                     title: 'Error saving!',
-                                    text: data.message,
+                                    text: data.error,
                                     customClass: {
                                         confirmButton: 'btn btn-success',
                                     },
@@ -1302,14 +1292,13 @@
             console.log("No employee data found in local storage.");
         }
     }
-
-        
+ 
     function updateSelectedDates() {
         var inputFieldValue = $('#dateField').val();
         if (inputFieldValue) {
             var inputDates = inputFieldValue.split(', ');
             var selectedDates = inputDates.map(function(dateString) {
-                return dateString; // No need to parse, use as is
+                return dateString;
             });
             dateField.setDate(selectedDates);
         } else {
