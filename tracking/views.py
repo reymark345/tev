@@ -83,6 +83,7 @@ def tracking_load(request):
     DpYear= request.GET.get('DpYear') 
 
 
+
     if DpYear == "2023":
         finance_database_alias = 'finance' 
     else:
@@ -101,7 +102,19 @@ def tracking_load(request):
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if FAdvancedFilter:
-
+        # 04/01/2024 to 04/30/2024
+        FStartDate = request.GET.get('FStartDate') 
+        FEndDate = request.GET.get('FEndDate') 
+        formatted_start_date = None
+        formatted_end_date = None
+        if FStartDate:
+            formatted_start_date = datetime.strptime(FStartDate, '%m/%d/%Y').strftime('%d-%m-%Y')
+        
+        if FEndDate:
+            formatted_end_date = datetime.strptime(FEndDate, '%m/%d/%Y').strftime('%d-%m-%Y')
+        print("Test")
+        print(formatted_start_date)
+        print(formatted_end_date)
         with connection.cursor() as cursor:
 
             query = """
@@ -124,6 +137,10 @@ def tracking_load(request):
                 WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
             """
             params = [f'{formatted_year}%']
+
+            if FStartDate and FEndDate:
+                query += " AND tev_incoming.date_travel BETWEEN %s AND %s"
+                params.extend([formatted_start_date, formatted_end_date])
 
             if FTransactionCode:
                 query += " AND tev_incoming.code = %s"

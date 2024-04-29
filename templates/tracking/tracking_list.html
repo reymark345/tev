@@ -136,6 +136,15 @@
                   </div>
               </div>
 
+              <div class="col-12 col-md-12">
+                <label for="dateRangePicker" class="form-label">Date Range</label>
+                <div class="input-group input-daterange" id="divDateRange">
+                  <input type="text" id="startDate" placeholder="MM/DD/YYYY" class="form-control" name="FStartDate" />
+                  <span class="input-group-text">to</span>
+                  <input type="text" id="endDate" placeholder="MM/DD/YYYY" class="form-control" name="FEndDate" />
+                </div>
+              </div>
+
               <div class="col-12 col-md-6">
                 <label class="form-label" for="modalFStatus">Status</label>
                 <select id="f-status" name="FStatus" class="form-select">
@@ -154,7 +163,7 @@
               </div>
 
               <div class="col-12 col-md-6">
-                <label class="form-label" for="modalDivision">Division</label>
+                <label class="form-label" for="modalDivision">Offices</label>
                 <select id="f-division" name="FDivision" class="form-select">
                     <option></option>
                     {% for row in division %}
@@ -271,6 +280,11 @@
                 'firstDayOfWeek': 1 // start week on Monday
             },
       });
+      var dateFieldRange = $('#startDate, #endDate').datepicker({
+        format: 'mm/dd/yyyy',
+        autoclose: true
+      });
+
       $('#loading-screen').hide();
       const currentDate = new Date();
       let year_now  = "";
@@ -287,6 +301,8 @@
           FIdNumber = jQuery(document.querySelector('[name="FIdNumber"]')),
           NDVNumber = jQuery(document.querySelector('[name="NDVNumber"]')),
           FStatus = jQuery(document.querySelector('[name="FStatus"]')),
+          FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
+          FEndDate = jQuery(document.querySelector('[name="FEndDate"]')),
           FTransactionCode = jQuery(document.querySelector('[name="FTransactionCode"]')),
           DpYear = jQuery(document.querySelector('[name="DpYear"]')),
           search_advance_filter = $('#search-advance-filter'),
@@ -320,6 +336,8 @@
                   d.DpYear = year_now
                   d.EmployeeList = employeeList
                   d.FDivision = FDivision.val()
+                  d.FStartDate = FStartDate.val()
+                  d.FEndDate = FEndDate.val()
               },
           },
           columns: [
@@ -703,6 +721,10 @@
 
                       if (l_status == 4){
                         payroll_statusColumn = `<td><span class="badge bg-label-warning">For Payroll</span></td>`;
+                        payrolled_date = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        payrolled_d_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        payrolled_f_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        payrolled_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                       }
                       else if (l_status < 4){
                         payroll_statusColumn = `<td><span class="badge bg-label-warning">N/A</span></td>`;
@@ -1281,7 +1303,7 @@
       if (FDivision.length) {
         FDivision.wrap('<div class="position-relative"></div>')
         FDivision.select2({
-            placeholder: 'Choose Division',
+            placeholder: 'Choose Office',
             dropdownParent: FDivision.parent(),
             allowClear: true,
         })
@@ -1289,4 +1311,5 @@
 
     })
 </script>
+
 {% endblock footer_scripts %}
