@@ -116,7 +116,6 @@ def tracking_load(request):
         print(formatted_start_date)
         print(formatted_end_date)
         with connection.cursor() as cursor:
-
             query = """
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
                     tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
@@ -139,9 +138,16 @@ def tracking_load(request):
             params = [f'{formatted_year}%']
 
             if FStartDate and FEndDate:
-                query += " AND tev_incoming.date_travel BETWEEN %s AND %s"
-                params.extend([formatted_start_date, formatted_end_date])
-
+                query += " AND ("
+                start_dates_list = formatted_start_date.split(",") if formatted_start_date else []
+                end_dates_list = formatted_end_date.split(",") if formatted_end_date else []
+                for i in range(len(start_dates_list)):
+                    if i > 0:
+                        query += " OR "
+                    query += f"tev_incoming.date_travel LIKE %s OR tev_incoming.date_travel LIKE %s"
+                    params.extend([f'%{start_dates_list[i]}%', f'%{end_dates_list[i]}%'])
+                query += ")"
+            
             if FTransactionCode:
                 query += " AND tev_incoming.code = %s"
                 params.append(FTransactionCode)
@@ -154,42 +160,12 @@ def tracking_load(request):
                 query += " AND tev_incoming.division = %s"
                 params.append(FDivision)
 
-            if FStatus:
-                if FStatus == "5":
-                    FStatus = (4,5,6)
-                    query += " AND tev_incoming.status_id IN %s"
-                    params.append(FStatus)
-
-                elif FStatus == "8" or FStatus == "9":
-                    FStatus = (6,8,9)
-                    query += " AND tev_incoming.status_id IN %s"
-                    params.append(FStatus)
-
-                elif FStatus == "10" or FStatus == "11":
-                    FStatus = (9,10,11)
-                    query += " AND tev_incoming.status_id IN %s"
-                    params.append(FStatus)
-
-                elif FStatus == "12" or FStatus == "13":
-                    FStatus = (11,12,13)
-                    query += " AND tev_incoming.status_id IN %s"
-                    params.append(FStatus)
-
-                elif FStatus == "14":
-                    FStatus = (13,14,15)
-                    query += " AND tev_incoming.status_id IN %s"
-                    params.append(FStatus)
-
-                else:
-                    query += " AND tev_incoming.status_id = %s"
-                    params.append(FStatus)
-
-
+                
             if EmployeeList:
                 placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
                 query += f" AND tev_incoming.id_no IN ({placeholders})"
                 params.extend(EmployeeList)
-            query += "ORDER BY tev_incoming.id DESC;"
+            query += " ORDER BY tev_incoming.id DESC;"
 
             cursor.execute(query, params)
             columns = [col[0] for col in cursor.description]
