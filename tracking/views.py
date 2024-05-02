@@ -82,7 +82,6 @@ def tracking_load(request):
     NDVNumber= request.GET.get('NDVNumber') 
     DpYear= request.GET.get('DpYear') 
 
-
     if DpYear == "2023":
         finance_database_alias = 'finance' 
     else:
@@ -101,7 +100,16 @@ def tracking_load(request):
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if FAdvancedFilter:
-
+        # 04/01/2024 to 04/30/2024
+        FStartDate = request.GET.get('FStartDate') 
+        FEndDate = request.GET.get('FEndDate') 
+        formatted_start_date = None
+        formatted_end_date = None
+        if FStartDate:
+            formatted_start_date = datetime.strptime(FStartDate, '%m/%d/%Y').strftime('%d-%m-%Y')
+        
+        if FEndDate:
+            formatted_end_date = datetime.strptime(FEndDate, '%m/%d/%Y').strftime('%d-%m-%Y')
         with connection.cursor() as cursor:
 
             query = """
@@ -124,6 +132,15 @@ def tracking_load(request):
                 WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
             """
             params = [f'{formatted_year}%']
+
+            if FStartDate and FEndDate:
+                formatted_dates = [date.strip() for date in FStartDate.split(',')]
+                query += " AND ("
+                for date in formatted_dates:
+                    query += f" tev_incoming.date_travel LIKE %s OR"
+                    params.append(f'%{date}%')
+                query = query[:-3]  # Remove the extra " OR" at the end
+                query += ")"
 
             if FTransactionCode:
                 query += " AND tev_incoming.code = %s"
@@ -166,7 +183,6 @@ def tracking_load(request):
                 else:
                     query += " AND tev_incoming.status_id = %s"
                     params.append(FStatus)
-
 
             if EmployeeList:
                 placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])

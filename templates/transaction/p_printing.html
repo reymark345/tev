@@ -642,6 +642,7 @@
                 });
 
                 $('body').on('click', '.item-update', function () {
+                    
                     temp_id = $(this).attr('id');
                     $('#update-transaction').modal('hide');
                     $("#payrollUpdate").modal("show");
@@ -1398,59 +1399,68 @@
                     });
                 }
                 else{
-                $.ajax({
-                    type: 'POST',
-                    url: "{% url 'check-charges' %}",
-                    data:{
-                        incoming_id: temp_id
-                    }
-                }).done(function (data) {
-                    let amount = data.amt;
-                    if(data.data){
-                    
-                        Swal.fire({
-                            title: 'Are you sure to Change Charges?',
-                            text: "You won't be able to revert this!",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Yes, change it!',
-                            customClass: {
-                                confirmButton: 'btn btn-primary me-3',
-                                cancelButton: 'btn btn-label-secondary',
-                            },
-                            buttonsStyling: false,
-                        }).then(function (result) {
-                            if (result.value) {
-                                
-
-                                $.ajax({
-                                    type: 'POST',
-                                    url: "{% url 'remove-charges' %}",
-                                    data: {
-                                        incoming_id: temp_id,
-                                        charge_id:empChargesValue,
-                                        amt:amount
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'check-charges' %}",
+                        data:{
+                            incoming_id: temp_id
+                        }
+                    }).done(function (data) {
+                        let amount = data.amt;
+                        if(data.data){
+                            Swal.fire({
+                                title: 'Are you sure to Change Charges?',
+                                text: "You won't be able to revert this!",
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Yes, change it!',
+                                customClass: {
+                                    confirmButton: 'btn btn-primary me-3',
+                                    cancelButton: 'btn btn-label-secondary',
+                                },
+                                buttonsStyling: false,
+                            }).then(function (result) {
+                                if (result.value) {
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: "{% url 'remove-charges' %}",
+                                        data: {
+                                            incoming_id: temp_id,
+                                            charge_id:empChargesValue,
+                                            amt:amount
+                                        }
+                                    }).done(function (data) {
+                                        dataTable.ajax.reload(null, false);
+                                    })
                                     }
-                                }).done(function (data) {
-                                    dataTable.ajax.reload(null, false);
-                                })
+                                });
+                        }
+                        else{
+                            $.ajax({
+                                type: 'POST',
+                                url: "{% url 'payroll-add-charges' %}",
+                                data:{
+                                    incoming_id: temp_id,
+                                    charge_id:empChargesValue,
+                                    amt:amount
+                                }
+                            }).done(function (data) {
+                                if (data.data == 'success') {
+                                    dataTable.ajax.reload();
+                                }
+                                else{
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error saving!',
+                                        text: data.data,
+                                        customClass: {
+                                            confirmButton: 'btn btn-success',
+                                        },
+                                    })
                                 }
                             });
-                    }
-                    else{
-                        $.ajax({
-                            type: 'POST',
-                            url: "{% url 'payroll-add-charges' %}",
-                            data:{
-                                incoming_id: temp_id,
-                                charge_id:empChargesValue,
-                                amt:amount
-                            }
-                            }).done(function (data) {
-                            dataTable.ajax.reload();
-                        });
-                    }
-                });
+                        }
+                    });
                 }
             } else {
                 alert("No charge selected");

@@ -13,11 +13,19 @@
                     </div>
                     <div class="user-profile-header d-flex flex-column flex-sm-row text-sm-start text-center mb-4">
                       <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
+                        {% if image_path %}
                         <img
-                          src="{% static 'assets/img/avatars/14.png' %}"
+                          src="{{image_path}}"
                           alt="user image"
                           class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img"
                         />
+                        {% else %}
+                        <img
+                        src="{% static 'assets/img/avatars/14.png' %}"
+                          alt="user image"
+                          class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img"
+                        />
+                        {% endif %}
                       </div>
                       <div class="flex-grow-1 mt-3 mt-sm-5">
                         <div
@@ -162,7 +170,7 @@
                             <p class="mb-2">Project meeting with john @10:15am</p>
                             <div class="d-flex flex-wrap">
                               <div class="avatar me-2">
-                                <img src="../../assets/img/avatars/3.png" alt="Avatar" class="rounded-circle" />
+                                <img src="{% static 'assets/img/avatars/3.png' %}" alt="Avatar" class="rounded-circle"/>
                               </div>
                               <div class="ms-1">
                                 <h6 class="mb-0">Lester McCarthy (Client)</h6>
@@ -190,31 +198,16 @@
                             </div>
                             <p class="mb-2">
                               Sent by Mollie Dixon
-                              <img
-                                src="../../assets/img/avatars/4.png"
-                                class="rounded-circle me-3"
-                                alt="avatar"
-                                height="24"
-                                width="24"
-                              />
+                              <img src="{% static 'assets/img/avatars/4.png' %}" alt="Avatar" height="24" width="24" class="rounded-circle me-3"/>
+                              
                             </p>
                             <div class="d-flex flex-wrap gap-2 pt-1">
                               <a href="javascript:void(0)" class="me-3">
-                                <img
-                                  src="../../assets/img/icons/misc/doc.png"
-                                  alt="Document image"
-                                  width="15"
-                                  class="me-2"
-                                />
+                                <img src="{% static 'assets/img/icons/misc/doc.png' %}" alt="Document image" width="15" class="me-2"/>
                                 <span class="fw-semibold text-heading">App Guidelines</span>
                               </a>
                               <a href="javascript:void(0)">
-                                <img
-                                  src="../../assets/img/icons/misc/xls.png"
-                                  alt="Excel image"
-                                  width="15"
-                                  class="me-2"
-                                />
+                                <img src="{% static 'assets/img/icons/misc/xls.png' %}" alt="Excel image" width="15" class="me-2"/>
                                 <span class="fw-semibold text-heading">Testing Results</span>
                               </a>
                             </div>
