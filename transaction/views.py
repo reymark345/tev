@@ -1690,6 +1690,7 @@ def check_charges(request):
 @csrf_exempt
 def payroll_add_charges(request):
     if request.method == 'POST':
+        print("Charges Here")
         incoming_id = request.POST.get('incoming_id')
         amt = request.POST.get('amt')
         charge_id = request.POST.get('charge_id')
@@ -1700,6 +1701,23 @@ def payroll_add_charges(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+
+@csrf_exempt
+def payroll_add_charges(request):
+    if request.method == 'POST':
+        incoming_id = request.POST.get('incoming_id')
+        amt = request.POST.get('amt')
+        charge_id = request.POST.get('charge_id')
+        
+        try:
+            with transaction.atomic():
+                PayrolledCharges.objects.create(amount=amt, charges_id=charge_id, incoming_id=incoming_id)
+            return JsonResponse({'data': 'success'})
+        except Exception as e:
+            return JsonResponse({'data': str(e)})
+    else:
+        return JsonResponse({'data': 'Invalid request method'})
     
 @csrf_exempt
 def remove_charges(request):
@@ -1800,75 +1818,6 @@ def transmittal_details(request):
             'data': data_result
         }
         return render(request, 'transaction/preview_transmittal.html', response)
-
-
-
-# @csrf_exempt
-# def transmittal_details(request):
-#     if request.method == 'POST':
-#         finance_database_name = 'finance'
-#         data_result = []
-#         year = request.POST.get('year')
-#         selected_dv = request.POST.getlist('selectedDv[]')
-
-#         if year == '2023':
-#             finance_database_name = 'finance'
-#         else:
-#             finance_database_name = 'infimos_2024'
-
-#         with connection.cursor() as cursor:
-#             query = f"""
-#                 SELECT
-#                     tev_outgoing.dv_no,
-#                     {finance_database_name}.payee,
-#                     {finance_database_name}.modepayment,
-#                     COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
-#                 FROM
-#                     tev_incoming
-#                 JOIN
-#                     tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
-#                 LEFT JOIN
-#                     tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-#                 LEFT JOIN
-#                     charges ON charges.id = tev_bridge.charges_id
-#                 LEFT JOIN
-#                     payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
-#                 LEFT JOIN
-#                     charges AS charges2 ON payrolled_charges.charges_id = charges2.id
-#                 LEFT JOIN
-#                     {finance_database_name}.transactions AS {finance_database_name}
-#                     ON tev_outgoing.dv_no = {finance_database_name}.dv_no
-#                 WHERE
-#                     tev_outgoing.id IN %s
-#                 GROUP BY
-#                     tev_outgoing.dv_no, {finance_database_name}.payee, {finance_database_name}.modepayment
-#                 ORDER BY
-#                     tev_outgoing.dv_no;
-#             """
-
-#             cursor.execute(query, [tuple(selected_dv)])
-#             columns = [col[0] for col in cursor.description]
-#             results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-#         rs_len = len(results)
-#         sl_dv = len(selected_dv)
-#         if rs_len != sl_dv:
-#             return JsonResponse({'message': 'Review Travel First'})
-
-#         else:
-#             for row in results:
-#                 data_dict = {
-#                     "dv_no": row['dv_no'],
-#                     "payee": row['payee'],
-#                     "modepayment": row['modepayment'],
-#                     "charges_amount": row['charges_amount']
-#                 }
-#                 data_result.append(data_dict)
-
-#             response = {
-#                 'data': data_result
-#             }
-#             return JsonResponse(response)
-#     return JsonResponse({'data': 'error', 'message': 'Invalid request method'})
 
 @csrf_exempt
 def add_dv(request):
@@ -2016,7 +1965,6 @@ def retrieve_employee(request):
 @csrf_exempt
 def delete_box_list(request):
     incoming_id = request.POST.get('emp_id')
-    dv_no = request.POST.get('dv_number')
     TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
     TevIncoming.objects.filter(id=incoming_id).update(status_id=4, date_payrolled = None, payrolled_by = None)
     response = {
@@ -2030,20 +1978,21 @@ def update_amt(request):
     incoming_id = request.POST.get('emp_id')
     amt = request.POST.get('amount')
     pp = request.POST.get('purpose')
+    try:
+        with transaction.atomic():
+            data = PayrolledCharges.objects.select_for_update().filter(incoming_id=incoming_id)
+            if len(data) == 1:
+                data.update(amount=amt)
 
-    data = PayrolledCharges.objects.filter(incoming_id = incoming_id)
+            TevBridge.objects.filter(tev_incoming_id=incoming_id).update(purpose=pp)
+            TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt)
 
-    if len(data) == 1:
-        data.update(amount=amt)
+    except Exception as e:
+        response = {'error': str(e)}
+        return JsonResponse(response, status=500)
 
-    TevBridge.objects.filter(tev_incoming_id=incoming_id).update(purpose=pp)
-    TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt)
-
-    response = {
-        'data': 'success'
-    }
+    response = {'data': 'success'}
     return JsonResponse(response)
-
 
 
 @csrf_exempt

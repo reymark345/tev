@@ -139,9 +139,9 @@
               <div class="col-12 col-md-12">
                 <label for="dateRangePicker" class="form-label">Date Range</label>
                 <div class="input-group input-daterange" id="divDateRange">
-                  <input type="text" id="startDate" placeholder="MM/DD/YYYY" class="form-control" name="FStartDate" />
+                  <input type="text" id="startDate" placeholder="MM/DD/YYYY" class="form-control" name="FStartDate" disabled/>
                   <span class="input-group-text">to</span>
-                  <input type="text" id="endDate" placeholder="MM/DD/YYYY" class="form-control" name="FEndDate" />
+                  <input type="text" id="endDate" placeholder="MM/DD/YYYY" class="form-control" name="FEndDate" disabled />
                 </div>
               </div>
 
@@ -643,6 +643,7 @@
                               })
                           }
                       }, 300);
+                      clear_advfilter();
                       $("#advance-filter").modal("show");
                   }
               },
@@ -1264,7 +1265,6 @@
         $('#f-employee-name').empty();
         $("#advance-filter").modal("hide");
         dataTable.ajax.reload();
-        clear_advfilter();
         toastr.success('Search successfully', 'Success', toast_options);
       });
 
