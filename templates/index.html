@@ -294,6 +294,21 @@
                                 </li>
                             {% endif %}      
                         {% endif %}
+
+                        {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions %}
+                            <li class="menu-header small text-uppercase">
+                                <span class="menu-header-text">History</span>
+                            </li>
+                            <li class="menu-item {% if url_name == 'transaction-logs' %}active{% endif %}">
+                                <a href="{% url 'transaction-logs' %}" class="menu-link">
+                                    <i class="menu-icon tf-icons ti ti-lock"></i>
+                                    <div data-i18n="Logs">Logs</div>
+                                </a>
+                            </li>
+
+                
+                        {% endif %}      
+                
                         
                         {% if permissions %}
                             {% if 'Admin' in permissions %}
@@ -316,12 +331,7 @@
                                     </a>
                                 </li>
                                 
-                                <li class="menu-item {% if url_name == 'transaction-logs' %}active{% endif %}">
-                                    <a href="{% url 'transaction-logs' %}" class="menu-link">
-                                        <i class="menu-icon tf-icons ti ti-lock"></i>
-                                        <div data-i18n="Logs">Logs</div>
-                                    </a>
-                                </li>
+
 
                                 <li class="menu-item {% if url_name == 'sms' %}active{% endif %}">
                                     <a href="{% url 'sms' %}" class="menu-link">
@@ -454,11 +464,8 @@
                                 <div class="footer-container d-flex align-items-center justify-content-between py-2 flex-md-row flex-column">
                                     <div>
                                         DEVELOPER : REYMARK N. VALDEHUEZA 
-                                        ©
-                                        <script>
-                                            document.write(new Date().getFullYear())
-                                        </script>
-                                        <a href="#" target="_blank" class="fw-semibold">TRIS</a> 
+                                        © 2024
+                                        <a href="#" class="fw-semibold">TRIS</a> 
                                     </div>
                                     <div></div>
                                 </div>
@@ -546,7 +553,7 @@
 
         <!-- Page JS -->
         <script src="{% static 'assets/js/dashboards-analytics.js' %}"></script>
-        <script src="{% static 'assets/js/forms-pickers.js' %}"></script>
+        {% comment %} <script src="{% static 'assets/js/forms-pickers.js' %}"></script> {% endcomment %}
         <!-- <script src="{% static 'assets/js/forms-file-upload.js' %}"></script> -->
 
         <!-- Custom made JS -->
@@ -572,12 +579,12 @@
         
         <script src="{% static 'assets/vendor/libs/fullcalendar/fullcalendar.js' %}"></script>
         <script src="{% static 'assets/js/app-calendar-events.js' %}"></script>
-        <script src="{% static 'assets/js/app-calendar.js' %}"></script>
+        {% comment %} <script src="{% static 'assets/js/app-calendar.js' %}"></script> {% endcomment %}
         <script src="{% static 'assets/js/dashboards-ecommerce.js' %}"></script>
 
         <script src="{% static 'assets/js/pages-profile.js' %}"></script>
 
-        <script src="{% static 'assets/js/app-chat.js' %}"></script>
+        {% comment %} <script src="{% static 'assets/js/app-chat.js' %}"></script> {% endcomment %}
 
 
         

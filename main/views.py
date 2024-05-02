@@ -51,7 +51,7 @@ def dashboard(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
 
-    uploaded = TevIncoming.objects.filter(is_upload = 1).count()
+    uploaded = TevIncoming.objects.filter(is_upload =1).count()
     incoming = TevIncoming.objects.filter(status_id=1).count()
     checking = TevIncoming.objects.filter(status_id=2).count()
     approved = TevIncoming.objects.filter(status_id=7).count()
@@ -83,32 +83,12 @@ def dashboard(request):
 def profile(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff" , "Certified staff"] 
     user_id = request.session.get('user_id', 0)
-
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
-
-    uploaded = TevIncoming.objects.filter(is_upload = 1).count()
-    incoming = TevIncoming.objects.filter(status_id=1).count()
-    checking = TevIncoming.objects.filter(status_id=2).count()
-    approved = TevIncoming.objects.filter(status_id=7).count()
-    returned = TevIncoming.objects.filter(status_id=3).count()
-    payroll = TevIncoming.objects.filter(status_id=4).count()
-    outgoing = TevIncoming.objects.filter(status_id=5).count()
-    ongoing = TevIncoming.objects.filter(status_id=6).count()
-    box_a = TevOutgoing.objects.filter().count()
-
+    path = StaffDetails.objects.filter(user_id = user_id).first()
     context = {
-        'uploaded': uploaded,
-        'user_role': "test",
-        'incoming': incoming,
-        'checking': checking,
-        'approved': approved,
-        'returned': returned,
-        'payroll': payroll,
-        'outgoing': outgoing,
-        'ongoing': ongoing,
-        'box_a': box_a,
+        'image_path': path.image_path,
         'permissions' : role_names,
     }
     if any(role_name in allowed_roles for role_name in role_names):

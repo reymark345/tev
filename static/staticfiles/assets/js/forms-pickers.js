@@ -51,7 +51,7 @@
   }
 
   // Range
-  if (typeof flatpickrRange != undefined) {
+  if (typeof flatpickrRange !== null) {
     flatpickrRange.flatpickr({
       mode: 'range'
     });
