@@ -648,9 +648,9 @@
                                 })
                             }
                         }, 300);
+                        clear_advfilter();
                         $("#advance-filter-checking").modal("show");
                     }
-
                 }
             ],
             drawCallback: function (settings) {
@@ -862,7 +862,6 @@
                 });
             },
         })
-        // $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
         $('div.head-label').html('<h5 class="card-title mb-0 d-flex align-items-center">'+
         '<button type="submit" id="forward" class="btn btn-primary">Forward</button>' +
         '</h5>');
@@ -1114,6 +1113,11 @@
         });
 
         clear_advance_filter.on('click', function () {
+            clear_advfilter();
+            toastr.success('Clear successfully', 'Success', toast_options);
+        });
+
+        function clear_advfilter(){
             FIdNumber.val('');
             FTransactionCode.val('');
             FOriginalAmount.val('');
@@ -1124,9 +1128,7 @@
             FEmployeeName.val('').trigger('change');
             FStatus.val('').trigger('change');
             FIncomingBy.val('').trigger('change');
-            toastr.success('Clear successfully', 'Success', toast_options);
-        });
-
+        }
 
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();

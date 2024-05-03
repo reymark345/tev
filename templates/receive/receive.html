@@ -718,6 +718,7 @@
                                 })
                             }
                         }, 300);
+                        clear_advfilter();
                         $("#advance-filter").modal("show");
                     }
     
@@ -1036,8 +1037,6 @@
                     offCanvasEl.show()
                 })
             }
-
-        // Form validation for Add new record
         const fv = FormValidation.formValidation(ItemFormValidation, {
             fields: {
                 EmployeeName: {
@@ -1600,7 +1599,6 @@
         $('#f-employee-name').empty();
         $("#advance-filter").modal("hide");
         dataTable.ajax.reload();
-        clear_advfilter();
         toastr.success('Search successfully', 'Success', toast_options);
     });
 
