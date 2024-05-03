@@ -1270,10 +1270,6 @@ def payroll_load(request):
         def dictfetchall(cursor):
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-        # query = """
-        #     SELECT * FROM `tev_incoming` WHERE status_id = 4
-        # """
         query = """
             SELECT t1.*,GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
             FROM `tev_incoming` t1 
@@ -1315,9 +1311,6 @@ def payroll_load(request):
             cursor.execute(query, params)
             results = dictfetchall(cursor)
 
-  
-
-    
     elif _search:
         with connection.cursor() as cursor:
             query = """
@@ -1349,8 +1342,6 @@ def payroll_load(request):
             columns = [col[0] for col in cursor.description]
             results = [dict(zip(columns, row)) for row in cursor.fetchall()]
     
-    
-    # total = item_data.count()
     total = len(results)
 
     _start = request.GET.get('start')

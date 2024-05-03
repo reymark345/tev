@@ -19,4 +19,5 @@ from django.urls import include, path
 urlpatterns = [
     path('', include('main.urls')),
     path('admin/', admin.site.urls),
+    path('tris/api/status/<str:dv_no>/', include('api.urls')),
 ]
