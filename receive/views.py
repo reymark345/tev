@@ -292,7 +292,7 @@ def item_load(request):
 
     for item in results:
         userData = AuthUser.objects.filter(id=item['user_id'])
-        full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
+        full_name = userData[0].first_name if userData else ''
         
         first_name = item['first_name'] if item['first_name'] else ''
         middle_name = item['middle_name'] if item['middle_name'] else ''
@@ -481,7 +481,7 @@ def checking_load(request):
 
     for item in results:
         userData = AuthUser.objects.filter(id=item['user_id'])
-        full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
+        full_name = userData[0].first_name if userData else ''
         
         first_name = item['first_name'] if item['first_name'] else ''
         middle_name = item['middle_name'] if item['middle_name'] else ''
