@@ -385,10 +385,9 @@
 
         $('#f-employee-name').on('select2:open', function() {
             $('.select2-search__field').keydown(function(e) {
-                if (e.keyCode === 9) { // Check if Tab key is pressed
+                if (e.keyCode === 9) { 
                 var selectedValue = $('#f-employee-name').val();
                 if (selectedValue) {
-                    // Assuming the option value is "reymark"
                     $('#f-employee-name').val(['2']).trigger('change.select2');
                 }
                 }
