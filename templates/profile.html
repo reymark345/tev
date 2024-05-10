@@ -1,7 +1,7 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
             <!-- Content -->
             <!-- <div class="container-fluid flex-grow-1 container-p-y"> -->
-            <div class="container-xxl flex-grow-1 container-p-y">
+            <div class="container-fluid flex-grow-1 container-p-y">
               <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">User Profile /</span> Profile</h4>
 
               <!-- Header -->
@@ -57,12 +57,12 @@
                 <div class="col-md-12">
                   <ul class="nav nav-pills flex-column flex-sm-row mb-4">
                     <li class="nav-item">
-                      <a class="nav-link active" href="javascript:void(0);"
+                      <a class="nav-link active" href="{% url 'profile' %}"
                         ><i class="ti-xs ti ti-user-check me-1"></i> Profile</a
                       >
                     </li>
                     <li class="nav-item">
-                      <a class="nav-link" href="pages-profile-teams.html"
+                      <a class="nav-link" href="{% url 'accomplishment' %}"
                         ><i class="ti-xs ti ti-users me-1"></i> Accomplishments</a
                       >
                     </li>
@@ -80,7 +80,7 @@
                       <small class="card-text text-uppercase">About</small>
                       <ul class="list-unstyled mb-4 mt-3">
                         <li class="d-flex align-items-center mb-3">
-                          <i class="ti ti-user"></i><span class="fw-bold mx-2">Full Name:</span> <span>Untitled</span>
+                          <i class="ti ti-user"></i><span class="fw-bold mx-2">Full Name:</span> <span>{{ request.user.first_name }} {{ request.user.last_name }}</span>
                         </li>
                         <li class="d-flex align-items-center mb-3">
                           <i class="ti ti-check"></i><span class="fw-bold mx-2">Status:</span> <span>Active</span>
