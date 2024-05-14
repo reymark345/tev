@@ -544,9 +544,9 @@
                   });
   
                   $('body').on('click', '.item-update', function () {
-                  temp_id = $(this).attr('id');
-                  $('#update-transaction').modal('hide');
-                  $("#payrollUpdate").modal("show");
+                    temp_id = $(this).attr('id');
+                    $('#update-transaction').modal('hide');
+                    $("#payrollUpdate").modal("show");
   
                     $.ajax({
                       type: 'POST',
@@ -554,7 +554,7 @@
                       data:{
                         payroll_id: temp_id
                       }
-                  }).done(function (data) {
+                    }).done(function (data) {
   
                     let totalAmount = 0;
                     let amountList = [];
