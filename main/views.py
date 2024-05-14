@@ -96,6 +96,23 @@ def profile(request):
     else:
         return redirect("tracking-list")
     
+@login_required(login_url='login')
+def accomplishment(request):
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff" , "Certified staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    path = StaffDetails.objects.filter(user_id = user_id).first()
+    context = {
+        'image_path': path.image_path,
+        'permissions' : role_names,
+    }
+    if any(role_name in allowed_roles for role_name in role_names):
+        return render(request, 'accomplishment.html',context)
+    else:
+        return redirect("tracking-list")
+    
     
 @csrf_exempt
 def logout(request):

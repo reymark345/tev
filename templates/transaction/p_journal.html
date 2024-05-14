@@ -28,7 +28,7 @@
                             <th><input type="checkbox" class="dt-checkboxes form-check-input" id="check-all"></th>
                             <th>Dv Number</th>
                             <th>Cluster</th>
-                            <th>Division</th>
+                            <th>Offices</th>
                             <th>Status</th>
                             <th>Amount</th>
                             <th>Date In</th>
@@ -250,10 +250,6 @@
                 </div>
 
             
-            </div>
-            <div class="modal-footer">
-                <!-- <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5> -->
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -878,6 +874,7 @@
             autoWidth: true,
             processing: true,
             serverSide: true,
+            paginate: false,
             ajax: {
                 url: "{% url 'employee-journal' %}",
                 data: function (d) {

@@ -131,7 +131,7 @@
                                     </a>
                                 </li>
 
-                                <li class="menu-item {% if url_name == 'profile' %}active{% endif %}">
+                                <li class="menu-item {% if url_name == 'profile' or url_name == 'accomplishment' %}active  {% endif %}">
                                     <a href="{% url 'profile' %}" class="menu-link">
                                      
                                         <i class="menu-icon ti ti-user-check me-2 ti-sm"></i>
@@ -553,7 +553,7 @@
 
         <!-- Page JS -->
         <script src="{% static 'assets/js/dashboards-analytics.js' %}"></script>
-        <script src="{% static 'assets/js/forms-pickers.js' %}"></script>
+        {% comment %} <script src="{% static 'assets/js/forms-pickers.js' %}"></script> {% endcomment %}
         <!-- <script src="{% static 'assets/js/forms-file-upload.js' %}"></script> -->
 
         <!-- Custom made JS -->
@@ -579,7 +579,6 @@
         
         <script src="{% static 'assets/vendor/libs/fullcalendar/fullcalendar.js' %}"></script>
         <script src="{% static 'assets/js/app-calendar-events.js' %}"></script>
-        {% comment %} <script src="{% static 'assets/js/app-calendar.js' %}"></script> {% endcomment %}
         <script src="{% static 'assets/js/dashboards-ecommerce.js' %}"></script>
 
         <script src="{% static 'assets/js/pages-profile.js' %}"></script>

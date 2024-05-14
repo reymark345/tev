@@ -28,8 +28,8 @@
                             <th><input type="checkbox" class="dt-checkboxes form-check-input" id="check-all"></th>
                             <th>Dv Number</th>
                             <th>Cluster</th>
-                            <th>Division</th>
-                            <th>Division Chief</th>
+                            <th>Offices</th>
+                            <th>Supervise</th>
                             <th>Status</th>
                             <th>Date In</th>
                             <th>Date Forwarded</th>
@@ -249,10 +249,7 @@
     
                 
                 </div>
-                <div class="modal-footer">
-                    <!-- <h5 class="card-action-title mb-0">Total Amount <span id="total-amount" class="badge bg-label-primary"></span></h5> -->
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
-                </div>
+
             </div>
         </div>
     </div>
@@ -1002,6 +999,7 @@
             autoWidth: true,
             processing: true,
             serverSide: true,
+            paginate: false,
             ajax: {
                 url: "{% url 'employee-dv' %}",
                 data: function (d) {
@@ -1067,7 +1065,7 @@
                 {
                     targets: 6,
                     render: function (data) {
-                        return `<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="${data}" style="width:500px; margin-right: -150px !important;" ></td>`
+                        return `<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="${data}" style="width:300px; margin-right: -50px !important;" ></td>`
                     },
                 },
                 {
