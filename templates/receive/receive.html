@@ -371,6 +371,7 @@
 </div>
 
 {% endblock %} {% block footer_scripts %}
+<script src="{% static 'assets/js/forms-pickers.js' %}"></script>
 <script>
     let clicked_id = 0;
     let status_val =0;
@@ -384,10 +385,9 @@
 
         $('#f-employee-name').on('select2:open', function() {
             $('.select2-search__field').keydown(function(e) {
-                if (e.keyCode === 9) { // Check if Tab key is pressed
+                if (e.keyCode === 9) { 
                 var selectedValue = $('#f-employee-name').val();
                 if (selectedValue) {
-                    // Assuming the option value is "reymark"
                     $('#f-employee-name').val(['2']).trigger('change.select2');
                 }
                 }
@@ -451,8 +451,6 @@
         //     }
         // })
 
-
-        
         
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),

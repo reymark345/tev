@@ -28,7 +28,7 @@
                               <th><input type="checkbox" id="check-all" class="dt-checkboxes form-check-input"></th>
                               <th>Dv Number</th>
                               <th>Cluster</th>	
-                              <th>Division</th>
+                              <th>Offices</th>
                               <th>Status</th>
                               <th>Date In</th>
                               <th>Date Received</th>
@@ -772,6 +772,7 @@
               autoWidth: true,
               processing: true,
               serverSide: true,
+              paginate: false,
               ajax: {
                   url: "{% url 'employee-dv' %}",
                   data: function (d) {

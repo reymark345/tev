@@ -14,5 +14,5 @@ urlpatterns = [
     path('tracking/', include('tracking.urls')),
     path('transaction/', include('transaction.urls')),
     path('libraries/', include('libraries.urls')),
-
+    path('accomplishment', views.accomplishment, name='accomplishment'),
 ]
