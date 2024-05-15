@@ -87,11 +87,11 @@
                         <div class="row">
                             <div class="col-12 col-md-5">
                                 <label class="form-label" for="modalEditTaxID">Start Date</label>
-                                <input type="date" class="form-control" name="FStartDate" placeholder="DD-MM-YYYY" autocomplete="off" />
+                                <input type="date" class="form-control" name="FStartDate" id ="FStartDate" placeholder="DD-MM-YYYY" autocomplete="off" />
                             </div>
                             <div class="col-12 col-md-5">
                                 <label class="form-label" for="modalEditTaxID">End Date</label>
-                                <input type="date" class="form-control" name="FEndDate" placeholder="DD-MM-YYYY" autocomplete="off" />
+                                <input type="date" class="form-control" name="FEndDate" id ="FEndDate" placeholder="DD-MM-YYYY" autocomplete="off" />
                             </div>
                             <div class="col-12 col-md-2">
                               <br>
@@ -105,41 +105,25 @@
               </div>
               <br>
               <!-- Bootstrap Table with Caption -->
-              <div class="card">
+              <div class="card" id="card-accomplishment">
                 <h5 class="card-header">Daily Accomplishment</h5>
                 <div class="table-responsive text-nowrap">
-                  <table class="table">
+                  <table class="table" id="accomplishment-tbl">
                     <caption class="ms-4">
-                      List of Accomplishment
+                        List of Accomplishment
                     </caption>
                     <thead>
-                      <tr>
-                        <th>Date</th>
-                        <th>Received</th>
-                        <th>Reviewed</th>
-                        <th>Payrolled</th>
-                      </tr>
+                        <tr>
+                            <th>Date</th>
+                            <th>Received</th>
+                            <th>Reviewed</th>
+                            <th>Payrolled</th>
+                        </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td>
-                           <strong>January 1, 2024</strong>
-                        </td>
-                        <td>Albert Cook</td>
-                        <td>25</td>
-                        <td><span class="badge bg-label-primary me-1">Active</span></td>
-                      </tr>
-                      <tr>
-                        <td>
-                           <strong>January 2, 2024</strong>
-                        </td>
-                        <td>Albert Cook</td>
-                        <td>25</td>
-                        <td><span class="badge bg-label-primary me-1">Active</span></td>
-                      </tr>
-
+                        <!-- Existing rows can be removed or kept as placeholders -->
                     </tbody>
-                  </table>
+                </table>
                 </div>
               </div>
               <!-- Bootstrap Table with Caption -->
@@ -150,11 +134,43 @@
   {% block footer_scripts %}
   <script>
     $(document).ready(function() {
-      const FStartDate = document.getElementById('FStartDate'),
-            FEndDate = document.getElementById('FEndDate');
+      const FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
+            FEndDate = jQuery(document.querySelector('[name="FEndDate"]'));
+      const toast_options = (toastr.options = {
+        maxOpened: 1,
+        autoDismiss: true,
+        closeButton: true,
+        newestOnTop: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        rtl: isRtl,
+      });
+
+      $('#generate-accomplishment').on('click', function() {
+        $.ajax({
+          type: 'POST',
+          url: "{% url 'generate-accomplishment' %}",
+          data:{
+            start_date: FStartDate.val(),
+            end_date: FEndDate.val(),
+          }
+        }).done(function (data) {
+          var tbody = $('#accomplishment-tbl tbody');
+          tbody.empty();
+
+          $.each(data, function(index, item) {
+            var row = $('<tr>').append(
+                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+                $('<td>').text(item.received),
+                $('<td>').text(item.reviewed),
+                $('<td>').text(item.payrolled)
+            );
+            tbody.append(row);
+          });
+          toastr.success('Generate Successfully', 'Success', toast_options);
 
       
-      $('#generate-accomplishment').on('click', function() {
+        });
       });
     });
   </script>
