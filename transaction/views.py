@@ -1356,10 +1356,6 @@ def payroll_load(request):
     data = []
 
     for item in results: 
-        userData = AuthUser.objects.filter(id=item['user_id'])
-        
-        full_name = userData[0].first_name + ' ' + userData[0].last_name
-        
         fname = item['first_name'] if item['first_name'] else ''
         mname = item['middle_name'] if item['middle_name'] else ''
         lname = item['last_name'] if item['last_name'] else ''
@@ -1380,8 +1376,7 @@ def payroll_load(request):
             'slashed_out': item['incoming_out'],
             'remarks': item['remarks'],
             'status': item['status_id'],
-            'm_charges': item['multiple_charges'],
-            'user_id': full_name
+            'm_charges': item['multiple_charges']
         }
 
         data.append(item)
