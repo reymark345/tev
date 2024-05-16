@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, RolePermissions)
+from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, RolePermissions, Division)
 from django.utils.dateparse import parse_date
 from django.db.models import Count, Case, When, IntegerField
 from datetime import timedelta, date
@@ -86,11 +86,19 @@ def dashboard(request):
 def profile(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff" , "Certified staff"] 
     user_id = request.session.get('user_id', 0)
+
+
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
     path = StaffDetails.objects.filter(user_id = user_id).first()
+    division = Division.objects.filter(id = path.division_id).first()
+
     context = {
+        'id_number': path.id_number, 
+        'position': path.position, 
+        'sex': path.sex,  
+        'division_name': division.name, 
         'image_path': path.image_path,
         'permissions' : role_names,
     }
@@ -99,22 +107,7 @@ def profile(request):
     else:
         return redirect("tracking-list")
     
-@login_required(login_url='login')
-def accomplishment(request):
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff" , "Certified staff"] 
-    user_id = request.session.get('user_id', 0)
-    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
-    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
-    role_names = [entry['role_name'] for entry in role_details]
-    path = StaffDetails.objects.filter(user_id = user_id).first()
-    context = {
-        'image_path': path.image_path,
-        'permissions' : role_names,
-    }
-    if any(role_name in allowed_roles for role_name in role_names):
-        return render(request, 'accomplishment.html',context)
-    else:
-        return redirect("tracking-list")
+
     
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days) + 1):
