@@ -113,6 +113,7 @@ def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days) + 1):
         yield start_date + timedelta(n)
 
+
 @login_required(login_url='login')
 @csrf_exempt
 def generate_accomplishment(request):
@@ -131,21 +132,62 @@ def generate_accomplishment(request):
             day_start = single_date
             day_end = single_date + timedelta(days=1)
 
-            daily_counts = TevIncoming.objects.filter(
+            received_count = TevIncoming.objects.filter(
                 user_id=user_id,
                 incoming_in__range=(day_start, day_end)
-            ).aggregate(
-                received_count=Count(Case(When(user_id=user_id, then=1), output_field=IntegerField())),
-                reviewed_count=Count(Case(When(reviewed_by=user_id, then=1), output_field=IntegerField())),
-                payrolled_count=Count(Case(When(payrolled_by=user_id, then=1), output_field=IntegerField()))
-            )
+            ).count()
+
+            reviewed_count = TevIncoming.objects.filter(
+                reviewed_by=user_id,
+                date_reviewed__range=(day_start, day_end)
+            ).count()
+
+            payrolled_count = TevIncoming.objects.filter(
+                payrolled_by=user_id,
+                date_payrolled__range=(day_start, day_end)
+            ).count()
+
             results.append({
                 'date': single_date.strftime('%B %d, %Y'),
-                'received': daily_counts['received_count'],
-                'reviewed': daily_counts['reviewed_count'],
-                'payrolled': daily_counts['payrolled_count']
+                'received': received_count,
+                'reviewed': reviewed_count,
+                'payrolled': payrolled_count
             })
         return JsonResponse(results, safe=False)
+
+# @login_required(login_url='login')
+# @csrf_exempt
+# def generate_accomplishment(request):
+#     if request.method == 'POST':
+#         FStartDate = request.POST.get('start_date')
+#         FEndDate = request.POST.get('end_date')
+#         start_date = parse_date(FStartDate)
+#         end_date = parse_date(FEndDate)
+#         if not start_date or not end_date:
+#             return JsonResponse({'error': 'Invalid date format'}, status=400)
+#         user_id = request.session.get('user_id', 0)
+#         if start_date > end_date:
+#             return JsonResponse({'error': 'Start date must be before end date'}, status=400)
+#         results = []
+#         for single_date in daterange(start_date, end_date):
+#             day_start = single_date
+#             day_end = single_date + timedelta(days=1)
+
+#             daily_counts = TevIncoming.objects.filter(
+#                 user_id=user_id,
+#                 incoming_in__range=(day_start, day_end)
+#             ).aggregate(
+#                 received_count=Count(Case(When(user_id=user_id, then=1), output_field=IntegerField())),
+#                 reviewed_count=Count(Case(When(reviewed_by=user_id, then=1), output_field=IntegerField())),
+#                 payrolled_count=Count(Case(When(payrolled_by=user_id, then=1), output_field=IntegerField()))
+#             )
+#             results.append({
+#                 'date': single_date.strftime('%B %d, %Y'),
+#                 'received': daily_counts['received_count'],
+#                 'reviewed': daily_counts['reviewed_count'],
+#                 'payrolled': daily_counts['payrolled_count']
+#             })
+#         return JsonResponse(results, safe=False)
     
 @csrf_exempt
 def logout(request):
