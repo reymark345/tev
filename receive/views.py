@@ -613,8 +613,6 @@ def upload_tev(request):
 
                 for date in dates_to_check:
                     results = TevIncoming.objects.filter(date_travel__contains=date).filter(id_no=id_number_value).all()
-
-                    # If there are matching records, store id_no and date_travel in the dictionary
                     if results:
                         for record in results:
                             if date not in duplicate_records:
