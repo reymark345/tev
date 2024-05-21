@@ -139,9 +139,9 @@
               <div class="col-12 col-md-12">
                 <label for="dateRangePicker" class="form-label">Date Range</label>
                 <div class="input-group input-daterange" id="divDateRange">
-                  <input type="text" id="startDate" placeholder="MM/DD/YYYY" class="form-control" name="FStartDate" disabled/>
+                  <input type="text" id="startDate" placeholder="MM/DD/YYYY" class="form-control" name="FStartDate"/>
                   <span class="input-group-text">to</span>
-                  <input type="text" id="endDate" placeholder="MM/DD/YYYY" class="form-control" name="FEndDate" disabled />
+                  <input type="text" id="endDate" placeholder="MM/DD/YYYY" class="form-control" name="FEndDate" />
                 </div>
               </div>
 
@@ -325,7 +325,7 @@
           processing: true,
           serverSide: true,
           ajax: {
-              url: "{% url 'tracking-load' %}",
+              url: "{% url 'status-load' %}",
               data: function (d) {
                   d.FAdvancedFilter = FAdvancedFilter.val()
                   d.FIdNumber = FIdNumber.val()
@@ -1289,6 +1289,8 @@
         FDivision.val('').trigger('change');
         dateField.clear();
         FEmployeeName.val('').trigger('change');
+        FStartDate.val('');
+        FEndDate.val('');
       }
 
       if (FStatus.length) {
