@@ -32,7 +32,7 @@ from django.template.defaultfilters import date
 
 @login_required(login_url='login')
 @csrf_exempt
-def tracking_list(request):
+def status(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff", "Budget staff", "Journal staff", "Approval staff"] 
 
     user_id = request.session.get('user_id', 0)
@@ -45,7 +45,7 @@ def tracking_list(request):
         'permissions' : role_names,
         'division' : Division.objects.filter().order_by('name'),
     }
-    return render(request, 'tracking/tracking_list.html', context)
+    return render(request, 'tracking/status.html', context)
 
 @login_required(login_url='login')
 def users(request):
@@ -66,7 +66,7 @@ def users(request):
 
         
 
-def tracking_load(request):
+def status_load(request):
     total = 0
     data = []
     _search = request.GET.get('search[value]')
@@ -105,11 +105,6 @@ def tracking_load(request):
         FEndDate = request.GET.get('FEndDate') 
         formatted_start_date = None
         formatted_end_date = None
-        if FStartDate:
-            formatted_start_date = datetime.strptime(FStartDate, '%m/%d/%Y').strftime('%d-%m-%Y')
-        
-        if FEndDate:
-            formatted_end_date = datetime.strptime(FEndDate, '%m/%d/%Y').strftime('%d-%m-%Y')
         with connection.cursor() as cursor:
 
             query = """
@@ -132,15 +127,6 @@ def tracking_load(request):
                 WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
             """
             params = [f'{formatted_year}%']
-
-            if FStartDate and FEndDate:
-                formatted_dates = [date.strip() for date in FStartDate.split(',')]
-                query += " AND ("
-                for date in formatted_dates:
-                    query += f" tev_incoming.date_travel LIKE %s OR"
-                    params.append(f'%{date}%')
-                query = query[:-3]  # Remove the extra " OR" at the end
-                query += ")"
 
             if FTransactionCode:
                 query += " AND tev_incoming.code = %s"
@@ -194,6 +180,20 @@ def tracking_load(request):
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
+            if FStartDate and FEndDate:
+                formatted_start_date = datetime.strptime(FStartDate, '%m/%d/%Y').date()
+                formatted_end_date = datetime.strptime(FEndDate, '%m/%d/%Y').date()
+                filtered_rows = []
+
+                for row in finance_data:
+                    dates = row['date_travel'].split(',')
+                    date_objects = [datetime.strptime(date.strip(), '%d-%m-%Y').date() for date in dates if date.strip()]
+                    for date in date_objects:
+                        if formatted_start_date <= date <= formatted_end_date:
+                            filtered_rows.append(row)
+                            break
+                finance_data = []
+                finance_data = filtered_rows
 
     elif _search:
         with connection.cursor() as cursor:

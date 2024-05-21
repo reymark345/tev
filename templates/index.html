@@ -226,21 +226,9 @@
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Tracking</span>
                         </li>
-                        <!-- {% if permissions %}
-                            {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions or 'Outgoing staff' in permissions or 'Budget staff' in permissions or 'Journal staff' in permissions or 'Approval staff' in permissions %}
-                                <li class="menu-item {% if url_name == 'tracking-list' %}active{% endif %}" >
-                                    <a href="{% url 'tracking-list' %}" class="menu-link">
-                                    
-                                        <i class="menu-icon tf-icons ti ti-lifebuoy"></i>
-                                        <div data-i18n="Status">Status</div>
-                                    </a>
-                                </li>
-                            {% endif %}
-                        {% endif %} -->
 
-                        
-                        <li class="menu-item {% if url_name == 'tracking-list' %}active{% endif %}" >
-                            <a href="{% url 'tracking-list' %}" class="menu-link">
+                        <li class="menu-item {% if url_name == 'status' %}active{% endif %}" >
+                            <a href="{% url 'status' %}" class="menu-link">
                             
                                 <i class="menu-icon tf-icons ti ti-lifebuoy"></i>
                                 <div data-i18n="Status">Status</div>
