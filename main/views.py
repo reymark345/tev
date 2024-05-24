@@ -58,10 +58,14 @@ def dashboard(request):
     incoming = TevIncoming.objects.filter(status_id=1).count()
     checking = TevIncoming.objects.filter(status_id=2).count()
     approved = TevIncoming.objects.filter(status_id=7).count()
-    returned = TevIncoming.objects.filter(status_id=3).count()
-    payroll = TevIncoming.objects.filter(status_id=4).count()
-    outgoing = TevIncoming.objects.filter(status_id=5).count()
+    returned = TevIncoming.objects.filter(status_id=3).values('code').distinct().count()
+    for_payroll = TevIncoming.objects.filter(status_id=4).count()
+    payrolled = TevIncoming.objects.filter(status_id=5).count()
+    outgoing = TevIncoming.objects.filter(status_id__in=[8,9]).count()
     ongoing = TevIncoming.objects.filter(status_id=6).count()
+    budget = TevIncoming.objects.filter(status_id__in=[10,11]).count()
+    journal = TevIncoming.objects.filter(status_id__in=[12,13]).count()
+    approval = TevIncoming.objects.filter(status_id__in=[14,15]).count()
     box_a = TevOutgoing.objects.filter().count()
 
     context = {
@@ -71,8 +75,12 @@ def dashboard(request):
         'checking': checking,
         'approved': approved,
         'returned': returned,
-        'payroll': payroll,
+        'payroll': for_payroll,
+        'payrolled': payrolled,
         'outgoing': outgoing,
+        'budget': budget,
+        'journal': journal,
+        'approval': approval,
         'ongoing': ongoing,
         'box_a': box_a,
         'permissions' : role_names,
