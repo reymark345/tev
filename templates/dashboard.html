@@ -32,7 +32,7 @@
         <div class="card h-100">
           <div class="card-header">
             <div class="d-flex justify-content-between mb-3">
-              <h5 class="card-title mb-0">Total Reports</h5>
+              <h5 class="card-title mb-0">Reports</h5>
               
             </div>
           </div>
@@ -63,10 +63,10 @@
               <div class="col-md-3 col-6">
                 <div class="d-flex align-items-center">
                   <div class="badge rounded-pill bg-label-danger me-3 p-2">
-                    <i class="ti ti-shopping-cart ti-sm"></i>
+                    <i class="ti ti-credit-card ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ payroll}}</h5>
+                    <h5 class="mb-0">{{ returned }}</h5>
                     <small>Returned</small>
                   </div>
                 </div>
@@ -74,14 +74,76 @@
               <div class="col-md-3 col-6">
                 <div class="d-flex align-items-center">
                   <div class="badge rounded-pill bg-label-success me-3 p-2">
-                    <i class="ti ti-currency-dollar ti-sm"></i>
+                    <i class="ti ti-browser-check ti-sm"></i>
                   </div>
                   <div class="card-info">
                     <h5 class="mb-0">{{ payroll }}</h5>
-                    <small>Payroll</small>
+                    <small>For Payroll</small>
                   </div>
                 </div>
               </div>
+
+              <div class="col-md-3 col-6">
+                <div class="d-flex align-items-center">
+                  <div class="badge rounded-pill bg-label-info me-3 p-2">
+                    <i class="ti ti-ticket ti-sm"></i>
+                  </div>
+                  <div class="card-info">
+                    <h5 class="mb-0">{{ payrolled }}</h5>
+                    <small>Payrolled</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3 col-6">
+                <div class="d-flex align-items-center">
+                  <div class="badge rounded-pill bg-label-warning me-3 p-2">
+                    <i class="ti ti-clock ti-sm"></i>
+                  </div>
+                  <div class="card-info">
+                    <h5 class="mb-0">{{ outgoing }}</h5>
+                    <small>Outgoing</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3 col-6">
+                <div class="d-flex align-items-center">
+                  <div class="badge rounded-pill bg-label-success me-3 p-2">
+                    <i class="ti ti-discount ti-sm"></i>
+                  </div>
+                  <div class="card-info">
+                    <h5 class="mb-0">{{ budget }}</h5>
+                    <small>Budget</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3 col-6">
+                <div class="d-flex align-items-center">
+                  <div class="badge rounded-pill bg-label-primary me-3 p-2">
+                    <i class="ti ti-circle-check ti-sm"></i>
+                  </div>
+                  <div class="card-info">
+                    <h5 class="mb-0">{{ journal }}</h5>
+                    <small>Journal</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3 col-6">
+                <div class="d-flex align-items-center">
+                  <div class="badge rounded-pill bg-label-success me-3 p-2">
+                    <i class="ti ti-users ti-sm"></i>
+                  </div>
+                  <div class="card-info">
+                    <h5 class="mb-0">{{ approval }}</h5>
+                    <small>Approval</small>
+                  </div>
+                </div>
+              </div>
+
+
             </div>
           </div>
         </div>
@@ -90,54 +152,6 @@
 
       <div class="col-xl-4 col-12">
         <div class="row">
-          <!-- Expenses -->
-          <div class="col-xl-6 col-md-4 col-6 mb-4">
-            <div class="card">
-              <div class="card-body">
-                <div class="badge p-2 bg-label-info mb-2 rounded"><i class="ti ti-chart-pie-2 ti-md"></i></div>
-                <h5 class="card-title mb-1 pt-2">Approved</h5>
-                <p class="mb-2 mt-1">{{ approved }}</p>
-
-              </div>
-            </div>
-          </div>
-          <!--/ Expenses -->
-
-          <!-- Profit last month -->
-          <div class="col-xl-6 col-md-4 col-6 mb-4">
-            <div class="card">
-              <div class="card-body">
-                <div class="badge p-2 bg-label-info mb-2 rounded"><i class="ti ti-chart-bar ti-md"></i></div>
-                <h5 class="card-title mb-1 pt-2">Returned</h5>
-                <p class="mb-2 mt-1">{{ returned }}</p>
-
-              </div>
-            </div>
-          </div>
-          <!--/ Profit last month -->
-
-          <!-- Generated Leads -->
-          <div class="col-xl-12 mb-4 col-md-6">
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between">
-                  <div class="d-flex flex-column">
-                    <div class="card-title mb-auto">
-                      <h5 class="mb-1 text-nowrap">Uploaded file <small>(Excel)</small></h5>
-                  
-                    </div>
-                    <div class="chart-statistics">
-                      {% comment %} <h3 class="card-title mb-1">{{ uploaded }}</h3> {% endcomment %}
-                    </div>
-                  </div>
-                  <div id="generatedLeadsChart"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <!--/ Generated Leads -->
-
-          
           {% comment %} <div class="col-xl-6 col-md-4 col-6 mb-4">
             <div class="card">
               <div class="card-body">
@@ -174,7 +188,7 @@
       </div>
 
       <!-- Chart Apex -->
-      <div class="col-12 col-xl-8 mb-4 col-lg-7">
+      <div class="col-12 col-xl-12 mb-4 col-lg-12">
         <div class="card">
           <div class="card-header d-flex justify-content-between">
             <div>
