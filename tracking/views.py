@@ -652,9 +652,9 @@ def export_status(request):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
-            tev_incoming.date_travel, tev_incoming.division,charges.name AS charges, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
-            tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
-            tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
+                tev_incoming.date_travel, tev_incoming.division,charges.name, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
+                tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
+                tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
             FROM tev_incoming
             INNER JOIN (
             SELECT MAX(id) AS max_id
@@ -666,8 +666,10 @@ def export_status(request):
             ON tev_incoming.id = tev_bridge.tev_incoming_id
             LEFT JOIN tev_outgoing
             ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+            LEFT JOIN payrolled_charges
+            ON payrolled_charges.incoming_id = tev_incoming.id
             LEFT JOIN charges
-            ON tev_bridge.charges_id = charges.id
+            ON payrolled_charges.charges_id = charges.id
             LEFT JOIN auth_user AS au
             ON au.id = tev_incoming.user_id
             LEFT JOIN auth_user AS rb
@@ -762,7 +764,7 @@ def export_status(request):
             cell.value = cell_value
             column_letter = get_column_letter(col_num)
             column_dimensions = worksheet.column_dimensions[column_letter]
-            column_dimensions.width = 20
+            column_dimensions.width = 22
     workbook.save(response)
     return response
 
