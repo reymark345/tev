@@ -652,7 +652,7 @@ def export_status(request):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
-                tev_incoming.date_travel, tev_incoming.division,charges.name, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
+                tev_incoming.date_travel, tev_incoming.division, tev_incoming.section,charges.name, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
                 tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
                 tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
             FROM tev_incoming
@@ -708,8 +708,8 @@ def export_status(request):
         'MIDDLE INITIAL',
         'DATE TRAVEL',
         'DIVISION',
-        'CHARGES',
         'SECTION',
+        'CHARGES',
         'STATUS ID',
         'INCOMING BY',
         'REVIEWED BY',
@@ -744,8 +744,8 @@ def export_status(request):
             tris[7],  # first_name
             tris[8],  # date_travel
             tris[9],  # division
-            tris[10],  # charges
-            tris[11],  # section
+            tris[10], # section
+            tris[11],  # charges
             tris[12],  # status_id
             tris[13],  # incoming_by
             tris[14],  # reviewed_by
