@@ -652,20 +652,22 @@ def export_status(request):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
-                    tev_incoming.date_travel, tev_incoming.division, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
-                    tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
-                    tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
+            tev_incoming.date_travel, tev_incoming.division,charges.name AS charges, tev_incoming.section, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
+            tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
+            tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
             FROM tev_incoming
             INNER JOIN (
-                    SELECT MAX(id) AS max_id
-                    FROM tev_incoming
-                    GROUP BY code
+            SELECT MAX(id) AS max_id
+            FROM tev_incoming
+            GROUP BY code
             ) AS latest_ids
             ON tev_incoming.id = latest_ids.max_id
             LEFT JOIN tev_bridge
             ON tev_incoming.id = tev_bridge.tev_incoming_id
             LEFT JOIN tev_outgoing
             ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+            LEFT JOIN charges
+            ON tev_bridge.charges_id = charges.id
             LEFT JOIN auth_user AS au
             ON au.id = tev_incoming.user_id
             LEFT JOIN auth_user AS rb
@@ -704,6 +706,7 @@ def export_status(request):
         'MIDDLE INITIAL',
         'DATE TRAVEL',
         'DIVISION',
+        'CHARGES',
         'SECTION',
         'STATUS ID',
         'INCOMING BY',
@@ -739,19 +742,20 @@ def export_status(request):
             tris[7],  # first_name
             tris[8],  # date_travel
             tris[9],  # division
-            tris[10],  # section
-            tris[11],  # status_id
-            tris[12],  # incoming_by
-            tris[13],  # reviewed_by
-            tris[14],  # original_amount
-            tris[15],  # final_amount
-            tris[16],
+            tris[10],  # charges
+            tris[11],  # section
+            tris[12],  # status_id
+            tris[13],  # incoming_by
+            tris[14],  # reviewed_by
+            tris[15],  # original_amount
+            tris[16],  # final_amount
             tris[17],
             tris[18],
-            tris[19],  
+            tris[19],
             tris[20],  
             tris[21],  
             tris[22],  
+            tris[23],  
         ]       
         for col_num, cell_value in enumerate(row, 1):
             cell = worksheet.cell(row=row_num, column=col_num)
