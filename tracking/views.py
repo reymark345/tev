@@ -652,7 +652,7 @@ def export_status(request):
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
-                tev_incoming.date_travel, tev_incoming.division, tev_incoming.section,charges.name, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
+                tev_incoming.date_travel, tev_incoming.division, tev_incoming.section,charges.name,payrolled_charges.amount, tev_incoming.status_id, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
                 tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
                 tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
             FROM tev_incoming
@@ -710,6 +710,7 @@ def export_status(request):
         'DIVISION',
         'SECTION',
         'CHARGES',
+        'CHARGES AMOUNT',
         'STATUS ID',
         'INCOMING BY',
         'REVIEWED BY',
@@ -746,18 +747,19 @@ def export_status(request):
             tris[9],  # division
             tris[10], # section
             tris[11],  # charges
-            tris[12],  # status_id
-            tris[13],  # incoming_by
-            tris[14],  # reviewed_by
-            tris[15],  # original_amount
-            tris[16],  # final_amount
-            tris[17],
+            tris[12],  # charges amount
+            tris[13],  # status_id
+            tris[14],  # incoming_by
+            tris[15],  # reviewed_by
+            tris[16],  # original_amount
+            tris[17],  # final_amount
             tris[18],
             tris[19],
-            tris[20],  
+            tris[20],
             tris[21],  
             tris[22],  
             tris[23],  
+            tris[24],  
         ]       
         for col_num, cell_value in enumerate(row, 1):
             cell = worksheet.cell(row=row_num, column=col_num)
