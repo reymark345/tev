@@ -652,11 +652,13 @@
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
                     action: function () {
+                      $('#loading-screen').show();
                       $.ajax({
                         type: 'POST',
                         url: "{% url 'export-status' %}"
                       }).done(function (data) {
                         window.location.href = "{% url 'export-status' %}";
+                        $('#loading-screen').hide();
                       });
                     }
                 },
