@@ -120,14 +120,14 @@ DATABASES = {
     #     'PORT': '3306',
     # },
     #for localhost main database
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tev_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'tev_db',
+    #     'USER': 'root',
+    #     'PASSWORD': '',
+    #     'HOST': 'localhost',
+    #     'PORT': '3306',
+    # },
     # #for localhost INFIMOS database
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',
