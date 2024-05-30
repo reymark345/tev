@@ -658,7 +658,9 @@
                         url: "{% url 'export-status' %}"
                       }).done(function (data) {
                         window.location.href = "{% url 'export-status' %}";
-                        $('#loading-screen').hide();
+                        setTimeout(function() {
+                          $('#loading-screen').hide();
+                        }, 5000);
                       });
                     }
                 },
