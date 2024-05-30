@@ -10,6 +10,8 @@ from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, Ro
 from django.utils.dateparse import parse_date
 from django.db.models import Count, Case, When, IntegerField, Subquery
 from datetime import timedelta, date
+from django.db.models.functions import TruncMonth
+from django.db.models import Q
 
 
 def index(request):
@@ -69,7 +71,51 @@ def dashboard(request):
     approval = TevIncoming.objects.filter(status_id__in=[14,15]).count()
     box_a = TevOutgoing.objects.filter().count()
 
+    year = int("2024")
+
+    received = TevIncoming.objects.filter(
+        incoming_in__year=year
+    )
+
+    reviewed = TevIncoming.objects.filter(
+        Q(date_reviewed__isnull=False) & Q(date_reviewed__year=year)
+    )
+
+    returned_ = TevIncoming.objects.filter(
+        status_id=3,
+        date_reviewed__isnull=False,
+        date_reviewed__year=year
+    ).exclude(code__in=Subquery(duplicated_codes)).values('code').distinct()
+
+    received_monthly_counts = received.annotate(month=TruncMonth('incoming_in')).values('month').annotate(count=Count('id')).order_by('month')
+    reviewed_monthly_counts = reviewed.annotate(month=TruncMonth('date_reviewed')).values('month').annotate(count=Count('id')).order_by('month')
+
+    returned_monthly_counts = TevIncoming.objects.filter(
+        code__in=Subquery(returned_),
+        status_id=3,
+        date_reviewed__year=year
+    ).annotate(month=TruncMonth('date_reviewed')).values('month').annotate(count=Count('id')).order_by('month')
+
+    received_counts = [0] * 12
+    reviewed_counts = [0] * 12
+    returned_counts = [0] * 12
+
+    for entry in received_monthly_counts:
+        month = entry['month'].month
+        received_counts[month - 1] = entry['count']
+
+    for entry in reviewed_monthly_counts:
+        month = entry['month'].month
+        reviewed_counts[month - 1] = entry['count']
+    
+    for entry in returned_monthly_counts:
+        month = entry['month'].month
+        returned_counts[month - 1] = entry['count']
+
     context = {
+        'received_counts': received_counts,
+        'reviewed_counts': reviewed_counts,
+        'returned_counts': returned_counts,
         'uploaded': uploaded,
         'user_role': "test",
         'incoming': incoming,
