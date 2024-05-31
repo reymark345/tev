@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, RolePermissions, Division)
+from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, TevBridge, RolePermissions, Division)
 from django.utils.dateparse import parse_date
 from django.db.models import Count, Case, When, IntegerField, Subquery
 from datetime import timedelta, date
@@ -87,6 +87,36 @@ def dashboard(request):
         date_reviewed__year=year
     ).exclude(code__in=Subquery(duplicated_codes)).values('code').distinct()
 
+
+    payrolled_ = TevIncoming.objects.filter(
+        date_payrolled__year=year
+    )
+
+    outgoing_monthly_counts = TevBridge.objects.filter(
+        tev_outgoing__otg_d_received__year=year
+    ).annotate(
+        month=TruncMonth('tev_outgoing__otg_d_received')
+    ).values('month').annotate(count=Count('tev_outgoing__id')).order_by('month')
+
+    budget_monthly_counts = TevBridge.objects.filter(
+        tev_outgoing__b_d_received__year=year
+    ).annotate(
+        month=TruncMonth('tev_outgoing__b_d_received')
+    ).values('month').annotate(count=Count('tev_outgoing__id')).order_by('month')
+
+    journal_monthly_counts = TevBridge.objects.filter(
+        tev_outgoing__j_d_received__year=year
+    ).annotate(
+        month=TruncMonth('tev_outgoing__j_d_received')
+    ).values('month').annotate(count=Count('tev_outgoing__id')).order_by('month')
+
+    approval_monthly_counts = TevBridge.objects.filter(
+        tev_outgoing__a_d_received__year=year
+    ).annotate(
+        month=TruncMonth('tev_outgoing__a_d_received')
+    ).values('month').annotate(count=Count('tev_outgoing__id')).order_by('month')
+
+
     received_monthly_counts = received.annotate(month=TruncMonth('incoming_in')).values('month').annotate(count=Count('id')).order_by('month')
     reviewed_monthly_counts = reviewed.annotate(month=TruncMonth('date_reviewed')).values('month').annotate(count=Count('id')).order_by('month')
 
@@ -96,9 +126,16 @@ def dashboard(request):
         date_reviewed__year=year
     ).annotate(month=TruncMonth('date_reviewed')).values('month').annotate(count=Count('id')).order_by('month')
 
+    payrolled_monthly_counts = payrolled_.annotate(month=TruncMonth('date_payrolled')).values('month').annotate(count=Count('id')).order_by('month')
+
     received_counts = [0] * 12
     reviewed_counts = [0] * 12
     returned_counts = [0] * 12
+    payrolled_counts = [0] * 12
+    outgoing_counts = [0] * 12
+    budget_counts = [0] * 12
+    journal_counts = [0] * 12
+    approval_counts = [0] * 12
 
     for entry in received_monthly_counts:
         month = entry['month'].month
@@ -112,10 +149,35 @@ def dashboard(request):
         month = entry['month'].month
         returned_counts[month - 1] = entry['count']
 
+    for entry in payrolled_monthly_counts:
+        month = entry['month'].month
+        payrolled_counts[month - 1] = entry['count']
+
+    for entry in outgoing_monthly_counts:
+        month = entry['month'].month
+        outgoing_counts[month - 1] = entry['count']
+
+    for entry in budget_monthly_counts:
+        month = entry['month'].month
+        budget_counts[month - 1] = entry['count']
+
+    for entry in journal_monthly_counts:
+        month = entry['month'].month
+        journal_counts[month - 1] = entry['count']
+
+    for entry in approval_monthly_counts:
+        month = entry['month'].month
+        approval_counts[month - 1] = entry['count']
+
     context = {
         'received_counts': received_counts,
         'reviewed_counts': reviewed_counts,
         'returned_counts': returned_counts,
+        'payrolled_counts': payrolled_counts,
+        'outgoing_counts': outgoing_counts,
+        'budget_counts': budget_counts,
+        'journal_counts': journal_counts,
+        'approval_counts': approval_counts,
         'uploaded': uploaded,
         'user_role': "test",
         'incoming': incoming,
