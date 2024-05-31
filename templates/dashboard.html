@@ -1,8 +1,14 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="row">
+      
       <!-- View sales -->
       <div class="col-xl-4 mb-4 col-lg-5 col-12">
+
+        <select id="dp-year" name="DpYear" class="form-select">
+          <option value="2024">2024</option>
+       </select><br><br>
+        
         <div class="card">
           <div class="d-flex align-items-end row">
             <div class="col-7">
@@ -192,8 +198,8 @@
         <div class="card">
           <div class="card-header d-flex justify-content-between">
             <div>
-              <h5 class="card-title mb-0">Monthly Statistics</h5>
-              <small class="text-muted">Monthly</small>
+              <h5 class="card-title mb-0">Statistics</h5>
+              <small class="text-muted">By Month</small>
             </div>
             <div class="dropdown">
               <button
@@ -286,10 +292,13 @@
     }
     const received_counts = {{ received_counts|safe }};
     const reviewed_counts = {{ reviewed_counts|safe }};
+    const payrolled_counts = {{ payrolled_counts|safe }};
+    const outgoing_counts = {{ outgoing_counts|safe }};
+    const budget_counts = {{ budget_counts|safe }};
+    const journal_counts = {{ journal_counts|safe }};
+    const approval_counts = {{ approval_counts|safe }};
     const returned_counts = {{ returned_counts|safe }};
-
-    // Color constant
-    {% comment %} const chartColors = {
+    const chartColors = {
       column: {
         series1: '#826af9',
         series2: '#d2b0ff',
@@ -302,32 +311,17 @@
         series4: '#2b9bf4'
       },
       area: {
-        series1: '#29dac7',
-        series2: '#60f2ca',
-        series3: '#a5f8cd'
-      }
-    }; {% endcomment %}
-    const chartColors = {
-      column: {
-        series1: '#826af9',
-        series2: '#826af9',
-        bg: '#f8d3ff'
-      },
-      donut: {
-        series1: '#fee802',
-        series2: '#3fd0bd',
-        series3: '#826bf8',
-        series4: '#2b9bf4'
-      },
-      area: {
         series1: '#ff6666',
         series2: '#60f2ca',
-        series3: '#a5f8cd'
+        series3: '#a5f8cd',
+        series4: '#ffff80',
+        series5: '#ffc266',
+        series6: '#80ffff',
+        series7: '#94b8b8',
+        series8: '#66b3ff'
       }
     };
     $(document).ready(function () {
-      console.log("counts");
-      console.log(received_counts);
       const areaChartEl = document.querySelector('#lineAreaChartDB'),
       areaChartConfig = {
         chart: {
@@ -362,23 +356,40 @@
             }
           }
         },
-        colors: [chartColors.area.series3, chartColors.area.series2, chartColors.area.series1],
+        colors: [chartColors.area.series3, chartColors.area.series2,chartColors.area.series4,chartColors.area.series5,chartColors.area.series6,chartColors.area.series7,chartColors.area.series8,chartColors.area.series1 ],
         series: [
           {
             name: 'Received',
-            // data: [100, 120, 90, 170, 130, 160, 140, 240, 220, 180, 270, 280, 290]
             data: received_counts
           },
           {
             name: 'Reviewed Documents',
-            // data: [60, 80, 70, 110, 80, 100, 90, 180, 160, 140, 200, 220, 280]
             data: reviewed_counts
           },
           {
+            name: 'Payrolled',
+            data: payrolled_counts
+          },
+          {
+            name: 'Outgoing',
+            data: outgoing_counts
+          },
+          {
+            name: 'Budget',
+            data: budget_counts
+          },
+          {
+            name: 'Journal',
+            data: journal_counts
+          },
+          {
+            name: 'Approval',
+            data: approval_counts
+          },
+          {
             name: 'Returned',
-            // data: [20, 40, 30, 70, 40, 60, 50, 140, 120, 100, 140, 180, 290]
             data: returned_counts
-          }
+          },
         ],
         xaxis: {
           categories: [
