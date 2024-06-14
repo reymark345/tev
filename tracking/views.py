@@ -27,6 +27,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from django.utils import timezone
 from django.template.defaultfilters import date
+import decimal
 
 
 
@@ -653,7 +654,7 @@ def export_status(request):
         cursor.execute("""
             SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
                 tev_incoming.date_travel, tev_incoming.division, tev_incoming.section,charges.name, st.name, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
-                tev_incoming.original_amount, payrolled_charges.amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
+                tev_incoming.original_amount, tev_incoming.final_amount, payrolled_charges.amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
                 tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
             FROM tev_incoming
             INNER JOIN (
@@ -716,7 +717,8 @@ def export_status(request):
         'INCOMING BY',
         'REVIEWED BY',
         'ORIGINAL AMOUNT',
-        'FINAL_AMOUNT',
+        'AMOUT CERTIFIED',
+        'CHARGES AMOUNT',
         'DATE ACTUAL RECEIVED',
         'DATE ENTRY',
         'DATE REVIEWED',
@@ -734,7 +736,21 @@ def export_status(request):
         column_letter = get_column_letter(col_num)
         column_dimensions = worksheet.column_dimensions[column_letter]
 
+
     for tris in rows:
+        original_amount = round(float(tris[15]), 2) if tris[15] is not None else None
+        final_amount = round(float(tris[16]), 2) if tris[16] is not None else None
+        charges_amount = round(float(tris[17]), 2) if tris[17] is not None else 0
+
+        if original_amount is not None:
+            original_amount = '{:.2f}'.format(original_amount)
+
+        if final_amount is not None:
+            final_amount = '{:.2f}'.format(final_amount)
+
+        if charges_amount is not None:
+            charges_amount = '{:.2f}'.format(charges_amount)
+
         row_num += 1
         row = [
             tris[1],  # dv_no
@@ -751,15 +767,16 @@ def export_status(request):
             tris[12],  # status_id
             tris[13],  # incoming_by
             tris[14],  # reviewed_by
-            tris[15],  # original_amount
-            tris[16],  # final_amount
-            tris[17],
+            original_amount,
+            final_amount,
+            charges_amount,
             tris[18],
             tris[19],
             tris[20],  
             tris[21],  
             tris[22],  
-            tris[23],  
+            tris[23], 
+            tris[24], 
         ]       
         for col_num, cell_value in enumerate(row, 1):
             cell = worksheet.cell(row=row_num, column=col_num)
