@@ -219,7 +219,10 @@ def profile(request):
         'image_path': path.image_path,
         'permissions' : role_names,
     }
-    if any(role_name in allowed_roles for role_name in role_names):
+
+    if "Admin" in role_names:
+        return render(request, 'admin_profile.html',context) 
+    elif any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'profile.html',context)
     else:
         return redirect("status")
