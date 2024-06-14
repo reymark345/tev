@@ -305,7 +305,7 @@ class Cluster(models.Model):
 
 class PayrolledCharges(models.Model):
     incoming = models.ForeignKey(TevIncoming, models.DO_NOTHING)
-    amount = models.CharField(max_length=128, blank=True, null=True)
+    amount = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
     charges = models.ForeignKey(Charges, models.DO_NOTHING)
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)
