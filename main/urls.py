@@ -15,4 +15,5 @@ urlpatterns = [
     path('transaction/', include('transaction.urls')),
     path('libraries/', include('libraries.urls')),
     path('generate_accomplishment', views.generate_accomplishment, name='generate-accomplishment'),
+    path('generate_accomplishment_admin', views.generate_accomplishment_admin, name='generate-accomplishment-admin'),
 ]
