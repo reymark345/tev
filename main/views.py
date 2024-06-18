@@ -274,6 +274,109 @@ def generate_accomplishment(request):
                 'payrolled': payrolled_count
             })
         return JsonResponse(results, safe=False)
+
+@login_required(login_url='login')
+@csrf_exempt
+def generate_accomplishment_admin(request):
+    if request.method == 'POST':
+        FStartDate = request.POST.get('start_date')
+        FEndDate = request.POST.get('end_date')
+
+        start_date = parse_date(FStartDate)
+        end_date = parse_date(FEndDate)
+        if not start_date or not end_date:
+            return JsonResponse({'error': 'Invalid date format'}, status=400)
+        if start_date > end_date:
+            return JsonResponse({'error': 'Start date must be before end date'}, status=400)
+        results = []
+        for single_date in daterange(start_date, end_date):
+            day_start = single_date
+            day_end = single_date + timedelta(days=1)
+
+            # sonny count start
+            received_count_sonny = TevIncoming.objects.filter(
+                user_id=5,
+                incoming_in__range=(day_start, day_end)
+            ).count()
+
+            reviewed_count_sonny = TevIncoming.objects.filter(
+                reviewed_by=5,
+                date_reviewed__range=(day_start, day_end)
+            ).count()
+
+            payrolled_count_sonny = TevIncoming.objects.filter(
+                payrolled_by=5,
+                date_payrolled__range=(day_start, day_end)
+            ).count()
+            # end
+
+            # carl count start
+            received_count_carl = TevIncoming.objects.filter(
+                user_id=3,
+                incoming_in__range=(day_start, day_end)
+            ).count()
+
+            reviewed_count_carl = TevIncoming.objects.filter(
+                reviewed_by=3,
+                date_reviewed__range=(day_start, day_end)
+            ).count()
+
+            payrolled_count_carl = TevIncoming.objects.filter(
+                payrolled_by=3,
+                date_payrolled__range=(day_start, day_end)
+            ).count()
+            # end
+
+            # jhoannah count start
+            received_count_jhoannah = TevIncoming.objects.filter(
+                user_id=6,
+                incoming_in__range=(day_start, day_end)
+            ).count()
+
+            reviewed_count_jhoannah = TevIncoming.objects.filter(
+                reviewed_by=6,
+                date_reviewed__range=(day_start, day_end)
+            ).count()
+
+            payrolled_count_jhoannah = TevIncoming.objects.filter(
+                payrolled_by=6,
+                date_payrolled__range=(day_start, day_end)
+            ).count()
+            # end
+
+            # bernard count start
+            received_count_bernard = TevIncoming.objects.filter(
+                user_id=4,
+                incoming_in__range=(day_start, day_end)
+            ).count()
+
+            reviewed_count_bernard = TevIncoming.objects.filter(
+                reviewed_by=4,
+                date_reviewed__range=(day_start, day_end)
+            ).count()
+
+            payrolled_count_bernard = TevIncoming.objects.filter(
+                payrolled_by=4,
+                date_payrolled__range=(day_start, day_end)
+            ).count()
+            # end
+            results.append({
+                'date': single_date.strftime('%B %d, %Y'),
+                'received_sonny': received_count_sonny,
+                'reviewed_sonny': reviewed_count_sonny,
+                'payrolled_sonny': payrolled_count_sonny,
+                'received_carl': received_count_carl,
+                'reviewed_carl': reviewed_count_carl,
+                'payrolled_carl': payrolled_count_carl,
+                'received_jhoannah': received_count_jhoannah,
+                'reviewed_jhoannah': reviewed_count_jhoannah,
+                'payrolled_jhoannah': payrolled_count_jhoannah,
+                'received_bernard': received_count_bernard,
+                'reviewed_bernard': reviewed_count_bernard,
+                'payrolled_bernard': payrolled_count_bernard
+            })
+        return JsonResponse(results, safe=False)
+    
 @csrf_exempt
 def logout(request):
     auth_logout(request)
