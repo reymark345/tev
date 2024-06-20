@@ -19,4 +19,5 @@ urlpatterns = [
     path('date_actual_update', views.date_actual_update, name='date-actual-update'),
     path('transaction_logs', views.transaction_logs, name='transaction-logs'),
     path('logs_load', views.logs_load, name='logs-load'),
+    path('chat', views.chat, name='chat'),
 ]
