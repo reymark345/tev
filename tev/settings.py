@@ -80,7 +80,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tev.wsgi.application'
 DATABASES = {
-    #for server to server
+    # for server to server
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tris',
@@ -128,7 +128,7 @@ DATABASES = {
     #     'HOST': 'localhost',
     #     'PORT': '3306',
     # },
-    # #for localhost INFIMOS database
+    # # #for localhost INFIMOS database
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'finance',
