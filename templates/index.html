@@ -233,18 +233,12 @@
                                 <div data-i18n="Status">Status</div>
                             </a>
                         </li>
-
-                        {% if permissions %}
-                            {% if 'Admin' in permissions %}
-                            <li class="menu-item {% if url_name == 'travel-history' %}active{% endif %}">
-                                <a href="{% url 'travel-history' %}" class="menu-link">
-                                    <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
-                                    <div data-i18n="Travel History">Travel History</div>
-                                </a>
-                            </li>
-                            {% endif %}
-                        {% endif %}
-                        
+                        <li class="menu-item {% if url_name == 'travel-history' %}active{% endif %}">
+                            <a href="{% url 'travel-history' %}" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
+                                <div data-i18n="Travel History">Travel History</div>
+                            </a>
+                        </li>
                         {% if permissions %}
                             {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions %}
                                 <li class="menu-item {% if url_name == 'travel-calendar' %}active{% endif %}">

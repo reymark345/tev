@@ -810,27 +810,14 @@ def travel_history_load(request):
     total = 0
     data = []
     _search = request.GET.get('search[value]')
-    _order_dir = request.GET.get('order[0][dir]')
-    _order_dash = '-' if _order_dir == 'desc' else ''
-    _order_col_num = request.GET.get('order[0][column]')
     user_id = request.session.get('user_id', 0)
-
-    user_details_ = AuthUser.objects.filter(id=user_id)
-
+    user_details_ = AuthUser.objects.filter(id=user_id).first()
     first_name_ = user_details_.first_name
     last_name_ = user_details_.last_name
-
-
-    print(first_name_)
-    print(last_name_)
-    print("testtttt")
-
-    FIdNumber= request.GET.get('FIdNumber')
     FStatus= request.GET.get('FStatus') 
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
     FDivision = request.GET.get('FDivision')
-    NDVNumber= request.GET.get('NDVNumber') 
     DpYear= request.GET.get('DpYear') 
 
     if DpYear == "2023":
@@ -856,7 +843,6 @@ def travel_history_load(request):
         formatted_start_date = None
         formatted_end_date = None
         with connection.cursor() as cursor:
-
             query = """
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
                     tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
@@ -874,9 +860,9 @@ def travel_history_load(request):
                 ON tev_incoming.id = tev_bridge.tev_incoming_id
                 LEFT JOIN tev_outgoing
                 ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-                WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
+                WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL) AND tev_incoming.first_name = %s and last_name = %s
             """
-            params = [f'{formatted_year}%']
+            params = [f'{formatted_year}%', first_name_, last_name_]
 
             if FTransactionCode:
                 query += " AND tev_incoming.code = %s"
@@ -985,11 +971,11 @@ def travel_history_load(request):
                     OR tev_incoming.division LIKE %s
                     OR tev_incoming.section LIKE %s
                     OR tev_outgoing.dv_no LIKE %s)
-                    AND (tev_outgoing.dv_no LIKE %s OR dv_no IS NULL)
+                    AND (tev_outgoing.dv_no LIKE %s OR dv_no IS NULL) AND tev_incoming.first_name = %s and last_name = %s
                 ORDER BY
                     tev_incoming.id DESC;
             """
-            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{formatted_year}%'])
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{formatted_year}%', f'{first_name_}', f'{last_name_}'])
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
@@ -1011,9 +997,9 @@ def travel_history_load(request):
                 ON tev_incoming.id = tev_bridge.tev_incoming_id
                 LEFT JOIN tev_outgoing
                 ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-                WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
+                WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL) AND tev_incoming.first_name = %s and last_name = %s
                 ORDER BY tev_incoming.id DESC;
-            """, [f'{formatted_year}%'])
+            """, [f'{formatted_year}%', first_name_, last_name_])
 
 
             columns = [col[0] for col in cursor.description]
