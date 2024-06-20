@@ -311,9 +311,14 @@
                                         <div data-i18n="Form Controls">Form Controls</div>
                                     </a>
                                 </li>
+
+                                <li class="menu-item {% if url_name == 'chat' %}active{% endif %}">
+                                    <a href="{% url 'chat' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-messages"></i>
+                                        <div data-i18n="Chat">Chat</div>
+                                    </a>
+                                </li>
                                 
-
-
                                 <li class="menu-item {% if url_name == 'sms' %}active{% endif %}">
                                     <a href="{% url 'sms' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-lock"></i>
@@ -567,7 +572,7 @@
         <script src="{% static 'assets/js/form-wizard-numbered.js' %}"></script>
         <script src="{% static 'assets/js/form-wizard-validation.js' %}"></script>
 
-        {% comment %} <script src="{% static 'assets/js/app-chat.js' %}"></script> {% endcomment %}
+        <script src="{% static 'assets/js/app-chat.js' %}"></script>
 
 
         
