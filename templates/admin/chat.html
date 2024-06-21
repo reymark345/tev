@@ -457,9 +457,6 @@
           positionClass: 'toast-top-right',
           rtl: isRtl,
       });
-
-
-
       $('.chat-contact-list-item').on('click', function() {
         var id = $(this).data('id');
         console.log('Clicked item ID:', id);
@@ -471,7 +468,9 @@
               auth_user_id: id    
           }
         }).done(function (data) {
-            toastr.success('Sent successfully', 'Success', toast_options);
+          console.log("testinggg");
+          console.log(data);
+          toastr.success('Search successfully', 'Success', toast_options);
         });
         
       });
