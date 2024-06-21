@@ -8,7 +8,7 @@ urlpatterns = [
     path('users', views.users, name='users'),
     path('form_controls', views.form_controls, name='form_controls'),
     path('sms', views.sms, name='sms'),
-    path('send_sms', views.send_sms, name='send_sms'),
+    path('send_sms', views.send_sms, name='send-sms'),
     path('user_add', views.user_add, name='user-add'),
     path('user_edit', views.user_edit, name='user-edit'),
     path('role_edit', views.role_edit, name='role-edit'),
@@ -20,4 +20,6 @@ urlpatterns = [
     path('transaction_logs', views.transaction_logs, name='transaction-logs'),
     path('logs_load', views.logs_load, name='logs-load'),
     path('chat', views.chat, name='chat'),
+    path('chat_data', views.chat_data, name='chat-data'),
+    path('send_chat', views.send_chat, name='send-chat')
 ]

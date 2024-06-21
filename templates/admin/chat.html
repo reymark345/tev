@@ -79,7 +79,7 @@
                           </li>
 
                           {% for row in combined_data %}
-                            <li class="chat-contact-list-item">
+                            <li class="chat-contact-list-item" data-id="{{ row.id }}">
                               <a class="d-flex align-items-center">
                                 <div class="flex-shrink-0 avatar avatar-online">
                                   <img src="{{row.image_path}}" alt="Avatar" class="rounded-circle" />
@@ -334,6 +334,8 @@
                             <input
                               class="form-control message-input border-0 me-3 shadow-none"
                               placeholder="Type your message here"
+                              id="my-message"
+                              name="my-message"
                             />
                             <div class="message-actions d-flex align-items-center">
                               {% comment %} <i class="speech-to-text ti ti-microphone ti-sm cursor-pointer"></i>
@@ -341,7 +343,7 @@
                                 <i class="ti ti-photo ti-sm cursor-pointer mx-3"></i>
                                 <input type="file" id="attach-doc" hidden />
                               </label> {% endcomment %}
-                              <button class="btn btn-primary d-flex send-msg-btn">
+                              <button class="btn btn-primary d-flex send-msg-btn" id="send-chat-btn">
                                 <i class="ti ti-send me-md-1 me-0"></i>
                                 <span class="align-middle d-md-inline-block d-none">Send</span>
                               </button>
@@ -444,31 +446,66 @@
 {% endblock %} {% block footer_scripts %}
 <script>
     $(document).ready(function () {
-        const toast_options = (toastr.options = {
-            maxOpened: 1,
-            autoDismiss: true,
-            closeButton: true,
-            newestOnTop: true,
-            progressBar: true,
-            positionClass: 'toast-top-right',
-            rtl: isRtl,
+      let staff_id = 0;
+      const ChatMessage = jQuery(document.querySelector('[name="my-message"]'));
+      const toast_options = (toastr.options = {
+          maxOpened: 1,
+          autoDismiss: true,
+          closeButton: true,
+          newestOnTop: true,
+          progressBar: true,
+          positionClass: 'toast-top-right',
+          rtl: isRtl,
+      });
+
+
+
+      $('.chat-contact-list-item').on('click', function() {
+        var id = $(this).data('id');
+        console.log('Clicked item ID:', id);
+        staff_id = id;
+        $.ajax({
+          type: 'GET',
+          url: "{% url 'chat-data' %}",
+          data:{
+              auth_user_id: id    
+          }
+        }).done(function (data) {
+            toastr.success('Sent successfully', 'Success', toast_options);
         });
         
-        $("#send_btn").click(function(){    
-            let contact_no =  $('#contact_no').val();
-            let message =  $('#sms_message').val();
-            $.ajax({
-                type: 'POST',
-                url: "{% url 'send_sms' %}",
-                data:{
-                    contact: contact_no,
-                    message: message        
-                }
-              }).done(function (data) {
-                toastr.success('Sent successfully', 'Success', toast_options);
-              });
+      });
+      $("#send-chat-btn").click(function(){  
+        console.log("testtt-staff_id");
+        console.log(staff_id);
+        $.ajax({
+          type: 'POST',
+          url: "{% url 'send-chat' %}",
+          data:{
+              message: ChatMessage.val(),
+              stf_id: staff_id
+          }
+        }).done(function (data) {
+          toastr.success('Sent successfully', 'Success', toast_options);
         });
-   
+
+      });
+      
+      $("#send_btn").click(function(){    
+          let contact_no =  $('#contact_no').val();
+          let message =  $('#sms_message').val();
+          $.ajax({
+              type: 'POST',
+              url: "{% url 'send-sms' %}",
+              data:{
+                  contact: contact_no,
+                  message: message        
+              }
+            }).done(function (data) {
+              toastr.success('Sent successfully', 'Success', toast_options);
+          });
+      });
+  
     })
 </script>
 {% endblock footer_scripts %}

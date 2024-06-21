@@ -10,7 +10,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, StaffDetails,RoleDetails, RolePermissions, SystemConfiguration, TransactionLogs, Division )
+from main.models import (AuthUser, StaffDetails,RoleDetails, RolePermissions, SystemConfiguration, TransactionLogs, Division, Chat )
 import json 
 from django.core.serializers import serialize
 import datetime
@@ -96,6 +96,7 @@ def chat(request):
     for auth_user in AuthUser.objects.all():
         staff_detail = StaffDetails.objects.filter(user=auth_user).first()
         combined_data.append({
+            'id': auth_user.id,
             'first_name': auth_user.first_name.title(),
             'last_name': auth_user.last_name.title(),
             'image_path': staff_detail.image_path if staff_detail else None
@@ -113,6 +114,58 @@ def chat(request):
         return render(request, 'admin/chat.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def chat_data(request):
+    allowed_roles = ["Admin"]    
+    user_id = request.session.get('user_id', 0)
+    AuthUserId = request.POST.get('auth_user_id')
+    
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    date_actual = SystemConfiguration.objects.filter().first().date_actual
+    path = StaffDetails.objects.filter(user_id = user_id).first()
+    combined_data = []
+
+    Chat.objects.filter(to_user = AuthUserId)
+
+
+    for auth_user in AuthUser.objects.all():
+        staff_detail = StaffDetails.objects.filter(user=auth_user).first()
+        combined_data.append({
+            'id': auth_user.id,
+            'first_name': auth_user.first_name.title(),
+            'last_name': auth_user.last_name.title(),
+            'image_path': staff_detail.image_path if staff_detail else None
+        })
+
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
+            'is_actual_date': date_actual,
+            'permissions' : role_names,
+            'image_path': path.image_path,
+            'role_details': RoleDetails.objects.filter().order_by('role_name'),
+            'combined_data': combined_data
+        }
+        return render(request, 'admin/chat.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+
+@csrf_exempt 
+@login_required(login_url='login')
+def send_chat(request):
+    if request.method == 'GET':
+        user_id = request.session.get('user_id', 0)
+        auth_user_id = request.POST.get('auth_user_id')
+        chat_message = request.POST.get('message')
+        stf_id = request.POST.get('stf_id')
+        
+        message = Chat(from_user=user_id,to_user =stf_id, message= chat_message, created_at=date_time.datetime.now())
+        message.save()
+
+        return JsonResponse({'data': 'success'})
     
 def send_notification(message, contact_number):
     url = 'https://wiserv.dswd.gov.ph/soap/?wsdl'
