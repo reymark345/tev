@@ -21,7 +21,7 @@ from django.db.models import Max
 from django.utils import timezone
 from django.db import connection
 from suds.client import Client
-
+from django.db.models import Q
 
 
 def is_member_of_inventory_staff(user):
@@ -152,33 +152,37 @@ def chat(request):
 #         return render(request, 'admin/chat.html', context)
 #     else:
 #         return render(request, 'pages/unauthorized.html')
-
+@csrf_exempt 
 @login_required(login_url='login')
 def chat_data(request):
     allowed_roles = ["Admin"]
     user_id = request.session.get('user_id', 0)
     auth_user_id = request.POST.get('auth_user_id')
-
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
-
     combined_data = []
-
-    messages = Chat.objects.filter(to_user=auth_user_id).values('from_user', 'to_user', 'message', 'seen', 'created_at')
+    # messages = Chat.objects.filter(to_user=auth_user_id).values('from_user', 'to_user', 'message', 'seen', 'created_at')
+    messages = Chat.objects.filter(Q(to_user=auth_user_id) | Q(from_user=auth_user_id)).values('from_user', 'to_user', 'message', 'seen', 'created_at')
     messages_list = list(messages)
-
+    print(messages_list)
+    print(auth_user_id)
+    print("tedstttt")
     try:
-        auth_user = AuthUser.objects.get(id=user_id)
+        auth_user = AuthUser.objects.get(id=auth_user_id)
         staff_detail = StaffDetails.objects.filter(user=auth_user).first()
+        staff_detail_img_path = StaffDetails.objects.filter(user=user_id).first()
         combined_data.append({
             'id': auth_user.id,
+            'login_id': user_id,
             'first_name': auth_user.first_name.title(),
             'last_name': auth_user.last_name.title(),
-            'image_path': staff_detail.image_path if staff_detail else None
+            'image_path': staff_detail.image_path if staff_detail else None,
+            'position': staff_detail.position if staff_detail else None,
+            'image_path_user': staff_detail_img_path.image_path if staff_detail else None,
         })
     except AuthUser.DoesNotExist:
-        pass  # Handle the case where the user does not exist
+        pass
 
     context = {
         'permissions': role_names,
