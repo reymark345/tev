@@ -141,7 +141,7 @@
             let message =  $('#sms_message').val();
             $.ajax({
                 type: 'POST',
-                url: "{% url 'send_sms' %}",
+                url: "{% url 'send-sms' %}",
                 data:{
                     contact: contact_no,
                     message: message        

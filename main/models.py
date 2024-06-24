@@ -333,11 +333,10 @@ class Remarks_r(models.Model):
         db_table = 'remarks_r'
 
 class Chat(models.Model):
-    user = models.OneToOneField(AuthUser, on_delete=models.CASCADE)
     from_user = models.IntegerField()
+    to_user = models.IntegerField()
     message = models.CharField(max_length=50, blank=True, null=True, default=0)
     seen = models.IntegerField(default=0)
-    created_by = models.IntegerField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
 
     class Meta:
