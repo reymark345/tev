@@ -332,21 +332,14 @@
                 var login_id = userData.login_id;
                 // console.log("user_id");
                 // console.log(user_id);
-
                 if (data.combined_data && data.combined_data.length > 0) {
-
                   $('.chat-contact-info .txt-fullname').text(userData.first_name + ' ' + userData.last_name);
                   $('.chat-contact-info .spn-position').text(userData.position);
                   $('#user-profile-img').attr('src', userData.image_path);
-                  // console.log('ID:', userData.id);
                 }
 
                 if (data.messages && data.messages.length > 0) {
-
-                  
-
-                  data.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); // Sort messages by created_at
-
+                  data.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                   data.messages.forEach(function(message) {
                       var messageClass = message.from_user === login_id ? 'chat-message-right' : 'chat-message';
                       var formattedDate = new Date(message.created_at).toLocaleString();
