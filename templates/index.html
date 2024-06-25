@@ -1,3 +1,4 @@
+Can't create, edit or upload … Not enough storage. Get 100 GB of storage for ₱89.00 ₱22.25/month for 2 months.
 {% load staticfiles %}
 <!DOCTYPE html>
 
@@ -369,9 +370,16 @@
                                 </li>
                                 <!--/ Style Switcher -->
 
-                      
-
-                   
+                                <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
+                                    <a
+                                      class="nav-link hide-arrow"
+                                      href="{% url 'chat-staff' %}"
+                                    >
+                                      <i class="ti ti-bell ti-md"></i>
+                                      <span class="badge bg-danger rounded-pill badge-notifications">1</span>
+                                    </a>
+                                </li>
+                                  <!--/ Notification -->
 
                                 <!-- User -->
                                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
