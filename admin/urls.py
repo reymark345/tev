@@ -21,5 +21,8 @@ urlpatterns = [
     path('logs_load', views.logs_load, name='logs-load'),
     path('chat', views.chat, name='chat'),
     path('chat_data', views.chat_data, name='chat-data'),
+    path('chat_staff', views.chat_staff, name='chat-staff'),
+    path('chat_data_staff', views.chat_data_staff, name='chat-data-staff'),
     path('send_chat', views.send_chat, name='send-chat')
+
 ]

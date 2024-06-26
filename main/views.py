@@ -254,7 +254,7 @@ def generate_accomplishment(request):
 
             received_count = TevIncoming.objects.filter(
                 user_id=user_id,
-                incoming_in__range=(day_start, day_end)
+                updated_at__range=(day_start, day_end)
             ).count()
 
             reviewed_count = TevIncoming.objects.filter(
