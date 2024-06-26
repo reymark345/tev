@@ -199,7 +199,7 @@ def chat_staff(request):
     path = StaffDetails.objects.filter(user_id = user_id).first()
     combined_data = []
 
-    for auth_user in AuthUser.objects.filter(id=1):
+    for auth_user in AuthUser.objects.filter(id=2):
         staff_detail = StaffDetails.objects.filter(user=auth_user).first()
         combined_data.append({
             'id': auth_user.id,
