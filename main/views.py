@@ -256,6 +256,7 @@ def generate_accomplishment(request):
                 user_id=user_id,
                 updated_at__range=(day_start, day_end)
             ).count()
+            
 
             reviewed_count = TevIncoming.objects.filter(
                 reviewed_by=user_id,
@@ -296,7 +297,7 @@ def generate_accomplishment_admin(request):
             # sonny count start
             received_count_sonny = TevIncoming.objects.filter(
                 user_id=5,
-                incoming_in__range=(day_start, day_end)
+                updated_at__range=(day_start, day_end)
             ).count()
 
             reviewed_count_sonny = TevIncoming.objects.filter(
@@ -313,7 +314,7 @@ def generate_accomplishment_admin(request):
             # carl count start
             received_count_carl = TevIncoming.objects.filter(
                 user_id=3,
-                incoming_in__range=(day_start, day_end)
+                updated_at__range=(day_start, day_end)
             ).count()
 
             reviewed_count_carl = TevIncoming.objects.filter(
@@ -330,7 +331,7 @@ def generate_accomplishment_admin(request):
             # jhoannah count start
             received_count_jhoannah = TevIncoming.objects.filter(
                 user_id=6,
-                incoming_in__range=(day_start, day_end)
+                updated_at__range=(day_start, day_end)
             ).count()
 
             reviewed_count_jhoannah = TevIncoming.objects.filter(
@@ -347,7 +348,7 @@ def generate_accomplishment_admin(request):
             # bernard count start
             received_count_bernard = TevIncoming.objects.filter(
                 user_id=4,
-                incoming_in__range=(day_start, day_end)
+                updated_at__range=(day_start, day_end)
             ).count()
 
             reviewed_count_bernard = TevIncoming.objects.filter(
