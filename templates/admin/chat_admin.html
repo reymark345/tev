@@ -1,3 +1,4 @@
+Can't create, edit or upload … Not enough storage. Get 100 GB of storage for ₱89.00 ₱22.25/month for 2 months.
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
 <style>
   #form-message {
@@ -163,7 +164,7 @@
                         </div>
                         <!-- Chat message form -->
                         <div class="chat-history-footer shadow-sm" id="form-message">
-                          <form class="form-send-message d-flex justify-content-between align-items-center">
+                          <form class="form-send-message-custom d-flex justify-content-between align-items-center">
                             <input
                               class="form-control message-input border-0 me-3 shadow-none"
                               placeholder="Type your message here"
@@ -172,11 +173,6 @@
                               autocomplete="off"
                             />
                             <div class="message-actions d-flex align-items-center">
-                              {% comment %} <i class="speech-to-text ti ti-microphone ti-sm cursor-pointer"></i>
-                              <label for="attach-doc" class="form-label mb-0">
-                                <i class="ti ti-photo ti-sm cursor-pointer mx-3"></i>
-                                <input type="file" id="attach-doc" hidden />
-                              </label> {% endcomment %}
                               <button class="btn btn-primary d-flex send-msg-btn" id="send-chat-btn">
                                 <i class="ti ti-send me-md-1 me-0"></i>
                                 <span class="align-middle d-md-inline-block d-none">Send</span>
@@ -284,7 +280,11 @@
       // form-message
 
       let staff_id = 0;
+      const chatMessagesContainer = document.querySelector('#chat-messages-container');
       const ChatMessage = jQuery(document.querySelector('[name="my-message"]'));
+      const formSendMessageCustom = document.querySelector('.form-send-message-custom');
+      const messageInput = document.querySelector('.message-input');
+      const chatHistoryBody = document.querySelector('.chat-history-body');
       const toast_options = (toastr.options = {
           maxOpened: 1,
           autoDismiss: true,
@@ -294,6 +294,7 @@
           positionClass: 'toast-top-right',
           rtl: isRtl,
       });
+
       // $('.chat-contact-list-item').on('click', function() {
       //   var id = $(this).data('id');
       //   console.log('Clicked item ID:', id);
@@ -317,10 +318,9 @@
           staff_id = id;
           $.ajax({
             type: 'POST',
-            url: "{% url 'chat-data' %}",
+            url: "{% url 'chat-data-staff' %}",
             data: {
-                auth_user_id: id,
-                csrfmiddlewaretoken: '{{ csrf_token }}'
+                auth_user_id: id
             },
             success: function(response) {
                 $('#chat-messages-container').empty();
@@ -342,6 +342,8 @@
                   data.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                   data.messages.forEach(function(message) {
                       var messageClass = message.from_user === login_id ? 'chat-message-right' : 'chat-message';
+                      console.log("testtt");
+                      console.log(messageClass);
                       var formattedDate = new Date(message.created_at).toLocaleString();
                       var messageHtml = `
                           <li class="chat-message ${messageClass}">
@@ -373,6 +375,7 @@
 
                       $('#chat-messages-container').append(messageHtml);
                   });
+                  scrollToBottom();
               }
                 // toastr.success('Search successful', 'Success', toast_options);
             },
@@ -391,8 +394,6 @@
           toastr.error('Select User first', 'Invalid', toast_options);
         }
         else{
-          console.log("testtt-staff_id");
-          console.log(staff_id);
           $.ajax({
             type: 'POST',
             url: "{% url 'send-chat' %}",
@@ -405,7 +406,8 @@
           });
         }
       });
-      
+
+
       $("#send_btn").click(function(){    
           let contact_no =  $('#contact_no').val();
           let message =  $('#sms_message').val();
@@ -420,6 +422,51 @@
               toastr.success('Sent successfully', 'Success', toast_options);
           });
       });
+
+      formSendMessageCustom.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+        if (message) {
+          console.log("Sending message: ", message);
+          // Create a new list item for the message
+          const li = document.createElement('li');
+          li.className = 'chat-message chat-message-right';
+    
+          const messageHtml = `
+            <div class="d-flex overflow-hidden">
+              <div class="chat-message-wrapper flex-grow-1">
+                <div class="chat-message-text">
+                  <p class="mb-0">${message}</p>
+                </div>
+                <div class="text-end text-muted mt-1">
+                  <i class="ti ti-checks ti-xs me-1 text-success"></i>
+                  <small>${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+                </div>
+              </div>
+              <div class="user-avatar flex-shrink-0 ms-3">
+                <div class="avatar avatar-sm">
+                  <img src="{{image_path}}" alt="Avatar" class="rounded-circle" />
+                </div>
+              </div>
+            </div>
+          `;
+    
+          li.innerHTML = messageHtml;
+          chatMessagesContainer.appendChild(li);
+          messageInput.value = ''; // Clear the input field
+          scrollToBottom(); // Ensure the chat scrolls to the bottom
+        }
+    });
+        // Chat history scrollbar
+    if (chatHistoryBody) {
+      new PerfectScrollbar(chatHistoryBody, {
+        wheelPropagation: false,
+        suppressScrollX: true
+      });
+    }
+    function scrollToBottom() {
+      chatHistoryBody.scrollTo(0, chatHistoryBody.scrollHeight);
+    }
   
     })
 </script>
