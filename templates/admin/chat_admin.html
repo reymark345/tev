@@ -277,6 +277,34 @@ Can't create, edit or upload â€¦ Not enough storage. Get 100 GB of storage for â
 <script>
 
     $(document).ready(function () {
+      let url = `ws://${window.location.host}/ws/socket-server/`
+      const chatSocket = new WebSocket(url)
+
+      chatSocket.onmessage = function(e){
+          let data = JSON.parse(e.data)
+          console.log('Data:', data)
+
+          if(data.type === 'chat'){
+              let messages = document.getElementById('messages')
+
+              messages.insertAdjacentHTML('beforeend', `<div>
+                                      <p>${data.message}</p>
+                                  </div>`)
+          }
+      }
+
+      // let form = document.getElementById('form')
+      // form.addEventListener('submit', (e)=> {
+      //     e.preventDefault()
+      //     let message = e.target.message.value 
+      //     chatSocket.send(JSON.stringify({
+      //         'message':message
+      //     }))
+      //     form.reset()
+      // })
+
+      
+
       // form-message
 
       let staff_id = 0;
@@ -324,7 +352,7 @@ Can't create, edit or upload â€¦ Not enough storage. Get 100 GB of storage for â
             },
             success: function(response) {
                 $('#chat-messages-container').empty();
-                console.log("Request successful");
+                console.log("Request successfulffff");
                 console.log(response);
                 var data = response.data;
                 var userData = data.combined_data[0];
@@ -390,6 +418,7 @@ Can't create, edit or upload â€¦ Not enough storage. Get 100 GB of storage for â
 
 
       $("#send-chat-btn").click(function(){  
+        alert("sendddd");
         if(staff_id ==0){
           toastr.error('Select User first', 'Invalid', toast_options);
         }
@@ -408,7 +437,7 @@ Can't create, edit or upload â€¦ Not enough storage. Get 100 GB of storage for â
       });
 
 
-      $("#send_btn").click(function(){    
+      $("#send_btn").click(function(){ 
           let contact_no =  $('#contact_no').val();
           let message =  $('#sms_message').val();
           $.ajax({

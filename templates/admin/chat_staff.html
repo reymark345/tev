@@ -173,7 +173,7 @@ Can't create, edit or upload â€¦ Not enough storage. Get 100 GB of storage for â
                               autocomplete="off"
                             />
                             <div class="message-actions d-flex align-items-center">
-                              <button class="btn btn-primary d-flex send-msg-btn" id="send-chat-btn">
+                              <button class="btn btn-primary d-flex send-msg-btn" id="send-chat-btn-staff">
                                 <i class="ti ti-send me-md-1 me-0"></i>
                                 <span class="align-middle d-md-inline-block d-none">Send</span>
                               </button>
@@ -389,7 +389,7 @@ Can't create, edit or upload â€¦ Not enough storage. Get 100 GB of storage for â
       });
 
 
-      $("#send-chat-btn").click(function(){  
+      $("#send-chat-btn-staff").click(function(){  
         if(staff_id ==0){
           toastr.error('Select User first', 'Invalid', toast_options);
         }
