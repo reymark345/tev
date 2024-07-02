@@ -24,6 +24,7 @@ from decimal import Decimal
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 from django.db import transaction
+import pytz
 
 
 def generate_code():
@@ -1924,7 +1925,8 @@ def retrieve_employee(request):
 
     for row in list_employee:
         date_travel_str = row.date_travel
-        date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=timezone.utc) for date_str in date_travel_str.split(',')]
+        # date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=timezone.utc) for date_str in date_travel_str.split(',')]
+        date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=pytz.UTC) for date_str in date_travel_str.split(',')]
         date_travel_formatted = ', '.join(date_travel.strftime("%b. %d %Y") for date_travel in date_travel_list)
         first_name = row.first_name if row.first_name else ''
         middle_name = row.middle_name if row.middle_name else ''
