@@ -21,6 +21,7 @@
                             <th>Sex</th>
                             <th>Address</th>
                             <th>Role</th>
+                            <th>Is Staff</th>
                             <th>Status</th>
                             <th>Action</th>
                           
@@ -257,6 +258,20 @@
             />
         </div>
 
+        <div class="col-12 col-md-12">
+            <label class="form-label">Accounting Staff?</label>
+            <select
+            id="modalstaff"
+            name="ModalStaff"
+            class="form-select"
+            aria-label="Default select example"
+            >
+            <option></option>
+            <option value="false">No</option>
+            <option value="true">Yes</option>
+            </select>
+        </div>
+
         <div class="col-12">
             <label class="switch">
             <input type="checkbox" class="switch-input" />
@@ -366,6 +381,18 @@
                 </div>
               </div>
             </div>
+
+            <div class="col-sm-12 is_staff">
+                <label class="form-label" for="is_staff">Accounting Staff?</label>
+                <div class="input-group input-group-merge">
+                  <div class="col-12 col-xxl-12 col-xl-12">
+                    <select id="is_staff" class="select2 form-select is_staff" name="IsStaff">
+                      <option value="0">No</option>
+                      <option value="1">Yes</option>
+                  </select>
+                  </div>
+                </div>
+              </div>
               
               <div class="col-sm-12 user-status">
                 <label class="form-label" for="status">Status</label>
@@ -508,6 +535,7 @@
             Password = jQuery(document.querySelector('[name="Password"]')),
             ConfirmPassword = jQuery(document.querySelector('[name="ConfirmPassword"]')),
             Roles = jQuery(document.querySelector('[name="Roles"]')),
+            IsStaff = jQuery(document.querySelector('[name="IsStaff"]')),
             Email = jQuery(document.querySelector('[name="Email"]')),
             Sex = jQuery(document.querySelector('[name="Sex"]')),
             Address = jQuery(document.querySelector('[name="Address"]')),
@@ -523,6 +551,7 @@
             ModalSex = jQuery(document.querySelector('[name="ModalSex"]')),
             ModalEmail = jQuery(document.querySelector('[name="ModalEmail"]')),
             ModalAddress = jQuery(document.querySelector('[name="ModalAddress"]')),
+            ModalStaff = jQuery(document.querySelector('[name="ModalStaff"]')),
             ModalPosition = jQuery(document.querySelector('[name="ModalPosition"]'));
 
         const UpdateRoleFormValidation = document.getElementById('update-role'),
@@ -560,6 +589,7 @@
                 { data: 'sex' },
                 { data: 'address' },
                 { data: 'role_name' },
+                { data: 'is_staff' },
                 { data: 'is_active' },
                 { data: 'id' },
                 
@@ -580,7 +610,7 @@
                 },
 
                 {
-                    targets: -3,
+                    targets: -4,
                     render: function (data) {
                         if (data =="Management") {
                             return '<span class="badge bg-label-warning">'+data+'</span>'
@@ -593,6 +623,17 @@
                         }
                         else{
                             return '<span class="badge bg-label-primary">'+data+'</span>'
+                        }
+                    },
+                },
+                {
+                    targets: -3,
+                    render: function (data) {
+                        if (data ==0) {
+                            return '<span class="badge bg-label-primary">No</span>'
+                        }
+                        else{
+                            return '<span class="badge bg-label-success">Yes</span>'
                         }
                     },
                 },
@@ -644,7 +685,9 @@
                             let fields = data[0].fields
                             let pk = data[0].pk
                             let user = $('#user')
-        
+
+                            console.log(fields.is_staff);
+                            console.log("fieldaaas");
                             ModalFname.val(fields.first_name);
                             ModalLname.val(fields.last_name);
                             ModalUsername.val(fields.username);
@@ -653,8 +696,8 @@
                             ModalEmail.val(fields.email);
                             ModalAddress.val(fields.address);
                             ModalPosition.val(fields.position);
+                            ModalStaff.val(fields.is_staff.toString()).trigger('change');
                             ModalID.val(pk);
-                         
                         }
                     })
                 }),
@@ -766,6 +809,13 @@
                     validators: {
                         notEmpty: {
                             message: 'Select Sex',
+                        },
+                    },
+                },
+                ModalStaff: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Required !',
                         },
                     },
                 },
@@ -959,6 +1009,13 @@
                     validators: {
                         notEmpty: {
                             message: 'Enter Sex',
+                        },
+                    },
+                },
+                IsStaff: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Is Staff?',
                         },
                     },
                 },
@@ -1218,7 +1275,16 @@
                 dropdownParent: Roles.parent(),
                 allowClear: true,
             })
-        }	
+        }
+        
+        if (IsStaff.length) {
+            IsStaff.wrap('<div class="position-relative"></div>')
+            IsStaff.select2({
+                placeholder: 'Choose data',
+                dropdownParent: IsStaff.parent(),
+                allowClear: true,
+            })
+        }
         if (Sex.length) {
             Sex.wrap('<div class="position-relative"></div>')
             Sex.select2({

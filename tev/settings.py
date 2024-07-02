@@ -45,7 +45,10 @@ INSTALLED_APPS = [
     'libraries',
     'django_filters',
     'rest_framework',
+    'channels',
 ]
+
+ASGI_APPLICATION = 'tev.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -80,7 +83,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'tev.wsgi.application'
 DATABASES = {
-    #for server to server
+    # #for server to server
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tris',
