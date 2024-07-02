@@ -111,7 +111,7 @@ def chat(request):
             'role_details': RoleDetails.objects.filter().order_by('role_name'),
             'combined_data': combined_data
         }
-        return render(request, 'admin/chat.html', context)
+        return render(request, 'admin/chat_admin.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
@@ -231,8 +231,8 @@ def chat_data_staff(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
     combined_data = []
-    messages = Chat.objects.filter(Q(to_user=user_id) | Q(from_user=user_id)).values('from_user', 'to_user', 'message', 'seen', 'created_at')
-    messages_list = list(messages)
+    messages = Chat.objects.filter(Q(to_user=auth_user_id) | Q(from_user=auth_user_id)).values('from_user', 'to_user', 'message', 'seen', 'created_at')
+    messages_list = list(messages)  
 
     try:
         auth_user = AuthUser.objects.get(id=auth_user_id)
@@ -374,6 +374,7 @@ def user_add(request):
     email = request.POST.get('Email')
     image = request.POST.get('ImagePath')
     role_ids = request.POST.getlist('Roles')
+    staff = request.POST.get('IsStaff')
     superuser = 0
     sex = request.POST.get('Sex')
     address = request.POST.get('Address')
@@ -391,7 +392,7 @@ def user_add(request):
     else:
         division_name = Division.objects.filter(name=division).first()
         if division_name:
-            user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,date_joined=date_time.datetime.now())
+            user_add = AuthUser(password = password,is_superuser=superuser,username=user_name,first_name=firstname,last_name=lastname,email=email,is_staff = staff, date_joined=date_time.datetime.now())
             user_add.save()
             max_id = AuthUser.objects.aggregate(max_id=Max('id'))['max_id']
             
@@ -442,11 +443,16 @@ def user_update(request):
         position = request.POST.get('ModalPosition')
         user_id = request.session.get('user_id', 0)
         status = request.POST.get('ModalStatus')
+        staff = 1 if request.POST.get('ModalStaff') == 'true' else 0
+
+        print("Testttt")
+        print(staff)
+
         if AuthUser.objects.filter(username=user_name).exclude(id=id):
             return JsonResponse({'data': 'error', 'message': 'Username Taken'})
         
         else:
-            AuthUser.objects.filter(id=id).update(username=user_name,first_name=firstname,last_name=lastname,email=email,is_active = status)
+            AuthUser.objects.filter(id=id).update(username=user_name,first_name=firstname,last_name=lastname,email=email, is_staff = staff, is_active = status)
             StaffDetails.objects.filter(user_id=id).update(sex=sex,address=address,position=position)
             return JsonResponse({'data': 'success'})
     except Exception as e:
@@ -515,7 +521,7 @@ def user_load(request):
     data = []
 
     user_data = """
-        SELECT t1.id, t1.username, t1.first_name, t1.last_name, t2.position, t1.email, t2.sex, t2.address, GROUP_CONCAT(t4.role_name SEPARATOR ', ') AS role, t2.id AS staff_id, t1.is_active
+        SELECT t1.id, t1.username, t1.first_name, t1.last_name, t2.position, t1.email, t1.is_staff, t2.sex, t2.address, GROUP_CONCAT(t4.role_name SEPARATOR ', ') AS role, t2.id AS staff_id, t1.is_active
         FROM auth_user AS t1 
         LEFT JOIN staff_details AS t2 ON t2.user_id = t1.id
         LEFT JOIN role_permissions AS t3 ON t3.user_id = t1.id
@@ -550,6 +556,7 @@ def user_load(request):
             'last_name': item['last_name'],
             'email': item['email'],
             'is_active': item['is_active'],
+            'is_staff': item['is_staff'],
         }
         data.append(user_data_item)
 

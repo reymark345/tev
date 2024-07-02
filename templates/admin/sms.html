@@ -137,6 +137,7 @@
         });
         
         $("#send_btn").click(function(){    
+
             let contact_no =  $('#contact_no').val();
             let message =  $('#sms_message').val();
             $.ajax({
@@ -148,7 +149,7 @@
                 }
               }).done(function (data) {
                 toastr.success('Sent successfully', 'Success', toast_options);
-              });
+            });
         });
    
     })
