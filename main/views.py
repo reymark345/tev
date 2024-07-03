@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, TevBridge, RolePermissions, Division)
+from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, TevBridge, RolePermissions, Division, AuthUser)
 from django.utils.dateparse import parse_date
 from django.db.models import Count, Case, When, IntegerField, Subquery
 from datetime import timedelta, date
@@ -210,8 +210,19 @@ def profile(request):
     role_names = [entry['role_name'] for entry in role_details]
     path = StaffDetails.objects.filter(user_id = user_id).first()
     division = Division.objects.filter(id = path.division_id).first()
+    data = []
+    
+    tris_staff = AuthUser.objects.filter(is_staff=1)
+
+    for user in tris_staff:
+        user.first_name = user.first_name.capitalize()
+        user.last_name = user.last_name.capitalize()
+
+    print(tris_staff)
+    print("testingg")
 
     context = {
+        'staff': tris_staff,
         'id_number': path.id_number, 
         'position': path.position, 
         'sex': path.sex,  
@@ -226,6 +237,7 @@ def profile(request):
         return render(request, 'profile.html',context)
     else:
         return redirect("status")
+    
     
 
     
