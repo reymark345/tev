@@ -26,7 +26,8 @@
     justify-content: center; /* Horizontally center the items */
     text-align: center; /* Ensure text is centered */
   }
-  
+
+
   
 </style>
             <!-- Content -->
@@ -171,99 +172,52 @@
               </div>
             
      
-
-              <!-- Default Wizard -->
-                <div class="col-12 mb-4">
-                  <div class="bs-stepper wizard-numbered mt-2">
-                    <div class="bs-stepper-header">
-                      {% for user in staff %}
-                      <div class="step" data-target="#account-details-{{ forloop.counter }}">
-                        <button type="button" class="step-trigger">
-                          <span class="bs-stepper-circle">{{ forloop.counter }}</span>
-                          <span class="bs-stepper-label">
-                            <span class="bs-stepper-title">{{ user.first_name }} {{ user.last_name }}</span>
-                            <span class="bs-stepper-subtitle">Accomplishment</span>
-                          </span>
-                        </button>
-                      </div>
-                      {% endfor %}
-
-
-                      {% comment %} <div class="step" data-target="#account-details">
-                        <button type="button" class="step-trigger">
-                          <span class="bs-stepper-circle">1</span>
-                          <span class="bs-stepper-label">
-                            <span class="bs-stepper-title">Sonny Gocela</span>
-                            <span class="bs-stepper-subtitle">Accomplishment</span>
-                          </span>
-                        </button>
-                      </div>
-                      <div class="line">
-                        <i class="ti ti-chevron-right"></i>
-                      </div>
-                      <div class="step" data-target="#personal-info">
-                        <button type="button" class="step-trigger">
-                          <span class="bs-stepper-circle">2</span>
-                          <span class="bs-stepper-label">
-                            <span class="bs-stepper-title">Carl Jubert Tambong</span>
-                            <span class="bs-stepper-subtitle">Accomplishment</span>
-                          </span>
-                        </button>
-                      </div>
-                      <div class="line">
-                        <i class="ti ti-chevron-right"></i>
-                      </div>
-                      <div class="step" data-target="#social-links">
-                        <button type="button" class="step-trigger">
-                          <span class="bs-stepper-circle">3</span>
-                          <span class="bs-stepper-label">
-                            <span class="bs-stepper-title">Jhoannah Paula Ramos</span>
-                            <span class="bs-stepper-subtitle">Accomplishment</span>
-                          </span>
-                        </button>
-                      </div>
-                      <div class="line">
-                        <i class="ti ti-chevron-right"></i>
-                      </div>
-                      <div class="step" data-target="#bernard">
-                        <button type="button" class="step-trigger">
-                          <span class="bs-stepper-circle">4</span>
-                          <span class="bs-stepper-label">
-                            <span class="bs-stepper-title">Bernard Maglupay</span>
-                            <span class="bs-stepper-subtitle">Accomplishment</span>
-                          </span>
-                        </button>
-                      </div> {% endcomment %}
-
+              <div class="col-12 mb-4">
+                
+                <div class="bs-stepper wizard-numbered mt-2">
+                  <div class="bs-stepper-header">
+                    <div class="line"></div>
+                    {% for user in staff %}
+                    <div class="step" data-target="#account-details-{{ forloop.counter }}">
+                      <button type="button" class="step-trigger">
+                        <span class="bs-stepper-circle">{{ forloop.counter }}</span>
+                        <span class="bs-stepper-label">
+                          <span class="bs-stepper-title">{{ user.first_name }} {{ user.last_name }}</span>
+                          <span class="bs-stepper-subtitle">Accomplishment</span>
+                        </span>
+                      </button>
                     </div>
+                    <div class="line"></div>
+                    {% endfor %}
+              </div>
 
-                    <div class="bs-stepper-content">
-                      <form onSubmit="return false">
-                        <!-- Account Details -->
-                        {% for user in staff %}
-                          <div id="account-details-{{ forloop.counter }}" class="content">
-                            <div class="table-responsive text-nowrap">
-                              <table class="table" id="accomplishment-tbl-{{ user.username }}">
-                                <caption class="ms-4">
-                                  List of Accomplishment for {{ user.first_name }} {{ user.last_name }}
-                                </caption>
-                                <thead>
-                                  <tr>
-                                    <th>Date</th>
-                                    <th>Received</th>
-                                    <th>Reviewed</th>
-                                    <th>Payrolled</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  <!-- Accomplishments data should be populated here -->
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        {% endfor %}
-                      </form>
+              <div class="bs-stepper-content">
+                <form onSubmit="return false">
+                  <!-- Account Details -->
+                  {% for user in staff %}
+                    <div id="account-details-{{ forloop.counter }}" class="content">
+                      <div class="table-responsive text-nowrap">
+                        <table class="table" id="accomplishment-tbl-{{ user.username }}">
+                          <caption class="ms-4">
+                            List of Accomplishment for {{ user.first_name }} {{ user.last_name }}
+                          </caption>
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Received</th>
+                              <th>Reviewed</th>
+                              <th>Payrolled</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <!-- Accomplishments data should be populated here -->
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
+                  {% endfor %}
+                </form>
+              </div>
 
 
 
@@ -358,13 +312,7 @@
                 </div>
                 <!-- /Default Wizard -->
               <br>
-         
-         
-
-          
-              
-       
-
+    
             </div>
             <!-- / Content -->
 
@@ -372,6 +320,7 @@
   {% block footer_scripts %}
   <script>
     $(document).ready(function() {
+      var steps = document.querySelectorAll('.step-trigger');
       const FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
             FEndDate = jQuery(document.querySelector('[name="FEndDate"]'));
       const toast_options = (toastr.options = {
@@ -384,62 +333,120 @@
         rtl: isRtl,
       });
 
-      $('#generate-accomplishment-admin').on('click', function() {
-        $.ajax({
-          type: 'POST',
-          url: "{% url 'generate-accomplishment-admin' %}",
-          data:{
-            start_date: FStartDate.val(),
-            end_date: FEndDate.val(),
-          }
-        }).done(function (data) {
-          var tbody1 = $('#accomplishment-tbl-sonny tbody');
-          var tbody2 = $('#accomplishment-tbl-carl tbody');
-          var tbody3 = $('#accomplishment-tbl-jhoannah tbody');
-          var tbody4 = $('#accomplishment-tbl-bernard tbody');
-          tbody1.empty();
-          tbody2.empty();
-          tbody3.empty();
-          tbody4.empty();
-          $.each(data, function(index, item) {
-            var row = $('<tr>').append(
-                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
-                $('<td>').text(item.received_sonny),
-                $('<td>').text(item.reviewed_sonny),
-                $('<td>').text(item.payrolled_sonny)
-            );
-            tbody1.append(row);
+      steps.forEach(function(step) {
+        step.addEventListener('click', function() {
+          
+          // Remove active state from all steps
+          steps.forEach(function(s) {
+            s.classList.remove('active');
           });
-          $.each(data, function(index, item) {
-            var row = $('<tr>').append(
-                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
-                $('<td>').text(item.received_carl),
-                $('<td>').text(item.reviewed_carl),
-                $('<td>').text(item.payrolled_carl)
-            );
-            tbody2.append(row);
-          });
-          $.each(data, function(index, item) {
-            var row = $('<tr>').append(
-                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
-                $('<td>').text(item.received_jhoannah),
-                $('<td>').text(item.reviewed_jhoannah),
-                $('<td>').text(item.payrolled_jhoannah)
-            );
-            tbody3.append(row);
-          });
-          $.each(data, function(index, item) {
-            var row = $('<tr>').append(
-                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
-                $('<td>').text(item.received_bernard),
-                $('<td>').text(item.reviewed_bernard),
-                $('<td>').text(item.payrolled_bernard)
-            );
-            tbody4.append(row);
-          });
-          toastr.success('Generate Successfully', 'Success', toast_options);
+          
+          // Add active state to the clicked step
+          this.classList.add('active');
         });
       });
+
+
+
+      $('#generate-accomplishment-admin').on('click', function() {
+        var startDate = $('#start-date').val();
+        var endDate = $('#end-date').val();
+
+          $.ajax({
+            type: 'POST',
+            url: "{% url 'generate-accomplishment-admin' %}",
+            data: {
+              start_date: startDate,
+              end_date: endDate,
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data) {
+              console.log(data);
+              console.log("data");
+            //   // Clear previous table data for each user
+            //   $('table tbody').empty();
+
+            //   // Iterate over the returned data
+            //   data.forEach(function(userResult) {
+            //     var tableId = `#accomplishment-tbl-${userResult.user.username}`;
+                
+            //     userResult.accomplishments.forEach(function(accomplishment) {
+            //       var newRow = `<tr>
+            //                       <td>${accomplishment.date}</td>
+            //                       <td>${accomplishment.updated_count}</td>
+            //                       <td>${accomplishment.reviewed_count}</td>
+            //                       <td>${accomplishment.payrolled_count}</td>
+            //                     </tr>`;
+            //       $(tableId + ' tbody').append(newRow);
+            //     });
+            //   });
+            // },
+            // error: function(xhr, status, error) {
+            //   // Handle errors
+            //   console.error(xhr.responseText);
+            }
+          });
+      });
+
+
+      // $('#generate-accomplishment-admin').on('click', function() {
+      //   $.ajax({
+      //     type: 'POST',
+      //     url: "{% url 'generate-accomplishment-admin' %}",
+      //     data:{
+      //       start_date: FStartDate.val(),
+      //       end_date: FEndDate.val(),
+      //     }
+      //   }).done(function (data) {
+      //     var tbody1 = $('#accomplishment-tbl-sonny tbody');
+      //     var tbody2 = $('#accomplishment-tbl-carl tbody');
+      //     var tbody3 = $('#accomplishment-tbl-jhoannah tbody');
+      //     var tbody4 = $('#accomplishment-tbl-bernard tbody');
+      //     tbody1.empty();
+      //     tbody2.empty();
+      //     tbody3.empty();
+      //     tbody4.empty();
+      //     $.each(data, function(index, item) {
+      //       var row = $('<tr>').append(
+      //           $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+      //           $('<td>').text(item.received_sonny),
+      //           $('<td>').text(item.reviewed_sonny),
+      //           $('<td>').text(item.payrolled_sonny)
+      //       );
+      //       tbody1.append(row);
+      //     });
+      //     $.each(data, function(index, item) {
+      //       var row = $('<tr>').append(
+      //           $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+      //           $('<td>').text(item.received_carl),
+      //           $('<td>').text(item.reviewed_carl),
+      //           $('<td>').text(item.payrolled_carl)
+      //       );
+      //       tbody2.append(row);
+      //     });
+      //     $.each(data, function(index, item) {
+      //       var row = $('<tr>').append(
+      //           $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+      //           $('<td>').text(item.received_jhoannah),
+      //           $('<td>').text(item.reviewed_jhoannah),
+      //           $('<td>').text(item.payrolled_jhoannah)
+      //       );
+      //       tbody3.append(row);
+      //     });
+      //     $.each(data, function(index, item) {
+      //       var row = $('<tr>').append(
+      //           $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+      //           $('<td>').text(item.received_bernard),
+      //           $('<td>').text(item.reviewed_bernard),
+      //           $('<td>').text(item.payrolled_bernard)
+      //       );
+      //       tbody4.append(row);
+      //     });
+      //     toastr.success('Generate Successfully', 'Success', toast_options);
+      //   });
+      // });
+
+      
     });
   </script>
   {% endblock footer_scripts %}
