@@ -197,7 +197,7 @@
                   {% for user in staff %}
                     <div id="account-details-{{ forloop.counter }}" class="content">
                       <div class="table-responsive text-nowrap">
-                        <table class="table" id="accomplishment-tbl-{{ user.username }}">
+                        <table class="table" id="accomplishment-tbl-{{ user.last_name }}">
                           <caption class="ms-4">
                             List of Accomplishment for {{ user.first_name }} {{ user.last_name }}
                           </caption>
@@ -209,7 +209,7 @@
                               <th>Payrolled</th>
                             </tr>
                           </thead>
-                          <tbody>
+                          <tbody class="tbody_">
                             <!-- Accomplishments data should be populated here -->
                           </tbody>
                         </table>
@@ -218,96 +218,6 @@
                   {% endfor %}
                 </form>
               </div>
-
-
-
-
-
-                    {% comment %} <div class="bs-stepper-content">
-                      <form onSubmit="return false">
-                        <!-- Account Details -->
-                        <div id="account-details" class="content">
-                          <div class="table-responsive text-nowrap">
-                            <table class="table" id="accomplishment-tbl-sonny">
-                              <caption class="ms-4">
-                                List of Accomplishment
-                              </caption>
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Received</th>
-                                  <th>Reviewed</th>
-                                  <th>Payrolled</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                        <!-- Personal Info -->
-                        <div id="personal-info" class="content">
-                          <div class="table-responsive text-nowrap">
-                            <table class="table" id="accomplishment-tbl-carl">
-                              <caption class="ms-4">
-                                List of Accomplishment
-                              </caption>
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Received</th>
-                                  <th>Reviewed</th>
-                                  <th>Payrolled</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                        <!-- Social Links -->
-                        <div id="social-links" class="content">
-                          <div class="table-responsive text-nowrap">
-                            <table class="table" id="accomplishment-tbl-jhoannah">
-                              <caption class="ms-4">
-                                List of Accomplishment
-                              </caption>
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Received</th>
-                                  <th>Reviewed</th>
-                                  <th>Payrolled</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                        <!-- bernard Links -->
-                        <div id="bernard" class="content">
-                          <div class="table-responsive text-nowrap">
-                            <table class="table" id="accomplishment-tbl-bernard">
-                              <caption class="ms-4">
-                                List of Accomplishment
-                              </caption>
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Received</th>
-                                  <th>Reviewed</th>
-                                  <th>Payrolled</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                     {% endcomment %}
                   </div>
                 </div>
                 <!-- /Default Wizard -->
@@ -349,41 +259,39 @@
 
 
       $('#generate-accomplishment-admin').on('click', function() {
-        var startDate = $('#start-date').val();
-        var endDate = $('#end-date').val();
-
           $.ajax({
             type: 'POST',
             url: "{% url 'generate-accomplishment-admin' %}",
             data: {
-              start_date: startDate,
-              end_date: endDate,
+              start_date: FStartDate.val(),
+              end_date: FEndDate.val(),
               csrfmiddlewaretoken: '{{ csrf_token }}'
             },
             success: function(data) {
-              console.log(data);
-              console.log("data");
+              // console.log(data);
+              // console.log("data");
             //   // Clear previous table data for each user
-            //   $('table tbody').empty();
-
-            //   // Iterate over the returned data
-            //   data.forEach(function(userResult) {
-            //     var tableId = `#accomplishment-tbl-${userResult.user.username}`;
+              $('table .tbody_').empty();
+              console.log(data);
+              // Iterate over the returned data
+              data.forEach(function(userResult) {
                 
-            //     userResult.accomplishments.forEach(function(accomplishment) {
-            //       var newRow = `<tr>
-            //                       <td>${accomplishment.date}</td>
-            //                       <td>${accomplishment.updated_count}</td>
-            //                       <td>${accomplishment.reviewed_count}</td>
-            //                       <td>${accomplishment.payrolled_count}</td>
-            //                     </tr>`;
-            //       $(tableId + ' tbody').append(newRow);
-            //     });
-            //   });
-            // },
-            // error: function(xhr, status, error) {
-            //   // Handle errors
-            //   console.error(xhr.responseText);
+                var tableId = `#accomplishment-tbl-${userResult.user}`;
+                
+                userResult.accomplishments.forEach(function(accomplishment) {
+                  var newRow = `<tr>
+                                  <td>${accomplishment.date}</td>
+                                  <td>${accomplishment.updated_count}</td>
+                                  <td>${accomplishment.reviewed_count}</td>
+                                  <td>${accomplishment.payrolled_count}</td>
+                                </tr>`;
+                  $(tableId + ' tbody').append(newRow);
+                });
+              });
+            },
+            error: function(xhr, status, error) {
+              // Handle errors
+              console.error(xhr.responseText);
             }
           });
       });

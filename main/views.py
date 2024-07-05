@@ -215,8 +215,8 @@ def profile(request):
     tris_staff = AuthUser.objects.filter(is_staff=1)
 
     for user in tris_staff:
-        user.first_name = user.first_name.capitalize()
-        user.last_name = user.last_name.capitalize()
+        user.first_name = user.first_name.title()
+        user.last_name = user.last_name.title()
 
     print(tris_staff)
     print("testingg")
@@ -295,10 +295,6 @@ def generate_accomplishment_admin(request):
     FStartDate = request.POST.get('start_date')
     FEndDate = request.POST.get('end_date')
 
-    print(FStartDate)
-    print(FEndDate)
-    print("daaa")
-
     start_date = parse_date(FStartDate)
     end_date = parse_date(FEndDate)
     
@@ -314,7 +310,7 @@ def generate_accomplishment_admin(request):
 
     for user in users:
         user_results = {
-            'user': f'{user.first_name} {user.last_name}',
+            'user': f'{user.last_name.title()}',
             'accomplishments': []
         }
         
