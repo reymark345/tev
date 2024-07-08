@@ -1,4 +1,35 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
+<style>
+  .bs-stepper-header {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap to the next line */
+    justify-content: flex-start; /* Align items at the start of the row */
+  }
+  
+  .step {
+    flex: 0 0 calc(12.5% - 10px); /* Ensure each step takes up 12.5% of the width minus margin */
+    min-width: 100px; /* Adjust the min-width to control the breakpoint at which the items wrap */
+    margin-bottom: 10px; /* Add margin for spacing between rows */
+    box-sizing: border-box; /* Ensure padding and border are included in the element's total width and height */
+  }
+  
+  .line {
+    flex: 0 0 30px; /* Ensure the line does not shrink and maintains a consistent width */
+    align-self: center; /* Align the line vertically with the step items */
+    margin: 0 5px; /* Add margin to ensure space between steps and lines */
+  }
+  
+  .bs-stepper-circle,
+  .bs-stepper-label {
+    display: flex;
+    align-items: center; /* Vertically center the items */
+    justify-content: center; /* Horizontally center the items */
+    text-align: center; /* Ensure text is centered */
+  }
+
+
+  
+</style>
             <!-- Content -->
             <!-- <div class="container-fluid flex-grow-1 container-p-y"> -->
             <div class="container-fluid flex-grow-1 container-p-y">
@@ -141,152 +172,57 @@
               </div>
             
      
+              <div class="col-12 mb-4">
+                
+                <div class="bs-stepper wizard-numbered mt-2">
+                  <div class="bs-stepper-header">
+                    <div class="line"></div>
+                    {% for user in staff %}
+                    <div class="step" data-target="#account-details-{{ forloop.counter }}">
+                      <button type="button" class="step-trigger">
+                        <span class="bs-stepper-circle">{{ forloop.counter }}</span>
+                        <span class="bs-stepper-label">
+                          <span class="bs-stepper-title">{{ user.first_name }} {{ user.last_name }}</span>
+                          <span class="bs-stepper-subtitle">Accomplishment</span>
+                        </span>
+                      </button>
+                    </div>
+                    <div class="line"></div>
+                    {% endfor %}
+              </div>
 
-              <!-- Default Wizard -->
-                <div class="col-12 mb-4">
-                  <div class="bs-stepper wizard-numbered mt-2">
-                    <div class="bs-stepper-header">
-                      <div class="step" data-target="#account-details">
-                        <button type="button" class="step-trigger">
-                          <span class="bs-stepper-circle">1</span>
-                          <span class="bs-stepper-label">
-                            <span class="bs-stepper-title">Sonny Gocela</span>
-                            <span class="bs-stepper-subtitle">Accomplishment</span>
-                          </span>
-                        </button>
-                      </div>
-                      <div class="line">
-                        <i class="ti ti-chevron-right"></i>
-                      </div>
-                      <div class="step" data-target="#personal-info">
-                        <button type="button" class="step-trigger">
-                          <span class="bs-stepper-circle">2</span>
-                          <span class="bs-stepper-label">
-                            <span class="bs-stepper-title">Carl Jubert Tambong</span>
-                            <span class="bs-stepper-subtitle">Accomplishment</span>
-                          </span>
-                        </button>
-                      </div>
-                      <div class="line">
-                        <i class="ti ti-chevron-right"></i>
-                      </div>
-                      <div class="step" data-target="#social-links">
-                        <button type="button" class="step-trigger">
-                          <span class="bs-stepper-circle">3</span>
-                          <span class="bs-stepper-label">
-                            <span class="bs-stepper-title">Jhoannah Paula Ramos</span>
-                            <span class="bs-stepper-subtitle">Accomplishment</span>
-                          </span>
-                        </button>
-                      </div>
-                      <div class="line">
-                        <i class="ti ti-chevron-right"></i>
-                      </div>
-                      <div class="step" data-target="#bernard">
-                        <button type="button" class="step-trigger">
-                          <span class="bs-stepper-circle">4</span>
-                          <span class="bs-stepper-label">
-                            <span class="bs-stepper-title">Bernard Maglupay</span>
-                            <span class="bs-stepper-subtitle">Accomplishment</span>
-                          </span>
-                        </button>
+              <div class="bs-stepper-content">
+                <form onSubmit="return false">
+                  <!-- Account Details -->
+                  {% for user in staff %}
+                    <div id="account-details-{{ forloop.counter }}" class="content">
+                      <div class="table-responsive text-nowrap">
+                        <table class="table" id="accomplishment-tbl-{{ user.last_name }}">
+                          <caption class="ms-4">
+                            List of Accomplishment for {{ user.first_name }} {{ user.last_name }}
+                          </caption>
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Received</th>
+                              <th>Reviewed</th>
+                              <th>Payrolled</th>
+                            </tr>
+                          </thead>
+                          <tbody class="tbody_">
+                            <!-- Accomplishments data should be populated here -->
+                          </tbody>
+                        </table>
                       </div>
                     </div>
-                    <div class="bs-stepper-content">
-                      <form onSubmit="return false">
-                        <!-- Account Details -->
-                        <div id="account-details" class="content">
-                          <div class="table-responsive text-nowrap">
-                            <table class="table" id="accomplishment-tbl-sonny">
-                              <caption class="ms-4">
-                                List of Accomplishment
-                              </caption>
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Received</th>
-                                  <th>Reviewed</th>
-                                  <th>Payrolled</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                        <!-- Personal Info -->
-                        <div id="personal-info" class="content">
-                          <div class="table-responsive text-nowrap">
-                            <table class="table" id="accomplishment-tbl-carl">
-                              <caption class="ms-4">
-                                List of Accomplishment
-                              </caption>
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Received</th>
-                                  <th>Reviewed</th>
-                                  <th>Payrolled</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                        <!-- Social Links -->
-                        <div id="social-links" class="content">
-                          <div class="table-responsive text-nowrap">
-                            <table class="table" id="accomplishment-tbl-jhoannah">
-                              <caption class="ms-4">
-                                List of Accomplishment
-                              </caption>
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Received</th>
-                                  <th>Reviewed</th>
-                                  <th>Payrolled</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                        <!-- bernard Links -->
-                        <div id="bernard" class="content">
-                          <div class="table-responsive text-nowrap">
-                            <table class="table" id="accomplishment-tbl-bernard">
-                              <caption class="ms-4">
-                                List of Accomplishment
-                              </caption>
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Received</th>
-                                  <th>Reviewed</th>
-                                  <th>Payrolled</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
+                  {% endfor %}
+                </form>
+              </div>
                   </div>
                 </div>
                 <!-- /Default Wizard -->
               <br>
-         
-         
-
-          
-              
-       
-
+    
             </div>
             <!-- / Content -->
 
@@ -294,6 +230,7 @@
   {% block footer_scripts %}
   <script>
     $(document).ready(function() {
+      var steps = document.querySelectorAll('.step-trigger');
       const FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
             FEndDate = jQuery(document.querySelector('[name="FEndDate"]'));
       const toast_options = (toastr.options = {
@@ -306,62 +243,118 @@
         rtl: isRtl,
       });
 
-      $('#generate-accomplishment-admin').on('click', function() {
-        $.ajax({
-          type: 'POST',
-          url: "{% url 'generate-accomplishment-admin' %}",
-          data:{
-            start_date: FStartDate.val(),
-            end_date: FEndDate.val(),
-          }
-        }).done(function (data) {
-          var tbody1 = $('#accomplishment-tbl-sonny tbody');
-          var tbody2 = $('#accomplishment-tbl-carl tbody');
-          var tbody3 = $('#accomplishment-tbl-jhoannah tbody');
-          var tbody4 = $('#accomplishment-tbl-bernard tbody');
-          tbody1.empty();
-          tbody2.empty();
-          tbody3.empty();
-          tbody4.empty();
-          $.each(data, function(index, item) {
-            var row = $('<tr>').append(
-                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
-                $('<td>').text(item.received_sonny),
-                $('<td>').text(item.reviewed_sonny),
-                $('<td>').text(item.payrolled_sonny)
-            );
-            tbody1.append(row);
+      steps.forEach(function(step) {
+        step.addEventListener('click', function() {
+          
+          // Remove active state from all steps
+          steps.forEach(function(s) {
+            s.classList.remove('active');
           });
-          $.each(data, function(index, item) {
-            var row = $('<tr>').append(
-                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
-                $('<td>').text(item.received_carl),
-                $('<td>').text(item.reviewed_carl),
-                $('<td>').text(item.payrolled_carl)
-            );
-            tbody2.append(row);
-          });
-          $.each(data, function(index, item) {
-            var row = $('<tr>').append(
-                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
-                $('<td>').text(item.received_jhoannah),
-                $('<td>').text(item.reviewed_jhoannah),
-                $('<td>').text(item.payrolled_jhoannah)
-            );
-            tbody3.append(row);
-          });
-          $.each(data, function(index, item) {
-            var row = $('<tr>').append(
-                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
-                $('<td>').text(item.received_bernard),
-                $('<td>').text(item.reviewed_bernard),
-                $('<td>').text(item.payrolled_bernard)
-            );
-            tbody4.append(row);
-          });
-          toastr.success('Generate Successfully', 'Success', toast_options);
+          
+          // Add active state to the clicked step
+          this.classList.add('active');
         });
       });
+
+
+
+      $('#generate-accomplishment-admin').on('click', function() {
+          $.ajax({
+            type: 'POST',
+            url: "{% url 'generate-accomplishment-admin' %}",
+            data: {
+              start_date: FStartDate.val(),
+              end_date: FEndDate.val(),
+              csrfmiddlewaretoken: '{{ csrf_token }}'
+            },
+            success: function(data) {
+              // console.log(data);
+              // console.log("data");
+            //   // Clear previous table data for each user
+              $('table .tbody_').empty();
+              console.log(data);
+              // Iterate over the returned data
+              data.forEach(function(userResult) {
+                
+                var tableId = `#accomplishment-tbl-${userResult.user}`;
+                
+                userResult.accomplishments.forEach(function(accomplishment) {
+                  var newRow = `<tr>
+                                  <td>${accomplishment.date}</td>
+                                  <td>${accomplishment.updated_count}</td>
+                                  <td>${accomplishment.reviewed_count}</td>
+                                  <td>${accomplishment.payrolled_count}</td>
+                                </tr>`;
+                  $(tableId + ' tbody').append(newRow);
+                });
+              });
+            },
+            error: function(xhr, status, error) {
+              // Handle errors
+              console.error(xhr.responseText);
+            }
+          });
+      });
+
+
+      // $('#generate-accomplishment-admin').on('click', function() {
+      //   $.ajax({
+      //     type: 'POST',
+      //     url: "{% url 'generate-accomplishment-admin' %}",
+      //     data:{
+      //       start_date: FStartDate.val(),
+      //       end_date: FEndDate.val(),
+      //     }
+      //   }).done(function (data) {
+      //     var tbody1 = $('#accomplishment-tbl-sonny tbody');
+      //     var tbody2 = $('#accomplishment-tbl-carl tbody');
+      //     var tbody3 = $('#accomplishment-tbl-jhoannah tbody');
+      //     var tbody4 = $('#accomplishment-tbl-bernard tbody');
+      //     tbody1.empty();
+      //     tbody2.empty();
+      //     tbody3.empty();
+      //     tbody4.empty();
+      //     $.each(data, function(index, item) {
+      //       var row = $('<tr>').append(
+      //           $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+      //           $('<td>').text(item.received_sonny),
+      //           $('<td>').text(item.reviewed_sonny),
+      //           $('<td>').text(item.payrolled_sonny)
+      //       );
+      //       tbody1.append(row);
+      //     });
+      //     $.each(data, function(index, item) {
+      //       var row = $('<tr>').append(
+      //           $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+      //           $('<td>').text(item.received_carl),
+      //           $('<td>').text(item.reviewed_carl),
+      //           $('<td>').text(item.payrolled_carl)
+      //       );
+      //       tbody2.append(row);
+      //     });
+      //     $.each(data, function(index, item) {
+      //       var row = $('<tr>').append(
+      //           $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+      //           $('<td>').text(item.received_jhoannah),
+      //           $('<td>').text(item.reviewed_jhoannah),
+      //           $('<td>').text(item.payrolled_jhoannah)
+      //       );
+      //       tbody3.append(row);
+      //     });
+      //     $.each(data, function(index, item) {
+      //       var row = $('<tr>').append(
+      //           $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+      //           $('<td>').text(item.received_bernard),
+      //           $('<td>').text(item.reviewed_bernard),
+      //           $('<td>').text(item.payrolled_bernard)
+      //       );
+      //       tbody4.append(row);
+      //     });
+      //     toastr.success('Generate Successfully', 'Success', toast_options);
+      //   });
+      // });
+
+      
     });
   </script>
   {% endblock footer_scripts %}

@@ -37,7 +37,7 @@
                             <th>Reviewed</th>
                             <th>Duplicate Travel</th>
                             <th>Remarks</th>
-                            <th>Created By</th>
+                            <th>Received By</th>
                             <th>ID</th>
                         </tr>
                     </thead>
@@ -291,19 +291,6 @@
                 </div>
             </div>
 
-            <div class="col-sm-12">
-                <div class="col-md-12 mb-2">
-                  <label for="flatpickr-multi" class="form-label">Date Travel <small>(Range)</small></label>
-                  <input
-                  type="text"
-                  class="form-control rangeTravel"
-                  name="RangeTravel"
-                  placeholder="YYYY-MM-DD to YYYY-MM-DD"
-                  id="flatpickr-range"
-                />
-                </div>
-            </div>
-
             {% if is_actual_date %}
             <div class="col-sm-12">
                 <div class="col-md-12 mb-2">
@@ -318,6 +305,21 @@
                 </div>
             </div>
             {% endif %}
+
+            <div class="col-sm-12">
+                <div class="col-md-12 mb-2">
+                  <label for="flatpickr-multi" class="form-label">Date Travel <small>(Range)</small></label>
+                  <input
+                  type="text"
+                  class="form-control rangeTravel"
+                  name="RangeTravel"
+                  placeholder="YYYY-MM-DD to YYYY-MM-DD"
+                  id="flatpickr-range"
+                />
+                </div>
+            </div>
+
+
 
             <!-- <div class="col-md-6 col-12 mb-4">
                 <label for="flatpickr-datetime" class="form-label">Datetime Picker</label>
