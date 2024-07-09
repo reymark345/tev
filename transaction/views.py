@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges, RolePermissions)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges, RolePermissions, RemarksLib)
 import json 
 from django.core import serializers
 from datetime import date, datetime, timedelta
@@ -75,6 +75,7 @@ def list_payroll(request):
     role_names = [entry['role_name'] for entry in role_details]
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
+            'remarks_list' : RemarksLib.objects.filter().order_by('name'),
             'charges' : Charges.objects.filter().order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
             'division' : Division.objects.filter(status=0).order_by('name'),

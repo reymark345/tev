@@ -790,6 +790,11 @@
                         let lacking = data.lacking;
                         let date_remarks = data.date_remarks;
                         let remarks_d = data.lacking;
+
+                        console.log(remarks_d);
+                        console.log("testttt");
+
+
                         $('.rows-container').empty();
                         if(duplicate_date === "" || duplicate_date === null ){
                             $("#dp_date").hide();
@@ -809,15 +814,17 @@
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
                             remarks_data = remarks_d;
+                            console.log("remarkssss_data");
+                            console.log(remarks_data);
 
                             for (let i = 0; i < date_remarks.length; i++) {                            
                                 var newRow = $('<div class="row mt-2">' +
                                     '<div class="col-5">' +
                                     '<select class="form-select select-remarks" id="remarks-select-'+i+'">' +
-                                    '<option></option>' +
-                                    '{% for row in remarks_list %}' +
-                                    '<option value="{{ row.id }}">{{ row.name }}</option>' +
-                                    '{% endfor %}' +
+                                        '<option></option>' +
+                                        '{% for row in remarks_list %}' +
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                                        '{% endfor %}' +
                                     '</select>' +
                                     '</div>' +
                                     '<div class="col-5">' +
