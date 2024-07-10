@@ -9,6 +9,7 @@ urlpatterns = [
     path('tevemployee', views.tevemployee, name='tev-employee'),
     
     path('payroll_load', views.payroll_load, name='payroll-load'),
+    path('payroll_list_load', views.payroll_list_load, name='payroll-list-load'),
     path('box_load', views.box_load, name='box-load'),
     path('outgoing_load', views.outgoing_load, name='outgoing-load'),
     path('budget_load', views.budget_load, name='budget-load'),
