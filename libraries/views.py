@@ -75,14 +75,10 @@ def division_add(request):
     approval = request.POST.get('Approval')
     c_designation = request.POST.get('CDesignation')
     user_id = request.session.get('user_id', 0)
-    
     try:
-        if Division.objects.filter(name=division):
-            return JsonResponse({'data': 'error', 'message': 'Division Already Taken'})
-        else:
-            division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation,created_by = user_id)
-            division_add.save()
-            return JsonResponse({'data': 'success'})
+        division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation,created_by = user_id)
+        division_add.save()
+        return JsonResponse({'data': 'success'})
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
     
@@ -114,7 +110,7 @@ def division_edit(request):
     
     
 def division_load(request):
-    division_data = Division.objects.select_related().filter().order_by('-created_at').reverse()
+    division_data = Division.objects.select_related().filter().order_by('-created_at')
     total = division_data.count()
 
     _start = request.GET.get('start')
