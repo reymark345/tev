@@ -518,6 +518,8 @@ def checking_load(request):
     }
     return JsonResponse(response)
 
+
+
 def read_excel_file(excel_file):
     workbook = load_workbook(excel_file, data_only=True)
     worksheet = workbook.active

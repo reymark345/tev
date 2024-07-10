@@ -342,7 +342,6 @@
 </div>
 
 
-
 <!--/ Enable OTP Modal -->
 {% endblock %} {% block footer_scripts %}
 <script src="{% static 'assets/js/forms-pickers.js' %}"></script>
@@ -432,7 +431,7 @@
             processing: true,
             serverSide: true,
             ajax: {
-                url: "{% url 'checking-load' %}",
+                url: "{% url 'payroll-list-load' %}",
                 data: function (d) {
                     d.FAdvancedFilter = FAdvancedFilter.val()
                     d.FIdNumber = FIdNumber.val()
@@ -577,19 +576,6 @@
 
                   },
                 },
-                // {
-                //     targets: -4,
-                //     render: function (data) {
-                //         return data;
-                //         // if (data === null || data === undefined || data === "") {
-                //         //     return ''; 
-                //         // } 
-                //         // else {
-                //         //     return '<span class="badge bg-label-success">' + data + '</span>';
-                //         // }
-                //     },
-                // },
-
                 {
                     targets: -3,
                     render: function (data) {
@@ -598,7 +584,6 @@
                         } 
                         else {
                             return data;
-                            // return '<span class="badge bg-label-danger">' + data + '</span>';
                         }
                     },
                 },
@@ -621,8 +606,7 @@
                   searchable: false,
                   render: function (data) {
                       return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-details text-body" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>' +
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'
+                          '<a href="javascript:;" data-id="' + data + '" class="item-details text-body" data-bs-toggle="modal" data-bs-target="#tevDetails"><i class="text-primary ti ti-eye"></i></a>'
                           )
                   },
               },
@@ -655,71 +639,6 @@
                 }
             ],
             drawCallback: function (settings) {
-                $('.item-edit').on('click', function () {
-                    let id = $(this).data('id')
-                    $('.title-name').text('Update TEV Record');
-                    $.ajax({
-                        type: 'GET',
-                        url: "{% url 'preview-received' %}?id=" + id,
-                        dataType: 'json',
-                    }).done(function (data) {
-                        let arraydetails = [];
-                        let lacking_ = data.lacking;
-                        let date_remarks_ = data.date_remarks;
-                        let d_received = data.incoming_in;
-                        let original_amount = data.original_amount;
-                        
-                        $('.rows-container').empty();
-                        let dateObj = new Date(d_received);
-                        let year = dateObj.getFullYear();
-                        let month = String(dateObj.getMonth() + 1).padStart(2, '0'); // Adding 1 because months are zero-indexed
-                        let day = String(dateObj.getDate()).padStart(2, '0');
-                        let hours = String(dateObj.getHours()).padStart(2, '0');
-                        let minutes = String(dateObj.getMinutes()).padStart(2, '0');
-                        let date_received = `${year}-${month}-${day} ${hours}:${minutes}`;
-                        if (lacking_){
-                            lacking_ = lacking_.split(',').map(Number);
-                            date_remarks_ = date_remarks_.split(", ")
-
-                        }
-                        const $selectElement1 = $('#employee-name');
-                        $selectElement1.empty();
-                        fetchEmployee($selectElement1);
-                        if (EmployeeName.length) {
-                            EmployeeName.wrap('<div class="position-relative"></div>')
-                            EmployeeName.select2({
-                            placeholder: 'Choose employee',
-                            dropdownParent: EmployeeName.parent(),
-                            allowClear: true,
-                            })
-                        }
-                        let pk = data.id
-                        let employee_name = $('#employee-name');
-                        let floatvalue = parseFloat(data.final_amount);
-                        let convertedAmount = 0;
-                        let date_travel = data.date_travel;
-                        formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
-
-                        status_val = data.status_id;
-                        let id_no = data.id_no;
-                        let date_remarks = data.date_remarks;
-                        let lacking = data.lacking;
-                        EmployeeName.val(id_no).trigger('change');
-                        if (date_remarks){
-                            date_remarks = date_remarks.split(", ")
-                            remarks_date = date_remarks;
-                        }
-                        HDateTravel.val(formattedDates)
-                        DateReceived.val(date_received);
-                        FAmount.val(original_amount);
-                        DateTravel.val(formattedDates);
-                        ItemID.val(pk);
-                        updateSelectedDates();
-                        offCanvasEl.show()
-                        
-                    })
-                }),
-
                 $('#tbl-items tbody input[type="checkbox"]').change(function () {
                 });
 

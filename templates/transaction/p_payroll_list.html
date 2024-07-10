@@ -49,6 +49,7 @@
                             <th>Amount</th>
                             <th>Status</th>
                             <th>Incoming In</th>
+                            <!-- <th>Action</th> -->
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -303,6 +304,72 @@
 </div>
 <!--/ Enable OTP Modal -->
 
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="tevDetails_" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center mb-4">
+            <h3 class="mb-2">TEV DETAILS</h3>
+            <p>Correctness of amount/Returned/and Approve</p>
+            </div>
+            <p>Please provide your final amount for the TEV, indicating whether it can be marked as for approval or if it needs to be returned due to any issues.</p>
+            <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
+            <div class="col-12">
+                <label class="form-label" for="modaltevDetails">Final Amount</label>
+                <div class="input-group">
+                    <span class="input-group-text">₱</span>
+                    <input
+                        type="number"
+                        id="final_amount"
+                        name="FinalAmount"
+                        class="form-control phone-number-otp-mask"
+                        placeholder="0.00"
+                    />
+                </div>
+                <span id="amount_error" style="color: red;"></span>
+            </div>
+            <div class="col-12" id="dp_date">
+                <label class="form-label" for="modaltevDetails">Duplicate Date</label>
+                
+                <div class="input-group">
+                <textarea class="form-control" placeholder="Date" rows="3" id="correctness_remarks" name="CorrectnessRemarks"></textarea>
+                </div>
+                
+            </div>
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <br>
+                        <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-primary me-sm-3 me-1">+</button>
+                        <span id="remarks_error" style="color: red;"></span>
+                    </div>
+                </div>
+                <div class="rows-container">
+                </div>
+            </div>    
+            
+            <div class="col-12">
+                <br>
+                <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
+                <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
+                <button
+                    type="reset"
+                    class="btn btn-label-secondary"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                    >
+                    Cancel
+                </button>
+            </div>
+            </form>
+        </div>
+        </div>
+    </div>
+</div>
+
       
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
@@ -375,6 +442,7 @@
         });
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
+            RemarksList= jQuery(document.querySelector('[name="RemarksList"]')),
             Charges = jQuery(document.querySelector('[name="Charges"]')),
             ChargesList = jQuery(document.querySelector('[name="ChargesList"]')),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
@@ -433,6 +501,7 @@
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'incoming_in' }
+                // { data: 'id' }
              
             ],
             columnDefs: [
@@ -494,6 +563,17 @@
                         return (data == null) ? '' : moment(data).format('LLL');
                     },
                 },
+                // {
+                //     targets: -1,
+                //     title: 'Action',
+                //     orderable: false,
+                //     searchable: false,
+                //     render: function (data) {
+                //         return (
+                //             '<a href="javascript:;" data-id="' + data + '" class="item-details text-body" data-bs-toggle="modal" data-bs-target="#tevDetails_"><i class="text-primary ti ti-eye"></i></a>'
+                //             )
+                //     },
+                // },
 
                
             ],
@@ -563,29 +643,201 @@
                     })
                 }),
 
+ 
+                $('#returned').click(function() {
+                    let final_amount = $("#final_amount").val().trim();
+                    let selectedIDs = [];
+                    let selectedDate = [];
+                    let status = 3;
+                    let hasError = 0;
+                    $('.rows-container .row').each(function() {
+                        let selectElement = $(this).find('._select-remarks');
+                        let selectElementDate = $(this).find('._select-remarks');
+                        let selectedValue = selectElement.val();
+                        let selectErrorLabel = selectElement.siblings(".error-label");
+
+                        let inputElement = $(this).find('.input-date');
+                        let inputValue = inputElement.val();
+                        let inputErrorLabel = inputElement.siblings(".error-label-date");
+
+                        if (selectedValue !== "") {
+                            selectedIDs.push(selectedValue);
+                            selectElement.removeClass('has-error');
+                            selectErrorLabel.hide();
+                        } else {
+                            hasError++;
+                            selectElement.addClass('has-error');
+                            selectErrorLabel.show();
+                        }
+                        if (inputValue !== "") {
+                            selectedDate.push(inputValue);
+                            inputElement.removeClass('has-error');
+                            inputErrorLabel.hide();
+                        } else {
+                            hasError++;
+                            inputElement.addClass('has-error');
+                            inputErrorLabel.show();
+                        }
+                    });
+                    if (selectedIDs.length > 0 && hasError ==0) {
+                        tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+                    } else if(selectedIDs.length == 0) {
+                        toastr.error('Please filled details at least one Remarks', 'Invalid Save!', toast_options);
+                    }
+                });
+
+                $('#add_remarks').click(function () {     
+                    var newRow = $('<div class="row mt-2">' +
+                        '<div class="col-5">' +
+                        '<select class="form-select _select-remarks" id="select_remarks">' +
+                            '<option></option>'+
+                            '{% for row in remarks_list %}'+
+                            '<option value="{{ row.id }}">{{ row.name }}</option>'+
+                            '{% endfor %}'+
+                        '</select>' +
+                        '<span class="error-label">Required</span>'+
+                        '</div>' +
+                        '<div class="col-5">' +
+                        '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="" />'+
+                        '<span class="error-label-date">Required</span>'+
+                        '</div>' +
+                        '<div class="col-2">' +
+                        '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                        '</div>' +
+                        '</div>');
+                        newRow.find('.error-label, .error-label-date').hide();
+                    $('.rows-container').append(newRow);
+                });
+
                 $('#check-all').change(function () {
                     var isChecked = $(this).is(':checked');
                     $('.checkbox_data').prop('checked', isChecked).trigger('change');
                 });
-
                 $('.item-details').on('click', function () {
+                    if (RemarksList.length) {
+                            RemarksList.wrap('<div class="position-relative"></div>')
+                            RemarksList.select2({
+                            placeholder: 'Choose remarks',
+                            dropdownParent: RemarksList.parent(),
+                            allowClear: true,
+                        })
+                    }
                     clicked_id = $(this).data('id');
+
+                    var csrf_token = "{{ csrf_token }}";
                     $.ajax({
                         type: 'POST',
-                        url: "{% url 'tev-details' %}",
+                        url: "{% url 'review-details' %}",
+                        headers: {
+                            'X-CSRFToken': csrf_token
+                        },
                         data:{
                             tev_id: clicked_id
                         }
                     }).done(function (data) {
-                        let value = data.data.remarks;
-                        let final_amount = data.data.final_amount;
+                        console.log(data);
+                        let duplicate_date = data.remarks;
+                        let final_amount = data.final_amount;
+                        let lacking = data.lacking;
+                        let date_remarks = data.date_remarks;
+                        let remarks_d = data.lacking;
+
+ 
+                        $('.rows-container').empty();
+                        if(duplicate_date === "" || duplicate_date === null ){
+                            $("#dp_date").hide();
+                        }
+                        else{
+                            $("#dp_date").show();
+                        }
+                        if (lacking === null) {
+
+                            $('#remarks-list').val([]).trigger('change');
+                            
+                        } else {
+                            arraydetails = [];
+  
+                            lacking = data.lacking.split(',').map(Number);
+
+                            remarks_d = remarks_d.split(", ");
+                            date_remarks = date_remarks.split(", ")
+                            remarks_date = date_remarks;
+                            remarks_data = remarks_d;
+                            console.log("remarkssss_data");
+                            console.log(remarks_data);
+
+                            for (let i = 0; i < date_remarks.length; i++) {       
+                                console.log(i);                
+                                var newRow = $('<div class="row mt-2">' +
+                                    '<div class="col-5">' +
+                                    '<select class="form-select _select-remarks" id="_remarks-select-'+i+'">' +
+                                        '<option></option>' +
+                                        '{% for row in remarks_list %}' +
+                                        '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                                        '{% endfor %}' +
+                                    '</select>' +
+                                    '</div>' +
+                                    '<div class="col-5">' +
+                                    '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="' + date_remarks[i] + '" />' +
+                                    '</div>' +
+                                    '<div class="col-2">' +
+                                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                                    '</div>' +
+                                    '</div>');
+                                $('.rows-container').append(newRow);
+
+                                $(`#_remarks-select-${i}`).val(remarks_d[i]).trigger('change');
+
+                                item_entry = {
+                                    'remarks': remarks_d[i],
+                                    'date': date_remarks[i]
+                                }
+                                arraydetails.push(item_entry);
+
+                            }
+                        }
+              
+                        if(final_amount && final_amount !="0E-10"){
+                            final_amount = data.final_amount;
+                        }
+                        else{
+                            final_amount = data.original_amount;
+                        }
+
+                        $('#remarks-list').trigger('change');
                         let floatvalue = parseFloat(final_amount);
                         let convertedAmount = floatvalue.toFixed(2);
                         if (convertedAmount === "0.00") {convertedAmount =""} 
                         $("#final_amount").val(convertedAmount);
-                        $("#correctness_remarks").val(value);
+                        $("#correctness_remarks").val(duplicate_date);
+                        $("#correctness_remarks").prop("disabled", true);
+
+                        $("#correctness_remarks").css({
+                            "background-color": "#cf2732",  
+                            "color": "#ffffff"           
+                        });
                     })
                 });
+
+
+                // $('.item-details').on('click', function () {
+                //     clicked_id = $(this).data('id');
+                //     $.ajax({
+                //         type: 'POST',
+                //         url: "{% url 'tev-details' %}",
+                //         data:{
+                //             tev_id: clicked_id
+                //         }
+                //     }).done(function (data) {
+                //         let value = data.data.remarks;
+                //         let final_amount = data.data.final_amount;
+                //         let floatvalue = parseFloat(final_amount);
+                //         let convertedAmount = floatvalue.toFixed(2);
+                //         if (convertedAmount === "0.00") {convertedAmount =""} 
+                //         $("#final_amount").val(convertedAmount);
+                //         $("#correctness_remarks").val(value);
+                //     })
+                // });
 
             },
         })
@@ -1102,7 +1354,75 @@
         });
 
 
+        $('#approved').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let selectedIDs = [];
+            let selectedDate = [];
+            let status = 7;
+            let hasError = 0;
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('._select-remarks');
+                let selectElementDate = $(this).find('._select-remarks');
+                let selectedValue = selectElement.val();
+                let selectErrorLabel = selectElement.siblings(".error-label");
 
+                let inputElement = $(this).find('.input-date');
+                let inputValue = inputElement.val();
+                let inputErrorLabel = inputElement.siblings(".error-label-date");
+
+                if (selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+                    selectElement.removeClass('has-error');
+                    selectErrorLabel.hide();
+                } else {
+                    hasError++;
+                    selectElement.addClass('has-error');
+                    selectErrorLabel.show();
+                }
+                if (inputValue !== "") {
+                    selectedDate.push(inputValue);
+                    inputElement.removeClass('has-error');
+                    inputErrorLabel.hide();
+                } else {
+                    hasError++;
+                    inputElement.addClass('has-error');
+                    inputErrorLabel.show();
+                }
+            });
+
+            if (final_amount === "") {  
+                hasError++;
+                $("#amount_error").text("Please enter Amount");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+            } else {
+                $("#amount_error").text("");
+                $(".input-group").removeClass("has-error");
+
+            }
+            if (selectedIDs.length > 0 && hasError ==0) {
+                tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            } else if(selectedIDs.length == 0) {
+                tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            }
+          });
+
+          $('#f-employee-name').change(function() {
+            var selectedOptions = $(this).find('option:selected');
+            selectedOptions.each(function() {
+                var optionValue = $(this).val();
+                if (employeeList.indexOf(optionValue) === -1) {
+                   employeeList.push(optionValue);
+                }
+            });
+            $(this).find('option:not(:selected)').each(function() {
+                var optionValue = $(this).val();
+                var index = employeeList.indexOf(optionValue);
+                if (index !== -1) {
+                   employeeList.splice(index, 1);
+                }
+            });
+        });
 
 
         $('#tbl-items').on('click', 'button[name="MultipleCharges"]', function() {
@@ -1373,27 +1693,52 @@
             }
         });
 
-        function tev_details(amount,remarks,status,emp_id){
+        function tev_details(amount,selectedRemarks,status,emp_id, selectedDates){
+            var hasError = false;
             $.ajax({
-                type: "POST",
-                url: "{% url 'add-tev-details' %}",
-                data:{
-                    final_amount: amount,
-                    remarks: remarks,
-                    status : status,
-                    transaction_id : emp_id
-                }
-                }).done(function(data){
+            type: "POST",
+            url: "{% url 'update-tev-details' %}",
+            data:{
+                final_amount: amount,
+                status : status,
+                transaction_id : emp_id,
+                remarks : remarks_data,
+                remarks_date : remarks_date,
+                selected_remarks : selectedRemarks,
+                selected_dates : selectedDates
+            }
+            }).done(function(data){
                 if (data.data == 'success') {
-                    $('#tevDetails').modal('hide');
+                    $('#tevDetails_').modal('hide');
                     toastr.success('Successfully save', 'Success', toast_options);
-                    offCanvasEl.hide()
                     dataTable.ajax.reload()
                 } else {
                     toastr.danger('Data not saved', 'Danger', toast_options);
                 }
             });
-            }
+        }
+
+        // function tev_details(amount,remarks,status,emp_id){
+        //     $.ajax({
+        //         type: "POST",
+        //         url: "{% url 'add-tev-details' %}",
+        //         data:{
+        //             final_amount: amount,
+        //             remarks: remarks,
+        //             status : status,
+        //             transaction_id : emp_id
+        //         }
+        //         }).done(function(data){
+        //         if (data.data == 'success') {
+        //             $('#tevDetails').modal('hide');
+        //             toastr.success('Successfully save', 'Success', toast_options);
+        //             offCanvasEl.hide()
+        //             dataTable.ajax.reload()
+        //         } else {
+        //             toastr.danger('Data not saved', 'Danger', toast_options);
+        //         }
+        //     });
+        // }
 
 
 
