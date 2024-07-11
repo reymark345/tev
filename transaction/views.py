@@ -313,8 +313,12 @@ def outgoing_load(request):
         else:
             item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9],division_id = division_id).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        if any(role_name in allowed_roles for role_name in role_names):
+        user = AuthUser.objects.filter(id=user_id).first()
+
+        if any(role_name in allowed_roles for role_name in role_names) :
             item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9]).select_related().distinct().order_by('-id')
+        elif user.is_staff:
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id__in = [division_id,2,3,4,5,6,7,8,11,12,15,16]).select_related().distinct().order_by('-id')
         else:
             item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id = division_id).select_related().distinct().order_by('-id')
 
@@ -1866,7 +1870,6 @@ def check_charges(request):
 @csrf_exempt
 def payroll_add_charges(request):
     if request.method == 'POST':
-        print("Charges Here")
         incoming_id = request.POST.get('incoming_id')
         amt = request.POST.get('amt')
         charge_id = request.POST.get('charge_id')
