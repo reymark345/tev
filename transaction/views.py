@@ -1562,15 +1562,9 @@ def payroll_list_load(request):
             'id': item['id'],
             'code': item['code'],
             'name': emp_fullname,
-            'id_no': item['id_no'],
-            'account_no': item['account_no'],
             'date_travel': item['date_travel'],
-            'original_amount': item['original_amount'],
             'final_amount': item['final_amount'],
             'incoming_in': item['incoming_in'],
-            'incoming_out': formatted_date_out,
-            'remarks': item['remarks'],
-            'lacking': item['lacking'],
             'status': item['status_id'],
             'user_id': full_name
         }

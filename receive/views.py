@@ -1310,6 +1310,27 @@ def updatetevdetails(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
 @csrf_exempt
+def updatetevamount(request):
+    user_id = request.session.get('user_id', 0)
+    if request.method == 'POST':
+        amount = request.POST.get('final_amount')
+        transaction_id = request.POST.get('transaction_id')
+        selected_remarks = request.POST.getlist('selected_remarks[]')
+        selected_dates = request.POST.getlist('selected_dates[]')
+        TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount)
+        Remarks_r.objects.filter(incoming_id=transaction_id).delete()
+        for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
+            Remarks_r.objects.create(
+                incoming_id=transaction_id,
+                remarks_lib_id=selected_remarks,
+                date=selected_dates
+        )
+        return JsonResponse({'data': 'success'})
+    
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+@csrf_exempt
 def delete_entry(request):
     item_id = request.POST.get('item_id')
     user_id = request.session.get('user_id', 0)
