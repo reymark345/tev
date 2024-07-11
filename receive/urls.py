@@ -7,6 +7,7 @@ urlpatterns = [
     path('addtev', views.addtev, name='add-tev'),
     path('addtevdetails', views.addtevdetails, name='add-tev-details'),
     path('updatetevdetails', views.updatetevdetails, name='update-tev-details'),
+    path('updatetevamount', views.updatetevamount, name='update-tev-amount'),
     path('tevemployee', views.tevemployee, name='tev-employee'),
     
     path('item_load', views.item_load, name='item-load'),
