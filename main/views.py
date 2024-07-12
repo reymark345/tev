@@ -212,7 +212,7 @@ def profile(request):
     division = Division.objects.filter(id = path.division_id).first()
     data = []
 
-    tris_staff = AuthUser.objects.filter(is_staff=1).exclude(id__in=[2,24])
+    tris_staff = AuthUser.objects.filter(is_staff=1).exclude(id__in=[1,2,24])
 
     for user in tris_staff:
         user.first_name = user.first_name.title()
