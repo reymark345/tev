@@ -187,7 +187,7 @@ def charges_edit(request):
     
     
 def charges_load(request):
-    charges_data = Charges.objects.select_related().order_by('-created_at').reverse()
+    charges_data = Charges.objects.select_related().order_by('-created_at')
     total = charges_data.count()
 
     _start = request.GET.get('start')
@@ -261,7 +261,7 @@ def remarks_edit(request):
 
 
 def remarks_load(request):
-    charges_data = RemarksLib.objects.select_related().order_by('-created_at').reverse()
+    charges_data = RemarksLib.objects.select_related().order_by('-created_at')
     total = charges_data.count()
 
     _start = request.GET.get('start')
