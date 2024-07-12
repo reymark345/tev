@@ -1330,12 +1330,18 @@ def updatetevamount(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
+
 @csrf_exempt
 def delete_entry(request):
     item_id = request.POST.get('item_id')
     user_id = request.session.get('user_id', 0)
+
     userData = AuthUser.objects.filter(id=user_id).first()
-    full_name = userData.first_name + ' ' + userData.last_name
+    if not userData:
+        return JsonResponse({'error': 'User not found'}, status=404)
+
+    full_name = f"{userData.first_name} {userData.last_name}"
+
     try:
         with transaction.atomic():
             data = TevIncoming.objects.get(id=item_id)
@@ -1343,20 +1349,37 @@ def delete_entry(request):
 
             for dl_code in dl_codes:
                 remark_data = Remarks_r.objects.filter(incoming_id=dl_code.id)
-                for remark in remark_data:
-                    remarks_lib = RemarksLib.objects.filter(id=remark.remarks_lib_id).first()
-                    description = '{}'.format(
-                        "This Transaction from RECEIVED module is deleted with code number " + data.code + " and ID Number : " + data.id_no + " Fullname : " + data.first_name +" "+ data.middle_name +" "+data.last_name+ " with Original amount : " + str(data.original_amount) + " and Date Travel : "+ data.date_travel + " deleted by " + full_name + " with remarks " + remarks_lib.name
-                    )
+                
+                if remark_data: 
+                    for remark in remark_data:
+                        remarks_lib = RemarksLib.objects.filter(id=remark.remarks_lib_id).first()
+                        description = (
+                            "This Transaction from RECEIVED module is deleted with code number " + data.code +
+                            " and ID Number : " + data.id_no + " Fullname : " + data.first_name + " " +
+                            data.middle_name + " " + data.last_name + " with Original amount : " + str(data.original_amount) +
+                            " and Date Travel : " + data.date_travel + " deleted by " + full_name +
+                            " with remarks " + (remarks_lib.name if remarks_lib else "N/A")
+                        )
+
+                        tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
+                        tev_add.save()
+                        remark.delete()
+                else:
+                    description = (
+                            "This Transaction from RECEIVED module is deleted with code number " + data.code +
+                            " and ID Number : " + data.id_no + " Fullname : " + data.first_name + " " +
+                            data.middle_name + " " + data.last_name + " with Original amount : " + str(data.original_amount) +
+                            " and Date Travel : " + data.date_travel + " deleted by " + full_name
+                        )
                     tev_add = TransactionLogs(description=description, user_id=user_id, created_at=timezone.now())
-                    remark.delete()
                     tev_add.save()
                 dl_code.delete()
 
             return JsonResponse({'data': 'success'})
     except Exception as e:
+        print("Exception occurred:", str(e))
         transaction.rollback()
-        return JsonResponse({'error': str(e)})
+        return JsonResponse({'error': str(e)}, status=500)
     
 @csrf_exempt
 def addtevdetails(request):
