@@ -352,7 +352,7 @@
             </div>
           </div>
           <div class="card-body">
-            <div id="donutChart"></div>
+            <div id="donutChart_"></div>
           </div>
         </div>
       </div>
@@ -400,6 +400,7 @@
       legendColor = config.colors.bodyColor;
       borderColor = config.colors.borderColor;
     }
+    const payroll_c_list = {{ payroll_c_list|safe }};
     const received_counts = {{ received_counts|safe }};
     const reviewed_counts = {{ reviewed_counts|safe }};
     const payrolled_counts = {{ payrolled_counts|safe }};
@@ -408,6 +409,8 @@
     const journal_counts = {{ journal_counts|safe }};
     const approval_counts = {{ approval_counts|safe }};
     const returned_counts = {{ returned_counts|safe }};
+    const charges_list = {{ charges_list|safe }};
+    
     const chartColors = {
       column: {
         series1: '#826af9',
@@ -420,6 +423,16 @@
         series3: '#826bf8',
         series4: '#2b9bf4'
       },
+      donut2: {
+        series1: '#fee802',
+        series2: '#3fd0bd',
+        series3: '#826bf8',
+        series4: '#2b9bf4',
+        series5: '#ffc266',
+        series6: '#80ffff',
+        series7: '#94b8b8',
+        series8: '#66b3ff'
+      },
       area: {
         series1: '#ff6666',
         series2: '#60f2ca',
@@ -431,6 +444,161 @@
         series8: '#66b3ff'
       }
     };
+    //donut_chart
+    const donutChartEl = document.querySelector('#donutChart_'),
+      donutChartConfig = {
+        chart: {
+          height: 445,
+          type: 'donut'
+        },
+        labels: charges_list,
+        series: payroll_c_list,
+        colors: [
+          chartColors.donut2.series3,
+          chartColors.area.series4,
+          chartColors.area.series3,
+          chartColors.area.series2,
+          chartColors.area.series5,
+          chartColors.area.series6,
+          chartColors.area.series7,
+          chartColors.area.series8,
+          chartColors.donut.series4,
+        ],
+        stroke: {
+          show: false,
+          curve: 'straight'
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: function (val, opt) {
+            return parseInt(val, 10) + '%';
+          }
+        },
+        legend: {
+          show: true,
+          position: 'bottom',
+          markers: { offsetX: -3 },
+          itemMargin: {
+            vertical: 3,
+            horizontal: 10
+          },
+          labels: {
+            colors: legendColor,
+            useSeriesColors: false
+          }
+        },
+        plotOptions: {
+          pie: {
+            donut: {
+              labels: {
+                show: true,
+                name: {
+                  fontSize: '2rem',
+                  fontFamily: 'Open Sans'
+                },
+                value: {
+                  fontSize: '1.2rem',
+                  color: legendColor,
+                  fontFamily: 'Open Sans',
+                  formatter: function (val) {
+                    return parseInt(val, 10) + '%';
+                  }
+                },
+                total: {
+                  show: true,
+                  fontSize: '1.5rem',
+                  color: headingColor,
+                  label: 'TOTAL',
+                  formatter: function (w) {
+                    return '100%';
+                  }
+                }
+              }
+            }
+          }
+        },
+        responsive: [
+          {
+            breakpoint: 992,
+            options: {
+              chart: {
+                height: 380
+              },
+              legend: {
+                position: 'bottom',
+                labels: {
+                  colors: legendColor,
+                  useSeriesColors: false
+                }
+              }
+            }
+          },
+          {
+            breakpoint: 576,
+            options: {
+              chart: {
+                height: 320
+              },
+              plotOptions: {
+                pie: {
+                  donut: {
+                    labels: {
+                      show: true,
+                      name: {
+                        fontSize: '1.5rem'
+                      },
+                      value: {
+                        fontSize: '1rem'
+                      },
+                      total: {
+                        fontSize: '1.5rem'
+                      }
+                    }
+                  }
+                }
+              },
+              legend: {
+                position: 'bottom',
+                labels: {
+                  colors: legendColor,
+                  useSeriesColors: false
+                }
+              }
+            }
+          },
+          {
+            breakpoint: 420,
+            options: {
+              chart: {
+                height: 280
+              },
+              legend: {
+                show: false
+              }
+            }
+          },
+          {
+            breakpoint: 360,
+            options: {
+              chart: {
+                height: 250
+              },
+              legend: {
+                show: false
+              }
+            }
+          }
+
+        ]
+      };
+    if (typeof donutChartEl !== undefined && donutChartEl !== null) {
+      const donutChart = new ApexCharts(donutChartEl, donutChartConfig);
+      donutChart.render();
+    }
+    //endchart donut
+
+
+
     $(document).ready(function () {
       const areaChartEl = document.querySelector('#lineAreaChartDB'),
       areaChartConfig = {
