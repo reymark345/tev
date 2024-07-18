@@ -313,13 +313,18 @@ def outgoing_load(request):
         else:
             item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9],division_id = division_id).select_related().distinct().order_by(_order_dash + 'id')
     else:
+        print("division")
+        print(division_id)
         user = AuthUser.objects.filter(id=user_id).first()
 
         if any(role_name in allowed_roles for role_name in role_names) :
+            print("if statement")
             item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9]).select_related().distinct().order_by('-id')
         elif user.is_staff:
+            print("elseif statement")
             item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id__in = [division_id,2,3,4,5,6,7,8,11,12,15,16]).select_related().distinct().order_by('-id')
         else:
+            print("else statement")
             item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id = division_id).select_related().distinct().order_by('-id')
 
     total = item_data.count()
@@ -1278,10 +1283,7 @@ def payroll_load(request):
             columns = [col[0] for col in cursor.description]
             return [dict(zip(columns, row)) for row in cursor.fetchall()]
         query = """
-            SELECT t1.*,GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
-            FROM `tev_incoming` t1 
-            LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = t1.id
-            LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+            SELECT t1.* FROM `tev_incoming` t1 
             WHERE t1.status_id = 4
         """
 
@@ -1321,27 +1323,23 @@ def payroll_load(request):
     elif _search:
         with connection.cursor() as cursor:
             query = """
-                SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges, t1.user_id
-                FROM `tev_incoming` t1 
-                LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = t1.id
-                LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+                SELECT t1.* FROM `tev_incoming` t1 
                 WHERE t1.status_id = 4
                 AND (
                     t1.code LIKE %s
                     OR t1.first_name LIKE %s
+                    OR t1.last_name LIKE %s
+                    OR t1.id_no LIKE %s
                 )
                 GROUP BY t1.id ORDER BY t1.incoming_out DESC;
             """
-            cursor.execute(query, [f'%{_search}%', f'%{_search}%'])
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%'])
             columns = [col[0] for col in cursor.description]
             results = [dict(zip(columns, row)) for row in cursor.fetchall()]
         
     else:
         query = """
-            SELECT t1.*,GROUP_CONCAT(t3.name SEPARATOR ', ') AS multiple_charges 
-            FROM `tev_incoming` t1 
-            LEFT JOIN payrolled_charges AS t2 ON t2.incoming_id = t1.id
-            LEFT JOIN charges AS t3 ON t3.id = t2.charges_id
+            SELECT t1.* FROM `tev_incoming` t1
             WHERE t1.status_id = 4 GROUP BY t1.id ORDER BY t1.incoming_out DESC;
         """
         with connection.cursor() as cursor:
@@ -1382,8 +1380,8 @@ def payroll_load(request):
             'incoming_out': item['incoming_out'],
             'slashed_out': item['incoming_out'],
             'remarks': item['remarks'],
-            'status': item['status_id'],
-            'm_charges': item['multiple_charges']
+            'status': item['status_id']
+         
         }
 
         data.append(item)
@@ -1487,8 +1485,8 @@ def payroll_list_load(request):
             LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
             WHERE (t1.status_id = 2
-                            OR t1.status_id = 7
-                            OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
+                    OR t1.status_id = 7
+                    OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
             )
             AND (code LIKE %s
             OR first_name LIKE %s
@@ -1515,8 +1513,8 @@ def payroll_list_load(request):
             LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
             WHERE (t1.status_id = 2
-                            OR t1.status_id = 7
-                            OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
+                    OR t1.status_id = 7
+                    OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
             )
             AND (code LIKE %s
             OR id_no LIKE %s

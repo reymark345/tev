@@ -260,25 +260,17 @@
               </div>
               <!-- / Content -->
 
-        
 </div>
-
-<script>
-    // Check selected custom option
-    window.Helpers.initCustomOptionCheck();
-</script>
-   
-    <!-- / Content -->
 
 
 
 {% endblock %} {% block footer_scripts %}
 <script>
+    window.Helpers.initCustomOptionCheck();
 
     $(document).ready(function () {
       let url = `ws://${window.location.host}/ws/socket-server/`
       const chatSocket = new WebSocket(url)
-
       chatSocket.onmessage = function(e){
           let data = JSON.parse(e.data)
           console.log('Data:', data)
@@ -286,11 +278,10 @@
           if(data.type === 'chat'){
               let messages = document.getElementById('messages')
 
-              messages.insertAdjacentHTML('beforeend', `<div>
-                                      <p>${data.message}</p>
-                                  </div>`)
+              messages.insertAdjacentHTML('beforeend', `<div> <p>${data.message}</p></div>`)
           }
       }
+      
 
       // let form = document.getElementById('form')
       // form.addEventListener('submit', (e)=> {

@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, TevBridge, RolePermissions, Division, AuthUser)
+from main.models import (RoleDetails, StaffDetails, TevIncoming, TevOutgoing, TevBridge, RolePermissions, Division, AuthUser, Charges, PayrolledCharges)
 from django.utils.dateparse import parse_date
 from django.db.models import Count, Case, When, IntegerField, Subquery
 from datetime import timedelta, date
@@ -169,6 +169,12 @@ def dashboard(request):
         month = entry['month'].month
         approval_counts[month - 1] = entry['count']
 
+    # donut chart
+    c_list = list(Charges.objects.order_by('id').values_list('name', flat=True))
+    p_charges_counts = PayrolledCharges.objects.values('charges_id').annotate(count=Count('charges_id')).order_by('charges_id')
+    p_counts_list = list(p_charges_counts.values_list('count', flat=True))
+    #end
+
     context = {
         'received_counts': received_counts,
         'reviewed_counts': reviewed_counts,
@@ -193,6 +199,8 @@ def dashboard(request):
         'ongoing': ongoing,
         'box_a': box_a,
         'permissions' : role_names,
+        'charges_list': c_list,
+        'payroll_c_list': p_counts_list,
     }
     if any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'dashboard.html',context)
@@ -210,8 +218,6 @@ def profile(request):
     role_names = [entry['role_name'] for entry in role_details]
     path = StaffDetails.objects.filter(user_id = user_id).first()
     division = Division.objects.filter(id = path.division_id).first()
-    data = []
-
     tris_staff = AuthUser.objects.filter(is_staff=1).exclude(id__in=[1,2,24])
 
     for user in tris_staff:
