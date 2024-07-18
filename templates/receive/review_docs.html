@@ -154,6 +154,16 @@
                     </select>
                 </div>
 
+                <div class="col-12 col-md-12">
+                    <label class="form-label" for="modalFEmployeeName">Reviewed By</label>
+                    <select class="select2 form-select" name="FReviewedBy" id="f-reviewedby">
+                        <option></option>
+                        {% for row in reviewed_by %}
+                        <option value="{{ row.id }}">{{ row.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
                     <input
                     type="hidden"
                     id="f-first-name"
@@ -397,6 +407,7 @@
             FOriginalAmount = jQuery(document.querySelector('[name="FOriginalAmount"]')),
             FFinalAmount = jQuery(document.querySelector('[name="FFinalAmount"]')),
             FAccountNumber = jQuery(document.querySelector('[name="FAccountNumber"]')),
+            FReviewedBy = jQuery(document.querySelector('[name="FReviewedBy"]')),
             RemarksList= jQuery(document.querySelector('[name="RemarksList"]')),
             offCanvasElement = document.querySelector('#add-new-record'),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
@@ -446,7 +457,8 @@
                     d.FFirstName = FFirstName.val()
                     d.FMiddleName = FMiddleName.val()
                     d.FLastName = FLastName.val()
-                    d.EmployeeList = employeeList
+                    d.EmployeeList = employeeList,
+                    d.FReviewedBy = FReviewedBy.val()
                 },
 
             },
@@ -1101,9 +1113,6 @@
             }
         }
 
-
-
-        
         search_advance_filter.on('click', function () {
             FAdvancedFilter.val("true");
             $('#f-employee-name').empty();

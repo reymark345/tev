@@ -313,18 +313,13 @@ def outgoing_load(request):
         else:
             item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9],division_id = division_id).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        print("division")
-        print(division_id)
         user = AuthUser.objects.filter(id=user_id).first()
 
         if any(role_name in allowed_roles for role_name in role_names) :
-            print("if statement")
             item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9]).select_related().distinct().order_by('-id')
         elif user.is_staff:
-            print("elseif statement")
             item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id__in = [division_id,2,3,4,5,6,7,8,11,12,15,16]).select_related().distinct().order_by('-id')
         else:
-            print("else statement")
             item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id = division_id).select_related().distinct().order_by('-id')
 
     total = item_data.count()
