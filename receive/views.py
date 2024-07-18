@@ -102,17 +102,30 @@ def checking(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
     date_actual = SystemConfiguration.objects.filter().first().date_actual
+
+    user_name = RolePermissions.objects.filter(role_id=3) 
+    get_id = user_name.values_list('user_id', flat=True)
+    data = []
+    for user_id in get_id:
+        userData = AuthUser.objects.filter(id=user_id)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
+        item_entry = {
+            'id': userData[0].id,
+            'full_name': full_name
+        }
+        data.append(item_entry)
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'remarks_list' : RemarksLib.objects.filter().order_by('name'),
             'permissions' : role_names,
-            'is_actual_date': date_actual
+            'is_actual_date': date_actual,
+            'reviewed_by' :  data
         }
         return render(request, 'receive/review_docs.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
-
+    
     
 @login_required(login_url='login')
 @csrf_exempt
@@ -349,6 +362,8 @@ def checking_load(request):
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
     FStatus = request.GET.get('FStatus')
     EmployeeList = request.GET.getlist('EmployeeList[]')
+    FReviewedBy = request.GET.get('FReviewedBy')
+
     status_txt = ''
     if _search in "returned":
         status_txt = '3'
@@ -403,6 +418,10 @@ def checking_load(request):
         if FFinalAmount:
             query += " AND t1.final_amount = %s"
             params.append(FFinalAmount)
+
+        if FReviewedBy:
+            query += " AND t1.reviewed_by = %s"
+            params.append(FReviewedBy)
 
         if EmployeeList:
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
