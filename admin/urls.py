@@ -23,6 +23,7 @@ urlpatterns = [
     path('chat_data', views.chat_data, name='chat-data'),
     path('chat_staff', views.chat_staff, name='chat-staff'),
     path('chat_data_staff', views.chat_data_staff, name='chat-data-staff'),
-    path('send_chat', views.send_chat, name='send-chat')
+    path('send_chat', views.send_chat, name='send-chat'),
+    path('<str:room_name>/<str:username>/', views.MessageView, name='room'),
 
 ]

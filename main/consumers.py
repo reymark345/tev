@@ -1,35 +1,55 @@
 import json
-from channels.generic.websocket import WebsocketConsumer
-from asgiref.sync import async_to_sync
+from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+# from ChatApp.models import *
+from main.models import (Room, Message)
 
-class ChatConsumer(WebsocketConsumer):
-    def connect(self):
-        self.room_group_name = 'test'
+class ChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+ 
+        self.room_name = f"room_{self.scope['url_route']['kwargs']['room_name']}"
+        print("Connecteddd")
+        print(self.room_name)
 
-        async_to_sync(self.channel_layer.group_add)(
-            self.room_group_name,
-            self.channel_name
-        )
+        await self.channel_layer.group_add(self.room_name, self.channel_name)
+        await self.accept()
+        
+    async def disconnect(self, close_code):
+        print("Disconnect")
+        print(self.room_name)
+        await self.channel_layer.group_discard(self.room_name, self.channel_name)
 
-        self.accept()
-   
-
-    def receive(self, text_data):
+    async def receive(self, text_data):
+        print("Receiveddd")
+        print(text_data)
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        message = text_data_json
 
-        async_to_sync(self.channel_layer.group_send)(
-            self.room_group_name,
-            {
-                'type':'chat_message',
-                'message':message
-            }
-        )
+        event = {
+            'type': 'send_message',
+            'message': message,
+        }
 
-    def chat_message(self, event):
-        message = event['message']
+        await self.channel_layer.group_send(self.room_name, event)
 
-        self.send(text_data=json.dumps({
-            'type':'chat',
-            'message':message
-        }))
+    async def send_message(self, event):
+        print("Send")
+        data = event['message']
+        print(data)
+        await self.create_message(data=data)
+
+        response_data = {
+            'sender': data['sender'],
+            'message': data['message']
+        }
+        await self.send(text_data=json.dumps({'message': response_data}))
+
+    @database_sync_to_async
+    def create_message(self, data):
+
+        get_room_by_name = Room.objects.get(room_name=data['room_name'])
+        
+        if not Message.objects.filter(message=data['message']).exists():
+            new_message = Message(room=get_room_by_name, sender=data['sender'], message=data['message'])
+            new_message.save()  
+        
