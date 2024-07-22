@@ -103,9 +103,22 @@ def checking(request):
     role_names = [entry['role_name'] for entry in role_details]
     date_actual = SystemConfiguration.objects.filter().first().date_actual
 
+    created_user_name = RolePermissions.objects.filter(role_id=2)
     user_name = RolePermissions.objects.filter(role_id=3) 
+    created_get_id = created_user_name.values_list('user_id', flat=True)
     get_id = user_name.values_list('user_id', flat=True)
     data = []
+    created_data = []
+
+    for c_user_id in created_get_id:
+        c_userData = AuthUser.objects.filter(id=c_user_id)
+        c_full_name = c_userData[0].first_name + ' ' + c_userData[0].last_name if c_userData else ''
+        c_item_entry = {
+            'id': c_userData[0].id,
+            'full_name': c_full_name
+        }
+        created_data.append(c_item_entry)
+    
     for user_id in get_id:
         userData = AuthUser.objects.filter(id=user_id)
         full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
@@ -114,12 +127,15 @@ def checking(request):
             'full_name': full_name
         }
         data.append(item_entry)
+
+
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'remarks_list' : RemarksLib.objects.filter().order_by('name'),
             'permissions' : role_names,
             'is_actual_date': date_actual,
+            'created_by' :  created_data,
             'reviewed_by' :  data
         }
         return render(request, 'receive/review_docs.html', context)
@@ -363,6 +379,7 @@ def checking_load(request):
     FStatus = request.GET.get('FStatus')
     EmployeeList = request.GET.getlist('EmployeeList[]')
     FReviewedBy = request.GET.get('FReviewedBy')
+    FCreatedBy = request.GET.get('FCreatedBy')
 
     status_txt = ''
     if _search in "returned":
@@ -418,6 +435,10 @@ def checking_load(request):
         if FFinalAmount:
             query += " AND t1.final_amount = %s"
             params.append(FFinalAmount)
+        
+        if FReviewedBy:
+            query += " AND t1.user_id = %s"
+            params.append(FReviewedBy)
 
         if FReviewedBy:
             query += " AND t1.reviewed_by = %s"

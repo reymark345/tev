@@ -154,7 +154,17 @@
                     </select>
                 </div>
 
-                <div class="col-12 col-md-12">
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalFCreatedBy">Created By</label>
+                    <select class="select2 form-select" name="FCreatedBy" id="f-createdby">
+                        <option></option>
+                        {% for row in created_by %}
+                        <option value="{{ row.id }}">{{ row.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-6">
                     <label class="form-label" for="modalFEmployeeName">Reviewed By</label>
                     <select class="select2 form-select" name="FReviewedBy" id="f-reviewedby">
                         <option></option>
@@ -164,37 +174,37 @@
                     </select>
                 </div>
 
-                    <input
-                    type="hidden"
-                    id="f-first-name"
-                    name="FFirstName"
-                    class="form-control"
-                    placeholder="Firstname"
-                    />
-    
-                    <input
-                    type="hidden"
-                    id="f-middle-name"
-                    name="FMiddleName"
-                    class="form-control"
-                    placeholder="Middle"
-                    />
-    
-                    <input
-                    type="hidden"
-                    id="f-last-name"
-                    name="FLastName"
-                    class="form-control"
-                    placeholder="Lastname"
-                    />
-    
-                    <input
-                    type="hidden"
-                    id="f-adv-filter"
-                    name="FAdvancedFilter"
-                    class="form-control"
-                    placeholder="AdvFilter"
-                    />
+                <input
+                type="hidden"
+                id="f-first-name"
+                name="FFirstName"
+                class="form-control"
+                placeholder="Firstname"
+                />
+
+                <input
+                type="hidden"
+                id="f-middle-name"
+                name="FMiddleName"
+                class="form-control"
+                placeholder="Middle"
+                />
+
+                <input
+                type="hidden"
+                id="f-last-name"
+                name="FLastName"
+                class="form-control"
+                placeholder="Lastname"
+                />
+
+                <input
+                type="hidden"
+                id="f-adv-filter"
+                name="FAdvancedFilter"
+                class="form-control"
+                placeholder="AdvFilter"
+                />
                 <div class="col-12 text-center">
                     <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
                     <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
@@ -408,6 +418,7 @@
             FFinalAmount = jQuery(document.querySelector('[name="FFinalAmount"]')),
             FAccountNumber = jQuery(document.querySelector('[name="FAccountNumber"]')),
             FReviewedBy = jQuery(document.querySelector('[name="FReviewedBy"]')),
+            FCreatedBy = jQuery(document.querySelector('[name="FCreatedBy"]')),
             RemarksList= jQuery(document.querySelector('[name="RemarksList"]')),
             offCanvasElement = document.querySelector('#add-new-record'),
             DateTravel = jQuery(document.querySelector('[name="DateTravel"]')),
@@ -459,6 +470,7 @@
                     d.FLastName = FLastName.val()
                     d.EmployeeList = employeeList,
                     d.FReviewedBy = FReviewedBy.val()
+                    d.FCreatedBy = FCreatedBy.val()
                 },
 
             },
