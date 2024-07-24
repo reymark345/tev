@@ -228,6 +228,10 @@
 
   {% endblock %}
   {% block footer_scripts %}
+  <script src="{% static 'assets/vendor/libs/bs-stepper/bs-stepper.js' %}"></script>
+  <script src="{% static 'assets/js/form-wizard-numbered.js' %}"></script>
+  <script src="{% static 'assets/js/form-wizard-validation.js' %}"></script>
+  
   <script>
     $(document).ready(function() {
       var steps = document.querySelectorAll('.step-trigger');

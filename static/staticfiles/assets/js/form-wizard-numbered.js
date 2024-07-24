@@ -61,14 +61,28 @@ $(function () {
   // Vertical Wizard
   // --------------------------------------------------------------------
   const wizardVertical = document.querySelector('.wizard-vertical'),
-    wizardVerticalBtnNextList = [].slice.call(wizardVertical.querySelectorAll('.btn-next')),
-    wizardVerticalBtnPrevList = [].slice.call(wizardVertical.querySelectorAll('.btn-prev')),
-    wizardVerticalBtnSubmit = wizardVertical.querySelector('.btn-submit');
+
+    // wizardVerticalBtnNextList = [].slice.call(wizardVertical.querySelectorAll('.btn-next')),
+    // wizardVerticalBtnPrevList = [].slice.call(wizardVertical.querySelectorAll('.btn-prev'))
+    // wizardVerticalBtnSubmit = wizardVertical.querySelector('.btn-submit');
+    wizardVerticalBtnNextList = '',
+    wizardVerticalBtnPrevList = '',
+    wizardVerticalBtnSubmit = '';
+
+
+    if (wizardVertical) {
+      // Custom this condtion only
+      const wizardVerticalBtnNextList = [].slice.call(wizardVertical.querySelectorAll('.btn-next'));
+      const wizardVerticalBtnPrevList = [].slice.call(wizardVertical.querySelectorAll('.btn-prev'));
+      const wizardVerticalBtnSubmit = wizardVertical.querySelector('.btn-submit');
+    }
+
 
   if (typeof wizardVertical !== undefined && wizardVertical !== null) {
     const verticalStepper = new Stepper(wizardVertical, {
       linear: false
     });
+
     if (wizardVerticalBtnNextList) {
       wizardVerticalBtnNextList.forEach(wizardVerticalBtnNext => {
         wizardVerticalBtnNext.addEventListener('click', event => {
@@ -94,9 +108,20 @@ $(function () {
   // Modern Wizard
   // --------------------------------------------------------------------
   const wizardModern = document.querySelector('.wizard-modern-example'),
-    wizardModernBtnNextList = [].slice.call(wizardModern.querySelectorAll('.btn-next')),
-    wizardModernBtnPrevList = [].slice.call(wizardModern.querySelectorAll('.btn-prev')),
-    wizardModernBtnSubmit = wizardModern.querySelector('.btn-submit');
+    // wizardModernBtnNextList = [].slice.call(wizardModern.querySelectorAll('.btn-next')),
+    // wizardModernBtnPrevList = [].slice.call(wizardModern.querySelectorAll('.btn-prev')),
+    // wizardModernBtnSubmit = wizardModern.querySelector('.btn-submit');
+    wizardModernBtnNextList = '',
+    wizardModernBtnPrevList = '',
+    wizardModernBtnSubmit = '';
+
+  if (wizardModern) {
+    // Custom this condtion only
+    const wizardModernBtnNextList = [].slice.call(wizardModern.querySelectorAll('.btn-next'));
+    const wizardModernBtnPrevList = [].slice.call(wizardModern.querySelectorAll('.btn-prev'));
+    const wizardModernBtnSubmit = wizardModern.querySelector('.btn-submit');
+  }
+
   if (typeof wizardModern !== undefined && wizardModern !== null) {
     const modernStepper = new Stepper(wizardModern, {
       linear: false
@@ -124,10 +149,42 @@ $(function () {
 
   // Modern Vertical Wizard
   // --------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   const wizardModernVertical = document.querySelector('.wizard-modern-vertical'),
+
+    // wizardModernVerticalBtnNextList = [].slice.call(wizardModernVertical.querySelectorAll('.btn-next')),
+    // wizardModernVerticalBtnPrevList = [].slice.call(wizardModernVertical.querySelectorAll('.btn-prev')),
+    // wizardModernVerticalBtnSubmit = wizardModernVertical.querySelector('.btn-submit');
+    wizardModernVerticalBtnNextList = '',
+    wizardModernVerticalBtnPrevList = '',
+    wizardModernVerticalBtnSubmit = '';
+
+  if (wizardModernVertical) {
+    // Custom this condtion only
+    // const wizardModernBtnNextList = [].slice.call(wizardModern.querySelectorAll('.btn-next'));
+    // const wizardModernBtnPrevList = [].slice.call(wizardModern.querySelectorAll('.btn-prev'));
+    // const wizardModernBtnSubmit = wizardModern.querySelector('.btn-submit');
     wizardModernVerticalBtnNextList = [].slice.call(wizardModernVertical.querySelectorAll('.btn-next')),
     wizardModernVerticalBtnPrevList = [].slice.call(wizardModernVertical.querySelectorAll('.btn-prev')),
     wizardModernVerticalBtnSubmit = wizardModernVertical.querySelector('.btn-submit');
+  }
+
   if (typeof wizardModernVertical !== undefined && wizardModernVertical !== null) {
     const modernVerticalStepper = new Stepper(wizardModernVertical, {
       linear: false

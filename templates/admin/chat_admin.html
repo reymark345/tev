@@ -265,34 +265,47 @@
 
 
 {% endblock %} {% block footer_scripts %}
+<script src="{% static 'assets/js/app-chat.js' %}"></script> 
 <script>
     window.Helpers.initCustomOptionCheck();
 
-    $(document).ready(function () {
-      let url = `ws://${window.location.host}/ws/socket-server/`
-      const chatSocket = new WebSocket(url)
-      chatSocket.onmessage = function(e){
-          let data = JSON.parse(e.data)
-          console.log('Data:', data)
 
-          if(data.type === 'chat'){
-              let messages = document.getElementById('messages')
-
-              messages.insertAdjacentHTML('beforeend', `<div> <p>${data.message}</p></div>`)
-          }
-      }
+    {% comment %} socket.addEventListener("message", (event) => { 
+      const messageData = JSON.parse(event.data)['message'];
+      console.log(messageData);
       
+      var sender = messageData['sender'];
+      var message = messageData['message'];
 
-      // let form = document.getElementById('form')
-      // form.addEventListener('submit', (e)=> {
-      //     e.preventDefault()
-      //     let message = e.target.message.value 
-      //     chatSocket.send(JSON.stringify({
-      //         'message':message
-      //     }))
-      //     form.reset()
-      // })
+      if (sender == '{{user}}'){
+          document.getElementById('msg').value = '';
+      }
 
+      var messageDiv = document.querySelector('.message');
+      if (sender != '{{user}}') {
+          messageDiv.innerHTML += '<div class="receive"><p style="color: #000;">' + message + '<strong>-' + sender + '</strong></p></div>';
+      } else {
+          messageDiv.innerHTML += '<div class="send"><p style="color: #000;">' + message + '</p></div>';
+      }
+      scrollToBottom();
+
+    }); {% endcomment %}
+
+    {% comment %} socket.onopen = (event) => {
+        console.log("WebSocket connection opened!");
+    };
+
+    socket.onclose = (event) => {
+        console.log("WebSocket connection closed!");
+    }; {% endcomment %}
+  
+
+
+
+    $(document).ready(function () {
+
+      const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+      const wsEndpoint = `${websocketProtocol}://${window.location.host}/ws/notification/`;
       
 
       // form-message
@@ -334,6 +347,16 @@
           $('#form-message').show();
           var id = $(this).data('id');
           staff_id = id;
+          const socket = new WebSocket(wsEndpoint+id+'/');
+
+          socket.onopen = (event) => {
+            console.log("WebSocket connection opened!" + staff_id);
+          };
+      
+          socket.onclose = (event) => {
+              console.log("WebSocket connection closed!");
+          };
+
           $.ajax({
             type: 'POST',
             url: "{% url 'chat-data-staff' %}",
@@ -341,9 +364,8 @@
                 auth_user_id: id
             },
             success: function(response) {
+
                 $('#chat-messages-container').empty();
-                console.log("Request successfulffff");
-                console.log(response);
                 var data = response.data;
                 var userData = data.combined_data[0];
                 var user_id = userData.id;
@@ -360,8 +382,6 @@
                   data.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
                   data.messages.forEach(function(message) {
                       var messageClass = message.from_user === login_id ? 'chat-message-right' : 'chat-message';
-                      console.log("testtt");
-                      console.log(messageClass);
                       var formattedDate = new Date(message.created_at).toLocaleString();
                       var messageHtml = `
                           <li class="chat-message ${messageClass}">
@@ -408,21 +428,34 @@
 
 
       $("#send-chat-btn").click(function(){  
-        alert("sendddd");
+        //const socket = new WebSocket(wsEndpoint);
+        //const socket = new WebSocket(wsEndpoint+staff_id+'/');
+        console.log("testtt");
+        console.log(wsEndpoint);
+        const socket = new WebSocket(wsEndpoint+'rooms/');
         if(staff_id ==0){
           toastr.error('Select User first', 'Invalid', toast_options);
         }
         else{
-          $.ajax({
-            type: 'POST',
-            url: "{% url 'send-chat' %}",
-            data:{
-                message: ChatMessage.val(),
-                stf_id: staff_id
-            }
-          }).done(function (data) {
-            toastr.success('Message sent successfully', 'Success', toast_options);
-          });
+
+          socket.send(
+            JSON.stringify({
+                'message': ChatMessage.val(),
+                'room_name': 'rooms',
+                'sender': 'macky',
+            })
+          )
+
+          // $.ajax({
+          //   type: 'POST',
+          //   url: "{% url 'send-chat' %}",
+          //   data:{
+          //       message: ChatMessage.val(),
+          //       stf_id: staff_id
+          //   }
+          // }).done(function (data) {
+          //   toastr.success('Message sent successfully', 'Success', toast_options);
+          // });
         }
       });
 

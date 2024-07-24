@@ -23,7 +23,9 @@ bsStepper.forEach(el => {
     }
     if (event.detail.to == 0) {
       for (let k = index; k < numberOfSteps; k++) {
-        line[k].classList.remove('crossed');
+        if (line[k] != null && line[k].classList != null) {
+          line[k].classList.remove('crossed');
+        }
       }
       line[0].classList.remove('crossed');
     }
@@ -31,3 +33,5 @@ bsStepper.forEach(el => {
 });
 
 export { Stepper };
+
+

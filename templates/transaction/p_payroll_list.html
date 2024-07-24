@@ -252,10 +252,7 @@
 
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title" id="exampleModalLabel"><p class="title-name">Add Record</p></h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
+
     <div class="offcanvas-body flex-grow-1">
        <form class="add-new-record pt-0 row g-2" id="item-form">
             <input type="hidden" id="item-id" name="ItemID" />
@@ -626,10 +623,6 @@
                         let date_remarks = data.date_remarks;
                         let remarks_d = data.lacking;
 
-                        console.log(remarks_d);
-                        console.log("testttt");
-
-
                         $('.rows-container').empty();
                         if(duplicate_date === "" || duplicate_date === null ){
                             $("#dp_date").hide();
@@ -649,8 +642,7 @@
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
                             remarks_data = remarks_d;
-                            console.log("remarkssss_data");
-                            console.log(remarks_data);
+
 
                             for (let i = 0; i < date_remarks.length; i++) {                            
                                 var newRow = $('<div class="row mt-2">' +
