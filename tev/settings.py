@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -48,7 +49,6 @@ INSTALLED_APPS = [
     'channels',
 ]
 
-ASGI_APPLICATION = 'tev.asgi.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -82,6 +82,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'tev.wsgi.application'
+ASGI_APPLICATION = 'tev.asgi.application'
+
+CHANNEL_LAYERS = {
+   
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
+}
+
 DATABASES = {
     #for server to server
     'default': {
