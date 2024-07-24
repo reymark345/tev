@@ -205,7 +205,7 @@ def dashboard(request):
     if any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'dashboard.html',context)
     else:
-        return redirect("status")
+        return redirect("travel-history")
     
 @login_required(login_url='login')
 def profile(request):

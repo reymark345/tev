@@ -41,12 +41,17 @@ def status(request):
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
-    context = {
-        'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-        'permissions' : role_names,
-        'division' : Division.objects.filter().order_by('name'),
-    }
-    return render(request, 'tracking/status.html', context)
+    
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'permissions' : role_names,
+            'division' : Division.objects.filter().order_by('name'),
+        }
+        return render(request, 'tracking/status.html', context)
+    else:
+        return redirect("travel-history")
+        # return render(request, 'pages/unauthorized.html')
 
 @login_required(login_url='login')
 def users(request):
@@ -55,6 +60,7 @@ def users(request):
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
+
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
@@ -63,7 +69,8 @@ def users(request):
         }
         return render(request, 'admin/users.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect("travel-history")
+        # return render(request, 'pages/unauthorized.html')
 
         
 @login_required(login_url='login')
@@ -804,7 +811,8 @@ def travel_calendar(request):
         }
         return render(request, 'tracking/travel_calendar.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect("travel-history")
+        # return render(request, 'pages/unauthorized.html')
 
 def travel_history_load(request):
     total = 0
