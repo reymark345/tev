@@ -225,7 +225,8 @@
                         <li class="menu-header small text-uppercase">
                             <span class="menu-header-text">Tracking</span>
                         </li>
-
+                        
+                        {% if 'Claimant' not in permissions %}
                         <li class="menu-item {% if url_name == 'status' %}active{% endif %}" >
                             <a href="{% url 'status' %}" class="menu-link">
                             
@@ -233,6 +234,8 @@
                                 <div data-i18n="Status">Status</div>
                             </a>
                         </li>
+                        {% endif %}
+
                         <li class="menu-item {% if url_name == 'travel-history' %}active{% endif %}">
                             <a href="{% url 'travel-history' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
