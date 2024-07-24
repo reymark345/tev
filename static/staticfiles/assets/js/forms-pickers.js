@@ -50,11 +50,13 @@
     });
   }
 
-  // Range
-  if (typeof flatpickrRange !== null) {
-    flatpickrRange.flatpickr({
-      mode: 'range'
-    });
+  if (flatpickrRange !== null) {
+    // Range custom above
+    if (typeof flatpickrRange !== null) {
+      flatpickrRange.flatpickr({
+        mode: 'range'
+      });
+    }
   }
 
   // Inline
