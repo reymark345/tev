@@ -34,7 +34,7 @@ import decimal
 @login_required(login_url='login')
 @csrf_exempt
 def status(request):
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff", "Budget staff", "Journal staff", "Approval staff"] 
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff", "Budget staff", "Journal staff", "Approval staff", "End user"] 
 
     user_id = request.session.get('user_id', 0)
 
@@ -51,7 +51,6 @@ def status(request):
         return render(request, 'tracking/status.html', context)
     else:
         return redirect("travel-history")
-        # return render(request, 'pages/unauthorized.html')
 
 @login_required(login_url='login')
 def users(request):
@@ -70,7 +69,6 @@ def users(request):
         return render(request, 'admin/users.html', context)
     else:
         return redirect("travel-history")
-        # return render(request, 'pages/unauthorized.html')
 
         
 @login_required(login_url='login')

@@ -204,6 +204,8 @@ def dashboard(request):
     }
     if any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'dashboard.html',context)
+    elif "End user" in role_names:
+        return redirect("status")
     else:
         return redirect("travel-history")
     
