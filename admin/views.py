@@ -115,44 +115,6 @@ def chat(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-# @login_required(login_url='login')
-# def chat_data(request):
-#     allowed_roles = ["Admin"]    
-#     user_id = request.session.get('user_id', 0)
-#     AuthUserId = request.POST.get('auth_user_id')
-    
-#     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
-#     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
-#     role_names = [entry['role_name'] for entry in role_details]
-#     date_actual = SystemConfiguration.objects.filter().first().date_actual
-#     path = StaffDetails.objects.filter(user_id = user_id).first()
-#     combined_data = []
-
-#     Chat.objects.filter(to_user = AuthUserId)
-
-
-#     for auth_user in AuthUser.objects.all():
-#         staff_detail = StaffDetails.objects.filter(user=auth_user).first()
-#         combined_data.append({
-#             'id': auth_user.id,
-#             'first_name': auth_user.first_name.title(),
-#             'last_name': auth_user.last_name.title(),
-#             'image_path': staff_detail.image_path if staff_detail else None
-#         })
-
-#     if any(role_name in allowed_roles for role_name in role_names):
-#         context = {
-#             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
-#             'is_actual_date': date_actual,
-#             'permissions' : role_names,
-#             'image_path': path.image_path,
-#             'role_details': RoleDetails.objects.filter().order_by('role_name'),
-#             'combined_data': combined_data
-#         }
-#         return render(request, 'admin/chat.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-
 @login_required(login_url='login')
 def chat_data(request):
     allowed_roles = ["Admin"]
@@ -162,7 +124,6 @@ def chat_data(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
     combined_data = []
-    # messages = Chat.objects.filter(to_user=auth_user_id).values('from_user', 'to_user', 'message', 'seen', 'created_at')
     messages = Chat.objects.filter(Q(to_user=auth_user_id) | Q(from_user=auth_user_id)).values('from_user', 'to_user', 'message', 'seen', 'created_at')
     messages_list = list(messages)
     try:
@@ -516,33 +477,55 @@ def update_password(request):
         return JsonResponse({'data': 'error'})
     
 
-
-def user_load(request):    
+def user_load(request):
+    _search = request.GET.get('search[value]')
     data = []
+    if _search:
+        user_data_query = """
+            SELECT t1.id, t1.username, t1.first_name, t1.last_name, t2.position, t1.email, t1.is_staff, t2.sex, t2.address, GROUP_CONCAT(t4.role_name SEPARATOR ', ') AS role, t2.id AS staff_id, t1.is_active
+            FROM auth_user AS t1 
+            LEFT JOIN staff_details AS t2 ON t2.user_id = t1.id
+            LEFT JOIN role_permissions AS t3 ON t3.user_id = t1.id
+            LEFT JOIN role_details AS t4 ON t4.id = t3.role_id
+            WHERE t1.username LIKE %s OR t1.first_name LIKE %s OR t1.last_name LIKE %s
+            GROUP BY t1.id ORDER BY t1.date_joined DESC;
+        """
+        params = [
+            '%' + _search + '%',
+            '%' + _search + '%',
+            '%' + _search + '%',
+        ]
+        with connection.cursor() as cursor:
+            cursor.execute(user_data_query, params)
+            columns = [col[0] for col in cursor.description]
+            user_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    else:
+        user_data_query = """
+            SELECT t1.id, t1.username, t1.first_name, t1.last_name, t2.position, t1.email, t1.is_staff, t2.sex, t2.address, GROUP_CONCAT(t4.role_name SEPARATOR ', ') AS role, t2.id AS staff_id, t1.is_active
+            FROM auth_user AS t1 
+            LEFT JOIN staff_details AS t2 ON t2.user_id = t1.id
+            LEFT JOIN role_permissions AS t3 ON t3.user_id = t1.id
+            LEFT JOIN role_details AS t4 ON t4.id = t3.role_id
+            GROUP BY t1.id ORDER BY t1.date_joined DESC;
+        """
+        with connection.cursor() as cursor:
+            cursor.execute(user_data_query)
+            columns = [col[0] for col in cursor.description]
+            user_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    user_data = """
-        SELECT t1.id, t1.username, t1.first_name, t1.last_name, t2.position, t1.email, t1.is_staff, t2.sex, t2.address, GROUP_CONCAT(t4.role_name SEPARATOR ', ') AS role, t2.id AS staff_id, t1.is_active
-        FROM auth_user AS t1 
-        LEFT JOIN staff_details AS t2 ON t2.user_id = t1.id
-        LEFT JOIN role_permissions AS t3 ON t3.user_id = t1.id
-        LEFT JOIN role_details AS t4 ON t4.id = t3.role_id
-        GROUP BY t1.id ORDER BY t1.date_joined DESC;
-    """
-    with connection.cursor() as cursor:
-        cursor.execute(user_data)
-        columns = [col[0] for col in cursor.description]
-        user_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     total = len(user_data)
     _start = request.GET.get('start')
     _length = request.GET.get('length')
-    
+    page = 1
+    per_page = total
+
     if _start and _length:
         start = int(_start)
         length = int(_length)
         page = math.ceil(start / length) + 1
         per_page = length
         user_data = user_data[start:start + length]
-        
+
     for item in user_data:
         user_data_item = {
             'user_details_id': item['staff_id'],

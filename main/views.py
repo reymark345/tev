@@ -297,9 +297,10 @@ def generate_accomplishment_admin(request):
 
     FStartDate = request.POST.get('start_date')
     FEndDate = request.POST.get('end_date')
-
     start_date = parse_date(FStartDate)
     end_date = parse_date(FEndDate)
+
+    _search = request.GET.get('search[value]')
     
     if not start_date or not end_date:
         return JsonResponse({'error': 'Invalid date format'}, status=400)
@@ -338,9 +339,9 @@ def generate_accomplishment_admin(request):
 
             user_results['accomplishments'].append({
                 'date': single_date.strftime('%B %d, %Y'),
-                'updated_count': updated_count,
-                'reviewed_count': reviewed_count,
-                'payrolled_count': payrolled_count
+                'updated_count': updated_count if updated_count > 0 else "-",
+                'reviewed_count': reviewed_count if reviewed_count > 0 else "-",
+                'payrolled_count': payrolled_count if payrolled_count > 0 else "-"
             })
         
         results.append(user_results)
