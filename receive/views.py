@@ -85,7 +85,8 @@ def list(request):
    
 @csrf_exempt
 def api(request):
-    url = "https://caraga-portal.dswd.gov.ph/api/employee/list/search/?q="
+    # url = "https://caraga-portal.dswd.gov.ph/api/employee/list/search/?q="
+    url = "https://caraga-portal.dswd.gov.ph/api/employee/list/load"
     headers = {
         "Authorization": "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
     }
