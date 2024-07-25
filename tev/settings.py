@@ -85,7 +85,6 @@ WSGI_APPLICATION = 'tev.wsgi.application'
 ASGI_APPLICATION = 'tev.asgi.application'
 
 CHANNEL_LAYERS = {
-   
     "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
 }
 
