@@ -362,8 +362,6 @@ def item_load(request):
 def checking_load(request):
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
-    _order_dash = '-' if _order_dir == 'desc' else ''
-    _order_col_num = request.GET.get('order[0][column]')
     FIdNumber= request.GET.get('FIdNumber')
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
