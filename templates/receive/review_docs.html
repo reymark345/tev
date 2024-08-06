@@ -1157,6 +1157,8 @@
             FEmployeeName.val('').trigger('change');
             FStatus.val('').trigger('change');
             FIncomingBy.val('').trigger('change');
+            FCreatedBy.val('').trigger('change');
+            FReviewedBy.val('').trigger('change');
         }
 
         $('#approved').click(function() {
@@ -1367,6 +1369,24 @@
             FStatus.select2({
                 placeholder: 'Choose Status',
                 dropdownParent: FStatus.parent(),
+                allowClear: true,
+            })
+        }
+
+        if (FCreatedBy.length) {
+            FCreatedBy.wrap('<div class="position-relative"></div>')
+            FCreatedBy.select2({
+                placeholder: 'Choose data',
+                dropdownParent: FCreatedBy.parent(),
+                allowClear: true,
+            })
+        }
+
+        if (FReviewedBy.length) {
+            FReviewedBy.wrap('<div class="position-relative"></div>')
+            FReviewedBy.select2({
+                placeholder: 'Choose data',
+                dropdownParent: FReviewedBy.parent(),
                 allowClear: true,
             })
         }
