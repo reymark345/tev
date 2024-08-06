@@ -14,6 +14,7 @@ class ItemSerializerStatus(serializers.Serializer):
     middle_name = serializers.CharField(max_length=100)
     last_name = serializers.CharField(max_length=100)
     id_no = serializers.CharField(max_length=100)
+    date_travel = serializers.CharField(max_length=100)
     original_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     final_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     status = serializers.CharField(max_length=100)
