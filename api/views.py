@@ -16,6 +16,9 @@ def getStatus(request, id_number):
     SELECT 
         ti.id, 
         ti.code, 
+        ti.first_name,	
+        ti.middle_name,
+        ti.last_name,	
         ti.id_no,
         ti.original_amount, 
         ti.final_amount, 
