@@ -435,9 +435,9 @@ def checking_load(request):
             query += " AND t1.final_amount = %s"
             params.append(FFinalAmount)
         
-        if FReviewedBy:
+        if FCreatedBy:
             query += " AND t1.user_id = %s"
-            params.append(FReviewedBy)
+            params.append(FCreatedBy)
 
         if FReviewedBy:
             query += " AND t1.reviewed_by = %s"
