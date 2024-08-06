@@ -317,7 +317,7 @@
           staff_id = id;
           $.ajax({
             type: 'POST',
-            url: "{% url 'chat-data-staff' %}",
+            url: "{% url 'chat-data-staff' %}?room_name=" + id +"?username=macky",
             data: {
                 auth_user_id: id
             },

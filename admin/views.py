@@ -180,43 +180,85 @@ def chat_staff(request):
         return render(request, 'admin/chat_staff.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
-    
 
 @csrf_exempt 
-@login_required(login_url='login')
-def chat_data_staff(request):
-    allowed_roles = ["Admin"]
-    user_id = request.session.get('user_id', 0)
-    auth_user_id = request.POST.get('auth_user_id')
-    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
-    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
-    role_names = [entry['role_name'] for entry in role_details]
-    combined_data = []
-    messages = Chat.objects.filter(Q(to_user=auth_user_id) | Q(from_user=auth_user_id)).values('from_user', 'to_user', 'message', 'seen', 'created_at')
-    messages_list = list(messages)  
+def chat_data_staff(request, room_name, user_name):
+    print("testtt")
+    print(room_name)
+    print(user_name)
+    get_room = Room.objects.get(room_name="rooms")
+    # if request.method == 'POST':
+        # message = request.POST['message']
+        # print(message)
 
-    try:
-        auth_user = AuthUser.objects.get(id=auth_user_id)
-        staff_detail = StaffDetails.objects.filter(user=auth_user).first()
-        staff_detail_img_path = StaffDetails.objects.filter(user=user_id).first()
-        combined_data.append({
-            'id': auth_user.id,
-            'login_id': user_id,
-            'first_name': auth_user.first_name.title(),
-            'last_name': auth_user.last_name.title(),
-            'image_path': staff_detail.image_path if staff_detail else None,
-            'position': staff_detail.position if staff_detail else None,
-            'image_path_user': staff_detail_img_path.image_path if staff_detail else None,
-        })
-    except AuthUser.DoesNotExist:
-        pass
+        # new_message = Message(room=get_room, sender=user_name, message=message)
+        # new_message.save()
+
+    get_messages = Message.objects.filter(room=get_room)
 
     context = {
-        'permissions': role_names,
-        'messages': messages_list,
-        'combined_data': combined_data
+        "messages": get_messages,
+        "user": user_name,
+        "room_name": "rooms",
     }
-    return JsonResponse({'data': context})
+    return render(request, 'chat_admin.html', context)
+
+
+# def chat_data_staff(request, room_name, username):
+#     get_room = Room.objects.get(room_name=room_name)
+#     if request.method == 'POST':
+#         message = request.POST['message']
+
+#         print(message)
+
+#         new_message = Message(room=get_room, sender=username, message=message)
+#         new_message.save()
+
+#     get_messages= Message.objects.filter(room=get_room)
+
+    
+#     context = {
+#         "messages": get_messages,
+#         "user": username,
+#         "room_name": room_name,
+#     }
+#     return render(request, 'chat_admin.html', context)   
+
+# @csrf_exempt 
+# @login_required(login_url='login')
+# def chat_data_staff(request):
+#     allowed_roles = ["Admin"]
+#     user_id = request.session.get('user_id', 0)
+#     auth_user_id = request.POST.get('auth_user_id')
+#     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+#     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+#     role_names = [entry['role_name'] for entry in role_details]
+#     combined_data = []
+#     messages = Chat.objects.filter(Q(to_user=auth_user_id) | Q(from_user=auth_user_id)).values('from_user', 'to_user', 'message', 'seen', 'created_at')
+#     messages_list = list(messages)  
+
+#     try:
+#         auth_user = AuthUser.objects.get(id=auth_user_id)
+#         staff_detail = StaffDetails.objects.filter(user=auth_user).first()
+#         staff_detail_img_path = StaffDetails.objects.filter(user=user_id).first()
+#         combined_data.append({
+#             'id': auth_user.id,
+#             'login_id': user_id,
+#             'first_name': auth_user.first_name.title(),
+#             'last_name': auth_user.last_name.title(),
+#             'image_path': staff_detail.image_path if staff_detail else None,
+#             'position': staff_detail.position if staff_detail else None,
+#             'image_path_user': staff_detail_img_path.image_path if staff_detail else None,
+#         })
+#     except AuthUser.DoesNotExist:
+#         pass
+
+#     context = {
+#         'permissions': role_names,
+#         'messages': messages_list,
+#         'combined_data': combined_data
+#     }
+#     return JsonResponse({'data': context})
 
 
 

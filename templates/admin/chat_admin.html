@@ -329,15 +329,13 @@
           $('#form-message').show();
           const id = $(this).data('id');
           staff_id = id;
-
           if (socket) {
               socket.close();
           }
           openSocket(id);
-
           $.ajax({
               type: 'POST',
-              url: "{% url 'chat-data-staff' %}",
+              url: "{% url 'chat-data-staff' 'ROOM_NAME_PLACEHOLDER' 'USER_NAME_PLACEHOLDER' %}".replace('ROOM_NAME_PLACEHOLDER', id).replace('USER_NAME_PLACEHOLDER', 'macky'),
               data: {
                   auth_user_id: id
               },
