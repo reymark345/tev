@@ -317,72 +317,70 @@
           staff_id = id;
           $.ajax({
             type: 'POST',
-            url: "{% url 'chat-data-staff' %}?room_name=" + id +"?username=macky",
+            url: "{% url 'chat-data-staff' %}",
             data: {
                 auth_user_id: id
             },
             success: function(response) {
-                $('#chat-messages-container').empty();
-                console.log("Request successful");
-                console.log(response);
-                var data = response.data;
-                var userData = data.combined_data[0];
-                var user_id = userData.id;
-                var login_id = userData.login_id;
-                // console.log("user_id");
-                // console.log(user_id);
-                if (data.combined_data && data.combined_data.length > 0) {
-                  $('.chat-contact-info .txt-fullname').text(userData.first_name + ' ' + userData.last_name);
-                  $('.chat-contact-info .spn-position').text(userData.position);
-                  $('#user-profile-img').attr('src', userData.image_path);
-                }
+              console.log(response.data);
+              console.log("testttaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+              //   $('#chat-messages-container').empty();
+              //   console.log("Request successful");
+              //   console.log(response);
+              //   var data = response.data;
+              //   var userData = data.combined_data[0];
+              //   var user_id = userData.id;
+              //   var login_id = userData.login_id;
+              //   // console.log("user_id");
+              //   // console.log(user_id);
+              //   if (data.combined_data && data.combined_data.length > 0) {
+              //     $('.chat-contact-info .txt-fullname').text(userData.first_name + ' ' + userData.last_name);
+              //     $('.chat-contact-info .spn-position').text(userData.position);
+              //     $('#user-profile-img').attr('src', userData.image_path);
+              //   }
 
-                if (data.messages && data.messages.length > 0) {
-                  data.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-                  data.messages.forEach(function(message) {
-                      var messageClass = message.from_user === login_id ? 'chat-message-right' : 'chat-message';
-                      console.log("testtt");
-                      console.log(messageClass);
-                      var formattedDate = new Date(message.created_at).toLocaleString();
-                      var messageHtml = `
-                          <li class="chat-message ${messageClass}">
-                            <div class="d-flex overflow-hidden">
-                              ${messageClass === 'chat-message' ? `
-                              <div class="user-avatar flex-shrink-0 me-3">
-                                <div class="avatar avatar-sm">
-                                  <img src="${userData.image_path}" alt="Avatar" class="rounded-circle" />
-                                </div>
-                              </div>` : ''}
-                              <div class="chat-message-wrapper flex-grow-1">
-                                <div class="chat-message-text">
-                                  <p class="mb-0">${message.message}</p>
-                                </div>
-                                <div class="${messageClass === 'chat-message' ? 'text-muted' : 'text-end text-muted'} mt-1">
-                                  ${messageClass === 'chat-message-right' ? '<i class="ti ti-checks ti-xs me-1 text-success"></i>' : ''}
-                                  <small>${formattedDate}</small> 
-                                </div>
-                              </div>
-                              ${messageClass === 'chat-message-right' ? `
-                              <div class="user-a  vatar flex-shrink-0 ms-3">
-                                <div class="avatar avatar-sm">
-                                  <img src="${userData.image_path_user}" alt="Avatar" class="rounded-circle" />
-                                </div>
-                              </div>` : ''}
-                            </div>
-                          </li>
-                      `;
+              //   if (data.messages && data.messages.length > 0) {
+              //     data.messages.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+              //     data.messages.forEach(function(message) {
+              //         var messageClass = message.from_user === login_id ? 'chat-message-right' : 'chat-message';
+              //         console.log("testtt");
+              //         console.log(messageClass);
+              //         var formattedDate = new Date(message.created_at).toLocaleString();
+              //         var messageHtml = `
+              //             <li class="chat-message ${messageClass}">
+              //               <div class="d-flex overflow-hidden">
+              //                 ${messageClass === 'chat-message' ? `
+              //                 <div class="user-avatar flex-shrink-0 me-3">
+              //                   <div class="avatar avatar-sm">
+              //                     <img src="${userData.image_path}" alt="Avatar" class="rounded-circle" />
+              //                   </div>
+              //                 </div>` : ''}
+              //                 <div class="chat-message-wrapper flex-grow-1">
+              //                   <div class="chat-message-text">
+              //                     <p class="mb-0">${message.message}</p>
+              //                   </div>
+              //                   <div class="${messageClass === 'chat-message' ? 'text-muted' : 'text-end text-muted'} mt-1">
+              //                     ${messageClass === 'chat-message-right' ? '<i class="ti ti-checks ti-xs me-1 text-success"></i>' : ''}
+              //                     <small>${formattedDate}</small> 
+              //                   </div>
+              //                 </div>
+              //                 ${messageClass === 'chat-message-right' ? `
+              //                 <div class="user-a  vatar flex-shrink-0 ms-3">
+              //                   <div class="avatar avatar-sm">
+              //                     <img src="${userData.image_path_user}" alt="Avatar" class="rounded-circle" />
+              //                   </div>
+              //                 </div>` : ''}
+              //               </div>
+              //             </li>
+              //         `;
 
-                      $('#chat-messages-container').append(messageHtml);
-                  });
-                  scrollToBottom();
-              }
+              //         $('#chat-messages-container').append(messageHtml);
+              //     });
+              //     scrollToBottom();
+              // }
                 // toastr.success('Search successful', 'Success', toast_options);
             },
             error: function(xhr, status, error) {
-                // console.log("Request failed");
-                // console.log("Status: " + status);
-                // console.log("Error: " + error);
-                // toastr.error('Search failed', 'Error', toast_options);
             }
           });
       });

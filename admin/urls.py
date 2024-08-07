@@ -22,13 +22,13 @@ urlpatterns = [
     path('chat', views.chat, name='chat'),
     path('chat_data', views.chat_data, name='chat-data'),
     path('chat_staff', views.chat_staff, name='chat-staff'),
-    # path('chat_data_staff', views.chat_data_staff, name='chat-data-staff'),
+    path('chat_data_staff', views.chat_data_staff, name='chat-data-staff'),
 
     # path('<str:room_name>/<str:username>/', views.MessageView, name='room'),
 
-    path('chat_data_staff/<str:room_name>/<str:user_name>/', views.chat_data_staff, name='chat-data-staff'),
+    # path('chat_data_staff/<str:room_name>/<str:user_name>/', views.chat_data_staff, name='chat-data-staff'),
 
-
+    # path('<str:room_name>/<str:username>/', views.MessageView, name='room'),
 
 
     path('send_chat', views.send_chat, name='send-chat'),

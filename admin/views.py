@@ -181,48 +181,73 @@ def chat_staff(request):
     else:
         return render(request, 'pages/unauthorized.html')
 
-@csrf_exempt 
-def chat_data_staff(request, room_name, user_name):
-    print("testtt")
-    print(room_name)
-    print(user_name)
-    get_room = Room.objects.get(room_name="rooms")
-    # if request.method == 'POST':
-        # message = request.POST['message']
-        # print(message)
+# @csrf_exempt 
+# def chat_data_staff(request, room_name, user_name):
+#     print("testtttt")
+#     print(room_name)
+#     print(user_name)
+#     get_room = Room.objects.get(room_name="rooms")
+#     # if request.method == 'POST':
+#         # message = request.POST['message']
+#         # print(message)
 
-        # new_message = Message(room=get_room, sender=user_name, message=message)
-        # new_message.save()
+#         # new_message = Message(room=get_room, sender=user_name, message=message)
+#         # new_message.save()
 
-    get_messages = Message.objects.filter(room=get_room)
+#     get_messages = Message.objects.filter(room=get_room)
 
-    context = {
-        "messages": get_messages,
-        "user": user_name,
-        "room_name": "rooms",
-    }
-    return render(request, 'chat_admin.html', context)
-
-
-# def chat_data_staff(request, room_name, username):
-#     get_room = Room.objects.get(room_name=room_name)
-#     if request.method == 'POST':
-#         message = request.POST['message']
-
-#         print(message)
-
-#         new_message = Message(room=get_room, sender=username, message=message)
-#         new_message.save()
-
-#     get_messages= Message.objects.filter(room=get_room)
-
-    
 #     context = {
 #         "messages": get_messages,
-#         "user": username,
-#         "room_name": room_name,
+#         "user": user_name,
+#         "room_name": "rooms",
 #     }
-#     return render(request, 'chat_admin.html', context)   
+#     # return render(request, 'admin/chat_admin.html', context)
+
+#     return redirect('room', room_name=room_name, username=user_name)
+
+@csrf_exempt
+def chat_data_staff(request):
+
+    if request.method == 'POST':
+        # username = request.POST['username']
+        username = request.session.get('user_id', 0)
+        # room = request.POST['room']
+
+        room = request.POST.get('auth_user_id')
+
+        try:
+            print("entereedddddddddd")
+            get_room = Room.objects.get(room_name=room)
+            return redirect('room', room_name=room, username=username)
+
+        except Room.DoesNotExist:
+            new_room = Room(room_name = room)
+            new_room.save()
+            return redirect('room', room_name=room, username=username)
+
+    return render(request, 'index.html')
+
+
+
+
+# @csrf_exempt 
+# def chat_data_staff(request):
+
+#     if request.method == 'POST':
+#         print("heeereeeeeeeeeeeeeeeeeeeeeee")
+#         username = request.POST['username']
+#         room = request.POST['room']
+
+#         try:
+#             get_room = Room.objects.get(room_name=room)
+#             return redirect('room', room_name=room, username=username)
+
+#         except Room.DoesNotExist:
+#             new_room = Room(room_name = room)
+#             new_room.save()
+#             return redirect('room', room_name=room, username=username)
+
+
 
 # @csrf_exempt 
 # @login_required(login_url='login')
@@ -653,12 +678,15 @@ def transaction_logs(request):
     
 
 # chat
-
+@csrf_exempt
 def CreateRoom(request):
 
     if request.method == 'POST':
-        username = request.POST['username']
-        room = request.POST['room']
+        # username = request.POST['username']
+        username = request.session.get('user_id', 0)
+        # room = request.POST['room']
+
+        room = request.POST.get('auth_user_id')
 
         try:
             get_room = Room.objects.get(room_name=room)
@@ -671,24 +699,49 @@ def CreateRoom(request):
 
     return render(request, 'index.html')
 
-def MessageView(request, room_name, username):
+# @csrf_exempt
+# def MessageView(request, room_name, username):
 
+#     get_room = Room.objects.get(room_name=room_name)
+
+#     if request.method == 'POST':
+#         message = request.POST['message']
+
+
+#         new_message = Message(room=get_room, sender=username, message=message)
+#         new_message.save()
+
+#     get_messages= Message.objects.filter(room=get_room)
+
+#     print("testt_message")
+#     print(get_messages)
+    
+#     context = {
+#         "messages": get_messages,
+#         "user": username,
+#         "room_name": room_name,
+#     }
+#     return JsonResponse(context) 
+    # return render(request, 'admin/chat_admin.html', context)
+    
+@csrf_exempt
+def MessageView(request, room_name, username):
+    print("testthereeeee")
     get_room = Room.objects.get(room_name=room_name)
 
     if request.method == 'POST':
         message = request.POST['message']
-
-        print(message)
-
         new_message = Message(room=get_room, sender=username, message=message)
         new_message.save()
+    get_messages = Message.objects.filter(room_id=2)
 
-    get_messages= Message.objects.filter(room=get_room)
+    # Convert the QuerySet to a list of dictionaries
+    messages_list = list(get_messages.values())
 
-    
     context = {
-        "messages": get_messages,
+        "messages": messages_list,
         "user": username,
         "room_name": room_name,
     }
     return render(request, 'message.html', context)
+    # return JsonResponse(context)
