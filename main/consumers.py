@@ -44,12 +44,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }
         await self.send(text_data=json.dumps({'message': response_data}))
 
+
     @database_sync_to_async
     def create_message(self, data):
-
         get_room_by_name = Room.objects.get(room_name=data['room_name'])
+        new_message = Message(room=get_room_by_name, sender=data['sender'], message=data['message'])
+        new_message.save()  
         
-        if not Message.objects.filter(message=data['message']).exists():
-            new_message = Message(room=get_room_by_name, sender=data['sender'], message=data['message'])
-            new_message.save()  
+
+    # @database_sync_to_async
+    # def create_message(self, data):
+
+    #     get_room_by_name = Room.objects.get(room_name=data['room_name'])
+    #     print("halaaaa")
+    #     if not Message.objects.filter(message=data['message']).exists():
+    #         print("wala nag exist")
+    #         new_message = Message(room=get_room_by_name, sender=data['sender'], message=data['message'])
+    #         new_message.save()  
         
