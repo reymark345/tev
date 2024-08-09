@@ -149,7 +149,7 @@ def getStatus(request, id_number):
 
         if dv_no:
             finance_query = """
-                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date AS check_issued_date
+                SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, tc.date_transact AS check_issued_date
                 FROM transactions AS ts
                 LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no 
                 WHERE ts.dv_no = %s
