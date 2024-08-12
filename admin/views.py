@@ -730,18 +730,25 @@ def MessageView(request, room_name, username):
     get_room = Room.objects.get(room_name=room_name)
 
     if request.method == 'POST':
+        print("POST")
         message = request.POST['message']
         new_message = Message(room=get_room, sender=username, message=message)
         new_message.save()
+
+    else:
+        print("not POST")
+
     get_messages = Message.objects.filter(room_id=2)
 
     # Convert the QuerySet to a list of dictionaries
     messages_list = list(get_messages.values())
+
+    print(messages_list)
 
     context = {
         "messages": messages_list,
         "user": username,
         "room_name": room_name,
     }
-    return render(request, 'message.html', context)
-    # return JsonResponse(context)
+    # return render(request, 'message.html', context)
+    return JsonResponse(context)
