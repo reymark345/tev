@@ -70,7 +70,6 @@
 
     // response from consumer on server
     socket.addEventListener("message", (event) => {
-        alert("fffffffffaaa");
         const messageData = JSON.parse(event.data)['message'];
         console.log(messageData);
         

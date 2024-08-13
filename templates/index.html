@@ -97,6 +97,48 @@
         <link rel="stylesheet" href="{% static 'custom/custom.css'%}" />
     </head>
 
+    <style>
+        .chat-box {
+            width: 300px;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            position: fixed;
+            bottom: 0px;
+            right: 20px;
+            z-index: 1000; /* Ensure it floats above other content */
+        }
+
+        .chat-header {
+            background-color: #685dd8;
+            color: #fff;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            cursor: pointer;
+        }
+
+        .chat-body {
+            display: none; /* Initially hidden */
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            max-height: 300px; /* Adjust max height */
+        }
+
+        .chat-footer {
+            display: none; /* Initially hidden */
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        .chat-footer input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+
     <body>
         <!-- Layout wrapper -->
         <div class="layout-wrapper layout-content-navbar">
@@ -451,6 +493,33 @@
                     <!-- Content wrapper -->
                     <div class="content-wrapper">
                         <!-- Content -->
+
+                        <div class="chat-box">
+                            <div class="chat-header" onclick="toggleChat()">
+                                Chat
+                            </div>
+                            <div class="chat-body">
+                                <!-- Messages will appear here -->
+                            </div>
+                            <div class="chat-footer">
+                                <label class="form-label" for="modalFEmployeeName">Staff Name</label>
+                                <select id="f-employee-name" class="select2 form-select" name="ChatEmployee">
+                                    <option></option>
+                                    {% for row in users %}
+                                    <option value="{{ row.id }}">{{ row.first_name }} {{ row.last_name }}</option>
+                                    {% endfor %}
+                                </select>
+
+
+                                
+                                {% comment %} <div class="col-12 col-md-12">
+                                    <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                                        <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
+                                            <option></option>
+                                        </select>
+                                </div> {% endcomment %}
+                            </div>
+                        </div>
                         {% block content %} {% csrf_token %} {% endblock %}
                         <!-- / Content -->
                       
@@ -486,6 +555,29 @@
 
         <script>
             const BASE_URL = '{{ request.get_host }}'
+        </script>
+
+        <script>
+            
+
+        
+            function toggleChat() {
+                const ChatEmployee = jQuery(document.querySelector('[name="ChatEmployee"]'));
+                const chatBody = document.querySelector('.chat-body');
+                const chatFooter = document.querySelector('.chat-footer');
+                const isHidden = chatBody.style.display === 'none';
+                
+                chatBody.style.display = isHidden ? 'flex' : 'none';
+                chatFooter.style.display = isHidden ? 'block' : 'none';
+                if (ChatEmployee.length) {
+                    ChatEmployee.wrap('<div class="position-relative"></div>')
+                    ChatEmployee.select2({
+                        placeholder: 'Choose employee',
+                        dropdownParent: ChatEmployee.parent(),
+                        allowClear: true,
+                    })
+                }
+            }
         </script>
 
         <!-- Core JS -->
@@ -583,13 +675,6 @@
         <script src="{% static 'assets/js/form-wizard-validation.js' %}"></script> {% endcomment %}
 
         {% comment %} <script src="{% static 'assets/js/app-chat.js' %}"></script>  {% endcomment %}
-
-
-        
-
-
-
-
         <!-- <script src="../../assets/js/modal-add-new-address.js"></script>
         <script src="../../assets/js/wizard-ex-checkout.js"></script> -->
 
