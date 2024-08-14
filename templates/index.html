@@ -501,24 +501,24 @@
                             <div class="chat-body">
                                 <!-- Messages will appear here -->
                             </div>
-                            <div class="chat-footer">
-                                <label class="form-label" for="modalFEmployeeName">Staff Name</label>
-                                <select id="f-employee-name" class="select2 form-select" name="ChatEmployee">
-                                    <option></option>
-                                    {% for row in users %}
-                                    <option value="{{ row.id }}">{{ row.first_name }} {{ row.last_name }}</option>
-                                    {% endfor %}
-                                </select>
-
-
-                                
-                                {% comment %} <div class="col-12 col-md-12">
-                                    <label class="form-label" for="modalFEmployeeName">Employee Name</label>
-                                        <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
-                                            <option></option>
-                                        </select>
-                                </div> {% endcomment %}
-                            </div>
+                            <form id="chat-form" action="{% url 'create-room' %}" method="POST">
+                                {% csrf_token %}
+                                <div class="chat-footer">
+                                    <label class="form-label" for="modalFEmployeeName">Staff Name</label>
+                                    <select id="f-employee-name" class="select2 form-select" name="room">
+                                        <option></option>
+                                        {% for row in users %}
+                                        <option value="{{ row.id }}">{{ row.first_name }} {{ row.last_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% comment %} <div class="col-12 col-md-12">
+                                        <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                                            <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
+                                                <option></option>
+                                            </select>
+                                    </div> {% endcomment %}
+                                </div>
+                            </form>
                         </div>
                         {% block content %} {% csrf_token %} {% endblock %}
                         <!-- / Content -->
@@ -557,28 +557,7 @@
             const BASE_URL = '{{ request.get_host }}'
         </script>
 
-        <script>
-            
-
-        
-            function toggleChat() {
-                const ChatEmployee = jQuery(document.querySelector('[name="ChatEmployee"]'));
-                const chatBody = document.querySelector('.chat-body');
-                const chatFooter = document.querySelector('.chat-footer');
-                const isHidden = chatBody.style.display === 'none';
-                
-                chatBody.style.display = isHidden ? 'flex' : 'none';
-                chatFooter.style.display = isHidden ? 'block' : 'none';
-                if (ChatEmployee.length) {
-                    ChatEmployee.wrap('<div class="position-relative"></div>')
-                    ChatEmployee.select2({
-                        placeholder: 'Choose employee',
-                        dropdownParent: ChatEmployee.parent(),
-                        allowClear: true,
-                    })
-                }
-            }
-        </script>
+ 
 
         <!-- Core JS -->
         <!-- build:js assets/vendor/js/core.js -->
@@ -679,6 +658,39 @@
         <script src="../../assets/js/wizard-ex-checkout.js"></script> -->
 
         <!-- <script src="{% static 'assets/js/tables-datatables-basic.js' %}"></script> -->
+
+
+        <script>
+            $(document).ready(function(){
+                $('#f-employee-name').change(function(){
+                    var selectedId = $(this).val();
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'room',
+                        value: selectedId
+                    }).appendTo('#chat-form');
+                    $('#chat-form').submit();
+                });
+            });
+        
+            function toggleChat() {
+                const ChatEmployee = jQuery(document.querySelector('[name="room"]'));
+                const chatBody = document.querySelector('.chat-body');
+                const chatFooter = document.querySelector('.chat-footer');
+                const isHidden = chatBody.style.display === 'none';
+                
+                chatBody.style.display = isHidden ? 'flex' : 'none';
+                chatFooter.style.display = isHidden ? 'block' : 'none';
+                if (ChatEmployee.length) {
+                    ChatEmployee.wrap('<div class="position-relative"></div>')
+                    ChatEmployee.select2({
+                        placeholder: 'Choose employee',
+                        dropdownParent: ChatEmployee.parent(),
+                        allowClear: true,
+                    })
+                }
+            }
+        </script>
         {% block footer_scripts %} {% endblock footer_scripts %}
     </body>
 </html>
