@@ -711,27 +711,42 @@ def transaction_logs(request):
         return render(request, 'pages/unauthorized.html')
     
 
-# chat
+
 @csrf_exempt
 def CreateRoom(request):
-
     if request.method == 'POST':
-        # username = request.POST['username']
         username = request.session.get('user_id', 0)
         room = request.POST['room']
 
-        # room = request.POST.get('auth_user_id')
-
         try:
             get_room = Room.objects.get(room_name=room)
-            return redirect('room', room_name=room, username=username)
-
         except Room.DoesNotExist:
-            new_room = Room(room_name = room)
+            new_room = Room(room_name=room)
             new_room.save()
-            return redirect('room', room_name=room, username=username)
 
-    return render(request, 'index.html')
+        return JsonResponse({'success': True, 'room_name': room, 'username': username})
+
+# chat
+# @csrf_exempt
+# def CreateRoom(request):
+
+#     if request.method == 'POST':
+#         # username = request.POST['username']
+#         username = request.session.get('user_id', 0)
+#         room = request.POST['room']
+
+#         # room = request.POST.get('auth_user_id')
+
+#         try:
+#             get_room = Room.objects.get(room_name=room)
+#             return redirect('room', room_name=room, username=username)
+
+#         except Room.DoesNotExist:
+#             new_room = Room(room_name = room)
+#             new_room.save()
+#             return redirect('room', room_name=room, username=username)
+
+#     return render(request, 'index.html')
 
 # @csrf_exempt
 # def MessageView(request, room_name, username):

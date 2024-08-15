@@ -501,16 +501,23 @@
                             <div class="chat-body">
                                 <!-- Messages will appear here -->
                             </div>
-                            <form id="chat-form" action="{% url 'create-room' %}" method="POST">
+                            <form id="create-room-form" action="{% url 'create-room' %}" method="POST">
                                 {% csrf_token %}
                                 <div class="chat-footer">
                                     <label class="form-label" for="modalFEmployeeName">Staff Name</label>
-                                    <select id="f-employee-name" class="select2 form-select" name="room">
+                                    <select id="room" class="select2 form-select" name="room">
                                         <option></option>
                                         {% for row in users %}
                                         <option value="{{ row.id }}">{{ row.first_name }} {{ row.last_name }}</option>
                                         {% endfor %}
                                     </select>
+                                    <br>
+                                    <div class="form">
+                                        <form id="message-form">
+                                            <textarea id="msg" cols="30" name="message" rows="10" placeholder="Enter your message" required></textarea>
+                                            <button class="submit" type="submit">Send</button>
+                                        </form>    
+                                    </div>
                                     {% comment %} <div class="col-12 col-md-12">
                                         <label class="form-label" for="modalFEmployeeName">Employee Name</label>
                                             <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
@@ -662,14 +669,14 @@
 
         <script>
             $(document).ready(function(){
-                $('#f-employee-name').change(function(){
+                $('#room').change(function(){
                     var selectedId = $(this).val();
                     $('<input>').attr({
                         type: 'hidden',
                         name: 'room',
                         value: selectedId
-                    }).appendTo('#chat-form');
-                    $('#chat-form').submit();
+                    }).appendTo('#create-room-form');
+                    $('#create-room-form').submit();
                 });
             });
         
@@ -691,6 +698,7 @@
                 }
             }
         </script>
+        
         {% block footer_scripts %} {% endblock footer_scripts %}
     </body>
 </html>
