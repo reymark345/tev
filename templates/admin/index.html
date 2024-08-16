@@ -28,10 +28,10 @@
         </div>
 
         <!-- Chat Interface (Initially Hidden) -->
-        <div class="child-2" id="chat-interface" >
+        <div class="child-2a" id="chat-interface" >
             <center><h2>Chats</h2></center><hr>
             <div class="chat-body-parent">
-                <div class="chat-body" id="tasks">
+                <div class="chat-body_" id="tasks">
                     <div class="message" id="chatContainer">
                         <!-- Messages will be dynamically loaded here -->
                     </div>
@@ -222,7 +222,7 @@
             align-items: center;
         }
         
-        .chat-body {
+        .chat-body_ {
             width: 100%;
             background-color: #557A95;
             border-radius: 10px;
@@ -236,7 +236,7 @@
             overflow-y: auto;
         }
         
-        .chat-body .message .receive, .send {
+        .chat-body_ .message .receive, .send {
             background-color: #B1A296;
             max-width: 400px;
             border-radius: 10px;
@@ -249,11 +249,11 @@
             transition: 0.8s;
         }
         
-        .chat-body .message .send {
+        .chat-body_ .message .send {
             align-self: flex-end;
         }
         
-        .chat-body .message .receive {
+        .chat-body_ .message .receive {
             align-self: flex-start;
         }
         

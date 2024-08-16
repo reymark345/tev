@@ -137,6 +137,23 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
+
+
+
+
+        .message {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chat-body .message .receive, .send {
+            background-color: #B1A296;
+            max-width: 400px;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
     </style>
 
     <body>
@@ -499,7 +516,6 @@
                                 Chat
                             </div>
                             <div class="chat-body">
-                                <!-- Messages will appear here -->
                             </div>
                             <form id="create-room-form" action="{% url 'create-room' %}" method="POST">
                                 {% csrf_token %}
@@ -512,10 +528,15 @@
                                         {% endfor %}
                                     </select>
                                     <br>
+
+                                    <div class="message" id="chatContainer">
+                                    </h1>fasfsaf</h1>
+                                        <!-- Messages will be dynamically loaded here -->
+                                    </div>
                                     <div class="form">
                                         <form id="message-form">
-                                            <textarea id="msg" cols="30" name="message" rows="10" placeholder="Enter your message" required></textarea>
-                                            <button class="submit" type="submit">Send</button>
+                                            <textarea id="msg" cols="30" name="message" rows="10" placeholder="Enter your messagess" required></textarea>
+                                            <button class="submit" type="submit">message form submit</button>
                                         </form>    
                                     </div>
                                     {% comment %} <div class="col-12 col-md-12">
@@ -679,7 +700,6 @@
                     $('#create-room-form').submit();
                 });
             });
-        
             function toggleChat() {
                 const ChatEmployee = jQuery(document.querySelector('[name="room"]'));
                 const chatBody = document.querySelector('.chat-body');
@@ -697,6 +717,67 @@
                     })
                 }
             }
+            $('#create-room-form').on('submit', function(event) {
+                event.preventDefault();
+                var roomName = $('select[name="room"]').val();
+    
+                $.ajax({
+                    url: "{% url 'create-room' %}",
+                    type: "POST",
+                    data: {
+                        'room': roomName,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function(response) {
+                        // On successful room creation, hide the form and show the chat interface
+                        //$('#room-creation').hide();
+                        //$('#chat-interface').show();
+                        // Establish WebSocket connection
+                        initializeChat(roomName, '{{ user }}');
+                    }
+                });
+            });
+            function initializeChat(roomName, username) {
+                const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+                const wsEndpoint = `${websocketProtocol}://${window.location.host}/ws/notification/${roomName}/`;
+                const socket = new WebSocket(wsEndpoint);
+    
+                $('#message-form').on('submit', function(event) {
+                    event.preventDefault();
+                    const message = $('#msg').val();
+                    socket.send(
+                        JSON.stringify({
+                            'message': message,
+                            'room_name': roomName,
+                            'sender': username,
+                        })
+                    );
+                });
+    
+                socket.addEventListener("message", (event) => {
+                    const messageData = JSON.parse(event.data)['message'];
+                    var sender = messageData['sender'];
+                    var message = messageData['message'];
+                    if (sender == username){
+                        $('#msg').val('');
+                    }
+    
+                    var messageDiv = $('.message');
+                    if (sender != username) {
+                        messageDiv.append('<div class="receive"><p style="color: #000;">' + message + '<strong>-' + sender + '</strong></p></div>');
+                    } else {
+                        messageDiv.append('<div class="send"><p style="color: #000;">' + message + '</p></div>');
+                    }
+                    scrollToBottom();
+                });
+            }
+    
+            function scrollToBottom() {
+                var chatContainer = document.getElementById("chatContainer");
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        
+
         </script>
         
         {% block footer_scripts %} {% endblock footer_scripts %}
