@@ -11,7 +11,7 @@
     <div class="parent">
         <!-- Room Creation Form -->
         <div class="child" id="room-creation">
-            <h1>Enter Room</h1>
+            <h1>Enter Rooma</h1>
             <form id="create-room-form">
                 <label for="">Room name</label><br>
                 {% comment %} <input type="text" placeholder="room name" name="room" required><br> {% endcomment %}
@@ -50,37 +50,48 @@
 
         $(document).ready(function(){
             $('#room').change(function(){
-                var selectedId = $(this).val();
-                $('<input>').attr({
-                    type: 'hidden',
-                    name: 'room',
-                    value: selectedId
-                }).appendTo('#chat-form');
-                $('#chat-form').submit();
+
+                var roomName = $('select[name="room"]').val();
+                $.ajax({
+                    url: "{% url 'create-room' %}",
+                    type: "POST",
+                    data: {
+                        'room': roomName,
+                    },
+                    success: function(response) {
+                        initializeChat(roomName, '{{ user }}');
+                    }
+                });
             });
+            // $('#room').change(function(){
+            //     alert("testttt"); 
+            //     var selectedId = $(this).val();
+            //     $('<input>').attr({
+            //         type: 'hidden',
+            //         name: 'room',
+            //         value: selectedId
+            //     }).appendTo('#chat-form');
+            //     $('#chat-form').submit();
+            // });
         });
         
         // Handle Room Creation Form Submission
-        $('#create-room-form').on('submit', function(event) {
-            event.preventDefault();
-            var roomName = $('select[name="room"]').val();
+        // $('#create-room-form').on('submit', function(event) {
+        //     event.preventDefault();
+        //     var roomName = $('select[name="room"]').val();
 
-            $.ajax({
-                url: "{% url 'create-room' %}",
-                type: "POST",
-                data: {
-                    'room': roomName,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'
-                },
-                success: function(response) {
-                    // On successful room creation, hide the form and show the chat interface
-                    //$('#room-creation').hide();
-                    //$('#chat-interface').show();
-                    // Establish WebSocket connection
-                    initializeChat(roomName, '{{ user }}');
-                }
-            });
-        });
+        //     $.ajax({
+        //         url: "{% url 'create-room' %}",
+        //         type: "POST",
+        //         data: {
+        //             'room': roomName,
+        //             'csrfmiddlewaretoken': '{{ csrf_token }}'
+        //         },
+        //         success: function(response) {
+        //             initializeChat(roomName, '{{ user }}');
+        //         }
+        //     });
+        // });
 
         // WebSocket connection initialization
         function initializeChat(roomName, username) {

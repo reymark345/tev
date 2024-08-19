@@ -112,7 +112,7 @@ def chat(request):
             'role_details': RoleDetails.objects.filter().order_by('role_name'),
             'combined_data': combined_data
         }
-        return render(request, 'admin/index.html', context)
+        return render(request, 'admin/chat.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
