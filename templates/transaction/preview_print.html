@@ -17,17 +17,18 @@
   </div>
 <head>
 </head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <style>
-#loading-screen {
-  position: fixed;
-  background: rgba(255, 255, 255, 0.7);
-  color: rgb(0, 0, 0);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+  #loading-screen {
+    position: fixed;
+    background: rgba(255, 255, 255, 0.7);
+    color: rgb(0, 0, 0);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
   }
 .sk-primary .sk-fold-cube {
     width: 15px; /* Set the width of each cube */
@@ -66,8 +67,9 @@
   cursor: pointer;
   margin-right: 500px;
 }
-  
-.container-body, .container-body2,.container-body3,.container-body4  {
+
+.container-body {
+  margin-top:5%;
   width: 210mm;
   height:auto;
   background-color: #ffffff;
@@ -78,6 +80,95 @@
   position: relative;
   padding: 50px;
 }
+  
+.container-body2,.container-body3,.container-body4  {
+  width: 210mm;
+  height:auto;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: relative;
+  padding: 50px;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background-color: #f0f0f0;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 10px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.navbar-brand {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
+}
+
+.navbar-collapse {
+  display: flex;
+}
+
+.navbar-collapse ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.navbar-collapse ul li {
+  display: inline-block;
+}
+
+.navbar-collapse button {
+  font-size: 14px;
+  margin-top: 8px;
+  margin-right: 150px; /* Added margin-right to ensure proper spacing */
+}
+
+.navbar-collapse {
+  margin-right: 30px; /* Adjusted for spacing from the right */
+}
+
+#dswd-logo {
+  height:55px;
+  width:160px;
+  margin-top: 7px;
+}
+
+#ph-img {
+  position: relative;
+  width:65px;
+  height:55px;
+  top: -7px; /* Adjust this value to move the image up */
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  height:35px;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
   .appendix {
     position: absolute;
     top: 65px;
@@ -85,14 +176,33 @@
     font-size: 14px;
     font-style: italic;
   }
+
+  .appendix-11 {
+    position: absolute;
+    top: 65px;
+    right: 50px;
+    font-size: 14px;
+    font-style: italic;
+  } 
   
   table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 40px;
+  }
+
+  table.table-border{
     border: 3px solid;
     border-collapse: collapse;
     width: 100%;
     margin-top: 40px;
   }
-  
+  table.obligation{
+    border: 3px solid;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+  }
   th,
   td {
     border: 1px solid #000000;
@@ -125,13 +235,27 @@
 table.myClass * { /*new*/
   border: 0;
 }
+thead {
+  visibility: hidden;
+}
+thead th {
+  border: none; /* No border for thead cells */
+}
  
 @media print {
   .container {
   display: none;
 }
 
-.container-body, .container-body2,.container-body3,.container-body4{
+.container-body, .container-body2,.container-body4{
+  background-color: #f0f0f0;
+  box-shadow: none;
+  width: 210mm;
+  height: 297mm;
+  margin-top: -30px;
+  }
+
+.container-body3{
   background-color: #f0f0f0;
   box-shadow: none;
   width: 210mm;
@@ -149,12 +273,17 @@ table.myClass * { /*new*/
 
   table {
     margin-top: 15px;
-    border: 3px solid;
+  }
+  .appendix {
+    position: absolute;
+    top: 65px;
+    right: 50px;
+    font-size: 14px;
+    font-style: italic;
   }
 
-  .appendix {
-    top: 45px;
-  }
+
+
 
   /* Adjust font size for Disbursement Voucher in print */
   .center-text b {
@@ -201,15 +330,37 @@ margin-top: 99%;
 </head>
 <body>
     <div class="container-wrapper">
-        <div class="container">
-          <h3></h3>
-
-          <button class="print-button" onclick="printForms()">Print</button>
-
+      {% comment %} <div class="container">
+        <div class="navbar-header">
+      
+          <a class="navbar-brand" href="#">DSWD FO CARAGA</a>
         </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+           
+            <li>
+              <button type="button" class="btn btn-primary" onclick="printForms()"  title="Print" style="font-size: 18px;"><i class="fas fa-print"></i> Print</button></li>
+          </ul>
+        </div>
+      </div> {% endcomment %}
+
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">
+            <img src="{% static 'assets/img/custom/dswd-logo.png' %}" alt="First Logo" id="dswd-logo">
+            <img src="{% static 'assets/img/custom/bp-logo.png' %}" alt="Second Logo" id="ph-img">
+          </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><button type="button" class="btn btn-primary" onclick="printForms()" id="floatprint" title="Print" style="font-size: 14px;"><i class="fas fa-print"></i> Print</button></li>
+          </ul>
+        </div>
+      </div>
+
         <div class="container-body">
           <span class="appendix">Appendix 32</span>
-          <table>
+          <table class="table-border">
             <thead></thead>
             <tbody>
               <tr>
@@ -438,8 +589,8 @@ margin-top: 99%;
         <br>
 
         <div class="container-body2">
-          <span class="appendix">Appendix 11</span>
-          <table>
+          <span class="appendix-11">Appendix 11</span><br>
+          <table class="obligation">
             <thead></thead>
             <tbody>
               <tr>
@@ -823,7 +974,7 @@ margin-top: 99%;
 
         <div class="container-body2">
           <span class="appendix">Appendix 11</span>
-          <table>
+          <table class="table-border">
             <thead></thead>
             <tbody>
               <tr>
@@ -1202,13 +1353,30 @@ margin-top: 99%;
               </tr>
             </tbody>
           </table>
-      
         </div><br>
-
         <div class="container-body3">
-          <span style="font-family: Calibri, sans-serif;" ><center>TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS {{ acronym }}<br> Regular / Contractual / MOA<br> DV# {{ dv_number}} <br> for {{ payroll_date|date:"F j, Y" }}</center></span>
+          <span style="font-family: Calibri, sans-serif;">
+            <center>
+              <span contenteditable="true" id="editableName">
+                TRAVEL REIMBURSEMENTS TRAVEL REIMBURSEMENTS {{ acronym }}
+              </span><br>
+              Regular / Contractual / MOA<br>
+              DV# {{ dv_number }}<br>
+              for {{ payroll_date|date:"F j, Y" }}
+            </center>
+          </span>
           <table style="font-family: Calibri, sans-serif;" >
-            <thead></thead>
+            <thead style="height: 55px;">
+              <tr>
+                <th>No.</th>
+                <th>Age</th>
+                <th>City</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>City</th>
+                <th>City</th>
+              </tr>
+            </thead>
             <tbody>
               <tr >
                 <td><b>No.</b></td>
