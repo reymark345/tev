@@ -840,6 +840,8 @@ def item_update(request):
     sec = request.POST.get('Section')
     contact = request.POST.get('Contact')
 
+
+
     if travel_date:
         travel_date = request.POST.get('DateTravel')
     else :

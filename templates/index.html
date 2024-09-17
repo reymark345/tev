@@ -97,6 +97,69 @@
         <link rel="stylesheet" href="{% static 'custom/custom.css'%}" />
     </head>
 
+    <style>
+        .chat-box {
+            width: 300px;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            position: fixed;
+            bottom: 0px;
+            right: 20px;
+            z-index: 1000; /* Ensure it floats above other content */
+        }
+
+        .chat-header {
+            background-color: #685dd8;
+            color: #fff;
+            padding: 10px;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+            cursor: pointer;
+        }
+
+        .chat-body {
+            display: none; /* Initially hidden */
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            max-height: 300px; /* Adjust max height */
+        }
+
+        .chat-footer {
+            display: none; /* Initially hidden */
+            padding: 10px;
+            border-top: 1px solid #ccc;
+        }
+
+        .chat-footer input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+
+
+
+        .message {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chat-body .message .receive, .send {
+            background-color: #B1A296;
+            max-width: 400px;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        #msg{
+            height:200px;
+        }
+        
+    </style>
+
     <body>
         <!-- Layout wrapper -->
         <div class="layout-wrapper layout-content-navbar">
@@ -375,10 +438,11 @@
                                 <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
                                     <a
                                       class="nav-link hide-arrow"
-                                      href="{% url 'chat-staff' %}"
+                                      {% comment %} href="{% url 'chat-staff' %}" {% endcomment %}
+                                      href="#"
                                     >
                                       <i class="ti ti-bell ti-md"></i>
-                                      <span class="badge bg-danger rounded-pill badge-notifications">1</span>
+                                      {% comment %} <span class="badge bg-danger rounded-pill badge-notifications">1</span> {% endcomment %}
                                     </a>
                                 </li>
                                   <!--/ Notification -->
@@ -447,13 +511,60 @@
                     </nav>
 
                     <!-- / Navbar -->
-
                     <!-- Content wrapper -->
                     <div class="content-wrapper">
                         <!-- Content -->
+                        {% if 'Admin' in permissions%}
+                            <div class="chat-box">
+                                <div class="chat-header" onclick="toggleChat()">
+                                    Chat
+                                </div>
+                                <div class="chat-body">
+                                </div>
+                                <form id="create-room-form">
+                                    {% csrf_token %}
+                                    <div class="chat-footer">
+                                        <label class="form-label" for="modalFEmployeeName">Staff Name</label>
+                                        <select id="room" class="select2 form-select" name="room">
+                                            <option></option>
+                                            {% for row in users %}
+                                            <option value="{{ row.id }}">{{ row.first_name }} {{ row.last_name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <br>
+
+                                        <div class="message chat-history-body bg-body" id="chatContainer"></div>
+            
+                                        
+                                        <!-- <div class="chat-history-body bg-body">
+                                            <ul class="message list-unstyled chat-history" id="chatContainer">
+                                            sasf
+                                            </ul>
+                                        </div> -->
+
+                                    
+                                        <div class="form">
+                                            <form id="message-form">
+                                                <!-- <textarea id="msg" cols="30" name="message" rows="10" placeholder="Enter your messages" required></textarea> -->
+                                                <label class="form-label" for="modalFEmployeeName">Enter Message</label>
+                                                <textarea
+                                                class="form-control"
+                                                id="msg"
+                                                name="message"
+                                                rows="3"
+                                                required
+                                            ></textarea>
+                                            <br>
+                                                <button class="btn btn-primary waves-effect waves-light" type="button" id="send-message">Send</button>
+                                            </form>    
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        {% endif %}
                         {% block content %} {% csrf_token %} {% endblock %}
                         <!-- / Content -->
-                      
+                    
                         <!-- Footer -->
                         <footer class="content-footer footer bg-footer-theme">
                             <div class="container-fluid">
@@ -471,6 +582,7 @@
 
                         <div class="content-backdrop fade"></div>
                     </div>
+                   
                     <!-- Content wrapper -->
                 </div>
                 <!-- / Layout page -->
@@ -487,6 +599,8 @@
         <script>
             const BASE_URL = '{{ request.get_host }}'
         </script>
+
+ 
 
         <!-- Core JS -->
         <!-- build:js assets/vendor/js/core.js -->
@@ -583,17 +697,137 @@
         <script src="{% static 'assets/js/form-wizard-validation.js' %}"></script> {% endcomment %}
 
         {% comment %} <script src="{% static 'assets/js/app-chat.js' %}"></script>  {% endcomment %}
-
-
-        
-
-
-
-
         <!-- <script src="../../assets/js/modal-add-new-address.js"></script>
         <script src="../../assets/js/wizard-ex-checkout.js"></script> -->
 
         <!-- <script src="{% static 'assets/js/tables-datatables-basic.js' %}"></script> -->
+
+
+        <script>
+        let socket = null;  // Declare socket outside to maintain the state
+
+        $(document).ready(function(){
+            $('#room').change(function(){
+                var roomName = $('select[name="room"]').val();
+                console.log(roomName);
+                $.ajax({
+                    url: "{% url 'create-room' %}",
+                    type: "POST",
+                    data: {
+                        'room': roomName
+                    },
+                    success: function(response) {
+                        // Optionally handle response or initialize chat interface
+                        // Make sure to close any existing WebSocket before opening a new one
+                        if (socket) {
+                            socket.close(); // Close existing socket
+                        }
+                        initializeChat(roomName, '{{ user }}'); // Initialize new chat for the selected room
+                    }
+                });
+            });
+
+            $("#send-message").click(function(){
+                const message = $('#msg').val();
+                var roomName = $('select[name="room"]').val();
+                console.log(roomName);
+                console.log(message);
+                console.log('{{ user }}');
+                if (message && roomName) {
+                    sendMessage(message, roomName, '{{ user }}');
+                }
+            });
+        }); 
+
+        function initializeChat(roomName, username) {
+            console.log("Initializing chat for room:", roomName);
+
+            const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+            const wsEndpoint = `${websocketProtocol}://${window.location.host}/ws/notification/${roomName}/`;
+            socket = new WebSocket(wsEndpoint);
+
+            socket.addEventListener("open", () => {
+                console.log("WebSocket connection opened for room:", roomName);
+            });
+
+            socket.addEventListener("message", (event) => {
+                const messageData = JSON.parse(event.data)['message'];
+                var sender = messageData['sender'];
+                var message = messageData['message'];
+                
+                var messageDiv = $('.message');
+                if (sender != username) {
+                    messageDiv.append('<div class="receive"><p style="color: #000;">' + message + '<strong>-' + sender + '</strong></p></div>');
+                } else {
+                    messageDiv.append('<div class="send"><p style="color: #000;">' + message + '</p></div>');
+                }
+                scrollToBottom();
+            });
+
+            socket.addEventListener("error", (event) => {
+                console.error("WebSocket error observed:", event);
+            });
+
+            socket.addEventListener("close", (event) => {
+                console.log("WebSocket connection closed:", event);
+            });
+        }
+
+        function sendMessage(message, roomName, username) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(
+                    JSON.stringify({
+                        'message': message,
+                        'room_name': roomName,
+                        'sender': username,
+                    })
+                );
+                $('#msg').val('');  // Clear the message input field
+            }
+            else if (socket && socket.readyState === WebSocket.CONNECTING) {
+                // Wait until the WebSocket connection is open
+                socket.addEventListener('open', function(event) {
+                    socket.send(
+                        JSON.stringify({
+                            'message': message,
+                            'room_name': roomName,
+                            'sender': username,
+                        })
+                    );
+                    $('#msg').val('');  // Clear the message input field
+                });
+            } 
+            else {
+                console.error("WebSocket is not open. Unable to send message.");
+            }
+        }
+
+        function scrollToBottom() {
+            var chatContainer = document.getElementById("chatContainer");
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function toggleChat() {
+            const ChatEmployee = jQuery(document.querySelector('[name="room"]'));
+            const chatBody = document.querySelector('.chat-body');
+            const chatFooter = document.querySelector('.chat-footer');
+            const isHidden = chatBody.style.display === 'none';
+            
+            chatBody.style.display = isHidden ? 'flex' : 'none';
+            chatFooter.style.display = isHidden ? 'block' : 'none';
+            if (ChatEmployee.length) {
+                ChatEmployee.wrap('<div class="position-relative"></div>')
+                ChatEmployee.select2({
+                    placeholder: 'Chat name',
+                    dropdownParent: ChatEmployee.parent(),
+                    allowClear: true,
+                })
+            }
+        }
+        
+
+        </script>
+        
         {% block footer_scripts %} {% endblock footer_scripts %}
     </body>
 </html>

@@ -201,6 +201,7 @@ def dashboard(request):
         'permissions' : role_names,
         'charges_list': c_list,
         'payroll_c_list': p_counts_list,
+        'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
     }
     if any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'dashboard.html',context)

@@ -3,6 +3,7 @@ from rest_framework.decorators import api_view
 from main.models import (TevOutgoing,TevIncoming)
 from .serializers import ItemSerializer, ItemSerializerStatus
 from django.db import connections
+from django.utils import timezone
 
 @api_view(['GET'])
 def getStatus(request, id_number):
@@ -138,12 +139,12 @@ def getStatus(request, id_number):
         rows = cursor.fetchall()
         columns = [col[0] for col in cursor.description]
 
-    # Convert each row to a dictionary
     mapped_data = [
         dict(zip(columns, row)) for row in rows
     ]
 
-    # Run the finance_2024 query if dv_no is available
+    current_year = timezone.now().year
+    finance_db = f'finance_{current_year}'
     for data in mapped_data:
         dv_no = data.get('dv_no')
 
@@ -155,32 +156,33 @@ def getStatus(request, id_number):
                 WHERE ts.dv_no = %s
             """
 
-            with connections['finance_2024'].cursor() as cursor:
+            with connections[finance_db].cursor() as cursor:
                 cursor.execute(finance_query, [dv_no])
                 finance_row = cursor.fetchone()
                 finance_columns = [col[0] for col in cursor.description]
 
-                # If finance data is found, update the dictionary
                 if finance_row:
                     finance_data = dict(zip(finance_columns, finance_row))
                     data.update(finance_data)
 
     serializer = ItemSerializerStatus(mapped_data, many=True)
     return Response(serializer.data)
+
 # @api_view(['GET'])
 # def getStatus(request, id_number):
-#     sql_query = """
+#     # First query on the default database (tev_db)
+#     main_query = """
 #     SELECT 
 #         ti.id, 
 #         ti.code, 
-#         ti.first_name,	
+#         ti.first_name,    
 #         ti.middle_name,
-#         ti.last_name,	
+#         ti.last_name,    
 #         ti.id_no,
 #         ti.date_travel,
 #         ti.original_amount, 
 #         ti.final_amount, 
-#         st.name AS status, 
+#         ti.status_id,
 #         GROUP_CONCAT(tb.purpose SEPARATOR ', ') AS purposes,
 #         ti.incoming_in,
 #         ti.incoming_out,
@@ -216,8 +218,6 @@ def getStatus(request, id_number):
 #         tev_incoming AS ti 
 #     LEFT JOIN 
 #         tev_bridge AS tb ON tb.tev_incoming_id = ti.id
-#     LEFT JOIN 
-#         status AS st ON st.id = ti.status_id
 #     LEFT JOIN 
 #         tev_outgoing AS t_o ON t_o.id = tb.tev_outgoing_id
 #     LEFT JOIN 
@@ -259,7 +259,7 @@ def getStatus(request, id_number):
 #     GROUP BY 
 #         ti.id, 
 #         ti.code, 
-#         ti.first_name,	
+#         ti.first_name,    
 #         ti.middle_name,
 #         ti.last_name,
 #         ti.id_no,
@@ -297,21 +297,39 @@ def getStatus(request, id_number):
 #         ti.id DESC
 #     """
 
-#     with connection.cursor() as cursor:
-#         cursor.execute(sql_query, [id_number])
+#     with connections['default'].cursor() as cursor:
+#         cursor.execute(main_query, [id_number])
 #         rows = cursor.fetchall()
 #         columns = [col[0] for col in cursor.description]
+
+#     # Convert each row to a dictionary
 #     mapped_data = [
 #         dict(zip(columns, row)) for row in rows
 #     ]
+
+#     # Run the finance_2024 query if dv_no is available
+#     for data in mapped_data:
+#         dv_no = data.get('dv_no')
+
+#         if dv_no:
+#             finance_query = """
+#                 SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, tc.date_transact AS check_issued_date
+#                 FROM transactions AS ts
+#                 LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no 
+#                 WHERE ts.dv_no = %s
+#             """
+
+#             with connections['finance_2024'].cursor() as cursor:
+#                 cursor.execute(finance_query, [dv_no])
+#                 finance_row = cursor.fetchone()
+#                 finance_columns = [col[0] for col in cursor.description]
+
+#                 # If finance data is found, update the dictionary
+#                 if finance_row:
+#                     finance_data = dict(zip(finance_columns, finance_row))
+#                     data.update(finance_data)
+
 #     serializer = ItemSerializerStatus(mapped_data, many=True)
-#     return Response(serializer.data)
-
-
-# @api_view(['GET'])
-# def getStatus(request, id_number):
-#     items = TevIncoming.objects.filter(id_no=id_number)
-#     serializer = ItemSerializerStatus(items, many=True)
 #     return Response(serializer.data)
 
 

@@ -82,6 +82,7 @@ def sms(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
+
 @login_required(login_url='login')
 def chat(request):
     allowed_roles = ["Admin"]    
@@ -111,9 +112,42 @@ def chat(request):
             'role_details': RoleDetails.objects.filter().order_by('role_name'),
             'combined_data': combined_data
         }
-        return render(request, 'admin/chat_admin.html', context)
+        return render(request, 'admin/chat.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+# @login_required(login_url='login')
+# def chat(request):
+#     allowed_roles = ["Admin"]    
+#     user_id = request.session.get('user_id', 0)
+#     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+#     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+#     role_names = [entry['role_name'] for entry in role_details]
+#     date_actual = SystemConfiguration.objects.filter().first().date_actual
+#     path = StaffDetails.objects.filter(user_id = user_id).first()
+#     combined_data = []
+
+#     for auth_user in AuthUser.objects.all():
+#         staff_detail = StaffDetails.objects.filter(user=auth_user).first()
+#         combined_data.append({
+#             'id': auth_user.id,
+#             'first_name': auth_user.first_name.title(),
+#             'last_name': auth_user.last_name.title(),
+#             'image_path': staff_detail.image_path if staff_detail else None
+#         })
+
+#     if any(role_name in allowed_roles for role_name in role_names):
+#         context = {
+#             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
+#             'is_actual_date': date_actual,
+#             'permissions' : role_names,
+#             'image_path': path.image_path,
+#             'role_details': RoleDetails.objects.filter().order_by('role_name'),
+#             'combined_data': combined_data
+#         }
+#         return render(request, 'admin/chat_admin.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
     
 @login_required(login_url='login')
 def chat_data(request):
@@ -677,27 +711,42 @@ def transaction_logs(request):
         return render(request, 'pages/unauthorized.html')
     
 
-# chat
+
 @csrf_exempt
 def CreateRoom(request):
-
     if request.method == 'POST':
-        # username = request.POST['username']
         username = request.session.get('user_id', 0)
-        # room = request.POST['room']
-
-        room = request.POST.get('auth_user_id')
+        room = request.POST['room']
 
         try:
             get_room = Room.objects.get(room_name=room)
-            return redirect('room', room_name=room, username=username)
-
         except Room.DoesNotExist:
-            new_room = Room(room_name = room)
+            new_room = Room(room_name=room)
             new_room.save()
-            return redirect('room', room_name=room, username=username)
 
-    return render(request, 'index.html')
+        return JsonResponse({'success': True, 'room_name': room, 'username': username})
+
+# chat
+# @csrf_exempt
+# def CreateRoom(request):
+
+#     if request.method == 'POST':
+#         # username = request.POST['username']
+#         username = request.session.get('user_id', 0)
+#         room = request.POST['room']
+
+#         # room = request.POST.get('auth_user_id')
+
+#         try:
+#             get_room = Room.objects.get(room_name=room)
+#             return redirect('room', room_name=room, username=username)
+
+#         except Room.DoesNotExist:
+#             new_room = Room(room_name = room)
+#             new_room.save()
+#             return redirect('room', room_name=room, username=username)
+
+#     return render(request, 'index.html')
 
 # @csrf_exempt
 # def MessageView(request, room_name, username):
@@ -726,17 +775,26 @@ def CreateRoom(request):
     
 @csrf_exempt
 def MessageView(request, room_name, username):
-    print("testthereeeee")
+    print("aaaa")
+    print(room_name)
+    print(username)
     get_room = Room.objects.get(room_name=room_name)
 
     if request.method == 'POST':
+        print("POST")
         message = request.POST['message']
         new_message = Message(room=get_room, sender=username, message=message)
         new_message.save()
-    get_messages = Message.objects.filter(room_id=2)
+
+    else:
+        print("not POST")
+
+    get_messages = Message.objects.filter(room_id=get_room)
 
     # Convert the QuerySet to a list of dictionaries
     messages_list = list(get_messages.values())
+
+    print(messages_list)
 
     context = {
         "messages": messages_list,
