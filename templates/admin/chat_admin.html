@@ -270,7 +270,7 @@
   window.Helpers.initCustomOptionCheck();
   $(document).ready(function () {
       const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-      const wsEndpoint = `ws://${window.location.host}/ws/notification/`;
+      const wsEndpoint = `${websocketProtocol}://caraga-tris-staging.dswd.gov.ph/ws/notification/`;
       
       let socket = null;
       let staff_id = 0;
@@ -474,7 +474,7 @@
     window.Helpers.initCustomOptionCheck();
     $(document).ready(function () {
       const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-      const wsEndpoint = `ws://${window.location.host}/ws/notification/`;
+      const wsEndpoint = `${websocketProtocol}://caraga-tris-staging.dswd.gov.ph/ws/notification/`;
       
 
       // form-message

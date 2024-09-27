@@ -96,7 +96,7 @@
         // WebSocket connection initialization
         function initializeChat(roomName, username) {
             const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-            const wsEndpoint = `ws://${window.location.host}/ws/notification/${roomName}/`;
+            const wsEndpoint = `${websocketProtocol}://caraga-tris-staging.dswd.gov.ph/ws/notification/${roomName}/`;
             const socket = new WebSocket(wsEndpoint);
 
             $('#message-form').on('submit', function(event) {
