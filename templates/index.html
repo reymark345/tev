@@ -709,6 +709,7 @@
         $(document).ready(function(){
             $('#room').change(function(){
                 var roomName = $('select[name="room"]').val();
+                console.log(roomName);
                 $.ajax({
                     url: "{% url 'create-room' %}",
                     type: "POST",
@@ -729,6 +730,9 @@
             $("#send-message").click(function(){
                 const message = $('#msg').val();
                 var roomName = $('select[name="room"]').val();
+                console.log(roomName);
+                console.log(message);
+                console.log('{{ user }}');
                 if (message && roomName) {
                     sendMessage(message, roomName, '{{ user }}');
                 }
@@ -736,8 +740,10 @@
         }); 
 
         function initializeChat(roomName, username) {
+            console.log("Initializing chat for room:", roomName);
+
             const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-            const wsEndpoint = `ws://${window.location.host}/ws/notification/${roomName}/`;
+            const wsEndpoint = `${websocketProtocol}://caraga-tris-staging.dswd.gov.ph/ws/notification/${roomName}/`;
             socket = new WebSocket(wsEndpoint);
 
             socket.addEventListener("open", () => {

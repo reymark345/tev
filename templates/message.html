@@ -53,7 +53,7 @@
     }
 
     const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const wsEndpoint = `ws://${window.location.host}/ws/notification/{{room_name}}/`;
+    const wsEndpoint = `${websocketProtocol}://caraga-tris-staging.dswd.gov.ph/ws/notification/{{room_name}}/`;
     const socket = new WebSocket(wsEndpoint);
 
     document.getElementById('message-form').addEventListener('submit', function(event){
