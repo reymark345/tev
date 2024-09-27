@@ -53,7 +53,7 @@
     }
 
     const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-    const wsEndpoint = `${websocketProtocol}://${window.location.host}/ws/notification/{{room_name}}/`;
+    const wsEndpoint = `ws://${window.location.host}/ws/notification/{{room_name}}/`;
     const socket = new WebSocket(wsEndpoint);
 
     document.getElementById('message-form').addEventListener('submit', function(event){
