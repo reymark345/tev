@@ -741,9 +741,11 @@
 
         function initializeChat(roomName, username) {
             console.log("Initializing chat for room:", roomName);
+            console.log(window.location.host);
 
             const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-            const wsEndpoint = `${websocketProtocol}://caraga-tris-staging.dswd.gov.ph/ws/notification/${roomName}/`;
+
+            const wsEndpoint = `${websocketProtocol}://${window.location.host}/ws/notification/${roomName}/`;
             socket = new WebSocket(wsEndpoint);
 
             socket.addEventListener("open", () => {
