@@ -99,6 +99,93 @@
 
     <style>
         .chat-box {
+        width: 300px;
+        background-color: #f1f1f1;
+        border-radius: 10px;
+        position: fixed;
+        bottom: 0px;
+        right: 20px;
+        z-index: 1000;
+
+    }
+    /* background-color: #46446b81; */
+
+    .bg-body{
+        background-color: transparent!important;
+    }
+
+    .chat-header {
+        background-color: #685dd8;
+        color: #fff;
+        padding: 10px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        cursor: pointer;
+    }
+
+    .chat-body {
+        display: none;
+        flex: 1;
+        padding: 10px;
+        overflow-y: auto;
+        max-height: 500px;
+    }
+
+    .chat-footer {
+        display: none;
+        padding: 10px;
+        border-top: 1px solid #ccc;
+    }
+
+    .chat-footer input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .message {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .message .receive, .message .send {
+        display: inline-block;
+        max-width: 80%; /* Adjust this to fit your desired width */
+        max-height: 40%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 10px;
+        word-wrap: break-word; /* Ensure long words wrap inside the message */
+    }
+
+    /* Styles for received messages */
+    .message .receive {
+        background-color: #e0e0e0; /* Gray background for received messages */
+        text-align: left;
+        float: left;
+        clear: both;
+        color: #000;
+    }
+
+    /* Styles for sent messages */
+    .message .send {
+        background-color: #0084ff; /* Blue background for sent messages */
+        color: #fff;
+        text-align: right;
+        float: right;
+        clear: both;
+    }
+
+    .message .receive p, .message .send p {
+    margin: 0;
+    line-height: 1.5; /* Adjust line height for better readability */
+}
+
+    </style>
+
+    <!-- <style>
+        .chat-box {
             width: 300px;
             background-color: #f1f1f1;
             border-radius: 10px;
@@ -147,8 +234,8 @@
         }
 
         .chat-body .message .receive, .send {
-            background-color: #B1A296;
-            max-width: 400px;
+            background-color: #0084ff;
+            width: auto;
             border-radius: 10px;
             padding: 10px;
             margin-bottom: 10px;
@@ -158,7 +245,7 @@
             height:200px;
         }
         
-    </style>
+    </style> -->
 
     <body>
         <!-- Layout wrapper -->
@@ -752,19 +839,38 @@
                 console.log("WebSocket connection opened for room:", roomName);
             });
 
-            socket.addEventListener("message", (event) => {
+            socket.addEventListener("message", (event) => { 
                 const messageData = JSON.parse(event.data)['message'];
                 var sender = messageData['sender'];
                 var message = messageData['message'];
-                
+
                 var messageDiv = $('.message');
+                
                 if (sender != username) {
-                    messageDiv.append('<div class="receive"><p style="color: #000;">' + message + '<strong>-' + sender + '</strong></p></div>');
+                    // Received message, aligned left
+                    messageDiv.append('<div class="receive"><p>' + message + '<strong> - ' + sender + '</strong></p></div>');
                 } else {
-                    messageDiv.append('<div class="send"><p style="color: #000;">' + message + '</p></div>');
+                    // Sent message, aligned right
+                    messageDiv.append('<div class="send"><p>' + message + '</p></div>');
                 }
+                
                 scrollToBottom();
             });
+
+
+            // socket.addEventListener("message", (event) => {
+            //     const messageData = JSON.parse(event.data)['message'];
+            //     var sender = messageData['sender'];
+            //     var message = messageData['message'];
+                
+            //     var messageDiv = $('.message');
+            //     if (sender != username) {
+            //         messageDiv.append('<div class="receive"><p style="color: #000;">' + message + '<strong>-' + sender + '</strong></p></div>');
+            //     } else {
+            //         messageDiv.append('<div class="send"><p style="color: #ffffff;">' + message + '</p></div>');
+            //     }
+            //     scrollToBottom();
+            // });
 
             socket.addEventListener("error", (event) => {
                 console.error("WebSocket error observed:", event);
