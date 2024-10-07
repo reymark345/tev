@@ -7,6 +7,7 @@ urlpatterns = [
     path('login', views.login, name='login'),
     path('logout', views.logout, name='logout'),
     path('dashboard', views.dashboard, name='dashboard'),
+    path('view_stats_year', views.view_stats_year, name='view-stats-year'),
     path('profile', views.profile, name='profile'),
     path('tris', views.landing, name='landing'),
     path('admin/', include('admin.urls')),
@@ -16,4 +17,7 @@ urlpatterns = [
     path('libraries/', include('libraries.urls')),
     path('generate_accomplishment', views.generate_accomplishment, name='generate-accomplishment'),
     path('generate_accomplishment_admin', views.generate_accomplishment_admin, name='generate-accomplishment-admin'),
+
+
+    
 ]
