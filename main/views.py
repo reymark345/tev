@@ -52,28 +52,26 @@ def login(request):
 def dashboard(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff" , "Certified staff"] 
     user_id = request.session.get('user_id', 0)
-
+    year = datetime.datetime.now().year
+ 
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
 
-    uploaded = TevIncoming.objects.filter(is_upload =1).count()
-    incoming = TevIncoming.objects.filter(status_id=1).count()
-    checking = TevIncoming.objects.filter(status_id=2).count()
-    approved = TevIncoming.objects.filter(status_id=7).count()
-    duplicated_codes = TevIncoming.objects.values('code').annotate(code_count=Count('code')).filter(code_count__gt=1).values('code')
-    returned = TevIncoming.objects.filter(status_id=3).exclude(code__in=Subquery(duplicated_codes)).values('code').distinct().count()
-    for_payroll = TevIncoming.objects.filter(status_id=4).count()
-    payrolled = TevIncoming.objects.filter(status_id=5).count()
-    outgoing = TevIncoming.objects.filter(status_id__in=[8,9]).count()
-    ongoing = TevIncoming.objects.filter(status_id=6).count()
-    budget = TevIncoming.objects.filter(status_id__in=[10,11]).count()
-    journal = TevIncoming.objects.filter(status_id__in=[12,13]).count()
-    approval = TevIncoming.objects.filter(status_id__in=[14,15]).count()
+    uploaded = TevIncoming.objects.filter(is_upload =1, incoming_in__year=year).count()
+    incoming = TevIncoming.objects.filter(status_id=1, incoming_in__year=year).count()
+    checking = TevIncoming.objects.filter(status_id=2, incoming_in__year=year).count()
+    approved = TevIncoming.objects.filter(status_id=7, incoming_in__year=year).count()
+    duplicated_codes = TevIncoming.objects.values('code').annotate(code_count=Count('code')).filter(code_count__gt=1, incoming_in__year=year).values('code')
+    returned = TevIncoming.objects.filter(status_id=3, incoming_in__year=year).exclude(code__in=Subquery(duplicated_codes)).values('code').distinct().count()
+    for_payroll = TevIncoming.objects.filter(status_id=4, incoming_in__year=year).count()
+    payrolled = TevIncoming.objects.filter(status_id=5, incoming_in__year=year).count()
+    outgoing = TevIncoming.objects.filter(status_id__in=[8,9], incoming_in__year=year).count()
+    ongoing = TevIncoming.objects.filter(status_id=6, incoming_in__year=year).count()
+    budget = TevIncoming.objects.filter(status_id__in=[10,11], incoming_in__year=year).count()
+    journal = TevIncoming.objects.filter(status_id__in=[12,13], incoming_in__year=year).count()
+    approval = TevIncoming.objects.filter(status_id__in=[14,15], incoming_in__year=year).count()
     box_a = TevOutgoing.objects.filter().count()
-
-
-    year = datetime.datetime.now().year
 
     received = TevIncoming.objects.filter(
         incoming_in__year=year
@@ -226,22 +224,20 @@ def view_stats_year(request):
         role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
         role_names = [entry['role_name'] for entry in role_details]
 
-        uploaded = TevIncoming.objects.filter(is_upload =1).count()
-        incoming = TevIncoming.objects.filter(status_id=1).count()
-        checking = TevIncoming.objects.filter(status_id=2).count()
-        approved = TevIncoming.objects.filter(status_id=7).count()
-        duplicated_codes = TevIncoming.objects.values('code').annotate(code_count=Count('code')).filter(code_count__gt=1).values('code')
-        returned = TevIncoming.objects.filter(status_id=3).exclude(code__in=Subquery(duplicated_codes)).values('code').distinct().count()
-        for_payroll = TevIncoming.objects.filter(status_id=4).count()
-        payrolled = TevIncoming.objects.filter(status_id=5).count()
-        outgoing = TevIncoming.objects.filter(status_id__in=[8,9]).count()
-        ongoing = TevIncoming.objects.filter(status_id=6).count()
-        budget = TevIncoming.objects.filter(status_id__in=[10,11]).count()
-        journal = TevIncoming.objects.filter(status_id__in=[12,13]).count()
-        approval = TevIncoming.objects.filter(status_id__in=[14,15]).count()
+        uploaded = TevIncoming.objects.filter(is_upload =1,incoming_in__year=year).count()
+        incoming = TevIncoming.objects.filter(status_id=1,incoming_in__year=year).count()
+        checking = TevIncoming.objects.filter(status_id=2,incoming_in__year=year).count()
+        approved = TevIncoming.objects.filter(status_id=7,incoming_in__year=year).count()
+        duplicated_codes = TevIncoming.objects.values('code').annotate(code_count=Count('code')).filter(code_count__gt=1,incoming_in__year=year).values('code')
+        returned = TevIncoming.objects.filter(status_id=3,incoming_in__year=year).exclude(code__in=Subquery(duplicated_codes)).values('code').distinct().count()
+        for_payroll = TevIncoming.objects.filter(status_id=4,incoming_in__year=year).count()
+        payrolled = TevIncoming.objects.filter(status_id=5,incoming_in__year=year).count()
+        outgoing = TevIncoming.objects.filter(status_id__in=[8,9],incoming_in__year=year).count()
+        ongoing = TevIncoming.objects.filter(status_id=6,incoming_in__year=year).count()
+        budget = TevIncoming.objects.filter(status_id__in=[10,11],incoming_in__year=year).count()
+        journal = TevIncoming.objects.filter(status_id__in=[12,13],incoming_in__year=year).count()
+        approval = TevIncoming.objects.filter(status_id__in=[14,15],incoming_in__year=year).count()
         box_a = TevOutgoing.objects.filter().count()
-
-
 
         received = TevIncoming.objects.filter(
             incoming_in__year=year
@@ -362,8 +358,7 @@ def view_stats_year(request):
             'approval': approval,
             'ongoing': ongoing,
             'box_a': box_a,
-            'permissions' : role_names,
-            'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related()
+            'permissions' : role_names
         })
     
 @login_required(login_url='login')
