@@ -5,9 +5,16 @@
       <!-- View sales -->
       <div class="col-xl-4 mb-4 col-lg-5 col-12">
 
-        <select id="dp-year" name="DpYear" class="form-select">
+        {% comment %} <select id="dp-year" name="DpYear" class="form-select"  style="height:50px;">
+          <option value="2023">2023</option>
           <option value="2024">2024</option>
-       </select><br><br>
+          <option value="2025">2025</option>
+       </select><br><br> {% endcomment %}
+
+      <select id="dp-year" name="DpYear" class="form-select"  style="height:50px;">
+      </select><br><br>
+
+       <input type="hidden" id="current_year" name="current_year" value="{{ current_year }}"></input>
         
         <div class="card">
           <div class="d-flex align-items-end row">
@@ -50,7 +57,7 @@
                     <i class="ti ti-chart-pie-2 ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ incoming }}</h5>
+                    <h5 class="mb-0"><span id="incoming-counts">{{ incoming }}</span></h5>
                     <small>Received</small>
                   </div>
                 </div>
@@ -61,7 +68,7 @@
                     <i class="ti ti-users ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ checking }}</h5>
+                    <h5 class="mb-0"><span id="checking-counts">{{ checking }}</span></h5>
                     <small>Reviewed Documents</small>
                   </div>
                 </div>
@@ -72,7 +79,7 @@
                     <i class="ti ti-credit-card ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ returned }}</h5>
+                    <h5 class="mb-0"><span id="returned-counts">{{ returned }}</span></h5>
                     <small>Returned</small>
                   </div>
                 </div>
@@ -83,7 +90,7 @@
                     <i class="ti ti-browser-check ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ payroll }}</h5>
+                    <h5 class="mb-0"><span id="payroll-counts">{{ payroll }}</span></h5>
                     <small>For Payroll</small>
                   </div>
                 </div>
@@ -95,7 +102,7 @@
                     <i class="ti ti-ticket ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ payrolled }}</h5>
+                    <h5 class="mb-0"><span id="payrolled-counts">{{ payrolled }}</span></h5>
                     <small>Payrolled</small>
                   </div>
                 </div>
@@ -107,7 +114,7 @@
                     <i class="ti ti-clock ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ outgoing }}</h5>
+                    <h5 class="mb-0"><span id="outgoing-counts">{{ outgoing }}</span></h5>
                     <small>Outgoing</small>
                   </div>
                 </div>
@@ -119,7 +126,7 @@
                     <i class="ti ti-discount ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ budget }}</h5>
+                    <h5 class="mb-0"><span id="budget-counts">{{ budget }}</span></h5>
                     <small>Budget</small>
                   </div>
                 </div>
@@ -131,7 +138,7 @@
                     <i class="ti ti-circle-check ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ journal }}</h5>
+                    <h5 class="mb-0"><span id="journal-counts">{{ journal }}</span></h5>
                     <small>Journal</small>
                   </div>
                 </div>
@@ -143,7 +150,7 @@
                     <i class="ti ti-users ti-sm"></i>
                   </div>
                   <div class="card-info">
-                    <h5 class="mb-0">{{ approval }}</h5>
+                    <h5 class="mb-0"><span id="approval-counts">{{ approval }}</span></h5>
                     <small>Approval</small>
                   </div>
                 </div>
@@ -383,6 +390,16 @@
 
   {% endblock %}{% block footer_scripts %}
   <script>
+    var startYear = 2024;
+    var currentYear = parseInt($('#current_year').val());
+    var endYear = currentYear + 1;
+    $('#dp-year').empty();
+
+    for (var year = startYear; year <= endYear; year++) {
+      var selected = year == currentYear ? 'selected' : '';
+      $('#dp-year').append('<option value="' + year + '" ' + selected + '>' + year + '</option>');
+    }
+
     
     let cardColor, headingColor, labelColor, borderColor, legendColor;
     if (isDarkStyle) {
@@ -596,127 +613,117 @@
 
     $(document).ready(function () {
       const areaChartEl = document.querySelector('#lineAreaChartDB'),
-      areaChartConfig = {
-        chart: {
-          height: 400,
-          type: 'area',
-          parentHeightOffset: 0,
-          toolbar: {
-            show: false
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          show: false,
-          curve: 'straight'
-        },
-        legend: {
-          show: true,
-          position: 'top',
-          horizontalAlign: 'start',
-          labels: {
-            colors: legendColor,
-            useSeriesColors: false
-          }
-        },
-        grid: {
-          borderColor: borderColor,
-          xaxis: {
-            lines: {
-              show: true
+        areaChartConfig = {
+          chart: {
+            height: 400,
+            type: 'area',
+            parentHeightOffset: 0,
+            toolbar: {
+              show: false
             }
-          }
-        },
-        colors: [chartColors.area.series3, chartColors.area.series2,chartColors.area.series4,chartColors.area.series5,chartColors.area.series6,chartColors.area.series7,chartColors.area.series8,chartColors.area.series1 ],
-        series: [
-          {
-            name: 'Received',
-            data: received_counts
           },
-          {
-            name: 'Reviewed Documents',
-            data: reviewed_counts
+          dataLabels: {
+            enabled: false
           },
-          {
-            name: 'Payrolled',
-            data: payrolled_counts
+          stroke: {
+            show: false,
+            curve: 'straight'
           },
-          {
-            name: 'Outgoing',
-            data: outgoing_counts
+          legend: {
+            show: true,
+            position: 'top',
+            horizontalAlign: 'start',
+            labels: {
+              colors: legendColor,
+              useSeriesColors: false
+            }
           },
-          {
-            name: 'Budget',
-            data: budget_counts
+          grid: {
+            borderColor: borderColor,
+            xaxis: {
+              lines: {
+                show: true
+              }
+            }
           },
-          {
-            name: 'Journal',
-            data: journal_counts
-          },
-          {
-            name: 'Approval',
-            data: approval_counts
-          },
-          {
-            name: 'Returned',
-            data: returned_counts
-          },
-        ],
-        xaxis: {
-          categories: [
-            'January',
-            'February',
-            'March',
-            'April',
-            'May',
-            'June',
-            'July',
-            'August',
-            'September',
-            'October',
-            'November',
-            'December'
+          colors: [chartColors.area.series3, chartColors.area.series2, chartColors.area.series4, chartColors.area.series5, chartColors.area.series6, chartColors.area.series7, chartColors.area.series8, chartColors.area.series1],
+          series: [
+            { name: 'Received', data: received_counts },
+            { name: 'Reviewed Documents', data: reviewed_counts },
+            { name: 'Payrolled', data: payrolled_counts },
+            { name: 'Outgoing', data: outgoing_counts },
+            { name: 'Budget', data: budget_counts },
+            { name: 'Journal', data: journal_counts },
+            { name: 'Approval', data: approval_counts },
+            { name: 'Returned', data: returned_counts },
           ],
-          axisBorder: {
-            show: false
-          },
-          axisTicks: {
-            show: false
-          },
-          labels: {
-            style: {
-              colors: labelColor,
-              fontSize: '13px'
+          xaxis: {
+            categories: [
+              'January', 'February', 'March', 'April', 'May', 'June',
+              'July', 'August', 'September', 'October', 'November', 'December'
+            ],
+            axisBorder: { show: false },
+            axisTicks: { show: false },
+            labels: {
+              style: {
+                colors: labelColor,
+                fontSize: '13px'
+              }
             }
-          }
-        },
-        yaxis: {
-          labels: {
-            style: {
-              colors: labelColor,
-              fontSize: '13px'
+          },
+          yaxis: {
+            labels: {
+              style: {
+                colors: labelColor,
+                fontSize: '13px'
+              }
             }
+          },
+          fill: {
+            opacity: 1,
+            type: 'solid'
+          },
+          tooltip: {
+            shared: false
           }
-        },
-        fill: {
-          opacity: 1,
-          type: 'solid'
-        },
-        tooltip: {
-          shared: false
-        }
-      };
-    if (typeof areaChartEl !== undefined && areaChartEl !== null) {
+        };
+    
       const areaChart = new ApexCharts(areaChartEl, areaChartConfig);
       areaChart.render();
-    }
-    });
-  
-
     
-
+      $('#dp-year').change(function() {
+        var selectedYear = $(this).val();    
+        $.ajax({
+          type: 'POST',
+          url: "{% url 'view-stats-year' %}",
+          data: {
+            year: selectedYear
+          },
+          success: function (data) {
+            $('#incoming-counts').text(data.incoming); 
+            $('#checking-counts').text(data.checking); 
+            $('#returned-counts').text(data.returned); 
+            $('#payroll-counts').text(data.payroll); 
+            $('#payrolled-counts').text(data.payrolled); 
+            $('#outgoing-counts').text(data.outgoing); 
+            $('#budget-counts').text(data.budget); 
+            $('#journal-counts').text(data.journal); 
+            $('#approval-counts').text(data.approval); 
+     
+            areaChart.updateSeries([
+              { name: 'Received', data: data.received_counts },
+              { name: 'Reviewed Documents', data: data.reviewed_counts },
+              { name: 'Payrolled', data: data.payrolled_counts },
+              { name: 'Outgoing', data: data.outgoing_counts },
+              { name: 'Budget', data: data.budget_counts },
+              { name: 'Journal', data: data.journal_counts },
+              { name: 'Approval', data: data.approval_counts },
+              { name: 'Returned', data: data.returned_counts },
+            ]);
+          }
+        });
+      });
+    });
   </script>
 
 

@@ -422,7 +422,9 @@ def employee_details(request):
                 GROUP_CONCAT(t3.name SEPARATOR ', ') AS remarks,
                 CONCAT_WS(' ', au.first_name, au.last_name) AS forwarded_by,
                 CONCAT_WS(' ', rb.first_name, rb.last_name) AS reviewed_by,
-                ti.date_reviewed
+                ti.date_reviewed,
+                ti.review_date_forwarded,
+                CONCAT_WS(' ', rf.first_name, rf.last_name) AS review_forwarded_by
         FROM 
                 tev_incoming AS ti 
         LEFT JOIN 
@@ -447,6 +449,8 @@ def employee_details(request):
 				auth_user AS ui ON ui.id = ti.user_id
         LEFT JOIN 
 				auth_user AS pb ON pb.id = ti.payrolled_by
+        LEFT JOIN 
+				auth_user AS rf ON rf.id = ti.review_forwarded_by
         LEFT JOIN 
 				auth_user AS ot_r ON ot_r.id = t_o.otg_r_user_id
         LEFT JOIN 
@@ -542,6 +546,8 @@ def employee_details(request):
         approval_f_by = row[29]
         forwarded_by = row[34]
         date_reviewed = date(row[36], "F j, Y g:i A")
+        review_date_forwarded = row[37]
+        review_forwarded_by = row[38]
 
         if row[12]:
             finance_query = """
@@ -614,6 +620,8 @@ def employee_details(request):
             'received_forwarded_by': forwarded_by.title(), 
             'reviewed_by': row[35],
             'date_reviewed': date_reviewed,
+            'review_date_forwarded': format_date(review_date_forwarded) if review_date_forwarded else '',
+            'review_forwarded_by': review_forwarded_by if review_forwarded_by else '',
             'amt_certified': amt_certified,
             'amt_journal': amt_journal,
             'amt_budget': amt_budget,

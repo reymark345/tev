@@ -1211,25 +1211,24 @@ def out_checking_tev(request):
         tev_update = TevIncoming.objects.filter(id=item_id).first()  
 
         if tev_update:
-            fullname = tev_update.first_name
-            contact_no = "09518149919"
-            date_travel = tev_update.date_travel
-            
-            formatted_dates = convert_date_string(date_travel)
-            message = 'Good day,{}! Your Travel in {} is being Forwarded to Budget Section and Ready to Obligate - DSWD CARAGA TRIS SYSTEM'.format(fullname,formatted_dates)
+            if tev_update.status_id == 3:
+                tev_update.slashed_out = date_time.datetime.now()
+            else:
+                tev_update.status_id = 4
+            tev_update.review_date_forwarded = date_time.datetime.now()
+            tev_update.review_forwarded_by = user_id
+            tev_update.save()
+            # fullname = tev_update.first_name
+            # contact_no = "09518149919"
+            # date_travel = tev_update.date_travel
+            # formatted_dates = convert_date_string(date_travel)
+            # message = 'Good day,{}! Your Travel in {} is being Forwarded to Budget Section and Ready to Obligate - DSWD CARAGA TRIS SYSTEM'.format(fullname,formatted_dates)
             # send_notification(message, contact_no)
             # contact_numbers = [{first_name: ['09518149919']}]
             # for contact in contact_numbers:
             #     for k, vs in contact.items():
             #         for v in vs:
             #             send_notification('Good day,{}! Your Travel From January 25 2024 is being Forwarded to Budget Section and Ready to Obligate - DSWD CARAGA TRIS SYSTEM'.format(k, formatted_dates), v)
-
-            if tev_update.status_id == 3:
-                tev_update.slashed_out = date_time.datetime.now()
-            else:
-                tev_update.status_id = 4
-            tev_update.forwarded_by = user_id
-            tev_update.save()
         else:
             pass 
 
