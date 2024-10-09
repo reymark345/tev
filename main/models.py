@@ -174,6 +174,8 @@ class TevIncoming(models.Model):
     section = models.CharField(max_length=128, blank=True, null=True)
     date_payrolled = models.DateTimeField(blank=True, null=True)
     payrolled_by = models.CharField(max_length=255, blank=True, null=True)
+    review_date_forwarded = models.DateTimeField(blank=True, null=True)
+    review_forwarded_by = models.CharField(max_length=255, blank=True, null=True)
     
     class Meta:
         managed = True

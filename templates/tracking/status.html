@@ -678,6 +678,9 @@
                       }
                   }).done(function (data) {                      
                       let latest_object = data.data[0];
+                      let review_date_forwarded = latest_object.review_date_forwarded;
+                      let review_forwarded_by = latest_object.review_forwarded_by;
+
                       let l_status = latest_object.status;
                       let payrolled_date = latest_object.p_d;
                       let payrolled_by = latest_object.p_by;
@@ -1052,6 +1055,8 @@
                         else if (status ==2){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                           review_statusColumn = `<td><span class="badge bg-label-warning">For Checking</span></td>`;
+                          review_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          review_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         }
                         else if (status ==3){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
@@ -1066,6 +1071,8 @@
                         else if (status ==7){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                           review_statusColumn = `<td><span class="badge bg-label-success">Approved</span></td>`;
+                          review_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          review_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         }
                         else {
                           receive_statusColumn = `<td><span class="badge bg-label-primary">Forwarded</span></td>`;
@@ -1086,8 +1093,8 @@
                                   </div>
                                 </div>
                                 <div class="timeline-header border-bottom mb-3">
-                                  <span>Forwarded By: ${r_forwarded_by}</span>
-                                  <span class="text-muted">Date Forwarded : ${forward_date}</span>
+                                  <span>Forwarded By: ${review_forwarded_by}</span>
+                                  <span class="text-muted">Date Forwarded : ${review_date_forwarded}</span>
                                   </div>
                                   <div>
                                 
