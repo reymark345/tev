@@ -101,6 +101,17 @@ hr {
     opacity: 1;
 }
 
+.chat-box {
+    width: 300px;
+    background-color: #504d7c81!important;
+    border-radius: 10px;
+    position: fixed;
+    bottom: 0px;
+    right: 20px;
+    z-index: 1000;
+
+}
+
 h6,
 .h6,
 h5,
