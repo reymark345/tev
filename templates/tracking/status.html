@@ -60,7 +60,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-header">
-              <h5 class="modal-title"><span class="badge bg-label-warning" id="employee-id-no"></span>&nbsp;&nbsp;&nbsp;<span class="badge bg-label-primary" id="employee-full-name"></span></h5>
+              <h5 class="modal-title"><span class="badge bg-label-primary" id="employee-fullname"></span>&nbsp;&nbsp;&nbsp;<span class="badge bg-label-primary" id="employee-fullname"></span></h5>
+              <h5 class="modal-title"><span class="badge bg-label-primary" id="employee-id-no"></span>&nbsp;&nbsp;&nbsp;<span class="badge bg-label-primary" id="employee-id-no"></span></h5>
+
             </div>
             <div class="modal-body">
                 <div class="col-xl-12">
@@ -678,8 +680,12 @@
                       }
                   }).done(function (data) {                      
                       let latest_object = data.data[0];
+                      console.log(latest_object);
+                      console.log("testtttt");
+
                       let review_date_forwarded = latest_object.review_date_forwarded;
                       let review_forwarded_by = latest_object.review_forwarded_by;
+                      let emp_fullname = latest_object.emp_fullname;
 
                       let l_status = latest_object.status;
                       let payrolled_date = latest_object.p_d;
@@ -752,6 +758,7 @@
                         outgoing_d_r = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         outgoing_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         outgoing_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        outgoing_r_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                       }
                       else if (l_status == 8){
                         obligate_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
@@ -1140,8 +1147,8 @@
                       let fullname = data.full_name;
                       let id_number = data.id_number;
                       tbody.empty();
-                      $('#employee-id-no').text(id_number);
-                      $('#employee-full-name').text(fullname);
+                      $('#employee-id-no').text("ID NUMBER : "+id_number);
+                      $('#employee-fullname').text(emp_fullname);
                       $('#tracking-history').modal('show');
                   })
                   

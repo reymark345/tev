@@ -146,6 +146,10 @@ def status_load(request):
                 query += " AND tev_incoming.division = %s"
                 params.append(FDivision)
 
+            if FIdNumber:
+                query += " AND tev_incoming.id_no = %s"
+                params.append(FIdNumber)
+
             if FStatus:
                 if FStatus == "5":
                     FStatus = (4,5,6)
@@ -387,8 +391,11 @@ def employee_details(request):
     query = """ 
         SELECT 
                 ti.id, 
-                ti.code, 
+                ti.code,
                 ti.id_no,
+                ti.first_name,
+                ti.middle_name,
+                ti.last_name,
                 ti.original_amount, 
                 ti.final_amount, 
                 ti.status_id, 
@@ -523,33 +530,33 @@ def employee_details(request):
             return ''
         
     for row in results:
-        incoming_in = row[7]
-        incoming_out = row[8]
-        incoming = row[9]
-        p_date = row[10]
-        box_b_out = row[13]
-        otg_d_received = row[14]
-        otg_r_by = row[15]
-        otg_d_f = row[16]
-        otg_f_user_id = row[17]
-        budget_d_r = row[18]
-        budget_r_by = row[19]
-        budget = row[20]
-        budget_f_by = row[21]
-        journal_d_r = row[22]
-        journal_r_by = row[23]
-        journal = row[24]
-        journal_f_by = row[25]
-        approval_d_r = row[26]
-        approval_r_by = row[27]
-        approval = row[28]
-        approval_f_by = row[29]
-        forwarded_by = row[34]
-        date_reviewed = date(row[36], "F j, Y g:i A")
-        review_date_forwarded = row[37]
-        review_forwarded_by = row[38]
+        incoming_in = row[10]
+        incoming_out = row[11]
+        incoming = row[12]
+        p_date = row[13]
+        box_b_out = row[16]
+        otg_d_received = row[17]
+        otg_r_by = row[18]
+        otg_d_f = row[19]
+        otg_f_user_id = row[20]
+        budget_d_r = row[21]
+        budget_r_by = row[22]
+        budget = row[23]
+        budget_f_by = row[24]
+        journal_d_r = row[25]
+        journal_r_by = row[26]
+        journal = row[27]
+        journal_f_by = row[28]
+        approval_d_r = row[29]
+        approval_r_by = row[30]
+        approval = row[31]
+        approval_f_by = row[32]
+        forwarded_by = row[37]
+        date_reviewed = date(row[39], "F j, Y g:i A")
+        review_date_forwarded = row[40]
+        review_forwarded_by = row[41]
 
-        if row[12]:
+        if row[15]:
             finance_query = """
                 SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date, tp.check_id, tp.check_issued, tp.check_released
                 FROM transactions AS ts
@@ -557,7 +564,7 @@ def employee_details(request):
                 LEFT JOIN trans_payeename AS tp ON tp.dv_no = ts.dv_no  WHERE ts.dv_no = %s
             """
             with connections[finance_database_alias].cursor() as cursor2:
-                cursor2.execute(finance_query, (row[12],))
+                cursor2.execute(finance_query, (row[15],))
                 finance_results = cursor2.fetchall()
 
             if finance_results:
@@ -586,16 +593,17 @@ def employee_details(request):
             'id': row[0],
             'code': row[1],
             'id_no': row[2],
-            'original_amount': row[3],
-            'final_amount': row[4],
-            'status': row[5],
-            'purpose': row[6], 
+            'emp_fullname': row[3] + " "+ row[4] + " " + row[5],
+            'original_amount': row[6],
+            'final_amount': row[7],
+            'status': row[8],
+            'purpose': row[9], 
             'incoming_in': format_date(incoming_in),
             'incoming_out': format_date(incoming_out),
             'incoming_by': incoming.title(),
             'p_d': format_date(p_date),
-            'p_by': row[11],
-            'dv_no': row[12],
+            'p_by': row[14],
+            'dv_no': row[15],
             'p_d_f': format_date(box_b_out),
             'otg_d_received': format_date(otg_d_received),
             'otg_r_by': otg_r_by.title(),
@@ -613,12 +621,12 @@ def employee_details(request):
             'a_r_by': approval_r_by.title(),
             'a_d_f': format_date(approval),
             'a_f_by': approval_f_by.title(),
-            'p_f_by': row[30],
-            'charges': row[31],
-            'cluster': row[32],
-            'remarks': row[33], 
+            'p_f_by': row[33],
+            'charges': row[34],
+            'cluster': row[35],
+            'remarks': row[36], 
             'received_forwarded_by': forwarded_by.title(), 
-            'reviewed_by': row[35],
+            'reviewed_by': row[38],
             'date_reviewed': date_reviewed,
             'review_date_forwarded': format_date(review_date_forwarded) if review_date_forwarded else '',
             'review_forwarded_by': review_forwarded_by if review_forwarded_by else '',
@@ -668,7 +676,7 @@ def export_status(request):
             SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
                 tev_incoming.date_travel, tev_incoming.division, tev_incoming.section,charges.name, st.name, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
                 tev_incoming.original_amount, tev_incoming.final_amount, payrolled_charges.amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
-                tev_incoming.incoming_out AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
+                tev_incoming.review_date_forwarded AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
             FROM tev_incoming
             INNER JOIN (
             SELECT MAX(id) AS max_id
