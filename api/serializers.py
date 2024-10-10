@@ -43,6 +43,8 @@ class ItemSerializerStatus(serializers.Serializer):
     forwarded_by = serializers.CharField(max_length=255)
     reviewed_by = serializers.CharField(max_length=255)
     date_reviewed = serializers.DateTimeField()
+    review_date_forwarded = serializers.DateTimeField()
+    review_forwarded_by = serializers.CharField(max_length=255)
 
     # Fields from finance_2024 database
     amt_certified = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
