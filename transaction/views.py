@@ -2285,9 +2285,13 @@ def forward_budget(request):
 @csrf_exempt
 def receive_journal(request):
     missing_items = []
+    journal_date = request.POST.get('journal_date')
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
+
+    print(journal_date)
+    print("journal_date")
 
     for status_id in out_list_int:
         check_status = TevOutgoing.objects.filter(id=status_id, status_id=13).values_list('dv_no', flat=True)
@@ -2298,18 +2302,67 @@ def receive_journal(request):
     if missing_items:
         return JsonResponse({'data': ', '.join(map(str, missing_items)), 'message' : 'Selected DVs is already Forwarded'})
     else:
+        
         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-        
         TevIncoming.objects.filter(id__in=ids).update(status_id=12)
-        
-        for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=12,j_d_received=date_time.datetime.now(), j_r_user_id = user_id)
-        return JsonResponse({'data': 'success'})
+
+        journal_date_obj = datetime.strptime(journal_date, '%Y-%m-%d %H:%M')
+
+        for item_id in out_list:
+            tev_outgoing = TevOutgoing.objects.filter(id=item_id).first()
+
+            if tev_outgoing and tev_outgoing.b_d_forwarded:
+                b_d_forwarded = tev_outgoing.b_d_forwarded
+                print("b_d_forwarded:", b_d_forwarded)
+                print("journal_date_obj:", journal_date_obj)
+                if b_d_forwarded.date() <= journal_date_obj.date():
+                    print("Success")
+                    TevOutgoing.objects.filter(id=item_id).update(
+                        status_id=12,
+                        j_d_received=journal_date_obj,
+                        j_r_user_id=user_id
+                    )
+                else:
+                    return JsonResponse({'message' : 'Budget forwarded must be beyond journal date'})
+            else:
+                print("No b_d_forwarded found for item_id:", item_id)
+
+        # if journal_date:
+        #     print("ifffff")
+        #     journal_date_obj = datetime.strptime(journal_date, '%Y-%m-%d %H:%M')
+
+
+            
+            
+        #     for item_id in out_list:
+        #         b_d_forwarded = TevOutgoing.objects.filter(id=item_id).first()
+
+        #         b_d_forwarded = b_d_forwarded.b_d_forwarded
+
+        #         print(b_d_forwarded)
+        #         print("testtttttt")
+
+
+        #         # TevOutgoing.objects.filter(id=item_id).update(
+        #         #     status_id=12,
+        #         #     j_d_received=journal_date_obj,
+        #         #     j_r_user_id=user_id
+        #         # )
+        # else:
+        #     print("elseeeeee")
+        #     for item_id in out_list:
+        #         TevOutgoing.objects.filter(id=item_id).update(
+        #             status_id=12,
+        #             j_d_received=date_time.datetime.now(),
+        #             j_r_user_id=user_id
+        #         )
+    return JsonResponse({'data': 'success'})
      
 
 @csrf_exempt
 def forward_journal(request):
     missing_items = []
+    journal_date = request.POST.get('journal_date')
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
