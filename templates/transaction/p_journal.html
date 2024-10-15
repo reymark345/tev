@@ -428,7 +428,7 @@
                 { data: 'division_name' },
                 { data: 'status' },
                 { data: 'amount' },
-                { data: 'box_b_in' },
+                { data: 'b_d_forwarded' },
                 { data: 'd_received' },
                 { data: 'received_by' },
                 { data: 'box_b_out' },
@@ -443,15 +443,6 @@
                         var status = row.status;
                         let isChecked = selectedCb.includes(data.toString());
                         return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                        // if (status == 5) {
-                        //     let isChecked = selectedCb.includes(data.toString());
-                        //     var status = row.status;
-                        //     return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                        // }
-                        // else{
-                        //     return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
-                        // }
-
                     }
                 },
                 {
@@ -1478,7 +1469,18 @@
                                 },
                             })
                             dataTable.ajax.reload()
-                        } else {
+                        }
+                        else if (data.data == 'invalid') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error Saving!',
+                                html: "<b>"+ data.dv_no + "<br><br>" + data.message +"</b>",
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                        else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error Saving!',
@@ -1487,7 +1489,7 @@
                                     confirmButton: 'btn btn-success',
                                 },
                             })
-                        }
+                    }
                     })
                 }
             })
