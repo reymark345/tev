@@ -76,7 +76,7 @@ def list_payroll(request):
     role_names = [entry['role_name'] for entry in role_details]
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
-            'remarks_list' : RemarksLib.objects.filter().order_by('name'),
+            'remarks_list' : RemarksLib.objects.filter(status=1).order_by('name'),
             'charges' : Charges.objects.filter().order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
             'division' : Division.objects.filter(status=0).order_by('name'),

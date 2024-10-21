@@ -252,12 +252,26 @@ def remarks_update(request):
         RemarksLib.objects.filter(id=id).update(name=charges)
         return JsonResponse({'data': 'success'})
     
-    
+@csrf_exempt  
 def remarks_edit(request):
     id = request.GET.get('id')
     items = RemarksLib.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
+
+@csrf_exempt
+def remarks_status_edit(request):
+    id = request.POST.get('id')
+    status_id = request.POST.get('status')
+    print(id)
+    print(status_id)
+    print("testtttt")
+    RemarksLib.objects.filter(pk=id).update(status=status_id)
+    return JsonResponse({'data': 'success'})
+
+
+
+
 
 
 def remarks_load(request):
@@ -284,7 +298,8 @@ def remarks_load(request):
             'id': item.id,
             'name': name.upper(),
             'created_by': full_name.upper(),
-            'created_at': item.created_at
+            'created_at': item.created_at,
+            'status': item.status,
         }
 
         data.append(item)
