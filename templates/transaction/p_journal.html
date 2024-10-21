@@ -340,6 +340,7 @@
 <!--/ Enable OTP Modal -->
 
 {% endblock %} {% block footer_scripts %}
+<script src="{% static 'assets/js/forms-pickers.js' %}"></script>
 <script>
     let clicked_id = 0;
     let dv_no_id =0;
@@ -369,6 +370,7 @@
           FPurpose = jQuery(document.querySelector('[name="FPurpose"]')),
           FCharges = jQuery(document.querySelector('[name="FCharges"]')),
           FDateReceived = jQuery(document.querySelector('[name="FDateReceived"]')),
+          FJournalDate = jQuery(document.querySelector('[name="FJournalDate"]')),
           FDateForwarded = jQuery(document.querySelector('[name="FDateForwarded"]')),
           FinalAmount = jQuery(document.querySelector('[name="FinalAmount"]')),
           BoxStatus= jQuery(document.querySelector('[name="BoxStatus"]')),
@@ -426,7 +428,7 @@
                 { data: 'division_name' },
                 { data: 'status' },
                 { data: 'amount' },
-                { data: 'box_b_in' },
+                { data: 'b_d_forwarded' },
                 { data: 'd_received' },
                 { data: 'received_by' },
                 { data: 'box_b_out' },
@@ -441,15 +443,6 @@
                         var status = row.status;
                         let isChecked = selectedCb.includes(data.toString());
                         return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                        // if (status == 5) {
-                        //     let isChecked = selectedCb.includes(data.toString());
-                        //     var status = row.status;
-                        //     return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                        // }
-                        // else{
-                        //     return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
-                        // }
-
                     }
                 },
                 {
@@ -1047,86 +1040,94 @@
     '</select>' +
     '<button type="submit" id="received" class="btn btn-primary me-3">Receive</button>' +
     '<button type="submit" id="forward" class="btn btn-success">Forward</button>' +
+    '&nbsp&nbsp;&nbsp;&nbsp;<input type="text" class="form-control FJournalDate" name="FJournalDate" style="width:200px;" placeholder="YYYY-MM-DD HH:MM" id="flatpickr-datetime"/>' +
     '</h5>');
 
+    setTimeout(function() {
+        flatpickr('#flatpickr-datetime', {
+            enableTime: true,
+            dateFormat: "Y-m-d H:i",
+        });
+    }, 0);
 
-        function clear_advfilter(){
-            BoxDvNo.val('Choose').trigger('change');
-            FCluster.val('').trigger('change');
-            FDivision.val('').trigger('change');
-            FBoxIn.val('');
-            FBoxOut.val('');
-            FDateReceived.val('');
-            FDateForwarded.val('');
-            BoxStatus.val('').trigger('change');
+
+    function clear_advfilter(){
+        BoxDvNo.val('Choose').trigger('change');
+        FCluster.val('').trigger('change');
+        FDivision.val('').trigger('change');
+        FBoxIn.val('');
+        FBoxOut.val('');
+        FDateReceived.val('');
+        FDateForwarded.val('');
+        BoxStatus.val('').trigger('change');
       }
 
-        BoxDvNo.on('change', function() {
-            selectedDv = BoxDvNo.val();
-        });
+    BoxDvNo.on('change', function() {
+        selectedDv = BoxDvNo.val();
+    });
 
-        search_advance_filter.on('click', function () {
-            FAdvancedFilter.val("true");
-            $("#advance-filter").modal("hide");
-            dataTable.ajax.reload();
-            clear_advfilter();
-            toastr.success('Search successfully', 'Success', toast_options);
-        });
+    search_advance_filter.on('click', function () {
+        FAdvancedFilter.val("true");
+        $("#advance-filter").modal("hide");
+        dataTable.ajax.reload();
+        clear_advfilter();
+        toastr.success('Search successfully', 'Success', toast_options);
+    });
 
-        reset_advance_filter.on('click', function () {
-            FAdvancedFilter.val('');
-            $("#advance-filter").modal("hide");
-            dataTable.ajax.reload();
-            toastr.success('Data has been reset', 'Success', toast_options);
-        });
+    reset_advance_filter.on('click', function () {
+        FAdvancedFilter.val('');
+        $("#advance-filter").modal("hide");
+        dataTable.ajax.reload();
+        toastr.success('Data has been reset', 'Success', toast_options);
+    });
 
-        clear_advance_filter.on('click', function () {
-            clear_advfilter();
-            toastr.success('Clear successfully', 'Success', toast_options);
-        });
+    clear_advance_filter.on('click', function () {
+        clear_advfilter();
+        toastr.success('Clear successfully', 'Success', toast_options);
+    });
 
-      function clearFlatpickr(){
+    function clearFlatpickr(){
+    var dateField = $('#dateField').flatpickr({
+        mode: 'multiple',
+        allowInput: true,
+        dateFormat: 'd-m-Y',
+        locale: {
+            'firstDayOfWeek': 1 // start week on Monday
+        },
+    });
+    
+    dateField.clear();;
+    }
+
+    function RenderFlatpickr(){
         var dateField = $('#dateField').flatpickr({
-          mode: 'multiple',
-          allowInput: true,
-          dateFormat: 'd-m-Y',
-          locale: {
-              'firstDayOfWeek': 1 // start week on Monday
-          },
+        mode: 'multiple',
+        allowInput: true,
+        dateFormat: 'd-m-Y',
+        locale: {
+            'firstDayOfWeek': 1 // start week on Monday
+        },
         });
-        
-        dateField.clear();;
-      }
+    $("#dateField").on("change", function() {
+        if(DateTravel.val()){
+            $(".rangeTravel").prop("disabled", true);
+        }
+        else{
+            $(".rangeTravel").prop("disabled", false);
+        } 
+        });
 
-      function RenderFlatpickr(){
-          var dateField = $('#dateField').flatpickr({
-            mode: 'multiple',
-            allowInput: true,
-            dateFormat: 'd-m-Y',
-            locale: {
-                'firstDayOfWeek': 1 // start week on Monday
-            },
-          });
-        $("#dateField").on("change", function() {
-            if(DateTravel.val()){
-                $(".rangeTravel").prop("disabled", true);
-            }
-            else{
-                $(".rangeTravel").prop("disabled", false);
-            } 
-          });
+    $(".rangeTravel").on("change", function() {
+        if(RangeTravel.val()){
+            $("#dateField").prop("disabled", true);
+        }
+        else{
+            $("#dateField").prop("disabled", false);
+        } 
+        });
+    }
 
-        $(".rangeTravel").on("change", function() {
-            if(RangeTravel.val()){
-                $("#dateField").prop("disabled", true);
-            }
-            else{
-                $("#dateField").prop("disabled", false);
-            } 
-          });
-      }
-
-      function incoming_out(){
+    function incoming_out(){
         selectedCb = $.grep(selectedCb, function(value) {
             return value !== 'on';
         });
@@ -1180,12 +1181,12 @@
         }   
 
         $('#received').on('click', function(){
-              if(selectedCb.length ===0){
-                  toastr.error('Selected item first', 'Invalid', toast_options);
-              }
-              else{
-                  outgoing(0);
-              }
+            if(selectedCb.length ===0){
+                toastr.error('Selected item first', 'Invalid', toast_options);
+            }
+            else{
+                outgoing(0);
+            }
         });
   
         $('#forward').on('click', function(){
@@ -1426,6 +1427,9 @@
 
 
         function outgoing(status_id){
+            var date_journal = $('input[name="FJournalDate"]').val();
+            console.log(date_journal);
+
             selectedCb = $.grep(selectedCb, function(value) {
                 return value !== 'on';
             })
@@ -1444,14 +1448,17 @@
             }).then(function (result) {
                 if (result.value) {
                     let post_url = status_id == '0' ? "{% url 'receive-journal' %}" : "{% url 'forward-journal' %}"
+
                     $.ajax({
                         type: 'POST',
                         url: post_url,
                         data:{
-                            out_list: selectedCb
+                            out_list: selectedCb,
+                            journal_date:date_journal
                         }
                     }).done(function (data) {
                         if (data.data == 'success') {
+                            $('input[name="FJournalDate"]').val('');
                             selectedCb = [];
                             Swal.fire({
                                 icon: 'success',
@@ -1462,7 +1469,18 @@
                                 },
                             })
                             dataTable.ajax.reload()
-                        } else {
+                        }
+                        else if (data.data == 'invalid') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error Saving!',
+                                html: "<b>"+ data.dv_no + "<br><br>" + data.message +"</b>",
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                        else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error Saving!',
@@ -1471,7 +1489,7 @@
                                     confirmButton: 'btn btn-success',
                                 },
                             })
-                        }
+                    }
                     })
                 }
             })

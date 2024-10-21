@@ -320,6 +320,8 @@ class RemarksLib(models.Model):
     created_by = models.IntegerField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)
+    status = models.IntegerField(default=1)
+
     class Meta:
         managed = True
         db_table = 'remarks_lib'
