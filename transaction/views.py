@@ -76,7 +76,7 @@ def list_payroll(request):
     role_names = [entry['role_name'] for entry in role_details]
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
-            'remarks_list' : RemarksLib.objects.filter().order_by('name'),
+            'remarks_list' : RemarksLib.objects.filter(status=1).order_by('name'),
             'charges' : Charges.objects.filter().order_by('name'),
             'cluster' : Cluster.objects.filter().order_by('name'),
             'division' : Division.objects.filter(status=0).order_by('name'),
@@ -465,7 +465,7 @@ def budget_load(request):
             'division_chief': item.division.chief,
             'status':item.status_id,
             'box_b_in': item.box_b_in,
-            'box_b_out': item.box_b_out,
+            'box_b_out': item.otg_d_forwarded,
             'd_received': item.b_d_received,
             'd_forwarded': item.b_d_forwarded,
             'received_by': full_name_receiver.title(),
@@ -540,7 +540,7 @@ def journal_load(request):
             LEFT JOIN
                 charges AS charges2 ON payrolled_charges.charges_id = charges2.id
             LEFT JOIN
-                    division ON division.id = tev_outgoing.division_id
+                division ON division.id = tev_outgoing.division_id
             WHERE tev_outgoing.status_id IN (11,12,13)
         """
 
@@ -627,39 +627,39 @@ def journal_load(request):
             item_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
         query = """
-            SELECT
-                tev_outgoing.id,
-                tev_outgoing.dv_no,
-                tev_outgoing.cluster,
-                division.name AS division,
-                division.chief AS division_chief,
-                tev_outgoing.status_id,
-                tev_outgoing.box_b_in,
-                tev_outgoing.j_d_received,
-                tev_outgoing.j_r_user_id,
-                tev_outgoing.j_d_forwarded,
-                tev_outgoing.j_out_user_id,
-                COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
-            FROM
-                tev_incoming
-            JOIN
-                tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
-            LEFT JOIN
-                tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-                    
-            LEFT JOIN
-                charges ON charges.id = tev_bridge.charges_id
-            LEFT JOIN
-                payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
-            LEFT JOIN
-                charges AS charges2 ON payrolled_charges.charges_id = charges2.id
-            LEFT JOIN
-                    division ON division.id = tev_outgoing.division_id
-            WHERE tev_outgoing.status_id IN (11,12,13)
-            GROUP BY
-                    tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.box_b_in,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id
-            ORDER BY
-                    tev_outgoing.dv_no DESC;
+                SELECT
+                    tev_outgoing.id,
+                    tev_outgoing.dv_no,
+                    tev_outgoing.cluster,
+                    division.name AS division,
+                    division.chief AS division_chief,
+                    tev_outgoing.status_id,
+                    tev_outgoing.b_d_forwarded,
+                    tev_outgoing.j_d_received,
+                    tev_outgoing.j_r_user_id,
+                    tev_outgoing.j_d_forwarded,
+                    tev_outgoing.j_out_user_id,
+                    COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
+                FROM
+                    tev_incoming
+                JOIN
+                    tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+                LEFT JOIN
+                    tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                        
+                LEFT JOIN
+                    charges ON charges.id = tev_bridge.charges_id
+                LEFT JOIN
+                    payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
+                LEFT JOIN
+                    charges AS charges2 ON payrolled_charges.charges_id = charges2.id
+                LEFT JOIN
+                        division ON division.id = tev_outgoing.division_id
+                WHERE tev_outgoing.status_id IN (11,12,13)
+                GROUP BY
+                        tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.b_d_forwarded,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id
+                ORDER BY
+                        tev_outgoing.dv_no DESC;
         """
         
         with connection.cursor() as cursor:
@@ -700,7 +700,7 @@ def journal_load(request):
             'division_name': item['division'],
             'division_chief': item['division_chief'],
             'status': item['status_id'],
-            'box_b_in': item['box_b_in'],
+            'b_d_forwarded': item['b_d_forwarded'],
             'box_b_out': item['j_d_forwarded'],
             'd_received': item['j_d_received'],
             'd_forwarded': item['j_d_forwarded'],
@@ -813,7 +813,7 @@ def approval_load(request):
             'division_chief': item.division.chief,
             'status':item.status_id,
             'box_b_in': item.box_b_in,
-            'box_b_out': item.box_b_out,
+            'j_d_forwarded': item.j_d_forwarded,
             'd_received': item.a_d_received,
             'd_forwarded': item.a_d_forwarded,
             'received_by': full_name_receiver.title(),
@@ -2282,9 +2282,60 @@ def forward_budget(request):
         return JsonResponse({'data': 'success'})
 
 
+# @csrf_exempt
+# def receive_journal(request):
+#     missing_items = []
+#     journal_date = request.POST.get('journal_date')
+#     out_list = request.POST.getlist('out_list[]')
+#     user_id = request.session.get('user_id', 0)
+#     out_list_int = [int(item) for item in out_list]
+
+#     for status_id in out_list_int:
+#         check_status = TevOutgoing.objects.filter(id=status_id, status_id=13).values_list('dv_no', flat=True)
+#         if check_status:
+#             status = [item for item in check_status]
+#             missing_items.extend(status)
+
+#     if missing_items:
+#         return JsonResponse({'data': ', '.join(map(str, missing_items)), 'message' : 'Selected DVs is already Forwarded'})
+#     else:
+        
+#         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+#         TevIncoming.objects.filter(id__in=ids).update(status_id=12)
+
+#         if journal_date:
+#             journal_date_obj = datetime.strptime(journal_date, '%Y-%m-%d %H:%M')
+#             dv_list = []
+#             for item_id in out_list:
+#                 tev_outgoing = TevOutgoing.objects.filter(id=item_id).first()
+#                 b_d_forwarded = tev_outgoing.b_d_forwarded
+#                 if b_d_forwarded <= journal_date_obj:
+#                     TevOutgoing.objects.filter(id=item_id).update(
+#                         status_id=12,
+#                         j_d_received=journal_date_obj,
+#                         j_r_user_id=user_id
+#                     )
+#                 else:
+#                     item = {
+#                         'dv_no': tev_outgoing.dv_no,
+#                     }
+#                     dv_list.append(item) 
+#         else:
+#             for item_id in out_list:
+#                 TevOutgoing.objects.filter(id=item_id).update(
+#                     status_id=12,
+#                     j_d_received=date_time.datetime.now(),
+#                     j_r_user_id=user_id
+#                 )
+#         if dv_list:
+#             return JsonResponse({'data': dv_list,'message' : 'The Budget forwarded date must be beyond the Journal date.'})
+#     return JsonResponse({'data': 'success'})
+     
+
 @csrf_exempt
 def receive_journal(request):
     missing_items = []
+    journal_date = request.POST.get('journal_date')
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
@@ -2296,20 +2347,41 @@ def receive_journal(request):
             missing_items.extend(status)
 
     if missing_items:
-        return JsonResponse({'data': ', '.join(map(str, missing_items)), 'message' : 'Selected DVs is already Forwarded'})
+        return JsonResponse({'data': ', '.join(map(str, missing_items)), 'message': 'Selected DVs are already Forwarded'})
     else:
         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-        
         TevIncoming.objects.filter(id__in=ids).update(status_id=12)
-        
-        for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=12,j_d_received=date_time.datetime.now(), j_r_user_id = user_id)
-        return JsonResponse({'data': 'success'})
-     
+        dv_list = []
+
+        if journal_date:
+            journal_date_obj = datetime.strptime(journal_date, '%Y-%m-%d %H:%M')
+            
+            for item_id in out_list:
+                tev_outgoing = TevOutgoing.objects.filter(id=item_id).first()
+                b_d_forwarded = tev_outgoing.b_d_forwarded
+                if b_d_forwarded <= journal_date_obj:
+                    TevOutgoing.objects.filter(id=item_id).update(
+                        status_id=12,
+                        j_d_received=journal_date_obj,
+                        j_r_user_id=user_id
+                    )
+                else:
+                    dv_list.append(tev_outgoing.dv_no)
+        else:
+            for item_id in out_list:
+                TevOutgoing.objects.filter(id=item_id).update(
+                    status_id=12,
+                    j_d_received=date_time.datetime.now(),
+                    j_r_user_id=user_id
+                )
+        if dv_list:
+            return JsonResponse({'data': 'invalid', 'message': 'The Budget forwarded date must be beyond the Journal date.','dv_no':', '.join(dv_list)})
+    return JsonResponse({'data': 'success'})
 
 @csrf_exempt
 def forward_journal(request):
     missing_items = []
+    journal_date = request.POST.get('journal_date')
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]

@@ -15,6 +15,7 @@
                             <th>Remarks</th>
                             <th>Created by</th>
                             <th>Date added</th>
+                            <th>Status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -58,6 +59,7 @@
 {% endblock %} {% block footer_scripts %}
 <script>
     let clicked_id = 0;
+    let dataTable;
     $(document).ready(function () {
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
@@ -76,7 +78,7 @@
       });
         let ItemID = $('#item-id')
 
-        let dataTable = table.DataTable({
+        dataTable = table.DataTable({
             processing: true,
             serverSide: true,
             ajax: "{% url 'remarks-load' %}",
@@ -84,7 +86,8 @@
                 { data: 'name' },
                 { data: 'created_by' },
                 { data: 'created_at' },
-                { data: 'id' },
+                { data: 'status' },
+                { data: 'id', status : 'status' },
             ],
             columnDefs: [
                 {
@@ -100,16 +103,100 @@
                     },
                 },
                 {
-                  targets: -1,
-                  title: 'Action',
-                  orderable: false,
-                  searchable: false,
-                  render: function (data) {
-                      return (
-                          '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'
-                      )
-                  },
-              },
+                    targets: 3,
+                    render: function (data) {
+                        if (data ==1) {
+                            return '<span class="badge bg-label-success">Active</span>'
+                        }
+                        else{
+                            return '<span class="badge bg-label-danger">Inactive</span>'
+                        }
+                    },
+                },
+                {
+                    targets: -1,
+                    title: 'Action',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        var status = row.status;
+                        var switchChecked = status === 1 ? 'checked' : '';
+                        var switchLabel = status === 1 ? 'Active' : 'Inactive';
+
+                        return (
+                            '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>&nbsp;&nbsp;' +
+                            '<label class="switch switch-success">' +
+                            '<input type="checkbox" class="switch-input" ' + switchChecked + ' data-id="' + data + '" />' +
+                            '<span class="switch-toggle-slider">' +
+                            '<span class="switch-on">' +
+                            '<i class="ti ti-check"></i>' +
+                            '</span>' +
+                            '<span class="switch-off">' +
+                            '<i class="ti ti-x"></i>' +
+                            '</span>' +
+                            '</span>' +
+                            '<span class="switch-label" id="switch-label-' + data + '">' + switchLabel + '</span>' +
+                            '</label>'
+                        );
+                    },
+                }
+                // {
+                //     targets: -1,
+                //     title: 'Action',
+                //     orderable: false,
+                //     searchable: false,
+                //     render: function (data, type, row) {
+                //         var status = row.status;
+                //         var switchChecked = status === 1 ? 'checked' : '';
+                //         var switchLabel = status === 1 ? 'Active' : 'Inactive';
+
+                //         return (
+                //             '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>&nbsp;&nbsp;' +
+                //             '<label class="switch switch-success">' +
+                //             '<input type="checkbox" class="switch-input" ' + switchChecked + ' data-id="' + data + '" />' +
+                //             '<span class="switch-toggle-slider">' +
+                //             '<span class="switch-on">' +
+                //             '<i class="ti ti-check"></i>' +
+                //             '</span>' +
+                //             '<span class="switch-off">' +
+                //             '<i class="ti ti-x"></i>' +
+                //             '</span>' +
+                //             '</span>' +
+                //             '<span class="switch-label" id="switch-label-' + data + '">' + switchLabel + '</span>' +
+                //             '</label>' +
+                //             '<script>' +
+                //                 '$(document).on("change", ".switch-input[data-id=\'' + data + '\']", function() {' +
+                //                     'var isChecked = $(this).is(":checked");' +
+                //                     'var newStatus = isChecked ? 1 : 0;' +
+                //                     'var newLabel = isChecked ? "Active" : "Inactive";' +
+                //                     '$("#switch-label-' + data + '").text(newLabel);' +
+
+                //                     '$.ajax({' +
+                //                         'url: "' + '{% url "remarks-status-edit" %}' + '",' +
+                //                         'type: "POST",' +
+                //                         'data: {' +
+                //                             'id: ' + data + ',' +
+                //                             'status: newStatus' +
+                //                         '},' +
+                //                         'success: function(data) {' +
+                //                             'dataTable.clear().draw();'+
+                //                             'if (data.data == "success") {'+
+                //                                 'dataTable.ajax.reload();'+
+                //                                 'alert("saved");' +
+                //                             '}'+
+                //                             'else{'+
+                //                                 'alert("not saved");' +
+                //                             '}'+
+                //                         '},' +
+                //                         'error: function(xhr, status, error) {' +
+                //                             'console.error("Error updating status: ", error);' +
+                //                         '}' +
+                //                     '});' +
+                //                 '});' +
+                //             '</scr' + 'ipt>' 
+                //         );
+                //     },
+                // }
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
@@ -142,7 +229,33 @@
                     clicked_id = $(this).data('id')
                 })
 
-
+                $('.switch-input').on('change', function () {
+                    var $this = $(this);
+                    var dataId = $this.data('id');
+                    var isChecked = $this.is(":checked");
+                    var newStatus = isChecked ? 1 : 0;
+                    var newLabel = isChecked ? "Active" : "Inactive";
+                    $("#switch-label-" + dataId).text(newLabel);
+                    $.ajax({
+                        url: "{% url 'remarks-status-edit' %}",
+                        type: "POST",
+                        data: {
+                            id: dataId,
+                            status: newStatus
+                        },
+                        success: function (data) {
+                            if (data.data == "success") {
+                                dataTable.ajax.reload();
+                                toastr.success('Successfully updated', 'Success', toast_options);
+                            } else {
+                                toastr.danger('Data not update', 'Invalid', toast_options);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error updating status: ", error);
+                        }
+                    });
+                });
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0">Remarks</h5>')
@@ -283,7 +396,7 @@
                     toastr.success('Successfully save', 'Success', toast_options);
                     offCanvasEl.hide()
                 } else {
-                    toastr.danger('Data not saved', 'Danger', toast_options);
+                    toastr.error('Data not saved', 'Danger', toast_options);
                 }
             });
             }

@@ -21,4 +21,5 @@ urlpatterns = [
     path('remarks_add', views.remarks_add, name='remarks-add'),
     path('remarks_update', views.remarks_update, name='remarks-update'),
     path('remarks_edit', views.remarks_edit, name='remarks-edit'),
+    path('remarks_status_edit', views.remarks_status_edit, name='remarks-status-edit'),
 ]

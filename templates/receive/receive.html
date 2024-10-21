@@ -319,28 +319,6 @@
                 </div>
             </div>
 
-
-
-            <!-- <div class="col-md-6 col-12 mb-4">
-                <label for="flatpickr-datetime" class="form-label">Datetime Picker</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="YYYY-MM-DD HH:MM"
-                  id="flatpickr-datetime"
-                />
-              </div> -->
-
-            <!-- <div class="col-sm-12">
-                <label class="form-label" >Remarks <small>(optional)</small></label>
-                <select id="remarks-list" name="RemarksList" class="select2 form-select remarks-list" multiple>
-                    <option></option>
-                    {% for row in remarks_list %}
-                    <option value="{{ row.id }}">{{ row.name }}</option>
-                    {% endfor %}
-                </select>
-            </div> -->
-
             <button type="button" id="add_remarks" name="AddRemarks" class="btn btn-warning me-sm-3 me-1">Add Remarks</button>
             <div class="col-sm-12">
     
@@ -1081,31 +1059,6 @@
             else {
                 let dateValues = [];
                 let isValidationError = 0;
-                // let selectedValues = $(".remarks-list").val();
-                // $("input[type='date']").each(function() {
-                //     if ($(this).val() !== "") {
-                //         dateValues.push($(this).val());
-                //     }
-                // });
-                // $("input[type='date']").each(function() {
-                //     var dateValue = $(this).val();
-
-                //     // Check if the value is not empty before adding to the array
-                //     if (dateValue !== "") {
-                //         isValidationError-1;
-                //         dateValues.push(dateValue);
-                //         $(this).next(".error-message").remove();
-                //     }
-                //     else if (selectedValues.length === 0){
-                //         isValidationError = 0;
-                //     } else {
-                //         isValidationError++;
-                //         $(this).next(".error-message").remove(); // Remove existing error messages
-                //         $(this).after('<div class="error-message">Required!</div>');
-                //     }
-                // });
-
-
                 $('.rows-container .row').each(function() {
                     let selectElement = $(this).find('.select-remarks');
                     let selectElementDate = $(this).find('.select-remarks');

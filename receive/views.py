@@ -74,7 +74,7 @@ def list(request):
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'remarks_list' : RemarksLib.objects.filter().order_by('name'),
+            'remarks_list' : RemarksLib.objects.filter(status = 1).order_by('name'),
             'is_actual_date': date_actual,
             'permissions' : role_names,
             'created_by' :  data
@@ -133,7 +133,7 @@ def checking(request):
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'remarks_list' : RemarksLib.objects.filter().order_by('name'),
+            'remarks_list' : RemarksLib.objects.filter(status = 1).order_by('name'),
             'permissions' : role_names,
             'is_actual_date': date_actual,
             'created_by' :  created_data,
