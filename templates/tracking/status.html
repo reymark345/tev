@@ -680,9 +680,6 @@
                       }
                   }).done(function (data) {                      
                       let latest_object = data.data[0];
-                      console.log(latest_object);
-                      console.log("testtttt");
-
                       let review_date_forwarded = latest_object.review_date_forwarded;
                       let review_forwarded_by = latest_object.review_forwarded_by;
                       let emp_fullname = latest_object.emp_fullname;
@@ -709,10 +706,8 @@
                       let approval_d_r = latest_object.a_d_received;
                       let approval_d_f = latest_object.a_d_f;
                       let approval_f_user = latest_object.a_f_by;
-
-                      let certified_date = latest_object.certified_date;
-
                       
+                      let certified_date = latest_object.certified_date;
                       let check_issued = latest_object.check_issued_status;
                       let check_issued_date = latest_object.check_issued_date;
                       let check_issued_released = latest_object.check_issued_released;
@@ -1036,7 +1031,9 @@
                         let remarks = item.remarks;
                         let original_amt = parseFloat(item.original_amount).toFixed(2);
                         let final_amt = parseFloat(item.final_amount).toFixed(2);
-
+                        let rv_date_forwarded = item.review_date_forwarded;
+                        let rv_forwarded_by = item.review_forwarded_by;
+                        
                         if (!r_forwarded_by){
                           r_forwarded_by = `<span class="badge bg-label-primary">Not Applicable</span>`
                         }
@@ -1062,8 +1059,8 @@
                         else if (status ==2){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                           review_statusColumn = `<td><span class="badge bg-label-warning">For Checking</span></td>`;
-                          review_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
-                          review_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          rv_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          rv_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         }
                         else if (status ==3){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
@@ -1078,8 +1075,8 @@
                         else if (status ==7){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                           review_statusColumn = `<td><span class="badge bg-label-success">Approved</span></td>`;
-                          review_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
-                          review_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          rv_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          rv_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         }
                         else {
                           receive_statusColumn = `<td><span class="badge bg-label-primary">Forwarded</span></td>`;
@@ -1100,8 +1097,8 @@
                                   </div>
                                 </div>
                                 <div class="timeline-header border-bottom mb-3">
-                                  <span>Forwarded By: ${review_forwarded_by}</span>
-                                  <span class="text-muted">Date Forwarded : ${review_date_forwarded}</span>
+                                  <span>Forwarded By: ${rv_forwarded_by}</span>
+                                  <span class="text-muted">Date Forwarded : ${rv_date_forwarded}</span>
                                   </div>
                                   <div>
                                 
