@@ -1213,6 +1213,8 @@ def out_checking_tev(request):
         if tev_update:
             if tev_update.status_id == 3:
                 tev_update.slashed_out = date_time.datetime.now()
+                tev_update.review_date_forwarded = date_time.datetime.now()
+                tev_update.review_forwarded_by = user_id
             else:
                 tev_update.status_id = 4
             tev_update.review_date_forwarded = date_time.datetime.now()

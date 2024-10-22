@@ -2259,8 +2259,6 @@ def receive_budget(request):
             TevOutgoing.objects.filter(id=item_id).update(status_id=10,b_d_received=date_time.datetime.now(), b_r_user_id = user_id)
         return JsonResponse({'data': 'success'})
     
-
-
 @csrf_exempt
 def forward_budget(request):
     missing_items = []
@@ -2354,13 +2352,7 @@ def forward_journal(request):
                 tev_outgoing = TevOutgoing.objects.filter(id=item_id).first()
                 j_d_received = tev_outgoing.j_d_received
                 if j_d_received <= journal_date_obj:
-                    print("testttt")
                     TevOutgoing.objects.filter(id=item_id).update(status_id=13,j_out_user_id = user_id,j_d_forwarded=journal_date_obj)
-                    TevOutgoing.objects.filter(id=item_id).update(
-                        status_id=12,
-                        j_d_received=journal_date_obj,
-                        j_r_user_id=user_id
-                    )
                     dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
                     with transaction.atomic():
                         for dv in dv_no_values:
@@ -2393,43 +2385,6 @@ def forward_journal(request):
             return JsonResponse({'data': 'invalid', 'message': 'The Journal forwarded date must be beyond the Journal date received.','dv_no':', '.join(dv_list)})
     return JsonResponse({'data': 'success'})
 
-# @csrf_exempt
-# def forward_journal(request):
-#     missing_items = []
-#     journal_date = request.POST.get('journal_date')
-#     out_list = request.POST.getlist('out_list[]')
-#     user_id = request.session.get('user_id', 0)
-#     out_list_int = [int(item) for item in out_list]
-
-#     year = request.GET.get('year')
-#     finance_database_name = 'finance' if year == '2023' else 'infimos_2024'
-
-#     for status_id in out_list_int:
-#         check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
-#         if check_status:
-#             status = [item for item in check_status]
-#             missing_items.extend(status)
-#     if missing_items:
-#         return JsonResponse({'data':'Dvs must receive first!','message': ', '.join(map(str, missing_items))})
-#     else:
-#         ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-#         TevIncoming.objects.filter(id__in=ids).update(status_id=13)
-#         for item_id  in out_list:
-#             TevOutgoing.objects.filter(id=item_id).update(status_id=13,j_out_user_id = user_id,j_d_forwarded=date_time.datetime.now())
-
-#         dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
-#         with transaction.atomic():
-#             for dv in dv_no_values:
-#                 with connection.cursor() as cursor:
-#                     actual_date = date_time.datetime.now()
-#                     query = f"""
-#                     UPDATE {finance_database_name}.transactions SET approval_date = %s WHERE dv_no = %s
-#                     """
-#                     params = [actual_date, dv]
-#                     cursor.execute(query, params)
-
-#         return JsonResponse({'data': 'success'})
-    
 @csrf_exempt
 def receive_approval(request):
     missing_items = []
