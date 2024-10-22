@@ -122,3 +122,4 @@ GitHub.sublime-settings
 .history
 
 virtualenv
+.settings.py
