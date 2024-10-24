@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, RemarksLib, Remarks_r, RolePermissions, Division, Section, TransactionLogs )
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, RemarksLib, Remarks_r, RolePermissions, Division, Section, TransactionLogs, TravelList, DestinationTime )
 import json 
 from django.core import serializers
 from datetime import date as datetime_date
@@ -80,6 +80,37 @@ def list(request):
             'created_by' :  data
         }
         return render(request, 'receive/receive.html' , context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def travel_list(request):
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    data = []
+    user_name = RolePermissions.objects.filter(role_id=2) 
+    get_id = user_name.values_list('user_id', flat=True)
+    date_actual = SystemConfiguration.objects.filter().first().date_actual
+    for user_id in get_id:
+        userData = AuthUser.objects.filter(id=user_id)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
+        item_entry = {
+            'id': userData[0].id,
+            'full_name': full_name
+        }
+        data.append(item_entry)
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'remarks_list' : RemarksLib.objects.filter(status = 1).order_by('name'),
+            'is_actual_date': date_actual,
+            'permissions' : role_names,
+            'created_by' :  data
+        }
+        return render(request, 'receive/travel_user.html' , context)
     else:
         return render(request, 'pages/unauthorized.html')
    
@@ -346,6 +377,101 @@ def item_load(request):
             'lacking': item['lacking'],
             'status': item['status_id'],
             'user_id': full_name
+        }
+
+        data.append(item_entry)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+def travel_loadss(request):    
+    data = []
+    user_data = TransactionLogs.objects.all().order_by('-id')
+
+    total = len(user_data)
+    page = 1
+    per_page = total
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        user_data = user_data[start:start + length]
+        
+    for item in user_data:
+        userData = AuthUser.objects.filter(id=item.user_id)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name
+       
+        user_data_item = {
+            'description': item.description,
+            'user': full_name.upper(),
+            'created_at': item.created_at,
+        }
+        data.append(user_data_item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+
+def travel_load(request):
+    user_id = request.session.get('user_id', 0)
+    results = TravelList.objects.all().order_by('-id')
+
+
+    total = len(results)
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        results = results[start:start + length]
+
+    data = []
+
+
+    for item in results:
+        # userData = AuthUser.objects.filter(id=user_id)
+        # full_name = userData[0].first_name if userData else ''
+        
+        # first_name = item['first_name'] if item['first_name'] else ''
+        # middle_name = item['middle_name'] if item['middle_name'] else ''
+        # last_name = item['last_name'] if item['last_name'] else ''
+        # emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
+
+        item_entry = {
+            'id': item.id,
+            'code': item.date,
+            'name': item.date,
+            'id_no': item.date,
+            'account_no': item.date,
+            'date_travel': item.date,
+            'original_amount': item.date,
+            'final_amount': item.date,
+            'incoming_in': item.date,
+            'incoming_out': item.date,
+            'slashed_out':item.date,
+            'remarks': item.date,
+            'lacking':item.date,
+            'status': item.date,
+            'user_id': 'fasfasfasf'
         }
 
         data.append(item_entry)

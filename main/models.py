@@ -370,6 +370,33 @@ class Message(models.Model):
 
     def __str__(self):
         return str(self.room)
+    
+class DestinationTime(models.Model):
+    d_from = models.DateField(blank=True, null=True)
+    d_to = models.CharField(max_length=128, blank=True, null=True)
+    d_still = models.CharField(max_length=128, blank=True, null=True)
+    departure = models.CharField(max_length=128, blank=True, null=True)
+    arrival = models.CharField(max_length=128, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'destination_time'
+    
+class TravelList(models.Model):
+    date = models.DateField(blank=True, null=True)
+    destination_time = models.ForeignKey(DestinationTime, models.DO_NOTHING)
+    means_of_transpo = models.CharField(max_length=128, blank=True, null=True)
+    transportation = models.CharField(max_length=128, blank=True, null=True)
+    per_diem = models.CharField(max_length=128, blank=True, null=True)
+    others = models.CharField(max_length=128, blank=True, null=True)
+    amount = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'travel_list'
+
+# destination_time_id = models.CharField(max_length=128, blank=True, null=True)
 
 
         
