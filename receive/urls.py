@@ -28,6 +28,7 @@ urlpatterns = [
 
     path('checking', views.checking, name='receive-checking'),
     path('api', views.api, name='receive-api'),
+    path('psgc_api', views.psgc_api, name='psgc-api'),
     path('search_list', views.search_list, name='search-list'),
     path('upload_tev', views.upload_tev, name='upload-tev'),
 

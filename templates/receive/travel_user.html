@@ -227,20 +227,77 @@
         <h5 class="card-header">Province</h5>
         
     </div><br><br>
-    <div class="card">
+    <!-- <div class="card" style="height: 90%;"> -->
+        <div class="card">
+            <h5 class="card-header">ITINERARY OF TRAVEL</h5>
+            <div class="card-datatable text-nowrap">
+                <table class="dt-complex-header table table-bordered" style="text-align: center;">
+                    <thead style="background-color: #f5f5f6;">
+                        <tr>
+                            <th rowspan="2" width="2%" style="font-weight: bold;">
+                                <a href="javascript:void(0);" id="addRowBtn" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                            </th>
+                            <th rowspan="2" width="8%" style="font-weight: bold;">Date</th>
+                            <th rowspan="2" width="12%" style="font-weight: bold;">Places to be visited (Destination)<br><br> From - To</th>
+                            <th colspan="2" width="8%" style="font-weight: bold;">TIME</th>
+                            <th rowspan="2" width="10%" style="font-weight: bold;">Means of Transportation</th>
+                            <th rowspan="2" width="3%" style="font-weight: bold;">Transportation</th>
+                            <th rowspan="2" width="3%" style="font-weight: bold;">Per Diem</th>
+                            <th rowspan="2" width="3%" style="font-weight: bold;">Others</th>
+                            <th rowspan="2" width="10%" style="font-weight: bold;">Total Amount</th>
+                        </tr>
+                        <tr>
+                            <th>Departure</th>
+                            <th>Arrival</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- First Row (Without Delete Icon) -->
+                        <tr>
+                            <td></td> <!-- No delete icon here -->
+                            <td>
+                                <input type="text" class="form-control" name="DateField" placeholder="DD-MM-YYYY" id="iot-date" autocomplete="off"/>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <select id="selectFrom" class="selectpicker w-100" data-style="btn-default" data-live-search="true">
+                        
+                                    </select>
+                                    <span style="margin: 0 10px;"> - </span>
+                                    <select id="selectTo" class="selectpicker w-100" data-style="btn-default" data-live-search="true">
+                 
+                                    </select>
+                                </div>
+                            </td>
+                            <td><input type="text" class="form-control flatpickr-input active" placeholder="HH:MM" id="iot-departure" readonly="readonly"></td>
+                            <td><input type="text" class="form-control flatpickr-input active" placeholder="HH:MM" id="iot-arrival" readonly="readonly"></td>
+                            <td>Single Motor</td>
+                            <td>120.00</td>
+                            <td></td>
+                            <td></td>
+                            <td>120.00</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    <!-- <div class="card">
         <h5 class="card-header">ITINERARY OF TRAVEL</h5>
         <div class="card-datatable text-nowrap">
         <table class="dt-complex-header table table-bordered" style="text-align: center;">
-            <thead>
+            <thead style="background-color: #f5f5f6;">
             <tr>
-                <th rowspan="2" width="8%">Date</th>
-                <th rowspan="2" width="12%">Places to be visited (Destination)</th>
-                <th colspan="2">TIME</th>
-                <th rowspan="2" width="12%">Means of Transportation</th>
-                <th rowspan="2" width="10%">Transportation</th>
-                <th rowspan="2" width="8%">Per Diem</th>
-                <th rowspan="2" width="8%">Others</th>
-                <th rowspan="2" width="10%">Total Amount</th>
+                <th rowspan="2" width="2%" style="font-weight: bold;"><a href="javascript:void(0);" data-role="clear" data-id="01" data-content="2024-10-01" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i></a></th>
+                <th rowspan="2" width="8%" style="font-weight: bold;">Date</th>
+                <th rowspan="2" width="12%" style="font-weight: bold;">Places to be visited (Destination)<br><br> From - To</th>
+                <th colspan="2" width="8%" style="font-weight: bold;">TIME</th>
+                <th rowspan="2" width="12%" style="font-weight: bold;">Means of Transportation</th>
+                <th rowspan="2" width="3%" style="font-weight: bold;">Transportation</th>
+                <th rowspan="2" width="3%" style="font-weight: bold;">Per Diem</th>
+                <th rowspan="2" width="3%" style="font-weight: bold;">Others</th>
+                <th rowspan="2" width="10%" style="font-weight: bold;">Total Amount</th>
             </tr>
             <tr>
                 <th>Departure</th>
@@ -248,10 +305,58 @@
             </tr>
             </thead>
             <tbody>
+                <tr>
+                    <td><a href="javascript:void(0);" data-role="clear" data-id="01" data-content="2024-10-01" class="btn btn-default btn-sm"><i class="fas fa-trash"></i></a></td>
+                    <td>
+                        <input type="text" class="form-control" name="DateField" placeholder="DD-MM-YYYY" id="iot-date" autocomplete="off"/>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+
+                            <select
+                                id="iot-from"
+                                class="selectpicker w-100"
+                                data-style="btn-default"
+                                data-live-search="true"
+                            >
+                                <option data-tokens="0">Station</option>
+                                <option data-tokens="1">Still in</option>
+                                <option data-tokens="Jp Rizal">Jp Rizal</option>
+                                <option data-tokens="Lemon">Lemon</option>
+                            </select>
+                              
+
+                            <span style="margin: 0 10px;"> - </span>
+
+                            <select
+                                id="selectpickerLiveSearch"
+                                class="selectpicker w-100"
+                                data-style="btn-default"
+                                data-live-search="true"
+                            >
+                                <option data-tokens="0">Station</option>
+                                <option data-tokens="Jp Rizal">Jp Rizal</option>
+                                <option data-tokens="Lemon">Lemon</option>
+                            </select>
+
+                        </div>
+                    </td>
+                    <td><input type="text" class="form-control flatpickr-input active"  placeholder="HH:MM" id="iot-departure" readonly="readonly"></td>
+                    <td><input type="text" class="form-control flatpickr-input active"  placeholder="HH:MM" id="iot-arrival" readonly="readonly"></td>
+                    <td>Single Motor</td>
+                    <td>120.00</td>
+                    <td></td>
+                    <td></td>
+                    <td>120.00</td>
+                </tr>
+
+                
+                
+               
             </tbody>
         </table>
         </div>
-    </div>
+    </div> -->
     <!--/ Complex Headers -->
     
 
@@ -269,6 +374,7 @@
 
 
 {% endblock %} {% block footer_scripts %}
+
 <script src="{% static 'assets/js/forms-pickers.js' %}"></script>
 <script>
     let clicked_id = 0;
@@ -280,7 +386,69 @@
     let selectedCb = [];
 
     $(document).ready(function () {
+        let rowCount = 1;
 
+    // Initialize selectpicker for existing elements
+    $('.selectpicker').selectpicker();
+
+    // Add row functionality
+    $('#addRowBtn').on('click', function() {
+        // Increment rowCount to make IDs unique
+        let rowId = rowCount++;
+
+        // Define a template for the new row with unique IDs for each field
+        let newRow = `
+            <tr id="row${rowId}">
+                <td><a href="javascript:void(0);" class="btn btn-default btn-sm deleteRowBtn"><i class="fas fa-trash"></i></a></td>
+                <td><input type="text" class="form-control" id="dateField${rowId}" name="DateField" placeholder="DD-MM-YYYY" autocomplete="off"/></td>
+                <td>
+                    <div class="d-flex align-items-center">
+                        <select id="selectFrom${rowId}" class="selectpicker w-100" data-style="btn-default" data-live-search="true">
+    
+                        </select>
+                        <span style="margin: 0 10px;"> - </span>
+                        <select id="selectTo${rowId}" class="selectpicker w-100" data-style="btn-default" data-live-search="true">
+         
+                        </select>
+                    </div>
+                </td>
+                <td><input type="text" class="form-control flatpickr-input active" id="departure${rowId}" placeholder="HH:MM" readonly="readonly"></td>
+                <td><input type="text" class="form-control flatpickr-input active" id="arrival${rowId}" placeholder="HH:MM" readonly="readonly"></td>
+                <td>Single Motor</td>
+                <td>120.00</td>
+                <td></td>
+                <td></td>
+                <td>120.00</td>
+            </tr>
+        `;
+
+        // Append the new row to the table body
+        $('#tableBody').append(newRow);
+
+        // Reinitialize selectpicker for the newly added elements
+        $('.selectpicker').selectpicker('refresh');
+
+        // Optionally, initialize Flatpickr for the new date and time fields
+        $(`#dateField${rowId}`).flatpickr({
+            dateFormat: "d-m-Y"
+        });
+        $(`#departure${rowId}`).flatpickr({
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i"
+        });
+        $(`#arrival${rowId}`).flatpickr({
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i"
+        });
+    });
+
+    // Delete row functionality
+    $(document).on('click', '.deleteRowBtn', function() {
+        $(this).closest('tr').remove();
+    });
+            
         $('#f-employee-name').on('select2:open', function() {
             $('.select2-search__field').keydown(function(e) {
                 if (e.keyCode === 9) { 
@@ -292,8 +460,17 @@
             });
         });
 
+        var fdateField = $('#iot-date').flatpickr({
+            allowInput: true,
+            dateFormat: 'd-m-Y',
+            locale: {
+                'firstDayOfWeek': 1 // start week on Monday
+            },
+        });
+
 
         employeelist();
+        psgc_api();
         $('#loading-screen').hide();
         var dateField = $('#dateField').flatpickr({
             mode: 'multiple',
@@ -338,6 +515,10 @@
        
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
+            IotFrom = jQuery(document.querySelector('[name="IotFrom"]')),
+            IotTo = jQuery(document.querySelector('[name="IotTo"]')),
+            IotDeparture = document.querySelector('#iot-departure'),
+            IotArrival = document.querySelector('#iot-arrival'),
             AdvancedFilter = document.getElementById('advanced-filter-list'),
             EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
             FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
@@ -346,7 +527,6 @@
             FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
             FIncomingIn= jQuery(document.querySelector('[name="FIncomingIn"]')),
             DateRemarks = jQuery(document.querySelector('[name="DateRemarks"]')),
-            // FSLashedOut= jQuery(document.querySelector('[name="FSLashedOut"]')),
             FOriginalAmount= jQuery(document.querySelector('[name="FOriginalAmount"]')),
             FFinalAmount= jQuery(document.querySelector('[name="FFinalAmount"]')),
             FAccountNumber= jQuery(document.querySelector('[name="FAccountNumber"]')),
@@ -490,298 +670,27 @@
                     text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
                     action: function () {
                         employeeList = [];
-                        const $selectElement = $('#f-employee-name');
-                        $selectElement.empty();
-                        fetchEmployee($selectElement);
-                        FEmployeeName.val('').trigger('change');
-                        setTimeout(function() {
-                            if (FEmployeeName.length) {
-                                FEmployeeName.wrap('<div class="position-relative"></div>')
-                                FEmployeeName.select2({
-                                    placeholder: 'Choose employee',
-                                    dropdownParent: FEmployeeName.parent(),
-                                    allowClear: true,
-                                })
-                            }
-                        }, 300);
-                        clear_advfilter();
+                        
+
+                        if (IotDeparture) {
+                            IotDeparture.flatpickr({
+                            enableTime: true,
+                            noCalendar: true
+                            });
+                        }
+                        if (IotArrival) {
+                            IotArrival.flatpickr({
+                            enableTime: true,
+                            noCalendar: true
+                            });
+                        }
                         $("#add-tev").modal("show");
+
                     }
     
                 },
-                // {
-                //     className: 'btn btn-label-primary me-2',
-                //     text: '<i class="ti ti-file-export me-sm-1"></i> <span class="d-none d-sm-inline-block">Forward</span>',
-                //     action: function () {
-                //         // Get the IDs of checked items
-                //         if(selectedCb.length ===0){
-                //             toastr.error('Select item first', 'Invalid', toast_options);
-                //         }
-                //         else{
-                //             incoming_out();
-                //         }
-                //     }
-                // },
-
-                // {
-                //     className: 'btn btn-label-success me-2 waves-effect',
-                //     text: '<i class="ti ti-file-import me-sm-1"></i> <span class="d-none d-sm-inline-block">Import xlsx</span>',
-                //     action: function () {
-                //         $("#import-excel").modal("show");              
-                //     }
-                // },
-
-
-                //{
-                    //text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                    //className: 'create-new btn btn-primary',
-                //},
-
-
             ],
             drawCallback: function (settings) {
-                $('.item-edit').on('click', function () {
-                    let id = $(this).data('id')
-                    $('.title-name').text('Update TEV Record');
-                    $.ajax({
-                        type: 'GET',
-                        url: "{% url 'preview-received' %}?id=" + id,
-                        dataType: 'json',
-                    }).done(function (data) {
-                        let arraydetails = [];
-                        let lacking_ = data.lacking;
-                        let date_remarks_ = data.date_remarks;
-                        let d_received = data.incoming_in;
-                        $('.rows-container').empty();
-                        let dateObj = new Date(d_received);
-                        let year = dateObj.getFullYear();
-                        let month = String(dateObj.getMonth() + 1).padStart(2, '0'); // Adding 1 because months are zero-indexed
-                        let day = String(dateObj.getDate()).padStart(2, '0');
-                        let hours = String(dateObj.getHours()).padStart(2, '0');
-                        let minutes = String(dateObj.getMinutes()).padStart(2, '0');
-                        let date_received = `${year}-${month}-${day} ${hours}:${minutes}`;
-                        if (lacking_){
-                            lacking_ = lacking_.split(',').map(Number);
-                            date_remarks_ = date_remarks_.split(", ")
-
-                            for (let i = 0; i < lacking_.length; i++) {                            
-                                var newRow = $('<div class="row mt-2">' +
-                                    '<div class="col-5">' +
-                                    '<select class="form-select select-remarks" id="remarks-select-'+i+'">' +
-                                    '<option></option>' +
-                                    '{% for row in remarks_list %}' +
-                                    '<option value="{{ row.id }}">{{ row.name }}</option>' +
-                                    '{% endfor %}' +
-                                    '</select>' +
-                                    '</div>' +
-                                    '<div class="col-5">' +
-                                    '<input type="date" id="date-remarks" name="DateRemarks" class="form-control input-date" value="' + date_remarks_[i] + '" />' +
-                                    '</div>' +
-                                    '<div class="col-2">' +
-                                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                                    '</div>' +
-                                    '</div>');
-                                $('.rows-container').append(newRow);
-
-                                $(`#remarks-select-${i}`).val(lacking_[i]).trigger('change');
-
-                                item_entry = {
-                                    'remarks': lacking_[i],
-                                    'date': date_remarks_[i]
-                                }
-                                arraydetails.push(item_entry);
-                            }
-                        }
-                        const $selectElement1 = $('#employee-name');
-                        $selectElement1.empty();
-                        fetchEmployee($selectElement1);
-                        if (EmployeeName.length) {
-                            EmployeeName.wrap('<div class="position-relative"></div>')
-                            EmployeeName.select2({
-                            placeholder: 'Choose employee',
-                            dropdownParent: EmployeeName.parent(),
-                            allowClear: true,
-                            })
-                        }
-
-                        if (RemarksList.length) {
-                            RemarksList.wrap('<div class="position-relative"></div>')
-                            RemarksList.select2({
-                            placeholder: 'Choose remarks',
-                            dropdownParent: RemarksList.parent(),
-                            allowClear: true,
-                            })
-                        }
-
-                        let pk = data.id
-                        let employee_name = $('#employee-name');
-                        let floatvalue = parseFloat(data.final_amount);
-                        let convertedAmount = 0;
-                        let date_travel = data.date_travel;
-                        formattedDates = date_travel.split(',').map(date => date.trim()).join(', ');
-
-                        status_val = data.status_id;
-                        let fullname = data.first_name + " " + data.middle_name + " " + data.last_name
-                        let id_no = data.id_no;
-                        let date_remarks = data.date_remarks;
-                        let lacking = data.lacking;
-                        
-                        
-                        if (date_remarks){
-                            date_remarks = date_remarks.split(", ")
-                            remarks_date = date_remarks;
-                        }
-
-                        if(status_val ===3){
-                            EmployeeName.val(id_no).trigger('change').prop("disabled", true);
-                            convertedAmount = floatvalue.toFixed(2);
-                            OriginalAmount.prop("disabled", true);
-                            DateTravel.prop("disabled", true);
-                            RangeTravel.prop("disabled", true);
-                        }
-                        else{
-                            EmployeeName.val(id_no).trigger('change').prop("disabled", false);
-                            let original_amt = parseFloat(data.original_amount)
-                            convertedAmount = original_amt.toFixed(2);
-                            OriginalAmount.prop("disabled", false);
-                            DateTravel.prop("disabled", false);
-                            RangeTravel.prop("disabled", false);
-                        }
-
-                        if (DateTravel){
-                            RangeTravel.prop("disabled", true);
-                        }
-                        else if(RangeTravel){
-                            DateTravel.prop("disabled", true);
-                        }
-                        HDateTravel.val(formattedDates)
-                        OriginalAmount.val(convertedAmount);
-                        DateReceived.val(date_received);
-
-                        DateTravel.val(formattedDates);
-                        ItemID.val(pk);
-               
-                        offCanvasEl.show()
-                        
-                    })
-                }),
-
-                $('.item-delete').on('click', function () {
-                    let id = $(this).data('id');
-
-                    Swal.fire({
-                    title: 'Delete?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, Remove it!',
-                    customClass: {
-                        confirmButton: 'btn btn-primary me-3',
-                        cancelButton: 'btn btn-label-secondary',
-                    },
-                    buttonsStyling: false,
-                }).then(function (result) {
-                    if (result.value) {
-                        $.ajax({
-                            type: 'POST',
-                            url: "{% url 'delete-entry' %}",
-                            data:{
-                                item_id: id
-                            }
-                        }).done(function (data) {
-                            if (data.data == 'success') {
-                                selectedCb = [];
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Successfully deleted!',
-                                    text: 'Item has been deleted.',
-                                    customClass: {
-                                        confirmButton: 'btn btn-success',
-                                    },
-                                })
-
-
-                                dataTable.ajax.reload()
-                            } else {
-                                Swal.fire({
-                                    icon: 'error',
-                                    title: 'Error saving!',
-                                    text: data.error,
-                                    customClass: {
-                                        confirmButton: 'btn btn-success',
-                                    },
-                                })
-                            }
-                        })
-                    }
-                })   
-                    
-                }),
-
-                $('.item-delete-off').on('click', function () {
-                    toastr.error('This item cannot delete!', 'Invalid', toast_options);
-                }),
-
-                $('#tbl-items').on('click', '.dt-checkboxes', function () {
-                    var id = $(this).val();
-                    if ($(this).prop('checked')) {
-                        if (selectedCb.indexOf(id) === -1) {
-                            selectedCb.push(id);
-                        }
-                        $(this).data('checked', true); 
-                    } else {
- 
-                        let index = selectedCb.indexOf(id);
-                        if (index !== -1) {
-                            selectedCb.splice(index, 1);
-                        }
-                        $(this).data('checked', false); 
-                    }
-                });
-
-                $('#check-all').change(function () {
-                    var isChecked = $(this).is(':checked');
-                    $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
-                    if (isChecked) {
-                        // Add all IDs to the array
-                        $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
-                            var id = $(this).val();
-                            if (selectedCb.indexOf(id) === -1) {
-                                selectedCb.push(id);
-                            }
-                        });
-                    } else {
-                        // Remove all IDs from the array
-                        $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
-                            var id = $(this).val();
-                            let index = selectedCb.indexOf(id);
-                            if (index !== -1) {
-                                selectedCb.splice(index, 1);
-                            }
-                        });
-                    }
-
-                    // Log or perform further actions with the selectedCb array
-                });
-
-                $('.item-details').on('click', function () {
-                    clicked_id = $(this).data('id');
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'tev-details' %}",
-                        data:{
-                            tev_id: clicked_id
-                        }
-                    }).done(function (data) {
-                        let value = data.data.remarks;
-                        let final_amount = data.data.final_amount;
-                        let floatvalue = parseFloat(final_amount);
-                        let convertedAmount = floatvalue.toFixed(2);
-                        if (convertedAmount === "0.00") {convertedAmount =""} 
-                        $("#final_amount").val(convertedAmount);
-                        $("#correctness_remarks").val(value);
-                    })
-                });
             },
         })
         // $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
@@ -1091,6 +1000,35 @@
             localStorage.setItem('employees', JSON.stringify(employees));
         });
         
+    }
+
+    function psgc_api() {
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'psgc-api' %}",
+            dataType: 'json',
+        }).done(function (data) {
+            console.log("testttt");
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
+
+            let provinces = data;
+            let psgc = [];
+
+            $.each(provinces, function (index, province) {
+                let provinceName = province.prov_name; 
+                psgc.push({
+                    id: province.prov_id,
+                    name: provinceName,
+                });
+                console.log("Province ID: " + province.prov_id + ", Name: " + provinceName);
+            });
+            console.log(psgc);  
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            console.error("AJAX request failed: " + textStatus + ", " + errorThrown);
+        });
     }
 
     function incoming_out(){
@@ -1473,6 +1411,7 @@
     }
 
     //select 2
+
     if (EmployeeName.length) {
         EmployeeName.wrap('<div class="position-relative"></div>')
         EmployeeName.select2({
@@ -1481,15 +1420,9 @@
             allowClear: true,
         })
     }
+    
 
-    if (FEmployeeName.length) {
-        FEmployeeName.wrap('<div class="position-relative"></div>')
-        FEmployeeName.select2({
-            placeholder: 'Choose employee',
-            dropdownParent: FEmployeeName.parent(),
-            allowClear: true,
-        })
-    }
+
 
     if (FStatus.length) {
         FStatus.wrap('<div class="position-relative"></div>')
@@ -1499,6 +1432,8 @@
             allowClear: true,
         })
     }
+
+
 
     if (FCreatedBy.length) {
         FCreatedBy.wrap('<div class="position-relative"></div>')
@@ -1512,5 +1447,9 @@
         //end select2
 
     })
+
 </script>
+
+  
+
 {% endblock footer_scripts %}

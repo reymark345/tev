@@ -31,6 +31,7 @@ from django.template.defaultfilters import date
 from decimal import Decimal
 from suds.client import Client
 from django.db import transaction
+from django.conf import settings
 
 
 def generate_code():
@@ -85,6 +86,7 @@ def list(request):
     
 @login_required(login_url='login')
 def travel_list(request):
+    
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
@@ -118,12 +120,46 @@ def travel_list(request):
 def api(request):
     # url = "https://caraga-portal.dswd.gov.ph/api/employee/list/search/?q="
     url = "https://caraga-portal.dswd.gov.ph/api/employee/list/load"
+    portal_token = settings.PORTAL_TOKEN
     headers = {
-        "Authorization": "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
+        "Authorization": portal_token,
     }
     response = requests.get(url, headers=headers)
     data = response.json()
     return JsonResponse({'data': data})
+
+@csrf_exempt
+def psgc_api(request):
+    region_url = "https://dxcloud.dswd.gov.ph/api/psgc/provincesByRegion?region=160000000"
+    province_url = "https://dxcloud.dswd.gov.ph/api/psgc/municipalityByProvince?province=1600200000"
+    access_token = settings.PSGC_TOKEN
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+    }
+    try:
+        response = requests.get(region_url, headers=headers)
+        response.raise_for_status()
+        api_data = response.json()  
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    
+
+    province_list = []
+    for province in api_data['data']['provinces']:
+        province_data = {
+            'prov_id': province['prov_id'],
+            'prov_code_correspondence': province['prov_code_correspondence'],
+            'prov_name': province['prov_name'],
+            'prov_code': province['prov_code'],
+            'geo_level': province['geo_level'],
+            'old_name': province['old_name'],
+            'income_classification': province['income_classification'],
+            'region_code': province['region_code'],
+            'region_code_correspondence': province['region_code_correspondence'],
+            'reg_id': province['reg_id'],
+        }
+        province_list.append(province_data)
+    return JsonResponse(province_list, safe=False)
     
 @login_required(login_url='login')
 def checking(request):
