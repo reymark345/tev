@@ -223,10 +223,33 @@
     <div class="modal-body">
         <!-- Complex Headers -->
 
-    <div class="card" style="width: 40%">
-        <h5 class="card-header">Province</h5>
+    <div style="display: flex; justify-content: space-between; width: 100%;">
+        <div class="card" style="width:35%;">
+            <br>
+            {% comment %} <div class="alert alert-primary d-flex align-items-center" style="width: 90%; margin-left:20px;margin-right:20px;" role="alert">
+                <span class="alert-icon text-primary me-2">
+                    <i class="ti ti-info-circle ti-xs"></i>
+                </span>
+                Province: Agusan Del Norte : Municipality: Butuan City
+            </div> {% endcomment %}
+            <h5 class="card-header">Province: Agusan Del Norte : Municipality: Butuan City</h5>
+        </div>
+        {% comment %} <div class="card" >
+            <h5 class="card-header">Province: Agusan Del Norte : Municipality: Butuan City</h5>
+        </div> {% endcomment %}
+        <div class="card" style="width:20%;">
+            <br>
+            <div class="alert alert-primary d-flex align-items-center" style="width: 90%; margin-left:20px;margin-right:20px;" role="alert">
+                <span class="alert-icon text-primary me-2">
+                    <i class="ti ti-info-circle ti-xs"></i>
+                </span>
+                Total Amount : ₱ 50,000.00
+              </div>
+            {% comment %} <h5 class="card-header">Total Amount : ₱ 50,000.00</h5> {% endcomment %}
+        </div>
+    </div>
         
-    </div><br><br>
+    <br><br>
     <!-- <div class="card" style="height: 90%;"> -->
         <div class="card">
             <h5 class="card-header">ITINERARY OF TRAVEL</h5>
@@ -1008,6 +1031,7 @@
             url: "{% url 'psgc-api' %}",
             dataType: 'json',
         }).done(function (data) {
+            console.log(data);
             console.log("testttt");
             if (data.error) {
                 console.error(data.error);
@@ -1023,9 +1047,8 @@
                     id: province.prov_id,
                     name: provinceName,
                 });
-                console.log("Province ID: " + province.prov_id + ", Name: " + provinceName);
             });
-            console.log(psgc);  
+           
         }).fail(function (jqXHR, textStatus, errorThrown) {
             console.error("AJAX request failed: " + textStatus + ", " + errorThrown);
         });

@@ -128,38 +128,129 @@ def api(request):
     data = response.json()
     return JsonResponse({'data': data})
 
-@csrf_exempt
-def psgc_api(request):
-    region_url = "https://dxcloud.dswd.gov.ph/api/psgc/provincesByRegion?region=160000000"
-    province_url = "https://dxcloud.dswd.gov.ph/api/psgc/municipalityByProvince?province=1600200000"
-    access_token = settings.PSGC_TOKEN
-    headers = {
-        "Authorization": f"Bearer {access_token}",
-    }
-    try:
-        response = requests.get(region_url, headers=headers)
-        response.raise_for_status()
-        api_data = response.json()  
-    except requests.exceptions.RequestException as e:
-        return JsonResponse({"error": str(e)}, status=500)
+# @csrf_exempt
+# def psgc_api(request):
+#     # region_code_correspondence
+#     province_url = "https://dxcloud.dswd.gov.ph/api/psgc/provincesByRegion?region=160000000"  
+
+#     municipality_url = "https://dxcloud.dswd.gov.ph/api/psgc/municipalityByProvince?province=1600200000"
+
+#     access_token = settings.PSGC_TOKEN
+#     headers = {
+#         "Authorization": f"Bearer {access_token}",
+#     }
+#     try:
+#         prov_response = requests.get(province_url, headers=headers)
+#         prov_response.raise_for_status()
+#         prov_api_data = prov_response.json()  
+
+#         muni_response = requests.get(province_url, headers=headers)
+#         muni_response.raise_for_status()
+#         muni_api_data = muni_response.json()  
+#     except requests.exceptions.RequestException as e:
+#         return JsonResponse({"error": str(e)}, status=500)
     
 
-    province_list = []
-    for province in api_data['data']['provinces']:
-        province_data = {
-            'prov_id': province['prov_id'],
-            'prov_code_correspondence': province['prov_code_correspondence'],
-            'prov_name': province['prov_name'],
-            'prov_code': province['prov_code'],
-            'geo_level': province['geo_level'],
-            'old_name': province['old_name'],
-            'income_classification': province['income_classification'],
-            'region_code': province['region_code'],
-            'region_code_correspondence': province['region_code_correspondence'],
-            'reg_id': province['reg_id'],
-        }
-        province_list.append(province_data)
-    return JsonResponse(province_list, safe=False)
+#     province_list =  []
+
+#     for province in prov_api_data['data']['provinces']:
+#         province_data = {
+#             'prov_id': province['prov_id'],
+#             'prov_code_correspondence': province['prov_code_correspondence'],
+#             'prov_name': province['prov_name'],
+#             'prov_code': province['prov_code'],
+#             'geo_level': province['geo_level'],
+#             'old_name': province['old_name'],
+#             'income_classification': province['income_classification'],
+#             'region_code': province['region_code'],
+#             'region_code_correspondence': province['region_code_correspondence'],
+#             'reg_id': province['reg_id'],
+#         }
+#         province_list.append(province_data)
+#     return JsonResponse(province_list, safe=False)
+
+@csrf_exempt
+def psgc_api(request):
+    province_url = "https://dxcloud.dswd.gov.ph/api/psgc/provincesByRegion?region=160000000"
+    access_token = settings.PSGC_TOKEN
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    try:
+        # Fetch province data
+        prov_response = requests.get(province_url, headers=headers)
+        prov_response.raise_for_status()
+        prov_api_data = prov_response.json()
+
+        province_list = []
+
+        for province in prov_api_data['data']['provinces']:
+            # Basic province data structure
+            province_data = {
+                "prov_id": province["prov_id"],
+                "prov_code_correspondence": province["prov_code_correspondence"],
+                "prov_name": province["prov_name"],
+                "prov_code": province["prov_code"],
+                "geo_level": province["geo_level"],
+                "old_name": province.get("old_name"),
+                "income_classification": province["income_classification"],
+                "region_code": province["region_code"],
+                "region_code_correspondence": province["region_code_correspondence"],
+                "reg_id": province["reg_id"],
+                "cities": []
+            }
+
+            # Fetch municipalities (cities) for each province
+            city_url = f"https://dxcloud.dswd.gov.ph/api/psgc/municipalityByProvince?province={province['prov_code']}"
+            city_response = requests.get(city_url, headers=headers)
+            city_response.raise_for_status()
+            city_api_data = city_response.json()
+
+            for city in city_api_data['data']['municipalities']:
+                # Basic city data structure
+                city_data = {
+                    "city_id": city["city_id"],
+                    "city_code_correspondence": city["city_code_correspondence"],
+                    "city_name": city["city_name"],
+                    "city_code": city["city_code"],
+                    "classification": city["classification"],
+                    "old_name": city.get("old_name"),
+                    "city_class": city["city_class"],
+                    "income_classification": city["income_classification"],
+                    "province_code": city["province_code"],
+                    "province_code_correspondence": city["province_code_correspondence"],
+                    "prov_id": city["prov_id"],
+                    "barangays": []
+                }
+
+                # Fetch barangays for each city
+                barangay_url = f"https://dxcloud.dswd.gov.ph/api/psgc/barangayByMunicipality?municipality={city['city_code']}"
+                brgy_response = requests.get(barangay_url, headers=headers)
+                brgy_response.raise_for_status()
+                brgy_api_data = brgy_response.json()
+
+                for barangay in brgy_api_data['data']['barangay']:
+                    # Basic barangay data structure
+                    barangay_data = {
+                        "brgy_id": barangay["brgy_id"],
+                        "brgy_code_correspondence": barangay["brgy_code_correspondence"],
+                        "brgy_name": barangay["brgy_name"],
+                        "brgy_code": barangay["brgy_code"],
+                        "geo_level": barangay["geo_level"],
+                        "old_name": barangay.get("old_name"),
+                        "city_class": barangay.get("city_class"),
+                        "urb_rur": barangay["urb_rur"],
+                        "city_code": barangay["city_code"],
+                        "city_code_correspondence": barangay["city_code_correspondence"],
+                        "city_id": barangay["city_id"]
+                    }
+                    # Add barangay to the city data
+                    city_data["barangays"].append(barangay_data)
+                province_data["cities"].append(city_data)
+            province_list.append(province_data)
+        return JsonResponse(province_list, safe=False)
+
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({"error": str(e)}, status=500)
     
 @login_required(login_url='login')
 def checking(request):

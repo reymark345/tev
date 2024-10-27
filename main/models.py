@@ -372,7 +372,7 @@ class Message(models.Model):
         return str(self.room)
     
 class DestinationTime(models.Model):
-    d_from = models.DateField(blank=True, null=True)
+    d_from = models.CharField(max_length=128, blank=True, null=True)
     d_to = models.CharField(max_length=128, blank=True, null=True)
     d_still = models.CharField(max_length=128, blank=True, null=True)
     departure = models.CharField(max_length=128, blank=True, null=True)
