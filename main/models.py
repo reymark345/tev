@@ -371,7 +371,8 @@ class Message(models.Model):
     def __str__(self):
         return str(self.room)
     
-class DestinationTime(models.Model):
+class TravelDestination(models.Model):
+    date = models.CharField(max_length=128, blank=True, null=True)
     d_from = models.CharField(max_length=128, blank=True, null=True)
     d_to = models.CharField(max_length=128, blank=True, null=True)
     d_still = models.CharField(max_length=128, blank=True, null=True)
@@ -383,13 +384,8 @@ class DestinationTime(models.Model):
         db_table = 'destination_time'
     
 class TravelList(models.Model):
-    date = models.DateField(blank=True, null=True)
-    destination_time = models.ForeignKey(DestinationTime, models.DO_NOTHING)
-    means_of_transpo = models.CharField(max_length=128, blank=True, null=True)
-    transportation = models.CharField(max_length=128, blank=True, null=True)
-    per_diem = models.CharField(max_length=128, blank=True, null=True)
-    others = models.CharField(max_length=128, blank=True, null=True)
-    amount = models.CharField(max_length=128, blank=True, null=True)
+    province = models.CharField(max_length=128, blank=True, null=True)
+    municipality = models.CharField(max_length=128, blank=True, null=True)
     created_by = models.CharField(max_length=128, blank=True, null=True)
     created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     class Meta:
