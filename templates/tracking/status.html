@@ -456,6 +456,10 @@
                     tooltip = 'For Checking';
                     return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span></center>'
                   }
+                  if(data==16){
+                    tooltip = 'Pending';
+                    return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span></center>'
+                  }
                   if(data==7){
                     tooltip = 'Approved';
                     return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span></center>'
@@ -477,10 +481,10 @@
                   let tooltip = '';
                   let status = '';
                   tooltip = 'For Received';
-                  if (data >= 5 && data < 6 ){
+                  if (data >= 5 && data < 6 && data !=16 ){
                     return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Payroll"><i class="ti ti-check"></i></span></center>`
                   }
-                  if (data >= 6 && data !=7 ){
+                  if (data >= 6 && data !=7 && data !=16 ){
                     return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
                   }
                   if (data == 4 ){
@@ -498,13 +502,13 @@
                   let tooltip = '';
                   let status = '';
                   tooltip = 'For Received';
-                  if (data >= 6  && data < 8 && data != 7){
+                  if (data >= 6  && data < 8 && data != 7 && data != 16){
                     return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>`
                   }
-                  else if (data == 8 ){
+                  else if (data == 8 && data !=16 ){
                     return  `<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span></center>`
                   }
-                  else if (data >= 9){
+                  else if (data >= 9 && data !=16){
                     return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
                   }
                   else{
@@ -519,13 +523,13 @@
               orderable: false,
               render: function (data, type, row) {
                   var status = row.status; 
-                  if (status >= 9  && status < 10){
+                  if (status >= 9  && status < 10 && status !=16){
                     return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>`
                   }
-                  else if (status == 10 ){
+                  else if (status == 10 && status !=16 ){
                     return  `<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span></center>`
                   }
-                  else if (status >= 11){
+                  else if (status >= 11 && status !=16){
                     return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
                   }
                   else{
@@ -540,13 +544,13 @@
               orderable: false,
               render: function (data, type, row) {
                   var status = row.status; 
-                  if (status >= 11  && status < 12){
+                  if (status >= 11  && status < 12 && status !=16){
                     return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>`
                   }
-                  else if (status == 12 ){
+                  else if (status == 12 && status !=16){
                     return  `<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span></center>`
                   }
-                  else if (status >= 13){
+                  else if (status >= 13 && status !=16){
                     return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
                   }
                   else{
@@ -562,7 +566,7 @@
               orderable: false,
               render: function (data, type, row) {
                   var status = row.status; 
-                  if (status >= 13  && status <= 15){
+                  if (status >= 13  && status <= 15 && status !=16){
                     return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
                   }
                   else{
@@ -577,13 +581,13 @@
               orderable: false,
               render: function (data, type, row) {
                   var status = row.status; 
-                  if (status >= 13  && status < 14){
+                  if (status >= 13  && status < 14 && status !=16){
                     return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>`
                   }
-                  else if (status == 14 ){
+                  else if (status == 14 && status !=16 ){
                     return  `<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span></center>`
                   }
-                  else if (status >= 15){
+                  else if (status >= 15 && status !=16){
                     return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
                   }
                   else{
@@ -602,7 +606,7 @@
                 if (data){
                   return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success"><i class="ti ti-check"></i></span></center>`
                 }
-                else if (status == 15){
+                else if (status == 15 && status !=16){
                   return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-warning"><i class="ti ti-check"></i></span></center>`
                 }
                 else{
@@ -745,6 +749,8 @@
                       }
                       else if (l_status == 5){
                         payroll_statusColumn = `<td><span class="badge bg-label-warning">For Payroll</span></td>`;
+                        payrolled_d_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        payrolled_f_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
 
                       }
                       else if (l_status == 6){
@@ -999,23 +1005,23 @@
                         $('.main-container').append(check_issued_status);
                       }
 
-                      if (l_status >=13 ){
+                      if (l_status >=13 && l_status !=16){
                         
                         $('.main-container').append(approval_status);
                         $('.main-container').append(certified_status);
                       }
-                      if (l_status >=11 ){
+                      if (l_status >=11 && l_status !=16){
                         $('.main-container').append(journal_status);
                       }
-                      if (l_status >=9 ){
+                      if (l_status >=9 && l_status !=16 ){
                         $('.main-container').append(obligate_status);
                       }
 
-                      if (l_status >=6 && l_status !=7 ){
+                      if (l_status >=6 && l_status !=7 && l_status !=16 ){
                         $('.main-container').append(outgoing_status);
                       }
 
-                      if (l_status >=4 && l_status !=7 ){
+                      if (l_status >=4 && l_status !=7 && l_status !=16 ){
                         $('.main-container').append(payroll_status);
                       }
                       data.data.forEach(function (item, index) {
@@ -1047,6 +1053,9 @@
                         if (!date_reviewed){
                           date_reviewed = `<span class="badge bg-label-primary">Not Applicable</span>`
                         }
+                        else if (date_reviewed && status ==16 ){
+                          date_reviewed = `<span class="badge bg-label-primary">Not Applicable</span>`
+                        }
 
                         if (!remarks){
                           remarks = `<span class="badge bg-label-primary">None</span>`
@@ -1062,9 +1071,17 @@
                           rv_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                           rv_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         }
+                        else if (status ==16){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          review_statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
+                          rv_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          rv_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        }
                         else if (status ==3){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                           review_statusColumn = `<td><span class="badge bg-label-danger">Returned</span></td>`;
+                          rv_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          rv_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         }
 
                         else if (status > 3 && status!=7){

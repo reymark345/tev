@@ -268,15 +268,9 @@
             <div class="col-12">
                 <br>
                 <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
+                <button type="submit" id ="pending" class="btn btn-warning me-sm-3 me-1">Pending</button>
                 <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
-                <button
-                    type="reset"
-                    class="btn btn-label-secondary"
-                    data-bs-dismiss="modal"
-                    aria-label="Close"
-                    >
-                    Cancel
-                </button>
+
             </div>
             </form>
         </div>
@@ -480,14 +474,12 @@
                     orderable: false, 
                     render: function (data, type, row) {
                         let isChecked = selectedCb.includes(data.toString());
-                        var status = row.status; // Access the 'status' value from the 'row' object
-                        if (status == 2) {
+                        var status = row.status; 
+                        if (status == 2 || status == 16) {
                             return '<input type="checkbox" disabled="disabled" class="dt-checkboxes form-check-input">';
                         } else {
-                            // Render a checkbox for each row with the item ID as its value
                             return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
                         }
-
                     }
                 },
 
@@ -594,6 +586,9 @@
                       }
                       else if(data==7){
                         return '<span class="badge bg-label-success">For approval</span>'
+                      }
+                      else if(data==16){
+                        return '<span class="badge bg-label-info">Pending</span>'
                       }
                       else{
                         return '<span class="badge bg-label-success">For payroll</span>'
@@ -815,10 +810,6 @@
                         let date_remarks = data.date_remarks;
                         let remarks_d = data.lacking;
 
-                        console.log(remarks_d);
-                        console.log("testttt");
-
-
                         $('.rows-container').empty();
                         if(duplicate_date === "" || duplicate_date === null ){
                             $("#dp_date").hide();
@@ -838,8 +829,6 @@
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
                             remarks_data = remarks_d;
-                            console.log("remarkssss_data");
-                            console.log(remarks_data);
 
                             for (let i = 0; i < date_remarks.length; i++) {                            
                                 var newRow = $('<div class="row mt-2">' +
@@ -1230,6 +1219,77 @@
                 }
             });
         });
+
+        $('#pending').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let selectedIDs = [];
+            let selectedDate = [];
+            let status = 16;
+            let hasError = 0;
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('.select-remarks');
+                let selectElementDate = $(this).find('.select-remarks');
+                let selectedValue = selectElement.val();
+                let selectErrorLabel = selectElement.siblings(".error-label");
+
+                let inputElement = $(this).find('.input-date');
+                let inputValue = inputElement.val();
+                let inputErrorLabel = inputElement.siblings(".error-label-date");
+
+                if (selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+                    selectElement.removeClass('has-error');
+                    selectErrorLabel.hide();
+                } else {
+                    hasError++;
+                    selectElement.addClass('has-error');
+                    selectErrorLabel.show();
+                }
+                if (inputValue !== "") {
+                    selectedDate.push(inputValue);
+                    inputElement.removeClass('has-error');
+                    inputErrorLabel.hide();
+                } else {
+                    hasError++;
+                    inputElement.addClass('has-error');
+                    inputErrorLabel.show();
+                }
+            });
+
+            if (final_amount === "") {  
+                hasError++;
+                $("#amount_error").text("Please enter Amount");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+            } else {
+                $("#amount_error").text("");
+                $(".input-group").removeClass("has-error");
+
+            }
+            if (selectedIDs.length > 0 && hasError ==0) {
+                tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            } else if(selectedIDs.length == 0) {
+                tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            }
+          });
+
+          $('#f-employee-name').change(function() {
+            var selectedOptions = $(this).find('option:selected');
+            selectedOptions.each(function() {
+                var optionValue = $(this).val();
+                if (employeeList.indexOf(optionValue) === -1) {
+                   employeeList.push(optionValue);
+                }
+            });
+            $(this).find('option:not(:selected)').each(function() {
+                var optionValue = $(this).val();
+                var index = employeeList.indexOf(optionValue);
+                if (index !== -1) {
+                   employeeList.splice(index, 1);
+                }
+            });
+        });
+
 
         $('#forward').on('click', function(){
             if(selectedCb.length ===0){

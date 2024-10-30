@@ -250,7 +250,6 @@ def chat_data_staff(request):
         room = request.POST.get('auth_user_id')
 
         try:
-            print("entereedddddddddd")
             get_room = Room.objects.get(room_name=room)
             return redirect('room', room_name=room, username=username)
 

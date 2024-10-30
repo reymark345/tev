@@ -3,6 +3,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('travel_list', views.travel_list, name='travel-list'),
     path('list', views.list, name='receive-list'),
     path('addtev', views.addtev, name='add-tev'),
     path('addtevdetails', views.addtevdetails, name='add-tev-details'),
@@ -10,6 +11,7 @@ urlpatterns = [
     path('updatetevamount', views.updatetevamount, name='update-tev-amount'),
     path('tevemployee', views.tevemployee, name='tev-employee'),
     
+    path('travel_load', views.travel_load, name='travel-load'),
     path('item_load', views.item_load, name='item-load'),
     path('checking_load', views.checking_load, name='checking-load'),
     path('item_edit', views.item_edit, name='item-edit'),
@@ -26,12 +28,11 @@ urlpatterns = [
 
     path('checking', views.checking, name='receive-checking'),
     path('api', views.api, name='receive-api'),
+    path('psgc_api', views.psgc_api, name='psgc-api'),
     path('search_list', views.search_list, name='search-list'),
     path('upload_tev', views.upload_tev, name='upload-tev'),
 
     path('delete_entry', views.delete_entry, name='delete-entry'),
-
-    
 
     
 ]
