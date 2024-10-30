@@ -23,6 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-e&691z)oh*#_&yv(h^3sn^*=gxs09(%(5395)=xe+_im_bk^l&'
 PSGC_TOKEN  = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2R4Y2xvdWQuZHN3ZC5nb3YucGgvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3Mjk4NDI4ODksImV4cCI6MTczMjQzNDg4OSwibmJmIjoxNzI5ODQyODg5LCJqdGkiOiJDTWVIN2YzWXBlMmx4YUFBIiwic3ViIjoyMTEsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.8bcnL7GL1Oe7Zs57w3B5dNhuFupfvI6fIHIfYjdrn18"
 PORTAL_TOKEN  = "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
+PORTAL_API_URL  = "https://caraga-portal.dswd.gov.ph/api/employee/list/load"
+PSGC_PROVINCE_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/provincesByRegion?region=160000000"
+PSGC_CITY_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/municipalityByProvince?province="
+PSGC_BARANGAY_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/barangayByMunicipality?municipality="
+
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -91,33 +98,33 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     #for server to server
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'tris',
-    #     'USER': 'tris',
-    #     'PASSWORD': 'vOHA]ko(5))If-LU',
-    #     'HOST': '172.31.240.235',
-    #     'PORT': '3306',
-    # },
-    # # #for server INFIMOS
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'tris',
+        'USER': 'tris',
+        'PASSWORD': 'vOHA]ko(5))If-LU',
+        'HOST': '172.31.240.235',
+        'PORT': '3306',
+    },
+    # #for server INFIMOS
     
-    # 'finance': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2023',
-    #     'USER':'tris',
-    #     'PASSWORD':'vOHA]ko(5))If-LU',
-    #     'HOST':'172.31.240.235',
-    #     'PORT':'3306',
-    # },
+    'finance': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'infimos_2023',
+        'USER':'tris',
+        'PASSWORD':'vOHA]ko(5))If-LU',
+        'HOST':'172.31.240.235',
+        'PORT':'3306',
+    },
 
-    # 'finance_2024': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2024',
-    #     'USER':'tris',
-    #     'PASSWORD':'vOHA]ko(5))If-LU',
-    #     'HOST':'172.31.240.235',
-    #     'PORT':'3306',
-    # },
+    'finance_2024': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'infimos_2024',
+        'USER':'tris',
+        'PASSWORD':'vOHA]ko(5))If-LU',
+        'HOST':'172.31.240.235',
+        'PORT':'3306',
+    },
     
 
     ##for server local but live database
@@ -130,31 +137,31 @@ DATABASES = {
     #     'PORT': '3306',
     # },
     #for localhost main database
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tev_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '3306',
-    },
-    # #for localhost INFIMOS database
-    'finance': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'finance',
-        'USER':'root',
-        'PASSWORD':'',
-        'HOST':'localhost',
-        'PORT':'3306',
-    },
-    'finance_2024': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'infimos_2024',
-        'USER':'root',
-        'PASSWORD':'',
-        'HOST':'localhost',
-        'PORT':'3306',
-    },
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'tev_db',
+    #     'USER': 'root',
+    #     'PASSWORD': '',
+    #     'HOST': 'localhost',
+    #     'PORT': '3306',
+    # },
+    # # #for localhost INFIMOS database
+    # 'finance': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'finance',
+    #     'USER':'root',
+    #     'PASSWORD':'',
+    #     'HOST':'localhost',
+    #     'PORT':'3306',
+    # },
+    # 'finance_2024': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2024',
+    #     'USER':'root',
+    #     'PASSWORD':'',
+    #     'HOST':'localhost',
+    #     'PORT':'3306',
+    # },
 
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',

@@ -392,7 +392,6 @@ class TravelList(models.Model):
         managed = True
         db_table = 'travel_list'
 
-# destination_time_id = models.CharField(max_length=128, blank=True, null=True)
 
 
         
