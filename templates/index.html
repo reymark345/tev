@@ -14,7 +14,7 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=0.6, user-scalable=yes, minimum-scale=0.6, maximum-scale=0.6" />
 
-        <title>TRIS</title>
+        <title>TRIPS</title>
 
         <meta name="description" content="" />
 
@@ -184,68 +184,6 @@
 
     </style>
 
-    <!-- <style>
-        .chat-box {
-            width: 300px;
-            background-color: #f1f1f1;
-            border-radius: 10px;
-            position: fixed;
-            bottom: 0px;
-            right: 20px;
-            z-index: 1000; /* Ensure it floats above other content */
-        }
-
-        .chat-header {
-            background-color: #685dd8;
-            color: #fff;
-            padding: 10px;
-            border-top-left-radius: 10px;
-            border-top-right-radius: 10px;
-            cursor: pointer;
-        }
-
-        .chat-body {
-            display: none; /* Initially hidden */
-            flex: 1;
-            padding: 10px;
-            overflow-y: auto;
-            max-height: 300px; /* Adjust max height */
-        }
-
-        .chat-footer {
-            display: none; /* Initially hidden */
-            padding: 10px;
-            border-top: 1px solid #ccc;
-        }
-
-        .chat-footer input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-
-
-
-        .message {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .chat-body .message .receive, .send {
-            background-color: #0084ff;
-            width: auto;
-            border-radius: 10px;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        #msg{
-            height:200px;
-        }
-        
-    </style> -->
 
     <body>
         <!-- Layout wrapper -->
@@ -259,7 +197,7 @@
                             <span class="app-brand-logo demo" style="width: 40px !important; height: 40px !important">
                                 <img class="w-100" src="{% static 'assets/img/branding/logo.png' %}" />
                             </span>
-                            <span class="app-brand-text demo menu-text fw-bold">TRIS </span>
+                            <span class="app-brand-text demo menu-text fw-bold">TRIPS </span>
                         </a>
 
                         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto">
@@ -300,6 +238,17 @@
                                 <span class="menu-header-text">Received Document</span>
                             </li>
                         {% endif %}
+
+                        <!-- {% if 'Admin' in permissions  %}
+                           
+                        <li class="menu-item {% if url_name == 'travel-list' %}active{% endif %}">
+                            <a href="{% url 'travel-list' %}" class="menu-link">
+                                <i class="menu-icon tf-icons ti ti-checkbox"></i>
+                            
+                                <div data-i18n="Travel">Travel</div>
+                            </a>
+                        </li>
+                        {% endif %} -->
 
                         {% if 'Admin' in permissions or 'Incoming staff' in permissions %}
                            
@@ -503,14 +452,14 @@
 
                         <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
                             <!-- Search -->
-                            <div class="navbar-nav align-items-center">
+                            {% comment %} <div class="navbar-nav align-items-center">
                                 <div class="nav-item navbar-search-wrapper mb-0">
                                     <a class="nav-item nav-link search-toggler d-flex align-items-center px-0" href="javascript:void(0);">
                                         <i class="ti ti-search ti-md me-2"></i>
                                         <span class="d-none d-md-inline-block text-muted">Search (Ctrl+/)</span>
                                     </a>
                                 </div>
-                            </div>
+                            </div> {% endcomment %}
                             <!-- /Search -->
 
                             <ul class="navbar-nav flex-row align-items-center ms-auto">
@@ -659,7 +608,7 @@
                                     <div>
                                         DEVELOPER : REYMARK N. VALDEHUEZA 
                                         © 2024
-                                        <a href="#" class="fw-semibold">TRIS</a> 
+                                        <a href="#" class="fw-semibold">TRIPS</a> 
                                     </div>
                                     <div></div>
                                 </div>
@@ -762,6 +711,7 @@
         <!-- Data tables -->
         <script src="{% static 'assets/js/tables-datatables-advanced.js' %}"></script>
         <script src="{% static 'assets/js/tables-datatables-extensions.js' %}"></script>
+        <script src="{% static 'assets/js/tables-datatables-basic.js' %}"></script>
 
         <script src="{% static 'assets/vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
         <script src="{% static 'assets/js/extended-ui-sweetalert2.js' %}"></script>
@@ -794,121 +744,103 @@
         let socket = null;  // Declare socket outside to maintain the state
 
         $(document).ready(function(){
-            $('#room').change(function(){
-                var roomName = $('select[name="room"]').val();
-                console.log(roomName);
-                $.ajax({
-                    url: "{% url 'create-room' %}",
-                    type: "POST",
-                    data: {
-                        'room': roomName
-                    },
-                    success: function(response) {
-                        // Optionally handle response or initialize chat interface
-                        // Make sure to close any existing WebSocket before opening a new one
-                        if (socket) {
-                            socket.close(); // Close existing socket
-                        }
-                        initializeChat(roomName, '{{ user }}'); // Initialize new chat for the selected room
-                    }
-                });
-            });
-
-            $("#send-message").click(function(){
-                const message = $('#msg').val();
-                var roomName = $('select[name="room"]').val();
-                console.log(roomName);
-                console.log(message);
-                console.log('{{ user }}');
-                if (message && roomName) {
-                    sendMessage(message, roomName, '{{ user }}');
-                }
-            });
-        }); 
-
-        function initializeChat(roomName, username) {
-            console.log("Initializing chat for room:", roomName);
-            console.log(window.location.host);
-
-            const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-
-            const wsEndpoint = `${websocketProtocol}://${window.location.host}/ws/notification/${roomName}/`;
-            socket = new WebSocket(wsEndpoint);
-
-            socket.addEventListener("open", () => {
-                console.log("WebSocket connection opened for room:", roomName);
-            });
-
-            socket.addEventListener("message", (event) => { 
-                const messageData = JSON.parse(event.data)['message'];
-                var sender = messageData['sender'];
-                var message = messageData['message'];
-
-                var messageDiv = $('.message');
-                
-                if (sender != username) {
-                    // Received message, aligned left
-                    messageDiv.append('<div class="receive"><p>' + message + '<strong> - ' + sender + '</strong></p></div>');
-                } else {
-                    // Sent message, aligned right
-                    messageDiv.append('<div class="send"><p>' + message + '</p></div>');
-                }
-                
-                scrollToBottom();
-            });
-
-
-            // socket.addEventListener("message", (event) => {
-            //     const messageData = JSON.parse(event.data)['message'];
-            //     var sender = messageData['sender'];
-            //     var message = messageData['message'];
-                
-            //     var messageDiv = $('.message');
-            //     if (sender != username) {
-            //         messageDiv.append('<div class="receive"><p style="color: #000;">' + message + '<strong>-' + sender + '</strong></p></div>');
-            //     } else {
-            //         messageDiv.append('<div class="send"><p style="color: #ffffff;">' + message + '</p></div>');
-            //     }
-            //     scrollToBottom();
+            // $('#room').change(function(){
+            //     var roomName = $('select[name="room"]').val();
+            //     console.log(roomName);
+            //     $.ajax({
+            //         url: "{% url 'create-room' %}",
+            //         type: "POST",
+            //         data: {
+            //             'room': roomName
+            //         },
+            //         success: function(response) {
+            //             if (socket) {
+            //                 socket.close();
+            //             }
+            //             initializeChat(roomName, '{{ user }}');
+            //         }
+            //     });
             // });
 
-            socket.addEventListener("error", (event) => {
-                console.error("WebSocket error observed:", event);
-            });
+            // $("#send-message").click(function(){
+            //     const message = $('#msg').val();
+            //     var roomName = $('select[name="room"]').val();
+            //     console.log(roomName);
+            //     console.log(message);
+            //     console.log('{{ user }}');
+            //     if (message && roomName) {
+            //         sendMessage(message, roomName, '{{ user }}');
+            //     }
+            // });
+        }); 
 
-            socket.addEventListener("close", (event) => {
-                console.log("WebSocket connection closed:", event);
-            });
-        }
+        // function initializeChat(roomName, username) {
+        //     console.log("Initializing chat for room:", roomName);
+        //     console.log(window.location.host);
 
-        function sendMessage(message, roomName, username) {
-            if (socket && socket.readyState === WebSocket.OPEN) {
-                socket.send(
-                    JSON.stringify({
-                        'message': message,
-                        'room_name': roomName,
-                        'sender': username,
-                    })
-                );
-                $('#msg').val('');  // Clear the message input field
-            }
-            else if (socket && socket.readyState === WebSocket.CONNECTING) {
-                // Wait until the WebSocket connection is open
-                socket.addEventListener('open', function(event) {
-                    socket.send(
-                        JSON.stringify({
-                            'message': message,
-                            'room_name': roomName,
-                            'sender': username,
-                        })
-                    );
-                    $('#msg').val('');  // Clear the message input field
-                });
-            } 
-            else {
-                console.error("WebSocket is not open. Unable to send message.");
-            }
-        }
+        //     const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+
+        //     const wsEndpoint = `${websocketProtocol}://${window.location.host}/ws/notification/${roomName}/`;
+        //     socket = new WebSocket(wsEndpoint);
+
+        //     socket.addEventListener("open", () => {
+        //         console.log("WebSocket connection opened for room:", roomName);
+        //     });
+
+        //     socket.addEventListener("message", (event) => { 
+        //         const messageData = JSON.parse(event.data)['message'];
+        //         var sender = messageData['sender'];
+        //         var message = messageData['message'];
+
+        //         var messageDiv = $('.message');
+                
+        //         if (sender != username) {
+        //             messageDiv.append('<div class="receive"><p>' + message + '<strong> - ' + sender + '</strong></p></div>');
+        //         } else {
+        //             // Sent message, aligned right
+        //             messageDiv.append('<div class="send"><p>' + message + '</p></div>');
+        //         }
+                
+        //         scrollToBottom();
+        //     });
+
+        //     socket.addEventListener("error", (event) => {
+        //         console.error("WebSocket error observed:", event);
+        //     });
+
+        //     socket.addEventListener("close", (event) => {
+        //         console.log("WebSocket connection closed:", event);
+        //     });
+        // }
+
+        // function sendMessage(message, roomName, username) {
+        //     if (socket && socket.readyState === WebSocket.OPEN) {
+        //         socket.send(
+        //             JSON.stringify({
+        //                 'message': message,
+        //                 'room_name': roomName,
+        //                 'sender': username,
+        //             })
+        //         );
+        //         $('#msg').val('');  // Clear the message input field
+        //     }
+        //     else if (socket && socket.readyState === WebSocket.CONNECTING) {
+        //         // Wait until the WebSocket connection is open
+        //         socket.addEventListener('open', function(event) {
+        //             socket.send(
+        //                 JSON.stringify({
+        //                     'message': message,
+        //                     'room_name': roomName,
+        //                     'sender': username,
+        //                 })
+        //             );
+        //             $('#msg').val('');  // Clear the message input field
+        //         });
+        //     } 
+        //     else {
+        //         console.error("WebSocket is not open. Unable to send message.");
+        //     }
+        // }
 
         function scrollToBottom() {
             var chatContainer = document.getElementById("chatContainer");

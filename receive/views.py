@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, RemarksLib, Remarks_r, RolePermissions, Division, Section, TransactionLogs )
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, TevOutgoing, TevBridge, RemarksLib, Remarks_r, RolePermissions, Division, Section, TransactionLogs, TravelList, TravelDestination )
 import json 
 from django.core import serializers
 from datetime import date as datetime_date
@@ -31,6 +31,7 @@ from django.template.defaultfilters import date
 from decimal import Decimal
 from suds.client import Client
 from django.db import transaction
+from django.conf import settings
 
 
 def generate_code():
@@ -82,17 +83,124 @@ def list(request):
         return render(request, 'receive/receive.html' , context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def travel_list(request):
+    
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    data = []
+    user_name = RolePermissions.objects.filter(role_id=2) 
+    get_id = user_name.values_list('user_id', flat=True)
+    date_actual = SystemConfiguration.objects.filter().first().date_actual
+    for user_id in get_id:
+        userData = AuthUser.objects.filter(id=user_id)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name if userData else ''
+        item_entry = {
+            'id': userData[0].id,
+            'full_name': full_name
+        }
+        data.append(item_entry)
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+            'remarks_list' : RemarksLib.objects.filter(status = 1).order_by('name'),
+            'is_actual_date': date_actual,
+            'permissions' : role_names,
+            'created_by' :  data
+        }
+        return render(request, 'receive/travel_user.html' , context)
+    else:
+        return render(request, 'pages/unauthorized.html')
    
 @csrf_exempt
 def api(request):
-    # url = "https://caraga-portal.dswd.gov.ph/api/employee/list/search/?q="
-    url = "https://caraga-portal.dswd.gov.ph/api/employee/list/load"
+    url = settings.PORTAL_API_URL
+    portal_token = settings.PORTAL_TOKEN
     headers = {
-        "Authorization": "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
+        "Authorization": portal_token,
     }
     response = requests.get(url, headers=headers)
     data = response.json()
     return JsonResponse({'data': data})
+
+@csrf_exempt
+def psgc_api(request):
+    province_url = settings.PSGC_PROVINCE_URL
+    access_token = settings.PSGC_TOKEN
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    try:
+        prov_response = requests.get(province_url, headers=headers)
+        prov_response.raise_for_status()
+        prov_api_data = prov_response.json()
+        province_list = []
+
+        for province in prov_api_data['data']['provinces']:
+            province_data = {
+                "prov_id": province["prov_id"],
+                "prov_code_correspondence": province["prov_code_correspondence"],
+                "prov_name": province["prov_name"],
+                "prov_code": province["prov_code"],
+                "geo_level": province["geo_level"],
+                "old_name": province.get("old_name"),
+                "income_classification": province["income_classification"],
+                "region_code": province["region_code"],
+                "region_code_correspondence": province["region_code_correspondence"],
+                "reg_id": province["reg_id"],
+                "cities": []
+            }
+            city_url = f"{settings.PSGC_CITY_URL}{province['prov_code']}" 
+            
+            city_response = requests.get(city_url, headers=headers)
+            city_response.raise_for_status()
+            city_api_data = city_response.json()
+
+            for city in city_api_data['data']['municipalities']:
+                city_data = {
+                    "city_id": city["city_id"],
+                    "city_code_correspondence": city["city_code_correspondence"],
+                    "city_name": city["city_name"],
+                    "city_code": city["city_code"],
+                    "classification": city["classification"],
+                    "old_name": city.get("old_name"),
+                    "city_class": city["city_class"],
+                    "income_classification": city["income_classification"],
+                    "province_code": city["province_code"],
+                    "province_code_correspondence": city["province_code_correspondence"],
+                    "prov_id": city["prov_id"],
+                    "barangays": []
+                }
+                # barangay_url = f"https://dxcloud.dswd.gov.ph/api/psgc/barangayByMunicipality?municipality={city['city_code']}"
+                barangay_url = f"{settings.PSGC_BARANGAY_URL}{city['city_code']}" 
+                brgy_response = requests.get(barangay_url, headers=headers)
+                brgy_response.raise_for_status()
+                brgy_api_data = brgy_response.json()
+
+                for barangay in brgy_api_data['data']['barangay']:
+                    barangay_data = {
+                        "brgy_id": barangay["brgy_id"],
+                        "brgy_code_correspondence": barangay["brgy_code_correspondence"],
+                        "brgy_name": barangay["brgy_name"],
+                        "brgy_code": barangay["brgy_code"],
+                        "geo_level": barangay["geo_level"],
+                        "old_name": barangay.get("old_name"),
+                        "city_class": barangay.get("city_class"),
+                        "urb_rur": barangay["urb_rur"],
+                        "city_code": barangay["city_code"],
+                        "city_code_correspondence": barangay["city_code_correspondence"],
+                        "city_id": barangay["city_id"]
+                    }
+                    city_data["barangays"].append(barangay_data)
+                province_data["cities"].append(city_data)
+            province_list.append(province_data)
+        return JsonResponse(province_list, safe=False)
+
+    except requests.exceptions.RequestException as e:
+        return JsonResponse({"error": str(e)}, status=500)
     
 @login_required(login_url='login')
 def checking(request):
@@ -359,6 +467,101 @@ def item_load(request):
     }
     return JsonResponse(response)
 
+def travel_loadss(request):    
+    data = []
+    user_data = TransactionLogs.objects.all().order_by('-id')
+
+    total = len(user_data)
+    page = 1
+    per_page = total
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        user_data = user_data[start:start + length]
+        
+    for item in user_data:
+        userData = AuthUser.objects.filter(id=item.user_id)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name
+       
+        user_data_item = {
+            'description': item.description,
+            'user': full_name.upper(),
+            'created_at': item.created_at,
+        }
+        data.append(user_data_item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+
+def travel_load(request):
+    user_id = request.session.get('user_id', 0)
+    results = TravelList.objects.all().order_by('-id')
+
+
+    total = len(results)
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        results = results[start:start + length]
+
+    data = []
+
+
+    for item in results:
+        # userData = AuthUser.objects.filter(id=user_id)
+        # full_name = userData[0].first_name if userData else ''
+        
+        # first_name = item['first_name'] if item['first_name'] else ''
+        # middle_name = item['middle_name'] if item['middle_name'] else ''
+        # last_name = item['last_name'] if item['last_name'] else ''
+        # emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
+
+        item_entry = {
+            'id': item.id,
+            'code': item.date,
+            'name': item.date,
+            'id_no': item.date,
+            'account_no': item.date,
+            'date_travel': item.date,
+            'original_amount': item.date,
+            'final_amount': item.date,
+            'incoming_in': item.date,
+            'incoming_out': item.date,
+            'slashed_out':item.date,
+            'remarks': item.date,
+            'lacking':item.date,
+            'status': item.date,
+            'user_id': 'fasfasfasf'
+        }
+
+        data.append(item_entry)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
 
 def checking_load(request):
     _search = request.GET.get('search[value]')
@@ -386,6 +589,9 @@ def checking_load(request):
 
     elif _search in "for checking":
         status_txt = '2'
+
+    elif _search in "pending":
+        status_txt = '16'
     else:
         status_txt = '7'
         
@@ -399,6 +605,7 @@ def checking_load(request):
             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
             WHERE (t1.status_id = 2
                 OR t1.status_id = 7
+                OR t1.status_id = 16
                 OR (t1.status_id = 3 AND t1.slashed_out IS NULL))
         """
         params = []
@@ -459,6 +666,7 @@ def checking_load(request):
             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
             WHERE (t1.status_id = 2
                             OR t1.status_id = 7
+                            OR t1.status_id = 16
                             OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
             )
             AND (code LIKE %s
@@ -487,6 +695,7 @@ def checking_load(request):
             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
             WHERE (t1.status_id = 2
                             OR t1.status_id = 7
+                            OR t1.status_id = 16
                             OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
             )
             AND (code LIKE %s

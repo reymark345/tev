@@ -370,6 +370,28 @@ class Message(models.Model):
 
     def __str__(self):
         return str(self.room)
+    
+class TravelDestination(models.Model):
+    date = models.CharField(max_length=128, blank=True, null=True)
+    d_from = models.CharField(max_length=128, blank=True, null=True)
+    d_to = models.CharField(max_length=128, blank=True, null=True)
+    d_still = models.CharField(max_length=128, blank=True, null=True)
+    departure = models.CharField(max_length=128, blank=True, null=True)
+    arrival = models.CharField(max_length=128, blank=True, null=True)
+
+    class Meta:
+        managed = True
+        db_table = 'destination_time'
+    
+class TravelList(models.Model):
+    province = models.CharField(max_length=128, blank=True, null=True)
+    municipality = models.CharField(max_length=128, blank=True, null=True)
+    created_by = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'travel_list'
+
 
 
         
