@@ -1013,7 +1013,45 @@ def preview_box_a(request):
         return render(request, 'transaction/preview_print.html', context)
     else:
         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
+
+@login_required(login_url='login')
+def rd_preview_print(request):
+    data = TevIncoming.objects.filter(status=16)
+    data_result = []
+
+    for item in data:
+        # Split and reformat each date
+        date_travel_list = item.date_travel.split(',')
+        formatted_dates = []
+        
+        for date_str in date_travel_list:
+            # Parse the date and format it as "Oct. 22, 2024"
+            date_obj = datetime.strptime(date_str.strip(), "%d-%m-%Y")
+            formatted_date = date_obj.strftime("%b. %d, %Y")
+            formatted_dates.append(formatted_date)
+        
+        # Join the formatted dates with commas
+        formatted_date_travel = ', '.join(formatted_dates)
+
+        data_dict = {
+            "id": item.id,
+            "first_name": item.first_name.upper(),
+            "middle_name": item.middle_name.upper(),
+            "last_name": item.last_name.upper(),
+            "id_no": item.id_no,
+            "date_travel": formatted_date_travel,
+        }
+        data_result.append(data_dict)
+
+    context = {
+        'data': data_result
+    }
     
+    return render(request, 'receive/rd_preview_print.html', context)
+
+
+
+
 @login_required(login_url='login')
 def checking(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 

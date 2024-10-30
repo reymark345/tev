@@ -35,6 +35,9 @@ urlpatterns = [
     path('save_payroll', views.save_payroll, name='save-payroll'),
     path('box_a', views.box_a, name='box-a'),
     path('preview', views.preview_box_a, name='preview-box-a'),
+    path('rd_preview_print', views.rd_preview_print, name='rd-preview-print'),
+
+    
     path('outgoing_list', views.outgoing_list, name='outgoing-list'),
     path('budget_list', views.budget_list, name='budget-list'),
     path('journal_list', views.journal_list, name='journal-list'),
