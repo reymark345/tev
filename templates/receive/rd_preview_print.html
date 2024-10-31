@@ -308,8 +308,9 @@ margin-top: 99%;
         <div class="container-body3">
           <span style="font-family: Calibri, sans-serif;">
             <center>
-              <span contenteditable="true" id="editableName">
-                <b>TRAVEL REIMBURSEMENT INFORMATION PLATFORM SYSTEM </b>
+              <span >
+                <b>TRAVEL REIMBURSEMENT INFORMATION PLATFORM SYSTEM </b> <br>
+                {{ date_now }}
               </span><br>
             </center>
           </span>
@@ -319,66 +320,19 @@ margin-top: 99%;
               <tr >
                 <td><b>No.</b></td>
                 <td><b>EMPLOYEE NAME</b></td>
-                <td><b>TRAVEL DATE</b></td>
-                <td><b>ACTUAL AMOUNT</b></td>
-                <td><b><center>FINAL AMOUNT</center></b></td>
-                <td><b>STATUS</b></td>
-
-              
+                <td><b>DIVISION/PROGRAM</b></td>
+                <td><b>AMOUNT (CLAIM)</b></td>
+                <td><b>REMARKS</b></td>
+                <td><b>DATE COMPILED</b></td>
               </tr>              
               {% for emp in data %}
               <tr>
                 <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
-                <td class="align-text-right" style="padding: 5;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
-                <td style="padding: 4;" class="align-text-right">{{ emp.date_travel }}, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.original_amount|floatformat:2|intcomma }}</td>
+                <td class="align-text-left" style="padding: 5;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
+                <td class="align-text-left" style="padding: 5;">{{ emp.division }}</td>
                 <td  class="align-text-left" style="padding: 4;">{{ emp.final_amount|floatformat:2|intcomma }} </td>
-                <td class="align-text-left" style="padding: 4;">PENDING</td>
-
-              </tr>
-              {% endfor %}
-              {% for emp in data %}
-              <tr>
-                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
-                <td class="align-text-right" style="padding: 5;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
-                <td style="padding: 4;" class="align-text-right">{{ emp.date_travel }}, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.original_amount|floatformat:2|intcomma }}</td>
-                <td  class="align-text-left" style="padding: 4;">{{ emp.final_amount|floatformat:2|intcomma }} </td>
-                <td class="align-text-left" style="padding: 4;">PENDING</td>
-
-              </tr>
-              {% endfor %}
-              {% for emp in data %}
-              <tr>
-                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
-                <td class="align-text-right" style="padding: 5;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
-                <td style="padding: 4;" class="align-text-right">{{ emp.date_travel }}, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.original_amount|floatformat:2|intcomma }}</td>
-                <td  class="align-text-left" style="padding: 4;">{{ emp.final_amount|floatformat:2|intcomma }} </td>
-                <td class="align-text-left" style="padding: 4;">PENDING</td>
-
-              </tr>
-              {% endfor %}
-              {% for emp in data %}
-              <tr>
-                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
-                <td class="align-text-right" style="padding: 5;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
-                <td style="padding: 4;" class="align-text-right">{{ emp.date_travel }}, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.original_amount|floatformat:2|intcomma }}</td>
-                <td  class="align-text-left" style="padding: 4;">{{ emp.final_amount|floatformat:2|intcomma }} </td>
-                <td class="align-text-left" style="padding: 4;">PENDING</td>
-
-              </tr>
-              {% endfor %}
-              {% for emp in data %}
-              <tr>
-                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
-                <td class="align-text-right" style="padding: 5;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
-                <td style="padding: 4;" class="align-text-right">{{ emp.date_travel }}, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024, Oct 25, 2024</td>
-                <td class="align-text-left" style="padding: 4;">{{ emp.original_amount|floatformat:2|intcomma }}</td>
-                <td  class="align-text-left" style="padding: 4;">{{ emp.final_amount|floatformat:2|intcomma }} </td>
-                <td class="align-text-left" style="padding: 4;">PENDING</td>
-
+                <td style="padding: 4;" class="align-text-right">{{ emp.remarks }}</td>                
+                <td class="align-text-right" style="padding: 5;">{{ emp.date_compiled }}</td>
               </tr>
               {% endfor %}
             </tbody>

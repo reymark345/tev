@@ -1016,41 +1016,40 @@ def preview_box_a(request):
 
 @login_required(login_url='login')
 def rd_preview_print(request):
-    data = TevIncoming.objects.filter(status=16)
+    data = TevIncoming.objects.filter(status=16).order_by('last_name')
     data_result = []
 
     for item in data:
-        # Split and reformat each date
         date_travel_list = item.date_travel.split(',')
         formatted_dates = []
         
         for date_str in date_travel_list:
-            # Parse the date and format it as "Oct. 22, 2024"
             date_obj = datetime.strptime(date_str.strip(), "%d-%m-%Y")
             formatted_date = date_obj.strftime("%b. %d, %Y")
             formatted_dates.append(formatted_date)
-        
-        # Join the formatted dates with commas
         formatted_date_travel = ', '.join(formatted_dates)
-
         data_dict = {
             "id": item.id,
-            "first_name": item.first_name.upper(),
-            "middle_name": item.middle_name.upper(),
-            "last_name": item.last_name.upper(),
+            "first_name": item.first_name.upper() if item.first_name else "",  
+            "middle_name": item.middle_name.upper() if item.middle_name else "",  
+            "last_name": item.last_name.upper() if item.last_name else "", 
             "id_no": item.id_no,
+            "original_amount": item.original_amount,
+            "final_amount": item.final_amount,
             "date_travel": formatted_date_travel,
+            "remarks": item.remarks.upper() if item.remarks else "",  
+            "division": item.division.upper() if item.division else "",
+            "date_compiled": item.date_reviewed.strftime('%B %d, %Y').upper() if item.date_reviewed else "" 
         }
+
         data_result.append(data_dict)
 
     context = {
-        'data': data_result
+        'data': data_result,
+        'date_now': timezone.now().date().strftime('%B %d, %Y').upper() 
     }
     
     return render(request, 'receive/rd_preview_print.html', context)
-
-
-
 
 @login_required(login_url='login')
 def checking(request):
