@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges, RolePermissions, RemarksLib)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges, RolePermissions, RemarksLib, Remarks_r)
 import json 
 from django.core import serializers
 from datetime import datetime, timedelta
@@ -1013,21 +1013,33 @@ def preview_box_a(request):
         return render(request, 'transaction/preview_print.html', context)
     else:
         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})
+    
 
 @login_required(login_url='login')
 def rd_preview_print(request):
     data = TevIncoming.objects.filter(status=16).order_by('last_name')
+
     data_result = []
 
     for item in data:
         date_travel_list = item.date_travel.split(',')
         formatted_dates = []
-        
         for date_str in date_travel_list:
             date_obj = datetime.strptime(date_str.strip(), "%d-%m-%Y")
             formatted_date = date_obj.strftime("%b. %d, %Y")
             formatted_dates.append(formatted_date)
         formatted_date_travel = ', '.join(formatted_dates)
+
+        remarks_qs = Remarks_r.objects.filter(incoming_id=item.id)
+        formatted_remarks = []
+        for remark in remarks_qs:
+            remark_name = remark.remarks_lib.name 
+            if remark.date:
+                formatted_remarks.append(f"{remark_name} - {remark.date.strftime('%B %d, %Y')}")
+            else:
+                formatted_remarks.append(remark_name)
+        remarks = "; ".join(formatted_remarks) 
+
         data_dict = {
             "id": item.id,
             "first_name": item.first_name.upper() if item.first_name else "",  
@@ -1037,7 +1049,7 @@ def rd_preview_print(request):
             "original_amount": item.original_amount,
             "final_amount": item.final_amount,
             "date_travel": formatted_date_travel,
-            "remarks": item.remarks.upper() if item.remarks else "",  
+            "remarks": remarks.upper(),  
             "division": item.division.upper() if item.division else "",
             "date_compiled": item.date_reviewed.strftime('%B %d, %Y').upper() if item.date_reviewed else "" 
         }
@@ -1050,6 +1062,46 @@ def rd_preview_print(request):
     }
     
     return render(request, 'receive/rd_preview_print.html', context)
+
+# @login_required(login_url='login')
+# def rd_preview_print(request):
+#     data = TevIncoming.objects.filter(status=16).order_by('last_name')
+#     remarks = Remarks_r.objects.filter(incoming_id=data.id)
+
+
+#     data_result = []
+
+#     for item in data:
+#         date_travel_list = item.date_travel.split(',')
+#         formatted_dates = []
+        
+#         for date_str in date_travel_list:
+#             date_obj = datetime.strptime(date_str.strip(), "%d-%m-%Y")
+#             formatted_date = date_obj.strftime("%b. %d, %Y")
+#             formatted_dates.append(formatted_date)
+#         formatted_date_travel = ', '.join(formatted_dates)
+#         data_dict = {
+#             "id": item.id,
+#             "first_name": item.first_name.upper() if item.first_name else "",  
+#             "middle_name": item.middle_name.upper() if item.middle_name else "",  
+#             "last_name": item.last_name.upper() if item.last_name else "", 
+#             "id_no": item.id_no,
+#             "original_amount": item.original_amount,
+#             "final_amount": item.final_amount,
+#             "date_travel": formatted_date_travel,
+#             "remarks": "remarks", 
+#             "division": item.division.upper() if item.division else "",
+#             "date_compiled": item.date_reviewed.strftime('%B %d, %Y').upper() if item.date_reviewed else "" 
+#         }
+
+#         data_result.append(data_dict)
+
+#     context = {
+#         'data': data_result,
+#         'date_now': timezone.now().date().strftime('%B %d, %Y').upper() 
+#     }
+    
+#     return render(request, 'receive/rd_preview_print.html', context)
 
 @login_required(login_url='login')
 def checking(request):

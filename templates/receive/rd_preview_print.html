@@ -319,7 +319,7 @@ margin-top: 99%;
             <tbody>
               <tr >
                 <td><b>No.</b></td>
-                <td><b>EMPLOYEE NAME</b></td>
+                <td><b>EMPLOYEE</b></td>
                 <td><b>DIVISION/PROGRAM</b></td>
                 <td><b>AMOUNT (CLAIM)</b></td>
                 <td><b>REMARKS</b></td>
@@ -331,7 +331,7 @@ margin-top: 99%;
                 <td class="align-text-left" style="padding: 5;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
                 <td class="align-text-left" style="padding: 5;">{{ emp.division }}</td>
                 <td  class="align-text-left" style="padding: 4;">{{ emp.final_amount|floatformat:2|intcomma }} </td>
-                <td style="padding: 4;" class="align-text-right">{{ emp.remarks }}</td>                
+                <td style="padding: 4;" class="align-text-left">{{ emp.remarks }}</td>                
                 <td class="align-text-right" style="padding: 5;">{{ emp.date_compiled }}</td>
               </tr>
               {% endfor %}

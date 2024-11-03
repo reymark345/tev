@@ -1547,7 +1547,7 @@ def updatetevdetails(request):
         transaction_id = request.POST.get('transaction_id')
         selected_remarks = request.POST.getlist('selected_remarks[]')
         selected_dates = request.POST.getlist('selected_dates[]')
-        TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status=status, reviewed_by =user_id, date_reviewed =date_time.datetime.now())
+        TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,status_id=status, reviewed_by =user_id, date_reviewed =date_time.datetime.now())
         Remarks_r.objects.filter(incoming_id=transaction_id).delete()
         for selected_remarks, selected_dates in zip(selected_remarks, selected_dates):
             Remarks_r.objects.create(

@@ -381,7 +381,7 @@ class TravelDestination(models.Model):
 
     class Meta:
         managed = True
-        db_table = 'destination_time'
+        db_table = 'travel_destination'
     
 class TravelList(models.Model):
     province = models.CharField(max_length=128, blank=True, null=True)
