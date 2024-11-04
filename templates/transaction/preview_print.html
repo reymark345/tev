@@ -330,20 +330,6 @@ margin-top: 99%;
 </head>
 <body>
     <div class="container-wrapper">
-      {% comment %} <div class="container">
-        <div class="navbar-header">
-      
-          <a class="navbar-brand" href="#">DSWD FO CARAGA</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-           
-            <li>
-              <button type="button" class="btn btn-primary" onclick="printForms()"  title="Print" style="font-size: 18px;"><i class="fas fa-print"></i> Print</button></li>
-          </ul>
-        </div>
-      </div> {% endcomment %}
-
       <div class="container">
         <div class="navbar-header">
           <a class="navbar-brand" href="#">
@@ -1433,7 +1419,6 @@ margin-top: 99%;
                       <tr>
                         <td class="no-border"></td>
                         <td class="no-border" colspan="2" >
-                          <!-- <center><b><u>Janice Lamorin</u></b></center> -->
                           <center><b><u><span contenteditable="true" id="editableName">{{ user }}</span></u></b></center>
                         </td>
                         </td>
@@ -1498,13 +1483,9 @@ margin-top: 99%;
 </body>   
 <script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
 <script type="text/javascript">
-
-
-
-$(document).ready(function () {
-  $('#loading-screen').hide();
-});
-
+  $(document).ready(function () {
+    $('#loading-screen').hide();
+  });
   function printForms() {
       $.ajax({
         type: 'POST',

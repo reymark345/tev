@@ -150,6 +150,7 @@
                         <option></option>
                         <option value="2">For checking</option>
                         <option value="7">For approval</option>
+                        <option value="16">Pending</option>
                         <option value="3">Returned</option>
                     </select>
                 </div>
@@ -596,18 +597,6 @@
 
                   },
                 },
-                // {
-                //     targets: -4,
-                //     render: function (data) {
-                //         return data;
-                //         // if (data === null || data === undefined || data === "") {
-                //         //     return ''; 
-                //         // } 
-                //         // else {
-                //         //     return '<span class="badge bg-label-success">' + data + '</span>';
-                //         // }
-                //     },
-                // },
 
                 {
                     targets: -3,
@@ -617,7 +606,6 @@
                         } 
                         else {
                             return data;
-                            // return '<span class="badge bg-label-danger">' + data + '</span>';
                         }
                     },
                 },
@@ -649,6 +637,13 @@
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
                 {
+                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Preview</span>',
+                    className: 'create-new btn btn-primary',
+                    action: function () {
+                        window.open("{% url 'rd-preview-print' %}", '_blank');
+                    }
+                },
+                {
                     className: 'btn btn-label-primary me-2',
                     text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
                     action: function () {
@@ -657,22 +652,22 @@
                         $selectElement.empty();
                         fetchEmployee($selectElement);
                         FEmployeeName.val('').trigger('change');
-
+            
                         setTimeout(function() {
                             if (FEmployeeName.length) {
-                                FEmployeeName.wrap('<div class="position-relative"></div>')
+                                FEmployeeName.wrap('<div class="position-relative"></div>');
                                 FEmployeeName.select2({
                                     placeholder: 'Choose employee',
                                     dropdownParent: FEmployeeName.parent(),
                                     allowClear: true,
-                                })
+                                });
                             }
                         }, 300);
                         clear_advfilter();
                         $("#advance-filter-checking").modal("show");
                     }
                 }
-            ],
+            ],        
             drawCallback: function (settings) {
                 $('.item-edit').on('click', function () {
                     let id = $(this).data('id')
