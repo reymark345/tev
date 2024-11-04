@@ -1019,7 +1019,6 @@ def preview_box_a(request):
 @login_required(login_url='login')
 def rd_preview_print(request):
     data = TevIncoming.objects.filter(status=16).order_by('last_name')
-
     data_result = []
 
     for item in data:
