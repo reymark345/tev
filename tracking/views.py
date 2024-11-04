@@ -426,7 +426,13 @@ def employee_details(request):
                 CONCAT_WS(' ', ob.first_name, ob.last_name) AS out_by,
                 ch.name AS charges, 
                 cl.name AS cluster,
-                GROUP_CONCAT(t3.name SEPARATOR ', ') AS remarks,
+                GROUP_CONCAT(
+                    CONCAT(
+                        '<strong><u>', t3.name, '</u></strong>', 
+                        ' - ', 
+                        DATE_FORMAT(t2.date, '%%M %%d, %%Y')
+                    ) SEPARATOR '; '
+                ) AS formatted_remarks,
                 CONCAT_WS(' ', au.first_name, au.last_name) AS forwarded_by,
                 CONCAT_WS(' ', rb.first_name, rb.last_name) AS reviewed_by,
                 ti.date_reviewed,
@@ -624,7 +630,7 @@ def employee_details(request):
             'p_f_by': row[33],
             'charges': row[34],
             'cluster': row[35],
-            'remarks': row[36], 
+            "remarks": row[36],
             'received_forwarded_by': forwarded_by.title(), 
             'reviewed_by': row[38],
             'date_reviewed': date_reviewed,
