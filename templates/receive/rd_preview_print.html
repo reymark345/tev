@@ -1,0 +1,365 @@
+
+{% load humanize %} 
+{% load staticfiles %}
+<html>
+  <div id="loading-screen">
+    <center>
+        <div class="col">
+            <!-- Fold -->
+            <div class="sk-fold sk-primary">
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+            </div>
+          </div>  
+    </center>
+  </div>
+<head>
+</head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+<style>
+  #loading-screen {
+    position: fixed;
+    background: rgba(255, 255, 255, 0.7);
+    color: rgb(0, 0, 0);
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+  }
+.sk-primary .sk-fold-cube {
+    width: 15px; /* Set the width of each cube */
+    height: 15px; /* Set the height of each cube */
+}
+
+.container-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: auto;
+  padding-bottom: 50px;
+  background-color: #cccccc;
+}
+  
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 5%;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 20px;
+  padding: 0 10px;
+}
+  
+.print-button {
+  background-color: #b2c2ce;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  margin-right: 500px;
+}
+
+.container-body3  {
+
+  width: 210mm;
+  height:auto;
+  background-color: #ffffff;
+  box-shadow: 0px 0px 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  position: relative;
+  padding: 50px;
+}
+
+
+
+.navbar-brand {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
+}
+
+.navbar-collapse {
+  display: flex;
+}
+
+.navbar-collapse ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.navbar-collapse ul li {
+  display: inline-block;
+}
+
+.navbar-collapse button {
+  font-size: 14px;
+  margin-top: 8px;
+  margin-right: 150px; /* Added margin-right to ensure proper spacing */
+}
+
+.navbar-collapse {
+  margin-right: 30px; /* Adjusted for spacing from the right */
+}
+
+#dswd-logo {
+  height:55px;
+  width:160px;
+  margin-top: 7px;
+}
+
+#ph-img {
+  position: relative;
+  width:65px;
+  height:55px;
+  top: -7px; /* Adjust this value to move the image up */
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  height:35px;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+  .appendix {
+    position: absolute;
+    top: 65px;
+    right: 50px;
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  .appendix-11 {
+    position: absolute;
+    top: 65px;
+    right: 50px;
+    font-size: 14px;
+    font-style: italic;
+  } 
+  
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 40px;
+  }
+
+  table.table-border{
+    border: 3px solid;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 40px;
+  }
+  table.obligation{
+    border: 3px solid;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+  }
+  th,
+  td {
+    border: 1px solid #000000;
+    text-align: left;
+    padding: 8px;
+  }
+  
+  th {
+    background-color: #f2f2f2;
+  }
+  
+  .center-text {
+    text-align: center;
+    vertical-align: top;
+  }
+
+.coloredrow {
+  background-color: rgb(158, 198, 255);
+  -webkit-print-color-adjust: exact;
+}
+.align-u-left {
+  text-align: left;
+  vertical-align: top;
+}
+
+table.myClass * { /*new*/
+  border: 0;
+}
+thead {
+  visibility: hidden;
+}
+thead th {
+  border: none; /* No border for thead cells */
+}
+ 
+@media print {
+  .container {
+  display: none;
+}
+
+.container-body{
+  background-color: #f0f0f0;
+  box-shadow: none;
+  width: 210mm;
+  height: 297mm;
+  margin-top: -30px;
+  }
+
+.container-body3{
+  background-color: #f0f0f0;
+  box-shadow: none;
+  width: 210mm;
+  height: 297mm;
+  margin-top: -30px;
+  }
+
+  .container h3 {
+    color: transparent;
+  }
+
+  .container-wrapper {
+    align-items: flex-start;
+  }
+
+  table {
+    margin-top: 15px;
+  }
+  .appendix {
+    position: absolute;
+    top: 65px;
+    right: 50px;
+    font-size: 14px;
+    font-style: italic;
+  }
+
+
+
+  .center-text b {
+    font-size: 14px;
+  }
+
+
+.footer {
+  margin-top: 95% !important;
+}}
+
+.innerTable{
+  margin:0px;
+  border-color:white;  
+}
+.lastRow{
+  padding:0px;
+}
+
+.align-text-right{
+text-align: right;
+}
+.align-text-right{
+text-align: right;
+}
+.no-border{
+border: 0;
+}
+
+.footer {
+margin-top: 99%;
+}
+
+</style>
+</head>
+<body>
+    <div class="container-wrapper">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">
+            <img src="{% static 'assets/img/custom/dswd-logo.png' %}" alt="First Logo" id="dswd-logo">
+            <img src="{% static 'assets/img/custom/bp-logo.png' %}" alt="Second Logo" id="ph-img">
+          </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav navbar-right">
+            <li><button type="button" class="btn btn-primary" onclick="printForms()" id="floatprint" title="Print" style="font-size: 14px;"><i class="fas fa-print"></i> Print</button></li>
+          </ul>
+        </div>
+      </div>
+        <br>
+        <div class="container-body3">
+          <span style="font-family: Calibri, sans-serif;">
+            <center>
+              <span >
+                <b>TRAVEL REIMBURSEMENT INFORMATION PLATFORM SYSTEM </b> <br>
+                {{ date_now }}
+              </span><br>
+            </center>
+          </span>
+          <table style="font-family: Calibri, sans-serif;" >
+            <br>
+            <tbody>
+              <tr >
+                <td><b>No.</b></td>
+                <td><b>EMPLOYEE</b></td>
+                <td><b>DIVISION/PROGRAM</b></td>
+                <td><b>AMOUNT (CLAIM)</b></td>
+                <td><b>REMARKS</b></td>
+                <td><b>DATE COMPILED</b></td>
+              </tr>              
+              {% for emp in data %}
+              <tr>
+                <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
+                <td class="align-text-left" style="padding: 5;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
+                <td class="align-text-left" style="padding: 5;">{{ emp.division }}</td>
+                <td  class="align-text-left" style="padding: 4;">{{ emp.final_amount|floatformat:2|intcomma }} </td>
+                <td style="padding: 4;" class="align-text-left">{{ emp.remarks|safe }}</td>                
+                <td class="align-text-left" style="padding: 5;">{{ emp.date_compiled }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <br>
+
+        </div>
+      </div>
+
+</body>   
+<script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
+<script type="text/javascript">
+
+
+
+$(document).ready(function () {
+  $('#loading-screen').hide();
+});
+
+  function printForms() {
+      $.ajax({
+        type: 'POST',
+        url: "{% url 'update-status' %}",
+    }).done(function (data) {
+      window.print();
+    })
+  }
+</script>
+</html>
