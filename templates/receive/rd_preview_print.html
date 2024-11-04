@@ -334,6 +334,10 @@ margin-top: 99%;
                 <td style="padding: 4;" class="align-text-left">{{ emp.remarks|safe }}</td>                
                 <td class="align-text-left" style="padding: 5;">{{ emp.date_compiled }}</td>
               </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" style="text-align: center;"><i>No data available</i></td>
+              </tr>
               {% endfor %}
             </tbody>
           </table>
