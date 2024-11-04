@@ -1034,7 +1034,7 @@
                         let reviewed_by = item.reviewed_by;
                         let date_reviewed = item.date_reviewed;
                         let status = item.status;
-                        let remarks = item.remarks;
+                        let remarks = `<span>${item.remarks}</span>`;
                         let original_amt = parseFloat(item.original_amount).toFixed(2);
                         let final_amt = parseFloat(item.final_amount).toFixed(2);
                         let rv_date_forwarded = item.review_date_forwarded;
@@ -1057,7 +1057,7 @@
                           date_reviewed = `<span class="badge bg-label-primary">Not Applicable</span>`
                         }
 
-                        if (!remarks){
+                        if (item.remarks == null){
                           remarks = `<span class="badge bg-label-primary">None</span>`
                         }
 
