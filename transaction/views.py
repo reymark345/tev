@@ -20,7 +20,7 @@ from django.db import connections
 from django.db import IntegrityError, connection
 from django.db.models import Q, Max
 import datetime as date_time
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from decimal import Decimal, ROUND_HALF_UP
 from django.utils import timezone
 from django.db import transaction
@@ -2145,38 +2145,86 @@ def add_emp_journal(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
   
 
+# @csrf_exempt
+# def retrieve_employee(request):
+#     dv_no_id = request.POST.get('dv_no_id')
+#     data = []
+#     dv_number = TevOutgoing.objects.filter(id=dv_no_id).first()
+
+#     list_employee = TevIncoming.objects.filter(status_id=4).order_by('first_name')
+
+#     for row in list_employee:
+#         date_travel_str = row.date_travel
+#         date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=pytz.UTC) for date_str in date_travel_str.split(',')]
+#         date_travel_formatted = ', '.join(date_travel.strftime("%b. %d %Y") for date_travel in date_travel_list)
+#         first_name = row.first_name if row.first_name else ''
+#         middle_name = row.middle_name if row.middle_name else ''
+#         last_name = row.last_name if row.last_name else ''
+#         final_amount = row.final_amount if row.final_amount else ''
+#         final_amount = ": Amount: " + f"{Decimal(final_amount):,.2f}"
+#         emp_fullname = f"{first_name} {middle_name} {last_name} {final_amount} : Date Travel: {date_travel_formatted}".strip()
+#         item = {
+#             'id': row.id,
+#             'name': emp_fullname
+#         }
+#         data.append(item)
+
+#     response = {
+#         'data': data,
+#         'dv_no' : dv_number.dv_no,
+#         'status' : dv_number.status_id
+#     }
+
+#     return JsonResponse(response)
+
 @csrf_exempt
 def retrieve_employee(request):
     dv_no_id = request.POST.get('dv_no_id')
     data = []
-    dv_number = TevOutgoing.objects.filter(id=dv_no_id).first()
+    
+    try:
+        # Ensure dv_no_id is valid
+        dv_no_id = int(dv_no_id)  # or validate according to your requirements
+        dv_number = TevOutgoing.objects.filter(id=dv_no_id).first()
+        
+        if dv_number is None:
+            return JsonResponse({'error': 'DV number not found'}, status=404)
 
-    list_employee = TevIncoming.objects.filter(status_id=4).order_by('first_name')
+        list_employee = TevIncoming.objects.filter(status_id=4).order_by('first_name')
 
-    for row in list_employee:
-        date_travel_str = row.date_travel
-        # date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=timezone.utc) for date_str in date_travel_str.split(',')]
-        date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=pytz.UTC) for date_str in date_travel_str.split(',')]
-        date_travel_formatted = ', '.join(date_travel.strftime("%b. %d %Y") for date_travel in date_travel_list)
-        first_name = row.first_name if row.first_name else ''
-        middle_name = row.middle_name if row.middle_name else ''
-        last_name = row.last_name if row.last_name else ''
-        final_amount = row.final_amount if row.final_amount else ''
-        final_amount = ": Amount: " + f"{Decimal(final_amount):,.2f}"
-        emp_fullname = f"{first_name} {middle_name} {last_name} {final_amount} : Date Travel: {date_travel_formatted}".strip()
-        item = {
-            'id': row.id,
-            'name': emp_fullname
+        for row in list_employee:
+            date_travel_list = [
+                datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=pytz.UTC) 
+                for date_str in row.date_travel.split(',')
+            ]
+            date_travel_formatted = ', '.join(date_travel.strftime("%b. %d %Y") for date_travel in date_travel_list)
+
+            final_amount = row.final_amount or 0
+            try:
+                # Try converting to Decimal
+                final_amount_decimal = Decimal(final_amount)
+            except (InvalidOperation, ValueError):
+                final_amount_decimal = Decimal(0)
+
+            emp_fullname = f"{row.first_name or ''} {row.middle_name or ''} {row.last_name or ''} : Amount: {final_amount_decimal:,.2f} : Date Travel: {date_travel_formatted}".strip()
+
+            data.append({
+                'id': row.id,
+                'name': emp_fullname
+            })
+
+        response = {
+            'data': data,
+            'dv_no': dv_number.dv_no,
+            'status': dv_number.status_id
         }
-        data.append(item)
+        
+        return JsonResponse(response)
 
-    response = {
-        'data': data,
-        'dv_no' : dv_number.dv_no,
-        'status' : dv_number.status_id
-    }
-
-    return JsonResponse(response)
+    except (ValueError, TypeError) as e:
+        return JsonResponse({'error': 'Invalid input'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @csrf_exempt
 def delete_box_list(request):
