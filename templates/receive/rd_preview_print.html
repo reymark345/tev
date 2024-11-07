@@ -310,7 +310,7 @@ margin-top: 99%;
             <center>
               <span >
                 <b>TRAVEL REIMBURSEMENT INFORMATION PLATFORM SYSTEM </b> <br>
-                {{ date_now }}
+                PENDING CLAIMS AS OF <b>{{ date_now }}</b>
               </span><br>
             </center>
           </span>
@@ -323,7 +323,7 @@ margin-top: 99%;
                 <td><b>DIVISION/PROGRAM</b></td>
                 <td><b>AMOUNT (CLAIM)</b></td>
                 <td><b>REMARKS</b></td>
-                <td><b>DATE COMPILED</b></td>
+                <td style="min-width: 150px;"><b>DATE COMPLIED</b></td>
               </tr>              
               {% for emp in data %}
               <tr>
@@ -332,7 +332,7 @@ margin-top: 99%;
                 <td class="align-text-left" style="padding: 5;">{{ emp.division }}</td>
                 <td  class="align-text-left" style="padding: 4;">{{ emp.final_amount|floatformat:2|intcomma }} </td>
                 <td style="padding: 4;" class="align-text-left">{{ emp.remarks|safe }}</td>                
-                <td class="align-text-left" style="padding: 5;">{{ emp.date_compiled }}</td>
+                <td ></td>
               </tr>
               {% empty %}
               <tr>
