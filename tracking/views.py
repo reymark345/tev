@@ -29,7 +29,8 @@ from django.utils import timezone
 from django.template.defaultfilters import date
 import decimal
 
-
+def format_datetime(dt):
+    return dt.strftime('%B %d, %Y %I:%M %p') if dt else None
 
 @login_required(login_url='login')
 @csrf_exempt
@@ -76,16 +77,12 @@ def status_load(request):
     total = 0
     data = []
     _search = request.GET.get('search[value]')
-    _order_dir = request.GET.get('order[0][dir]')
-    _order_dash = '-' if _order_dir == 'desc' else ''
-    _order_col_num = request.GET.get('order[0][column]')
 
     FIdNumber= request.GET.get('FIdNumber')
     FStatus= request.GET.get('FStatus') 
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
     FDivision = request.GET.get('FDivision')
-    NDVNumber= request.GET.get('NDVNumber') 
     DpYear= request.GET.get('DpYear') 
 
     if DpYear == "2023":
@@ -106,7 +103,6 @@ def status_load(request):
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if FAdvancedFilter:
-        # 04/01/2024 to 04/30/2024
         FStartDate = request.GET.get('FStartDate') 
         FEndDate = request.GET.get('FEndDate') 
         formatted_start_date = None
@@ -117,8 +113,11 @@ def status_load(request):
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
                     tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
                     tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
-                    tev_incoming.incoming_out, tev_incoming.division, tev_incoming.section,
-                    tev_bridge.purpose AS purposes, tev_outgoing.dv_no AS dv_no
+                    tev_incoming.incoming_out, tev_incoming.slashed_out,tev_incoming.updated_at, tev_incoming.division, tev_incoming.section,
+                    tev_incoming.date_reviewed, tev_incoming.date_payrolled, tev_incoming.review_date_forwarded,
+                    tev_bridge.purpose AS purposes, tev_outgoing.dv_no AS dv_no,
+                    tev_outgoing.box_date_out, tev_outgoing.box_b_in, tev_outgoing.box_b_out, tev_outgoing.ard_in, tev_outgoing.otg_d_received, tev_outgoing.otg_d_forwarded,
+                    tev_outgoing.b_d_received,tev_outgoing.b_d_forwarded, tev_outgoing.j_d_received, tev_outgoing.j_d_forwarded, tev_outgoing.a_d_received, tev_outgoing.a_d_forwarded
                 FROM tev_incoming
                 INNER JOIN (
                     SELECT MAX(id) AS max_id
@@ -220,10 +219,17 @@ def status_load(request):
                     tev_incoming.final_amount,
                     tev_incoming.incoming_in,
                     tev_incoming.incoming_out,
+                    tev_incoming.slashed_out,
+                    tev_incoming.updated_at,
                     tev_bridge.purpose AS purposes,
                     tev_outgoing.dv_no AS dv_no,
                     tev_incoming.division,
-                    tev_incoming.section
+                    tev_incoming.section,
+                    tev_incoming.date_reviewed,
+                    tev_incoming.date_payrolled,
+                    tev_incoming.review_date_forwarded,
+                    tev_outgoing.box_date_out, tev_outgoing.box_b_in, tev_outgoing.box_b_out, tev_outgoing.ard_in, tev_outgoing.otg_d_received, tev_outgoing.otg_d_forwarded,
+                    tev_outgoing.b_d_received,tev_outgoing.b_d_forwarded, tev_outgoing.j_d_received, tev_outgoing.j_d_forwarded, tev_outgoing.a_d_received, tev_outgoing.a_d_forwarded
                 FROM
                     tev_incoming
                 INNER JOIN (
@@ -258,8 +264,11 @@ def status_load(request):
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
                     tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
                     tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
-                    tev_incoming.incoming_out, tev_incoming.division, tev_incoming.section,
-                    tev_bridge.purpose AS purposes, tev_outgoing.dv_no AS dv_no
+                    tev_incoming.incoming_out,tev_incoming.slashed_out,tev_incoming.updated_at, tev_incoming.division, tev_incoming.section,
+                    tev_incoming.date_reviewed, tev_incoming.date_payrolled, tev_incoming.review_date_forwarded,
+                    tev_bridge.purpose AS purposes, tev_outgoing.dv_no AS dv_no,
+                    tev_outgoing.box_date_out, tev_outgoing.box_b_in, tev_outgoing.box_b_out, tev_outgoing.ard_in, tev_outgoing.otg_d_received, tev_outgoing.otg_d_forwarded,
+                    tev_outgoing.b_d_received,tev_outgoing.b_d_forwarded, tev_outgoing.j_d_received, tev_outgoing.j_d_forwarded, tev_outgoing.a_d_received, tev_outgoing.a_d_forwarded
                 FROM tev_incoming
                 INNER JOIN (
                     SELECT MAX(id) AS max_id
@@ -274,8 +283,7 @@ def status_load(request):
                 WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
                 ORDER BY tev_incoming.id DESC;
             """, [f'{formatted_year}%'])
-
-
+            
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     
@@ -335,6 +343,11 @@ def status_load(request):
           "PD" if acronym == 'Promotive Services Division'else
           "")
         
+        if approved_date:
+            approved_date = approved_date.strftime('%B %d, %Y')
+        else:
+            approved_date = None
+        
         item = {
             'division': acr,
             'code': row['code'],
@@ -343,8 +356,25 @@ def status_load(request):
             'status': row['status_id'],
             'original_amount': row['original_amount'],
             'final_amount': row['final_amount'],
-            'incoming_in': row['incoming_in'],
-            'incoming_out': row['incoming_out'],
+            'incoming_in': format_datetime(row['incoming_in']),
+            'incoming_out': format_datetime(row['incoming_out']),
+            'slashed_out': format_datetime(row['slashed_out']),
+            'updated_at': format_datetime(row['updated_at']),
+            'date_reviewed': format_datetime(row['date_reviewed']),
+            'date_payrolled': format_datetime(row['date_payrolled']),
+            'review_date_forwarded': format_datetime(row['review_date_forwarded']),
+            'box_date_out': format_datetime(row['box_date_out']),
+            'box_b_in': format_datetime(row['box_b_in']),
+            'box_b_out': format_datetime(row['box_b_out']),
+            'ard_in': format_datetime(row['ard_in']),
+            'otg_d_received': format_datetime(row['otg_d_received']),
+            'otg_d_forwarded': format_datetime(row['otg_d_forwarded']),
+            'b_d_received': format_datetime(row['b_d_received']),
+            'b_d_forwarded': format_datetime(row['b_d_forwarded']),
+            'j_d_received': format_datetime(row['j_d_received']),
+            'j_d_forwarded': format_datetime(row['j_d_forwarded']),
+            'a_d_received': format_datetime(row['a_d_received']),
+            'a_d_forwarded': format_datetime(row['a_d_forwarded']),
             'purpose': row['purposes'],
             'dv_no': row['dv_no'],
             'id': row['id'],
