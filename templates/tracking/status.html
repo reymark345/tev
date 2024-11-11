@@ -523,13 +523,13 @@
                   var b_d_forwarded = row.b_d_forwarded; 
                   
                   if (status >= 9  && status < 10 && status !=16){
-                    return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
+                    return '<center><span class="badge badge-center rounded-pill bg-warning tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
                   }
                   else if (status == 10 && status !=16 ){
-                    return  '<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received <br>' + b_d_received +'"><i class="ti ti-check"></i></span></center>'
+                    return  '<center><span class="badge badge-center rounded-pill bg-primary tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received <br>' + b_d_received +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else if (status >= 11 && status !=16){
-                    return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded <br>' + b_d_forwarded +'"><i class="ti ti-check"></i></span></center>'
+                    return '<center><span class="badge badge-center rounded-pill bg-success tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded <br>' + b_d_forwarded +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else{
                       return ``;
@@ -547,13 +547,13 @@
                   var j_d_forwarded = row.j_d_forwarded; 
 
                   if (status >= 11  && status < 12 && status !=16){
-                    return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
+                    return '<center><span class="badge badge-center rounded-pill bg-warning  tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
                   }
                   else if (status == 12 && status !=16){
-                    return  '<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received <br>' + j_d_received +'"><i class="ti ti-check"></i></span></center>'
+                    return  '<center><span class="badge badge-center rounded-pill bg-primary  tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received <br>' + j_d_received +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else if (status >= 13 && status !=16){
-                    return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded <br>' + j_d_forwarded +'"><i class="ti ti-check"></i></span></center>'
+                    return '<center><span class="badge badge-center rounded-pill bg-success  tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded <br>' + j_d_forwarded +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else{
                     return ``;
@@ -568,7 +568,7 @@
                   var status = row.status; 
                   var journal_forwarded = row.j_d_forwarded; 
                   if (status >= 13  && status <= 15 && status !=16){
-                    return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded <br>' + journal_forwarded +'"><i class="ti ti-check"></i></span></center>'
+                    return '<center><span class="badge badge-center rounded-pill bg-success  tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded <br>' + journal_forwarded +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else{
                       return ``;   
@@ -585,13 +585,13 @@
                   var approval_received = row.a_d_received; 
                   var approval_forwarded = row.a_d_forwarded; 
                   if (status >= 13  && status < 14 && status !=16){
-                    return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs- ="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
+                    return '<center><span class="badge badge-center rounded-pill bg-warning tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs- ="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
                   }
                   else if (status == 14 && status !=16 ){
-                    return  '<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received <br>' + approval_received +'"><i class="ti ti-check"></i></span></center>'
+                    return  '<center><span class="badge badge-center rounded-pill bg-primary tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received <br>' + approval_received +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else if (status >= 15 && status !=16){
-                    return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded <br>' + approval_forwarded +'"><i class="ti ti-check"></i></span></center>'
+                    return '<center><span class="badge badge-center rounded-pill bg-success tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded <br>' + approval_forwarded +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else{
                     return ``;
@@ -606,13 +606,13 @@
                 var status = row.status; 
                 var approved_date = row.approved_date; 
                 if (data){
-                  return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Check Issued <br>' + approved_date +'"><i class="ti ti-check"></i></span></center>'
+                  return '<center><span class="badge badge-center rounded-pill bg-success tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Check Issued <br>' + approved_date +'"><i class="ti ti-check"></i></span></center>'
                 }
                 else if (status == 15 && status !=16){
-                  return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-warning"><i class="ti ti-check"></i></span></center>'
+                  return '<center><span class="badge badge-center rounded-pill bg-warning tool-tip-hover" role="button" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-warning" title="For Receive"><i class="ti ti-check"></i></span></center>'
                 }
                 else{
-                  return ``;    
+                  return ``;     
                 }
               },
           },
@@ -675,13 +675,18 @@
               {% endif %}
           ],
           drawCallback: function (settings) { 
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('.tool-tip-hover'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
             
-            setTimeout(function() {
-                  var tooltipTriggerList = [].slice.call(document.querySelectorAll('.tool-tip-hover'));
-                  tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-                      new bootstrap.Tooltip(tooltipTriggerEl);
-                  });
-              }, 100);
+            
+            // setTimeout(function() {
+            //       var tooltipTriggerList = [].slice.call(document.querySelectorAll('.tool-tip-hover'));
+            //       tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            //           new bootstrap.Tooltip(tooltipTriggerEl);
+            //       });
+            //   }, 100);
 
               $('.view-data').on('click', function () {
                   let id = $(this).attr('id');
