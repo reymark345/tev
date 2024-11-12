@@ -239,16 +239,17 @@
                             </li>
                         {% endif %}
 
-                        <!-- {% if 'Admin' in permissions  %}
+                       {% if 'Admin' in permissions  %}
                            
                         <li class="menu-item {% if url_name == 'travel-list' %}active{% endif %}">
                             <a href="{% url 'travel-list' %}" class="menu-link">
-                                <i class="menu-icon tf-icons ti ti-checkbox"></i>
+                                <i class="menu-icon tf-icons ti ti-components"></i>
                             
                                 <div data-i18n="Travel">Travel</div>
                             </a>
                         </li>
-                        {% endif %} -->
+                        
+                        {% endif %}
 
                         {% if 'Admin' in permissions or 'Incoming staff' in permissions %}
                            
