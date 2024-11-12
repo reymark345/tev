@@ -278,7 +278,6 @@
       let chargeId = 0;
       let selectedCb = [];
       $(document).ready(function () {
-        $('#loading-screen').hide();
         const table_box_a = $('#tbl-box-a')
         const table = $('#tbl-items');
         const currentDate = new Date();
@@ -932,6 +931,15 @@
               } 
             });
         }
+
+        dataTable.on('processing.dt', function(e, settings, processing) {
+            if (!processing) {
+                $('#loading-screen').hide();
+            }
+        });
+        dataTable.on('xhr.dt', function() {
+            $('#loading-screen').hide();
+        });
   
         function outgoing(status_id){
           selectedCb = $.grep(selectedCb, function(value) {
