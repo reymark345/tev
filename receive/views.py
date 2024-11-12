@@ -269,13 +269,6 @@ def item_load(request):
     EmployeeList = request.GET.getlist('EmployeeList[]')
     id_numbers = EmployeeList if EmployeeList else []
     
-
-#             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
-#             FROM tev_incoming t1
-#             LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
-#             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
-
-
     base_query = """
         SELECT t1.*, 
                GROUP_CONCAT(CONCAT('<strong><u>', t3.name, '</u></strong> - ', DATE_FORMAT(t2.date, '%%M %%d, %%Y')) SEPARATOR '<br>') AS formatted_remarks,
@@ -291,8 +284,6 @@ def item_load(request):
         AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) 
              OR (`status_id` IN (1) AND slashed_out IS NULL))
     """
-    
-    # Add filters based on advanced filter or search criteria
     params = []
     if FAdvancedFilter:
         advanced_filters = """
@@ -372,215 +363,6 @@ def item_load(request):
         'recordsFiltered': total,
     }
     return JsonResponse(response)
-    
-# def item_load(request):
-#     _search = request.GET.get('search[value]')
-#     _order_dir = request.GET.get('order[0][dir]')
-#     _order_dash = '-' if _order_dir == 'desc' else ''
-#     _order_col_num = request.GET.get('order[0][column]')
-#     FIdNumber= request.GET.get('FIdNumber')
-#     FTransactionCode = request.GET.get('FTransactionCode')
-#     FDateTravel= request.GET.get('FDateTravel') 
-#     FIncomingIn= request.GET.get('FIncomingIn')
-#     FOriginalAmount= request.GET.get('FOriginalAmount')
-#     FFinalAmount= request.GET.get('FFinalAmount')
-#     FAccountNumber= request.GET.get('FAccountNumber')
-#     FIncomingBy= request.GET.get('FIncomingBy')
-#     FFirstName= request.GET.get('FFirstName')
-#     FMiddleName= request.GET.get('FMiddleName')
-#     FLastName= request.GET.get('FLastName')
-#     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
-#     FStatus = request.GET.get('FStatus')
-#     FCreatedBy = request.GET.get('FCreatedBy')
-#     EmployeeList = request.GET.getlist('EmployeeList[]')
-#     status_txt = ''
-#     if _search in "returned":
-#         status_txt = '3'
-#     else:
-#         status_txt = '1'
-#     id_numbers = EmployeeList if EmployeeList else []
-#     if FAdvancedFilter and not EmployeeList:
-#         query = """
-#             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
-#             FROM tev_incoming t1
-#             LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
-#             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
-#             WHERE (t1.code, t1.id) IN (
-#                 SELECT DISTINCT code, MAX(id)
-#                 FROM tev_incoming
-#                 GROUP BY code 
-#             )
-#             AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL)) 
-#             AND (code LIKE %s
-#             AND id_no LIKE %s
-#             AND account_no LIKE %s
-#             AND date_travel LIKE %s
-#             AND original_amount LIKE %s
-#             AND final_amount LIKE %s
-#             AND incoming_in LIKE %s
-#             AND status_id LIKE %s
-#             AND user_id LIKE %s
-#             )GROUP BY t1.id ORDER BY id DESC;
-#         """
-
-#         params = [
-#             '%' + FTransactionCode + '%' if FTransactionCode else "%%",
-#             '%' + EmployeeList + '%' if EmployeeList else "%%",
-#             '%' + FAccountNumber + '%' if FAccountNumber else "%%",
-#             '%' + FDateTravel + '%' if FDateTravel else "%%",
-#             '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
-#             '%' + FFinalAmount + '%' if FFinalAmount else "%%",
-#             '%' + FIncomingIn + '%' if FIncomingIn else "%%",
-#             '%' + FStatus + '%' if FStatus else "%%",
-#             '%' + FCreatedBy + '%' if FCreatedBy else "%%"
-#         ]
-
-#     elif FAdvancedFilter:
-#         query = """
-#             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
-#             FROM tev_incoming t1
-#             LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
-#             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
-#             WHERE (t1.code, t1.id) IN (
-#                     SELECT DISTINCT code, MAX(id)
-#                     FROM tev_incoming
-#                     GROUP BY code 
-#             )
-#             AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL)) 
-#             AND (code LIKE %s
-#             AND id_no IN %s
-#             AND account_no LIKE %s
-#             AND date_travel LIKE %s
-#             AND original_amount LIKE %s
-#             AND final_amount LIKE %s
-#             AND incoming_in LIKE %s
-#             AND status_id LIKE %s
-#             AND user_id LIKE %s
-#             )GROUP BY t1.id ORDER BY id DESC;
-#         """
-
-#         params = [
-#             '%' + FTransactionCode + '%' if FTransactionCode else "%%",
-#             tuple(id_numbers),
-#             '%' + FAccountNumber + '%' if FAccountNumber else "%%",
-#             '%' + FDateTravel + '%' if FDateTravel else "%%",
-#             '%' + FOriginalAmount + '%' if FOriginalAmount else "%%",
-#             '%' + FFinalAmount + '%' if FFinalAmount else "%%",
-#             '%' + FIncomingIn + '%' if FIncomingIn else "%%",
-#             '%' + FStatus + '%' if FStatus else "%%",
-#             '%' + FCreatedBy + '%' if FCreatedBy else "%%"
-#         ]
-
-#     elif _search:
-#         query = """
-#             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
-#             FROM tev_incoming t1
-#             LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
-#             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
-#             WHERE (t1.code, t1.id) IN (
-#                     SELECT DISTINCT code, MAX(id)
-#                     FROM tev_incoming
-#                     GROUP BY code 
-#             )
-#             AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL)) 
-#             AND (first_name LIKE %s
-#             OR last_name LIKE %s
-#             OR id_no LIKE %s
-#             OR original_amount LIKE %s
-#             OR final_amount LIKE %s
-#             )GROUP BY t1.id ORDER BY id DESC;
-#         """
-                
-#         params = [
-#             '%' + _search + '%' if _search else "%%",
-#             '%' + _search + '%' if _search else "%%",
-#             '%' + _search + '%' if _search else "%%",
-#             '%' + _search + '%' if _search else "%%",
-#             '%' + _search + '%' if _search else "%%",
-#         ]
-#     else:
-#         query = """
-#             SELECT t1.*, GROUP_CONCAT(t3.name SEPARATOR ', ') AS lacking
-#             FROM tev_incoming t1
-#             LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
-#             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
-#             WHERE (t1.code, t1.id) IN (
-#                     SELECT DISTINCT code, MAX(id)
-#                     FROM tev_incoming
-#                     GROUP BY code 
-#             )
-#             AND ((`status_id` IN (3) AND slashed_out IS NOT NULL) OR (`status_id` IN (1) AND slashed_out IS NULL)) 
-#             AND (code LIKE %s
-#             OR first_name LIKE %s
-#             OR middle_name LIKE %s
-#             OR last_name LIKE %s
-#             OR id_no LIKE %s
-#             OR account_no LIKE %s
-#             OR date_travel LIKE %s
-#             OR original_amount LIKE %s
-#             OR final_amount LIKE %s
-#             OR status_id LIKE %s
-#             )GROUP BY t1.id ORDER BY id DESC;
-#         """
-            
-#         params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
-    
-#     with connection.cursor() as cursor:
-#         cursor.execute(query, params)
-#         columns = [col[0] for col in cursor.description]
-#         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-
-#     total = len(results)
-#     _start = request.GET.get('start')
-#     _length = request.GET.get('length')
-#     if _start and _length:
-#         start = int(_start)
-#         length = int(_length)
-#         page = math.ceil(start / length) + 1
-#         per_page = length
-#         results = results[start:start + length]
-
-#     data = []
-
-
-#     for item in results:
-#         userData = AuthUser.objects.filter(id=item['user_id'])
-#         full_name = userData[0].first_name if userData else ''
-        
-#         first_name = item['first_name'] if item['first_name'] else ''
-#         middle_name = item['middle_name'] if item['middle_name'] else ''
-#         last_name = item['last_name'] if item['last_name'] else ''
-        
-#         emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
-
-#         item_entry = {
-#             'id': item['id'],
-#             'code': item['code'],
-#             'name': emp_fullname,
-#             'id_no': item['id_no'],
-#             'account_no': item['account_no'],
-#             'date_travel': item['date_travel'],
-#             'original_amount': item['original_amount'],
-#             'final_amount': item['final_amount'],
-#             'incoming_in': item['incoming_in'],
-#             'incoming_out': item['incoming_out'],
-#             'slashed_out': item['slashed_out'],
-#             'remarks': item['remarks'],
-#             'lacking': item['lacking'],
-#             'status': item['status_id'],
-#             'user_id': full_name
-#         }
-
-#         data.append(item_entry)
-
-#     response = {
-#         'data': data,
-#         'page': page,
-#         'per_page': per_page,
-#         'recordsTotal': total,
-#         'recordsFiltered': total,
-#     }
-#     return JsonResponse(response)
 
 def travel_loadss(request):    
     data = []
@@ -640,13 +422,6 @@ def travel_load(request):
 
 
     for item in results:
-        # userData = AuthUser.objects.filter(id=user_id)
-        # full_name = userData[0].first_name if userData else ''
-        
-        # first_name = item['first_name'] if item['first_name'] else ''
-        # middle_name = item['middle_name'] if item['middle_name'] else ''
-        # last_name = item['last_name'] if item['last_name'] else ''
-        # emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
 
         item_entry = {
             'id': item.id,
