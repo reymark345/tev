@@ -376,7 +376,7 @@
 
 
         employeelist();
-        $('#loading-screen').hide();
+        // $('#loading-screen').hide();
         var dateField = $('#dateField').flatpickr({
             mode: 'multiple',
             allowInput: true,
@@ -1204,6 +1204,14 @@
 
         });
 
+    dataTable.on('processing.dt', function(e, settings, processing) {
+        if (!processing) {
+            $('#loading-screen').hide();
+        }
+    });
+    dataTable.on('xhr.dt', function() {
+        $('#loading-screen').hide();
+    });
 
     function fetchEmployee($selectElement) {
         const employees = JSON.parse(localStorage.getItem('employees'));
@@ -1395,7 +1403,7 @@
                     $('#fileInput').val('');
                     $('#selectedFileName').text('');
 
-                    $('#loading-screen').hide();
+                    // $('#loading-screen').hide();
 
                     if (data.id_no && data.id_no.length){
                         Swal.fire({
@@ -1496,7 +1504,7 @@
                 } 
                 else if (data.data == 'empty'){
                     $("#import-excel").modal("hide");
-                    $('#loading-screen').hide();
+                    // $('#loading-screen').hide();
                     Swal.fire({
                             title: '<strong>Excel File: Empty column!</strong>',
                             icon: 'error',
