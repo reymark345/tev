@@ -376,7 +376,6 @@
 
 
         employeelist();
-        // $('#loading-screen').hide();
         var dateField = $('#dateField').flatpickr({
             mode: 'multiple',
             allowInput: true,
@@ -1403,8 +1402,6 @@
                     $('#fileInput').val('');
                     $('#selectedFileName').text('');
 
-                    // $('#loading-screen').hide();
-
                     if (data.id_no && data.id_no.length){
                         Swal.fire({
                             title: '<strong>ID NUMBER NOT FOUND!</strong> <br><h5><u>'+data.id_no+'<h5></u>',
@@ -1504,7 +1501,6 @@
                 } 
                 else if (data.data == 'empty'){
                     $("#import-excel").modal("hide");
-                    // $('#loading-screen').hide();
                     Swal.fire({
                             title: '<strong>Excel File: Empty column!</strong>',
                             icon: 'error',
