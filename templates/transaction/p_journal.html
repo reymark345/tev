@@ -354,7 +354,7 @@
     let chargeId = 0;
     let selectedCb = [];
     $(document).ready(function () {
-      $('#loading-screen').hide();
+
       const table_box_a = $('#tbl-box-a')
       const table = $('#tbl-items');
       const currentDate = new Date();
@@ -696,40 +696,49 @@
                         $('.rows-container').append(newRow);
                     }
                     })
-              });
+            });
+
+            dataTable.on('processing.dt', function(e, settings, processing) {
+                if (!processing) {
+                    $('#loading-screen').hide();
+                }
+            });
+            dataTable.on('xhr.dt', function() {
+                $('#loading-screen').hide();
+            });
 
             $('body').on('click', '.item-delete', function () {
-                    let emp_id = $(this).attr('id');
-                    let dataTable = $('#tbl-items').DataTable();
-                    let dataTable2 = $('#tbl-box-a').DataTable();
-                    let closestRow = dataTable2.row($(this).closest('tr'));
-                    let rowData = closestRow.data();
-                    let p_id = rowData.id;
+                let emp_id = $(this).attr('id');
+                let dataTable = $('#tbl-items').DataTable();
+                let dataTable2 = $('#tbl-box-a').DataTable();
+                let closestRow = dataTable2.row($(this).closest('tr'));
+                let rowData = closestRow.data();
+                let p_id = rowData.id;
 
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'delete-box-list' %}",
-                        data:{
-                        emp_id: p_id,
-                        dv_number: dv_number
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'delete-box-list' %}",
+                    data:{
+                    emp_id: p_id,
+                    dv_number: dv_number
+                }
+                }).done(function (data) {
+                    if (data.data == 'success') {
+                        employee_list();
+                        dataTable.ajax.reload();
+                        dataTable2.ajax.reload();
+                        toastr.success('Removed Successfully', 'Success', toast_options);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error saving!',
+                            text: data.message,
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        })
                     }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            employee_list();
-                            dataTable.ajax.reload();
-                            dataTable2.ajax.reload();
-                            toastr.success('Removed Successfully', 'Success', toast_options);
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
+                })
             });
 
             $('body').on('click', '.item-amount', function () {
@@ -776,45 +785,45 @@
                 toastr.error('DV must Received First', 'Invalid', toast_options);
             });
  
-        $('#check-all').change(function () {
-            var isChecked = $(this).is(':checked');
-            $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
-            if (isChecked) {
-                $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
-                    var id = $(this).val();
-                    if (selectedCb.indexOf(id) === -1) {
-                        selectedCb.push(id);
-                    }
-                });
-            } else {
-                $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
-                    var id = $(this).val();
-                    let index = selectedCb.indexOf(id);
-                    if (index !== -1) {
-                        selectedCb.splice(index, 1);
-                    }
-                });
-            }
-        });
-
-        $('.preview-details').on('click', function () {
-            bx_id = $(this).data('id');
-
-            $.ajax({
-                type: 'POST',
-                url: "{% url 'preview-box-a' %}",
-                data:{
-                    box_id: bx_id
+            $('#check-all').change(function () {
+                var isChecked = $(this).is(':checked');
+                $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
+                if (isChecked) {
+                    $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                        var id = $(this).val();
+                        if (selectedCb.indexOf(id) === -1) {
+                            selectedCb.push(id);
+                        }
+                    });
+                } else {
+                    $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').each(function () {
+                        var id = $(this).val();
+                        let index = selectedCb.indexOf(id);
+                        if (index !== -1) {
+                            selectedCb.splice(index, 1);
+                        }
+                    });
                 }
-            }).done(function (data) {
-            })
-        });
-        $('#cancel-multiple-charges').click(function() {
-            dataTable2.ajax.reload();
-        });
+            });
+
+            $('.preview-details').on('click', function () {
+                bx_id = $(this).data('id');
+
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'preview-box-a' %}",
+                    data:{
+                        box_id: bx_id
+                    }
+                }).done(function (data) {
+                })
+            });
+            $('#cancel-multiple-charges').click(function() {
+                dataTable2.ajax.reload();
+            });
     
 
-    },
+        },
     });
 
     function employee_list(){
