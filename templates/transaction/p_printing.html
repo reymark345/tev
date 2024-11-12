@@ -347,7 +347,6 @@
     let chargeId = 0;
     let selectedCb = [];
     $(document).ready(function () {
-      $('#loading-screen').hide();
       const table_box_a = $('#tbl-box-a')
       const table = $('#tbl-items');
       const currentDate = new Date();
@@ -434,15 +433,6 @@
                         var status = row.status;
                         let isChecked = selectedCb.includes(data.toString());
                         return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                        // if (status == 5) {
-                        //     let isChecked = selectedCb.includes(data.toString());
-                        //     var status = row.status;
-                        //     return `<input type="checkbox" class="dt-checkboxes form-check-input checkbox-items" value="${data}" id ="checkbox_data" ${isChecked ? 'checked' : ''}>`;
-                        // }
-                        // else{
-                        //     return '<input type="checkbox" class="dt-checkboxes form-check-input" disabled="disabled">';
-                        // }
-
                     }
                 },
                 {
@@ -918,17 +908,6 @@
             }
         });
 
-
-
-
-        // $('#check-all').change(function () {
-        //     // Get the checked state of the "check-all" checkbox
-        //     var isChecked = $(this).is(':checked');
-
-        //     // Set the checked state of all checkboxes in the table body
-        //     $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input"]').prop('checked', isChecked);
-        // });
-
         $('.preview-details').on('click', function () {
             bx_id = $(this).data('id');
 
@@ -949,10 +928,6 @@
 
     },
     });
-
-
-
-
 
     function employee_list(){
         $.ajax({
@@ -1196,6 +1171,14 @@
             } 
           });
       }
+      dataTable.on('processing.dt', function(e, settings, processing) {
+        if (!processing) {
+            $('#loading-screen').hide();
+        }
+      });
+      dataTable.on('xhr.dt', function() {
+        $('#loading-screen').hide();
+      });
 
       function incoming_out(){
         selectedCb = $.grep(selectedCb, function(value) {

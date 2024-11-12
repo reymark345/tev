@@ -376,7 +376,6 @@
     let selectedCb = [];
     
     $(document).ready(function () {
-        $('#loading-screen').hide();
         const table = $('#tbl-items')
         var fdateField = $('#f-dateField').flatpickr({
             mode: 'multiple',
@@ -961,33 +960,6 @@
                 }
                 if (data.data == 'success') {
                     toastr.success('Update successfully', 'Success', toast_options);
-                    // dateField.clear();
-                //     let code = data.g_code;
-                //     if (code){
-                //         toastr.success('Save Successfully', 'Success', toast_options);
-                //     }
-                //     else{
-                //         offCanvasEl.hide()
-                //         Swal.fire({
-                //             icon: 'success',
-                //             title: 'Update Successfully!',
-                //             html:
-                //             'Successfully <b>Save!</b>',
-                //             customClass: {
-                //                 confirmButton: 'btn btn-success',
-                //             },
-                //         })
-                //     }
-                //     EmployeeName.val("").trigger('change');
-                //     RemarksList.val([]).trigger("change");
-                //     OriginalAmount.val("");
-                //     DateReceived.val("");
-                //     DateTravel.val("");
-                //     RangeTravel.val("");
-                //     $("#dateField").prop("disabled", false);
-                //     $(".rangeTravel").prop("disabled", false);
-
-                //     dataTable.ajax.reload();
                     Swal.fire({
                         icon: 'success',
                         title: 'Update Successfully!',
@@ -1021,8 +993,14 @@
             
         });
 
-        
-
+        dataTable.on('processing.dt', function(e, settings, processing) {
+            if (!processing) {
+                $('#loading-screen').hide();
+            }
+        });
+        dataTable.on('xhr.dt', function() {
+            $('#loading-screen').hide();
+        });
         function incoming_out(){
             Swal.fire({
                 title: 'Forward?',
