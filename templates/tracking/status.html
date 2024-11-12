@@ -279,7 +279,7 @@
             allowInput: true,
             dateFormat: 'd-m-Y',
             locale: {
-                'firstDayOfWeek': 1 // start week on Monday
+                'firstDayOfWeek': 1
             },
       });
       var dateFieldRange = $('#startDate, #endDate').datepicker({
@@ -287,7 +287,6 @@
         autoclose: true
       });
 
-      $('#loading-screen').hide();
       const currentDate = new Date();
       let year_now  = "";
       if(!year_now){year_now = currentDate.getFullYear().toString();}  
@@ -1190,6 +1189,15 @@
           '<option value="2024">2024</option>'+
           '</select>'
       +'</h5>')
+
+      dataTable.on('processing.dt', function(e, settings, processing) {
+        if (!processing) {
+            $('#loading-screen').hide();
+        }
+      });
+      dataTable.on('xhr.dt', function() {
+          $('#loading-screen').hide();
+      });
 
       $('.view-data').on('click', function () {
           let id = $(this).attr('id');
