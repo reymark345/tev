@@ -384,8 +384,9 @@ class TravelDestination(models.Model):
         db_table = 'travel_destination'
     
 class TravelList(models.Model):
-    province = models.CharField(max_length=128, blank=True, null=True)
-    municipality = models.CharField(max_length=128, blank=True, null=True)
+    provinces = models.CharField(max_length=128, blank=True, null=True)
+    municipalities = models.CharField(max_length=128, blank=True, null=True)
+    purpose = models.TextField(blank=True, null=True)
     created_by = models.CharField(max_length=128, blank=True, null=True)
     created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
     class Meta:
