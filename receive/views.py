@@ -260,11 +260,7 @@ def search_list(request):
 
 
 def item_load(request):
-    # Get request parameters
     _search = request.GET.get('search[value]', '').strip()
-    _order_dir = request.GET.get('order[0][dir]', 'asc')
-    _order_dash = '-' if _order_dir == 'desc' else ''
-    _order_col_num = request.GET.get('order[0][column]')
     FAdvancedFilter = request.GET.get('FAdvancedFilter')
     EmployeeList = request.GET.getlist('EmployeeList[]')
     id_numbers = EmployeeList if EmployeeList else []
@@ -287,24 +283,31 @@ def item_load(request):
     params = []
     if FAdvancedFilter:
         advanced_filters = """
-            AND id_no IN %s
+            {id_no_filter}
             AND account_no LIKE %s
             AND date_travel LIKE %s
             AND original_amount LIKE %s
             AND final_amount LIKE %s
             AND incoming_in LIKE %s
             AND user_id LIKE %s
+            AND status_id LIKE %s
         """
-        base_query += advanced_filters
+        if id_numbers:
+            id_no_filter = "AND id_no IN %s"
+            params.append(tuple(id_numbers))
+        else:
+            id_no_filter = ""
         params.extend([
-            tuple(id_numbers),
             '%' + request.GET.get('FAccountNumber', '') + '%',
             '%' + request.GET.get('FDateTravel', '') + '%',
             '%' + request.GET.get('FOriginalAmount', '') + '%',
             '%' + request.GET.get('FFinalAmount', '') + '%',
             '%' + request.GET.get('FIncomingIn', '') + '%',
-            '%' + request.GET.get('FCreatedBy', '') + '%'
+            '%' + request.GET.get('FCreatedBy', '') + '%',
+            '%' + request.GET.get('FStatus', '') + '%'
         ])
+
+        base_query += advanced_filters.format(id_no_filter=id_no_filter)
     elif _search:
         search_filters = """
             AND (first_name LIKE %s OR last_name LIKE %s 
@@ -312,23 +315,18 @@ def item_load(request):
         """
         base_query += search_filters
         params.extend(['%' + _search + '%'] * 5)
-
-    # Finalize query
     base_query += " GROUP BY t1.id ORDER BY id DESC;"
     
-    # Execute query
     with connection.cursor() as cursor:
         cursor.execute(base_query, params)
         columns = [col[0] for col in cursor.description]
         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    # Pagination
     total = len(results)
     _start = int(request.GET.get('start', 0))
     _length = int(request.GET.get('length', 10))
     results = results[_start:_start + _length]
 
-    # Process results
     data = []
     for item in results:
         userData = AuthUser.objects.filter(id=item['user_id']).first()
@@ -348,7 +346,7 @@ def item_load(request):
             'incoming_in': item['incoming_in'],
             'incoming_out': item['incoming_out'],
             'slashed_out': item['slashed_out'],
-            'remarks': item['remarks'],  # Use formatted remarks
+            'remarks': item['remarks'],
             'lacking': item['formatted_remarks'],
             'status': item['status_id'],
             'user_id': full_name
@@ -356,7 +354,6 @@ def item_load(request):
 
         data.append(item_entry)
 
-    # Prepare response
     response = {
         'data': data,
         'recordsTotal': total,
@@ -455,7 +452,6 @@ def travel_load(request):
 
 def checking_load(request):
     _search = request.GET.get('search[value]')
-    _order_dir = request.GET.get('order[0][dir]')
     FIdNumber= request.GET.get('FIdNumber')
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
@@ -463,10 +459,6 @@ def checking_load(request):
     FOriginalAmount= request.GET.get('FOriginalAmount')
     FFinalAmount= request.GET.get('FFinalAmount')
     FAccountNumber= request.GET.get('FAccountNumber')
-    FIncomingBy= request.GET.get('FIncomingBy')
-    FFirstName= request.GET.get('FFirstName')
-    FMiddleName= request.GET.get('FMiddleName')
-    FLastName= request.GET.get('FLastName')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
     FStatus = request.GET.get('FStatus')
     EmployeeList = request.GET.getlist('EmployeeList[]')
