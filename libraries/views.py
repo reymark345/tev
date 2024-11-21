@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, RemarksLib, RolePermissions)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, RemarksLib, RolePermissions, FareMatrix)
 import math
 from django.core.serializers import serialize
 from django.db import IntegrityError
@@ -63,6 +63,24 @@ def remarks(request):
             'permissions' : role_names,
         }
         return render(request, 'libraries/remarks.html', context)
+    else:
+        return render(request, 'pages/unauthorized.html')
+    
+@login_required(login_url='login')
+def fare_matrix(request):
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
+    user_id = request.session.get('user_id', 0)
+    role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+    role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+    role_names = [entry['role_name'] for entry in role_details]
+    
+    if any(role_name in allowed_roles for role_name in role_names):
+        context = {
+            'charges' : RemarksLib.objects.filter().order_by('name'),
+            'cluster' : Cluster.objects.filter().order_by('name'),
+            'permissions' : role_names,
+        }
+        return render(request, 'libraries/fare_matrix.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
     
@@ -259,20 +277,19 @@ def remarks_edit(request):
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
+@csrf_exempt  
+def fare_matrix_edit(request):
+    id = request.GET.get('id')
+    items = FareMatrix.objects.get(pk=id)
+    data = serialize("json", [items])
+    return HttpResponse(data, content_type="application/json")
+
 @csrf_exempt
 def remarks_status_edit(request):
     id = request.POST.get('id')
     status_id = request.POST.get('status')
-    print(id)
-    print(status_id)
-    print("testtttt")
     RemarksLib.objects.filter(pk=id).update(status=status_id)
     return JsonResponse({'data': 'success'})
-
-
-
-
-
 
 def remarks_load(request):
     charges_data = RemarksLib.objects.select_related().order_by('-created_at')
@@ -300,6 +317,55 @@ def remarks_load(request):
             'created_by': full_name.upper(),
             'created_at': item.created_at,
             'status': item.status,
+        }
+
+        data.append(item)
+
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+
+def fare_matrix_load(request):
+    fare_matrix_data = FareMatrix.objects.filter()
+    total = fare_matrix_data.count()
+
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+
+        fare_matrix_data = fare_matrix_data[start:start + length]
+
+    data = []
+
+    for item in fare_matrix_data:
+        userData = AuthUser.objects.filter(id=item.created_by)
+        full_name = userData[0].first_name + ' ' + userData[0].last_name
+        item = {
+            'id': item.id,
+            'province': item.province,
+            'province_acronym': item.province_acronym,
+            'municipality': item.municipality,
+            'barangay': item.barangay,
+            'purok': item.purok,
+            'means_of_transpo': item.means_of_transpo,
+            'regular_fare': item.regular_fare,
+            'rate': item.rate,
+            'hire_rate': item.hire_rate,
+            'estimated_duration_of_travel': item.estimated_duration_of_travel,
+            'justification': item.justification,
+            'remarks': item.remarks,
+            'created_by': full_name.upper(),
+            'created_at': item.created_at
         }
 
         data.append(item)

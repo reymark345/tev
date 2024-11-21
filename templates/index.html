@@ -239,7 +239,7 @@
                             </li>
                         {% endif %}
 
-                       <!-- {% if 'Admin' in permissions  %}
+                       {% comment %} {% if 'Admin' in permissions  %} {% endcomment %}
                            
                         <li class="menu-item {% if url_name == 'travel-list' %}active{% endif %}">
                             <a href="{% url 'travel-list' %}" class="menu-link">
@@ -249,7 +249,7 @@
                             </a>
                         </li>
                         
-                        {% endif %} -->
+                        {% comment %} {% endif %} --> {% endcomment %}
 
                         {% if 'Admin' in permissions or 'Incoming staff' in permissions %}
                            
@@ -374,6 +374,12 @@
                                     <a href="{% url 'remarks' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-color-swatch"></i>
                                         <div data-i18n="Remarks">Remarks</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item {% if url_name == 'fare-matrix' %}active{% endif %}">
+                                    <a href="{% url 'fare-matrix' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-chart-pie"></i>
+                                        <div data-i18n="Fare Matrix">Fare Matrix</div>
                                     </a>
                                 </li>
                             {% endif %}      

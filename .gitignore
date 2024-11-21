@@ -9,7 +9,8 @@ db.sqlite3
 media
 .idea
 .vscode
-
+CACHE
+settings.py
 # Backup files # 
 *.bak 
 

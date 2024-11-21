@@ -47,8 +47,9 @@ def status(request):
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'permissions' : role_names,
-            'division' : Division.objects.filter().order_by('name'),
+            'division': Division.objects.filter(id__in=[1, 13, 14, 17, 18, 19, 20, 21, 22, 23, 24, 26]).order_by('name')
         }
+
         return render(request, 'tracking/status.html', context)
     else:
         return redirect("travel-history")

@@ -393,6 +393,25 @@ class TravelList(models.Model):
         managed = True
         db_table = 'travel_list'
 
+class FareMatrix(models.Model):
+    province = models.CharField(max_length=128, blank=True, null=True)
+    province_acronym = models.CharField(max_length=128, blank=True, null=True)
+    municipality = models.CharField(max_length=128, blank=True, null=True)
+    barangay = models.CharField(max_length=255, blank=True, null=True)
+    purok = models.CharField(max_length=255, blank=True, null=True)
+    means_of_transpo = models.CharField(max_length=255, blank=True, null=True)
+    regular_fare = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
+    rate = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
+    hire_rate = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
+    estimated_duration_of_travel = models.CharField(max_length=128, blank=True, null=True)
+    justification = models.CharField(max_length=255, blank=True, null=True)
+    remarks = models.TextField(blank=True, null=True)
+    created_by = models.CharField(max_length=128, blank=True, null=True)
+    created_at = models.DateTimeField(default=datetime.now,blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'fare_matrix'
+
 
 
         

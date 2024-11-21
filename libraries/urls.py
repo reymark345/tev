@@ -22,4 +22,8 @@ urlpatterns = [
     path('remarks_update', views.remarks_update, name='remarks-update'),
     path('remarks_edit', views.remarks_edit, name='remarks-edit'),
     path('remarks_status_edit', views.remarks_status_edit, name='remarks-status-edit'),
+
+    path('fare_matrix', views.fare_matrix, name='fare-matrix'),
+    path('fare_matrix_load', views.fare_matrix_load, name='fare-matrix-load'),  
+    path('fare_matrix_edit', views.fare_matrix_edit, name='fare-matrix-edit'),
 ]
