@@ -212,6 +212,10 @@
                 </div>
             </div>
 
+            <input type="text" id="province-code" class="form-control dt-province-acronym" name="ProvinceCode" placeholder=""/>
+            <input type="text" id="municipality-code" class="form-control dt-province-acronym" name="MunicipalityCode" placeholder=""/>
+            <input type="text" id="barangay-code" class="form-control dt-province-acronym" name="BarangayCode" placeholder=""/>
+
             <div class="row">
                 <div class="col-12">
                     <span id="remarks_error" style="color: red;"></span>
@@ -245,6 +249,9 @@
     $(document).ready(function () {
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
+            ProvinceCode = jQuery(document.querySelector('[name="ProvinceCode"]')),
+            MunicipalityCode = jQuery(document.querySelector('[name="MunicipalityCode"]')),
+            BarangayCode = jQuery(document.querySelector('[name="BarangayCode"]')),
             ProvinceName = jQuery(document.querySelector('[name="ProvinceName"]')),
             ProvinceAcronym = jQuery(document.querySelector('[name="ProvinceAcronym"]')),
             MunicipalityName = jQuery(document.querySelector('[name="MunicipalityName"]')),
@@ -448,15 +455,30 @@
                             // Capitalize all letters in prov_name
                             let capitalizedProvName = province.prov_name.toUpperCase();
                     
-                            select_me.append('<option value="' + province.prov_id + '">' + capitalizedProvName + '</option>');
+                            select_me.append('<option value="' + province.prov_code + '">' + capitalizedProvName + '</option>');
                         });
                     } else {
                         console.log("No data found in localStorage.");
                     }
-
-
                     $('.form-control').val('');
-         
+                    $('#province-name').on('change', function () {
+                        var prov_code = $(this).val(); 
+                        var prov_name = $(this).find('option:selected').text();
+                        if (prov_name === "DINAGAT ISLANDS") {
+                            var abbreviation = "PDI";
+                        } else {
+                            var abbreviation = prov_name.split(' ').map(function(word) {
+                                return word.charAt(0); 
+                            }).join(''); 
+                        }
+                      
+                        ProvinceAcronym.val(abbreviation);
+                        ProvinceCode.val(prov_code);
+                    });
+
+
+
+                    
                     offCanvasEl.show();
                 })
             }
@@ -552,7 +574,7 @@
                 if (ProvinceName.length) {
                     ProvinceName.wrap('<div class="position-relative"></div>')
                     ProvinceName.select2({
-                        placeholder: 'Choose Provicne',
+                        placeholder: 'Choose Province',
                         dropdownParent: ProvinceName.parent(),
                         allowClear: true,
                     })
@@ -575,8 +597,7 @@
                 }
             }, 100);
         }
-        
-
+    
         $('#approved').click(function() {
             let final_amount = $("#final_amount").val().trim();
             let correctness_remarks = $("#correctness_remarks").val().trim();
