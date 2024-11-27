@@ -1,0 +1,327 @@
+{% extends 'index.html' %} {% block content %} {% load staticfiles %}
+
+<!-- Content wrapper -->
+<div class="content-wrapper">
+    <!-- Content -->
+    <div class="container-fluid flex-grow-1 container-p-y">
+        <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Libraries /</span> Means of Transportation</h4>
+
+        <!-- DataTable with Buttons -->
+        <div class="card">
+            <div class="card-datatable table-responsive pt-0">
+                <table id="tbl-items" class="table">
+                    <thead>
+                        <tr>
+                            <th>NAME</th>
+                            <th>CREATED BY</th>
+                            <th>CREATED DATE</th>
+                            <th>UPDATED BY</th>
+                            <th>UPDATED DATE</th>
+                            <th>ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal to add new record -->
+<div class="offcanvas offcanvas-end" id="add-new-record">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="exampleModalLabel"><p class="title-name">Add Record</p></h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body flex-grow-1">
+        <form class="add-new-record pt-0 row g-2" id="item-form">
+            <input type="hidden" id="item-id" name="ItemID" />
+
+            <div class="col-sm-12">
+                <div class="col-md-12 mb-2">
+                  <label for="flatpickr-multi" class="form-label">Vehicle Name</label>
+                  <input
+                    type="text"
+                    id="mot-name"
+                    class="form-control dt-province-acronym"
+                    name="MotName"
+                    placeholder="Enter vehicle"
+                    aria-describedby="vehicle2"
+                    autocomplete="off"
+                  />
+                </div>
+            </div>
+
+            <div class="col-sm-12 mt-4">
+                <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
+                <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+{% endblock %} {% block footer_scripts %}
+<script>
+    let clicked_id = 0;
+    let dataTable;
+    $(document).ready(function () {
+        const table = $('#tbl-items')
+        const ItemFormValidation = document.getElementById('item-form'),
+            MotName = jQuery(document.querySelector('[name="MotName"]')),
+            offCanvasElement = document.querySelector('#add-new-record');
+        const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement);
+        const toast_options = (toastr.options = {
+            maxOpened: 1,
+            autoDismiss: true,
+            closeButton: true,
+            newestOnTop: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            rtl: isRtl,
+      });
+        let ItemID = $('#item-id')
+
+        dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: "{% url 'means-of-transportation-load' %}",
+            columns: [
+                { data: 'transportation_name' },
+                { data: 'created_by' },
+                { data: 'created_at' },
+                { data: 'updated_by' },
+                { data: 'updated_at' },
+                { data: 'id'},
+            ],
+            columnDefs: [
+                {
+                    targets: 0,
+                    render: function (data) {
+                        return data
+                    },
+                },
+                {
+                    targets: 2,
+                    render: function (data) {
+                        return moment(data).format('LLL')
+                    },
+                },
+                {
+                    targets: -2,
+                    render: function (data) {
+                        if (data){
+                            return moment(data).format('LLL')
+                        }
+                        else{
+
+                        }
+                        return ''
+                    },
+                },
+                {
+                    targets: -1,
+                    title: 'Action',
+                    orderable: false,
+                    searchable: false,
+                    render: function (data) {
+                        return (
+                            '<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>&nbsp;&nbsp;'
+                        );
+                    },
+                }
+            ],
+            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            buttons: [
+                {
+                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
+                    className: 'create-new btn btn-primary',
+                },
+            ],
+            drawCallback: function (settings) {
+                $('.item-edit').on('click', function () {
+                    let id = $(this).data('id');
+                    
+                    $('.title-name').text('Update Means of Transportation Record');
+
+                    $.ajax({
+                        type: 'GET',
+                        url: "{% url 'means-of-transportation-edit' %}?id=" + id,
+                        dataType: 'json',
+                    }).done(function (data) {
+                        if (data.length > 0) {
+                            let fields = data[0].fields
+                            MotName.val(fields.transportation_name);
+                            let pk = data[0].pk
+                            ItemID.val(pk)
+                            offCanvasEl.show();
+                        }
+                    })
+                }),
+
+                $('.item-details').on('click', function () {
+                    clicked_id = $(this).data('id')
+                })
+
+                $('.switch-input').on('change', function () {
+                    var $this = $(this);
+                    var dataId = $this.data('id');
+                    var isChecked = $this.is(":checked");
+                    var newStatus = isChecked ? 1 : 0;
+                    var newLabel = isChecked ? "Active" : "Inactive";
+                    $("#switch-label-" + dataId).text(newLabel);
+                    $.ajax({
+                        url: "{% url 'remarks-status-edit' %}",
+                        type: "POST",
+                        data: {
+                            id: dataId,
+                            status: newStatus
+                        },
+                        success: function (data) {
+                            if (data.data == "success") {
+                                dataTable.ajax.reload();
+                                toastr.success('Successfully updated', 'Success', toast_options);
+                            } else {
+                                toastr.danger('Data not update', 'Invalid', toast_options);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Error updating status: ", error);
+                        }
+                    });
+                });
+            },
+        })
+        $('div.head-label').html('<h5 class="card-title mb-0">Means of Transportation</h5>')
+
+        const newRecord = document.querySelector('.create-new')
+        if (newRecord) {
+            newRecord.addEventListener('click', function () {
+                ItemID.val(0);
+            
+                $('.title-name').text('Add Record');
+                clear_data();
+                $('.form-control').val('');
+                offCanvasEl.show();
+            });
+        }
+
+
+        // Form validation for Add new record
+        const fv = FormValidation.formValidation(ItemFormValidation, {
+            fields: {
+                MotName: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Required!',
+                        },
+                    },
+                },
+            },
+            plugins: {
+                trigger: new FormValidation.plugins.Trigger(),
+                bootstrap5: new FormValidation.plugins.Bootstrap5(),
+                submitButton: new FormValidation.plugins.SubmitButton(),
+                autoFocus: new FormValidation.plugins.AutoFocus(),
+            },
+            init: (instance) => {
+                instance.on('plugins.message.placed', function (e) {
+                    if (e.element.parentElement.classList.contains('input-group')) {
+                        e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                    }
+                })
+            },
+        }).on('core.form.valid', function () {
+            var form_data = $('#item-form').serialize()
+            let post_url = ItemID.val() != '0' ? "{% url 'means-of-transportation-update' %}" : "{% url 'means-of-transportation-add' %}" 
+            $.ajax({
+                type: 'POST',
+                url: post_url,
+                data: form_data,
+            }).done(function (data) {
+                dataTable.ajax.reload();
+                console.log("whatif");
+                console.log(data.data);
+                if (data.data == 'success' && ItemID.val()=='0') {
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    clear_data();
+                }
+                else if (data.data == 'success' && ItemID.val()!='0') {
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    clear_data();
+                    offCanvasEl.hide();
+                }
+                else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error saving!',
+                        text:ItemID.val(),
+                        customClass: {
+                            confirmButton: 'btn btn-success',
+                        },
+                    })
+                }
+            })
+        });
+
+        function clear_data(){
+            MotName.val('');
+        }
+
+    
+        $('#approved').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 1; 
+              if (final_amount === "") {  
+                $("#amount_error").text("Please enter Amount");
+                $("#remarks_error").text("");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              } else {
+                $("#amount_error").text("");
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+              }
+          });
+          
+          $('#returned').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let correctness_remarks = $("#correctness_remarks").val().trim();
+            let status = 2;
+              if (correctness_remarks === "") {
+                $("#amount_error").text("");
+                $("#remarks_error").text("Please enter Remarks for returned.");
+                $(".input-group").addClass("has-error");
+                event.preventDefault();
+              } else {
+                $("#remarks_error").text("");
+                $(".input-group").removeClass("has-error");
+                tev_details(final_amount,correctness_remarks,status,clicked_id);
+              }
+              
+            });
+
+          function tev_details(amount,remarks,status,emp_id){
+            $.ajax({
+                type: "POST",
+                data:{
+                    final_amount: amount,
+                    correctness_remarks: remarks,
+                    status : status,
+                    transaction_id : emp_id
+                }
+                }).done(function(data){
+                if (data.data == 'success') {
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    offCanvasEl.hide()
+                } else {
+                    toastr.error('Data not saved', 'Danger', toast_options);
+                }
+            });
+            }
+    })
+</script>
+{% endblock footer_scripts %}

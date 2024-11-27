@@ -1021,62 +1021,67 @@
     }
 
     function psgc_api() {
-    console.log("testttt");
-    $.ajax({
-        type: 'GET',
-        url: "{% url 'psgc-api' %}",
-        dataType: 'json',
-    }).done(function (data) {
-        console.log(data);
-        if (data.error) {
-            console.error(data.error);
-            return;
-        }
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'psgc-api' %}",
+            dataType: 'json',
+        }).done(function (data) {
+            console.log(data);
+            if (data.error) {
+                console.error(data.error);
+                return;
+            }
 
-        let provinces = data;
-        let psgc = [];
+            let provinces = data;
+            let psgc = [];
 
-        // Process each province, including its cities and barangays
-        $.each(provinces, function (index, province) {
-            let cities = province.cities.map(city => {
-                return {
-                    city_id: city.city_id,
-                    city_name: city.city_name,
-                    city_code: city.city_code,
-                    city_class: city.city_class,
-                    classification: city.classification,
-                    income_classification: city.income_classification,
-                    barangays: city.barangays.map(barangay => ({
-                        brgy_id: barangay.brgy_id,
-                        brgy_name: barangay.brgy_name,
-                        brgy_code: barangay.brgy_code,
-                        geo_level: barangay.geo_level,
-                        urb_rur: barangay.urb_rur,
-                    }))
-                };
+            // Process each province, including its cities and barangays
+            $.each(provinces, function (index, province) {
+                let cities = province.cities.map(city => {
+                    return {
+                        city_id: city.city_id,
+                        city_name: city.city_name,
+                        city_code: city.city_code,
+                        city_class: city.city_class,
+                        classification: city.classification,
+                        income_classification: city.income_classification,
+                        province_code: city.province_code,
+                        province_code_correspondence: city.province_code_correspondence,
+                        prov_id: city.prov_id,
+                        barangays: city.barangays.map(barangay => ({
+                            brgy_id: barangay.brgy_id,
+                            brgy_name: barangay.brgy_name,
+                            brgy_code: barangay.brgy_code,
+                            geo_level: barangay.geo_level,
+                            urb_rur: barangay.urb_rur,
+                            city_code: barangay.city_code,
+                            city_code_correspondence: barangay.city_code_correspondence,
+                            city_id: barangay.city_id,
+                        }))
+                    };
+                });
+
+                psgc.push({
+                    prov_id: province.prov_id,
+                    prov_name: province.prov_name,
+                    prov_code: province.prov_code,
+                    geo_level: province.geo_level,
+                    income_classification: province.income_classification,
+                    region_code: province.region_code,
+                    cities: cities // Include cities with their barangays
+                });
             });
 
-            psgc.push({
-                prov_id: province.prov_id,
-                prov_name: province.prov_name,
-                prov_code: province.prov_code,
-                geo_level: province.geo_level,
-                income_classification: province.income_classification,
-                region_code: province.region_code,
-                cities: cities // Include cities with their barangays
-            });
+            // Store the psgc array in localStorage
+            localStorage.setItem('psgc_data', JSON.stringify(psgc));
+            console.log("Data saved to localStorage:", psgc);
+
+            
+            
+        }).fail(function (jqXHR, textStatus, errorThrown) {
+            console.error("AJAX request failed: " + textStatus + ", " + errorThrown);
         });
-
-        // Store the psgc array in localStorage
-        localStorage.setItem('psgc_data', JSON.stringify(psgc));
-        console.log("Data saved to localStorage:", psgc);
-
-        
-        
-    }).fail(function (jqXHR, textStatus, errorThrown) {
-        console.error("AJAX request failed: " + textStatus + ", " + errorThrown);
-    });
-}
+    }
 
 
 

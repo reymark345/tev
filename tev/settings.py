@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-e&691z)oh*#_&yv(h^3sn^*=gxs09(%(5395)=xe+_im_bk^l&'
-PSGC_TOKEN  = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2R4Y2xvdWQuZHN3ZC5nb3YucGgvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3Mjk4NDI4ODksImV4cCI6MTczMjQzNDg4OSwibmJmIjoxNzI5ODQyODg5LCJqdGkiOiJDTWVIN2YzWXBlMmx4YUFBIiwic3ViIjoyMTEsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.8bcnL7GL1Oe7Zs57w3B5dNhuFupfvI6fIHIfYjdrn18"
+PSGC_TOKEN  = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2R4Y2xvdWQuZHN3ZC5nb3YucGgvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3MzI0OTc5NDAsImV4cCI6MTczNTA4OTk0MCwibmJmIjoxNzMyNDk3OTQwLCJqdGkiOiJ0aFJPZzRzMnJ3OU9Mb3JVIiwic3ViIjoyMTEsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.Pxwbo3lDWfoz4e-s79lGqf8S4DbaqHewCyVjWtHTYUQ"
 PORTAL_TOKEN  = "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
 PORTAL_API_URL  = "https://caraga-portal.dswd.gov.ph/api/employee/list/load"
 PSGC_PROVINCE_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/provincesByRegion?region=160000000"

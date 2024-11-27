@@ -12,7 +12,6 @@
                 <table id="tbl-items" class="table">
                     <thead>
                         <tr>
-                            <th>PROVINCE</th>
                             <th>ACRONYM</th>
                             <th>MUNICIPALITY</th>
                             <th>BARANGAY</th>
@@ -35,40 +34,7 @@
     </div>
 </div>
 
-      <!-- Modal to add new record -->
-{% comment %} <div class="offcanvas offcanvas-end" id="add-new-record">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title" id="exampleModalLabel"><p class="title-name">Add Record</p></h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body flex-grow-1">
-        <form class="add-new-record pt-0 row g-2" id="item-form">
-            <input type="hidden" id="item-id" name="ItemID" />
-            <div class="col-sm-12">
-                <label class="form-label">Province</label>
 
-                <label class="form-label">PROVINCE</label>
-                <select  class="select2 form-select" name="TravelProvince" multiple>
-
-                </select>
-                
-                <input
-                  type="text"
-                  id="remarks"
-                  class="form-control dt-lib-remarks"
-                  name="Remarks"
-                  placeholder="Enter Remarks"
-                  aria-describedby="remarks2"
-                />
-            </div>
-
-            <div class="col-sm-12 mt-4">
-                <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
-                <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div> {% endcomment %}
 
 <!-- Modal to add new record -->
 <div class="offcanvas offcanvas-end" id="add-new-record">
@@ -92,8 +58,9 @@
                   id="province-acronym"
                   class="form-control dt-province-acronym"
                   name="ProvinceAcronym"
-                  placeholder="Enter acronym"
-                  aria-describedby="acronym2"
+                  placeholder="Acronym"
+                  aria-describedby="provinceacronym"
+                  disabled
                 />
             </div>
 
@@ -125,6 +92,7 @@
                     name="PurokName"
                     placeholder="Enter purok"
                     aria-describedby="purok2"
+                    autocomplete="off"
                   />
                 </div>
             </div>
@@ -132,14 +100,23 @@
             <div class="col-sm-12">
                 <div class="col-md-12 mb-2">
                   <label for="flatpickr-multi" class="form-label">Means of Transportation</label>
-                  <input
-                    type="text"
+                  
+                    <select id="means-of-transportation" name="MeansOfTransportation" class="form-select means-of-transportation" data-allow-clear="true">
+                        <option></option>
+                        {% for row in m_o_t %}
+                            <option value="{{ row.id }}">{{ row.transportation_name }}</option>
+                        {% endfor %}
+                    </select>
+                  
+                  <!-- <input
+                    type="text" 
                     id="means-of-transportation"
                     class="form-control dt-means-of-transportation"
                     name="MeansOfTransportation"
-                    placeholder="Enter amount"
+                    placeholder="Enter vehicle"
                     aria-describedby="means_of_transpo2"
-                  />
+                    autocomplete="off"
+                  /> -->
                 </div>
             </div>
             <div class="col-sm-12">
@@ -147,9 +124,9 @@
                   <label for="flatpickr-multi" class="form-label">Most Economical Rate of Transportation (Regular Fare)</label>
                   <input
                     type="number"
-                    id="regular-fare"
+                    id="rate-regular-fare"
                     class="form-control dt-regular-fare"
-                    name="RegularFare"
+                    name="RateRegularFare"
                     placeholder="Enter amount"
                     aria-describedby="regular_fare2"
                   />
@@ -161,9 +138,23 @@
                   <label for="flatpickr-multi" class="form-label">Hire Rate (One Way)</label>
                   <input
                     type="number"
-                    id="high-rate"
+                    id="high-rate-one-way"
                     class="form-control dt-high-rate"
-                    name="HireRate"
+                    name="HireRateOneWay"
+                    placeholder="Enter amount"
+                    aria-describedby="high_rate2"
+                  />
+                </div>
+            </div>
+
+            <div class="col-sm-12">
+                <div class="col-md-12 mb-2">
+                  <label for="flatpickr-multi" class="form-label">Hire Rate (Round trip-whole day)</label>
+                  <input
+                    type="number"
+                    id="high-rate-whole-day"
+                    class="form-control dt-high-rate"
+                    name="HireRateWholeDay"
                     placeholder="Enter amount"
                     aria-describedby="high_rate2"
                   />
@@ -180,6 +171,7 @@
                     name="EstimatedDurationOfTravel"
                     placeholder="Enter duration"
                     aria-describedby="estimated_duration_of_travel2"
+                    autocomplete="off"
                   />
                 </div>
             </div>
@@ -193,6 +185,7 @@
                     name="Justification"
                     placeholder="Enter Justification"
                     aria-describedby="estimated_duration_of_travel2"
+                    autocomplete="off"
                     >
                   </textarea>
                 </div>
@@ -207,14 +200,13 @@
                     name="DtRemarks"
                     placeholder="Enter Remarks"
                     aria-describedby="dt_remarks2"
+                    autocomplete="off"
                     >
                   </textarea>
                 </div>
             </div>
 
-            <input type="text" id="province-code" class="form-control dt-province-acronym" name="ProvinceCode" placeholder=""/>
-            <input type="text" id="municipality-code" class="form-control dt-province-acronym" name="MunicipalityCode" placeholder=""/>
-            <input type="text" id="barangay-code" class="form-control dt-province-acronym" name="BarangayCode" placeholder=""/>
+
 
             <div class="row">
                 <div class="col-12">
@@ -237,6 +229,15 @@
             <input id="division-user" name="DivisionUser" class="form-control accn" type="hidden" placeholder="Division"/>
             <input id="contact-no" name="ContactNo" class="form-control accn" type="hidden" placeholder="09+"/>
             <input id="section-user" name="SectionUser" class="form-control accn" type="hidden" placeholder="Section"/>
+
+            <input type="hidden" id="province-name2" class="form-control dt-province-name2" name="ProvinceName2" placeholder="" />
+            <input type="hidden" id="municipality-name2" class="form-control dt-municipality-name2" name="MunicipalityName2" placeholder="" />
+            <input type="hidden" id="barangay-name2" class="form-control dt-barangay-name2" name="BarangayName2" placeholder="" />
+
+            <input type="hidden" id="province-acronym2" class="form-control dt-province-acronym2" name="ProvinceAcronym2" placeholder="" />
+            <input type="hidden" id="province-code" class="form-control dt-province-acronym" name="ProvinceCode" placeholder="" />
+            <input type="hidden" id="municipality-code" class="form-control dt-province-acronym" name="MunicipalityCode" placeholder=""/>
+            <input type="hidden" id="barangay-code" class="form-control dt-province-acronym" name="BarangayCode" placeholder=""/>
         </form>
     </div>
 </div>
@@ -254,12 +255,17 @@
             BarangayCode = jQuery(document.querySelector('[name="BarangayCode"]')),
             ProvinceName = jQuery(document.querySelector('[name="ProvinceName"]')),
             ProvinceAcronym = jQuery(document.querySelector('[name="ProvinceAcronym"]')),
+            ProvinceAcronym2 = jQuery(document.querySelector('[name="ProvinceAcronym2"]')),
             MunicipalityName = jQuery(document.querySelector('[name="MunicipalityName"]')),
             BarangayName = jQuery(document.querySelector('[name="BarangayName"]')),
+            ProvinceName2 = jQuery(document.querySelector('[name="ProvinceName2"]')),
+            MunicipalityName2 = jQuery(document.querySelector('[name="MunicipalityName2"]')),
+            BarangayName2 = jQuery(document.querySelector('[name="BarangayName2"]')),
             PurokName = jQuery(document.querySelector('[name="PurokName"]')),
             MeansOfTransportation = jQuery(document.querySelector('[name="MeansOfTransportation"]')),
-            RegularFare = jQuery(document.querySelector('[name="RegularFare"]')),
-            HireRate = jQuery(document.querySelector('[name="HireRate"]')),
+            RateRegularFare = jQuery(document.querySelector('[name="RateRegularFare"]')),
+            HireRateOneWay = jQuery(document.querySelector('[name="HireRateOneWay"]')),
+            HireRateWholeDay = jQuery(document.querySelector('[name="HireRateWholeDay]')),
             EstimatedDurationOfTravel = jQuery(document.querySelector('[name="EstimatedDurationOfTravel"]')),
             Justification = jQuery(document.querySelector('[name="Justification"]')),
             DtRemarks = jQuery(document.querySelector('[name="DtRemarks"]')),
@@ -281,15 +287,14 @@
             serverSide: true,
             ajax: "{% url 'fare-matrix-load' %}",
             columns: [
-                { data: 'province' },
                 { data: 'province_acronym' },
                 { data: 'municipality' },
                 { data: 'barangay' },
                 { data: 'purok' },
-                { data: 'means_of_transpo' },
-                { data: 'regular_fare' },
-                { data: 'rate' },
-                { data: 'hire_rate' },
+                { data: 'means_of_transportation' },
+                { data: 'rate_regular_fare' },
+                { data: 'hire_rate_one_way' },
+                { data: 'hire_rate_whole_day' },
                 { data: 'estimated_duration_of_travel' },
                 { data: 'justification' },
                 { data: 'remarks' },
@@ -317,49 +322,6 @@
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
             buttons: [
                 {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
-                    action: function () {
-                        employeeList = [];
-                        const $selectElement = $('#f-employee-name');
-                        $selectElement.empty();
-                        fetchEmployee($selectElement);
-                        FEmployeeName.val('').trigger('change');
-
-                        setTimeout(function() {
-                            if (FEmployeeName.length) {
-                                FEmployeeName.wrap('<div class="position-relative"></div>')
-                                FEmployeeName.select2({
-                                    placeholder: 'Choose employee',
-                                    dropdownParent: FEmployeeName.parent(),
-                                    allowClear: true,
-                                })
-                            }
-                        }, 300);
-                        clear_advfilter();
-                        const $selectElements = $('#f-division');
-                        $selectElements.val('').trigger('change');
-                        $("#advance-filter").modal("show");
-                    }
-                },   
-                {
-                    className: 'btn btn-label-primary me-2',
-                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
-                    action: function () {
-                      $('#loading-screen').show();
-                      $.ajax({
-                        type: 'POST',
-                        url: "#"
-                        //url: "{% url 'export-status' %}"
-                      }).done(function (data) {
-                        window.location.href = "{% url 'export-status' %}";
-                        setTimeout(function() {
-                          $('#loading-screen').hide();
-                        }, 5000);
-                      });
-                    }
-                },
-                {
                     text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
                     className: 'create-new btn btn-primary',
                 },
@@ -369,7 +331,7 @@
                     let id = $(this).data('id');
                     
                     $('.title-name').text('Update Fare Matrix Record');
-                    load_select();
+
                     $.ajax({
                         type: 'GET',
                         url: "{% url 'fare-matrix-edit' %}?id=" + id,
@@ -377,25 +339,25 @@
                     }).done(function (data) {
                         if (data.length > 0) {
                             let fields = data[0].fields
-                            console.log(fields);
-                            console.log("fields");
+                            let prov_code = fields.prov_code;
+                            let city_code = fields.city_code;
+                            load_select(1,prov_code,city_code);
                             let pk = data[0].pk
                             let remarks = $('#province-name');
-
-                            //ProvinceName
+                            ProvinceName.val(prov_code).trigger('change');
                             ProvinceAcronym.val(fields.province_acronym);
-                            //MunicipalityName
-                            //BarangayName
+                            MunicipalityName.val(city_code).trigger('change');
+                            BarangayName.val(fields.brgy_code).trigger('change');
                             PurokName.val(fields.purok);
-                            MeansOfTransportation.val(fields.means_of_transpo);
-                            RegularFare.val(fields.regular_fare);
-                            HireRate.val(fields.hire_rate);
+                            MeansOfTransportation.val(fields.means_of_transportation).trigger('change');
+                            RateRegularFare.val(fields.rate_regular_fare);
+                            HireRateOneWay.val(fields.hire_rate_one_way);
+                            HireRateWholeDay.val(fields.hire_rate_whole_day);
                             EstimatedDurationOfTravel.val(fields.estimated_duration_of_travel);
                             Justification.val(fields.justification);
                             DtRemarks.val(fields.remarks);
-                            
                             ItemID.val(pk)
-                            offCanvasEl.show()
+                            offCanvasEl.show();
                         }
                     })
                 }),
@@ -434,67 +396,101 @@
         })
         $('div.head-label').html('<h5 class="card-title mb-0">Fare Matrix</h5>')
 
-        const newRecord = document.querySelector('.create-new')
+        const newRecord = document.querySelector('.create-new');
+        if (newRecord) {
+            newRecord.addEventListener('click', function () {
+                ItemID.val(0);
+            
+                $('.title-name').text('Add Record');
+                clear_data();
+                load_select(0,0,0);
+                $('.form-control').val('');
+                offCanvasEl.show();
+            });
+        }
+   
 
-        setTimeout(() => {
-            if (newRecord) {
-                newRecord.addEventListener('click', function () {
-                    ItemID.val(0);
+        // setTimeout(() => {
+        //     if (newRecord) {
+        //         newRecord.addEventListener('click', function () {
+        //             ItemID.val(0);
                  
-                    $('.title-name').text('Add Record');
-                    clear_data();
-                    load_select();
-                    const select_me = jQuery(document.querySelector('[name="ProvinceName"]'));
+        //             $('.title-name').text('Add Record');
+        //             clear_data();
+        //             load_select();
+        //             const select_me = jQuery(document.querySelector('[name="ProvinceName"]'));
 
-                    let storedData = localStorage.getItem('psgc_data');
-                    if (storedData) {
-                        let psgcData = JSON.parse(storedData);
-                        select_me.empty();
+        //             let storedData = localStorage.getItem('psgc_data');
+        //             if (storedData) {
+        //                 let psgcData = JSON.parse(storedData);
+        //                 select_me.empty();
                     
-                        psgcData.forEach(function(province) {
-                            // Capitalize all letters in prov_name
-                            let capitalizedProvName = province.prov_name.toUpperCase();
+        //                 psgcData.forEach(function(province) {
+        //                     let capitalizedProvName = province.prov_name.toUpperCase();
                     
-                            select_me.append('<option value="' + province.prov_code + '">' + capitalizedProvName + '</option>');
-                        });
-                    } else {
-                        console.log("No data found in localStorage.");
-                    }
-                    $('.form-control').val('');
-                    $('#province-name').on('change', function () {
-                        var prov_code = $(this).val(); 
-                        var prov_name = $(this).find('option:selected').text();
-                        if (prov_name === "DINAGAT ISLANDS") {
-                            var abbreviation = "PDI";
-                        } else {
-                            var abbreviation = prov_name.split(' ').map(function(word) {
-                                return word.charAt(0); 
-                            }).join(''); 
-                        }
+        //                     select_me.append('<option value="' + province.prov_id + '">' + capitalizedProvName + '</option>');
+        //                 });
+        //             } else {
+        //                 console.log("No data found in localStorage.");
+        //             }
+        //             $('.form-control').val('');
+        //             $('#province-name').on('change', function () {
+        //                 var prov_id = $(this).val(); 
+        //                 var prov_name = $(this).find('option:selected').text();
+        //                 if (prov_name === "DINAGAT ISLANDS") {
+        //                     var abbreviation = "PDI";
+        //                 } else {
+        //                     var abbreviation = prov_name.split(' ').map(function(word) {
+        //                         return word.charAt(0); 
+        //                     }).join(''); 
+        //                 }
                       
-                        ProvinceAcronym.val(abbreviation);
-                        ProvinceCode.val(prov_code);
-                    });
-
-
-
-                    
-                    offCanvasEl.show();
-                })
-            }
-        }, 200)
+        //                 ProvinceAcronym.val(abbreviation);
+        //                 ProvinceCode.val(prov_id);
+        //             });
+        //             offCanvasEl.show();
+        //         })
+        //     }
+        // }, 200)
 
         // Form validation for Add new record
         const fv = FormValidation.formValidation(ItemFormValidation, {
             fields: {
-                Remarks: {
+                ProvinceName: {
                     validators: {
                         notEmpty: {
-                            message: 'Please Enter Remarks',
+                            message: 'Required!',
                         },
                     },
                 },
-  
+                MunicipalityName: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Required!',
+                        },
+                    },
+                },
+                BarangayName: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Required!',
+                        },
+                    },
+                },
+                // PurokName: {
+                //     validators: {
+                //         notEmpty: {
+                //             message: 'Required!',
+                //         },
+                //     },
+                // },
+                MeansOfTransportation: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Required!',
+                        },
+                    },
+                },
             },
             plugins: {
                 trigger: new FormValidation.plugins.Trigger(),
@@ -510,51 +506,29 @@
                 })
             },
         }).on('core.form.valid', function () {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, save it!',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-3',
-                    cancelButton: 'btn btn-label-secondary',
-                },
-                buttonsStyling: false,
-            }).then(function (result) {
-                if (result.value) {
-                    var form_data = $('#item-form').serialize()
-                    let post_url = ItemID.val() != '0' ? "{% url 'remarks-update' %}" : "{% url 'remarks-add' %}"
-                    $.ajax({
-                        type: 'POST',
-                        url: post_url,
-                        data: form_data,
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Successfully save!',
-                                text: 'Item has been save.',
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                            offCanvasEl.hide()
-                            dataTable.ajax.reload()
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
+            var form_data = $('#item-form').serialize()
+            let post_url = ItemID.val() != '0' ? "{% url 'fare-matrix-update' %}" : "{% url 'fare-matrix-add' %}" 
+            $.ajax({
+                type: 'POST',
+                url: post_url,
+                data: form_data,
+            }).done(function (data) {
+                dataTable.ajax.reload();
+                if (data.data == 'success') {
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    clear_data();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error saving!',
+                        text: data.message,
+                        customClass: {
+                            confirmButton: 'btn btn-success',
+                        },
                     })
                 }
             })
-        })
+        });
 
         function clear_data(){
             ProvinceName.val('').trigger('change');
@@ -562,14 +536,17 @@
             MunicipalityName.val('').trigger('change');
             BarangayName.val('').trigger('change');
             PurokName.val('');
-            MeansOfTransportation.val('');
-            RegularFare.val('');
-            HireRate.val('');
+            MeansOfTransportation.val('').trigger('change');
+            RateRegularFare.val('');
+            HireRateOneWay.val('');
+            HireRateWholeDay.val('');
             EstimatedDurationOfTravel.val('');
             Justification.val('');
             DtRemarks.val('');
         }
-        function load_select(){
+        function load_select(value, prov_code, city_code){
+            let storedData = localStorage.getItem('psgc_data');
+            let psgcData = JSON.parse(storedData);
             setTimeout(function() {
                 if (ProvinceName.length) {
                     ProvinceName.wrap('<div class="position-relative"></div>')
@@ -595,7 +572,116 @@
                         allowClear: true,
                     })
                 }
+                if (MeansOfTransportation.length) {
+                    MeansOfTransportation.wrap('<div class="position-relative"></div>')
+                    MeansOfTransportation.select2({
+                        placeholder: 'Means of Transportation',
+                        dropdownParent: MeansOfTransportation.parent(),
+                        allowClear: true,
+                    })
+                }
             }, 100);
+            //edit data
+            if (value ==1){
+                ProvinceName.empty();
+                psgcData.forEach(function(province) {
+                    let capitalizedProvName = province.prov_name.toUpperCase();
+                    ProvinceName.append('<option value="' + province.prov_id + '">' + capitalizedProvName + '</option>');
+                });
+
+                let selectedProvince = psgcData.find(province => province.prov_id == prov_code);
+                if (selectedProvince && selectedProvince.cities) {
+                    selectedProvince.cities.forEach(city => {
+                        $('#municipality-name').append(
+                            `<option value="${city.city_id}">${city.city_name.toUpperCase()}</option>`
+                        );
+                    });
+                }
+
+                if (selectedProvince) {
+                    let selectedCity = selectedProvince.cities.find(city => city.city_id == city_code);
+                    if (selectedCity && selectedCity.barangays) {
+                        selectedCity.barangays.forEach(barangay => {
+                            $('#barangay-name').append(
+                                `<option value="${barangay.brgy_id}">${barangay.brgy_name.toUpperCase()}</option>`
+                            );
+                        });
+                    }
+                }
+            }
+            //add record
+            else{
+                clear_data();
+                let storedData = localStorage.getItem('psgc_data');
+                if (storedData) {
+                    let psgcData = JSON.parse(storedData);
+
+                    ProvinceName.empty();
+                    psgcData.forEach(function(province) {
+                        let capitalizedProvName = province.prov_name.toUpperCase();
+                        ProvinceName.append('<option value="' + province.prov_id + '">' + capitalizedProvName + '</option>');
+                    });
+                    ProvinceName.val('').trigger('change');
+                }
+            }
+            $('#province-name').on('change', function () {
+                var prov_id = $(this).val(); 
+                var prov_name = $(this).find('option:selected').text();
+                var prov_name2 = $(this).find('option:selected').text();
+                
+                if (prov_name === "DINAGAT ISLANDS") {
+                    var abbreviation = "PDI";
+                } else {
+                    var abbreviation = prov_name.split(' ').map(function(word) {
+                        return word.charAt(0); 
+                    }).join(''); 
+                }
+                ProvinceName2.val(prov_name2);
+                ProvinceAcronym.val(abbreviation);
+                ProvinceAcronym2.val(abbreviation);
+                ProvinceCode.val(prov_id);
+                $('#municipality-name').empty().append('<option></option>');
+                $('#barangay-name').empty().append('<option></option>'); // Clear barangay dropdown
+
+                let selectedProvince = psgcData.find(province => province.prov_id == prov_id);
+                if (selectedProvince && selectedProvince.cities) {
+                    selectedProvince.cities.forEach(city => {
+                        $('#municipality-name').append(
+                            `<option value="${city.city_id}">${city.city_name.toUpperCase()}</option>`
+                        );
+                    });
+                }
+            });
+            $('#municipality-name').on('change', function () {
+                var city_id = $(this).val();
+                var city_name = $(this).find('option:selected').text();
+                MunicipalityCode.val(city_id);
+
+                $('#barangay-name').empty().append('<option></option>');
+
+                let selectedProvince = psgcData.find(province =>
+                    province.cities.some(city => city.city_id == city_id)
+                );
+                MunicipalityName2.val(city_name);
+
+                if (selectedProvince) {
+                    let selectedCity = selectedProvince.cities.find(city => city.city_id == city_id);
+                    if (selectedCity && selectedCity.barangays) {
+                        selectedCity.barangays.forEach(barangay => {
+                            $('#barangay-name').append(
+                                `<option value="${barangay.brgy_id}">${barangay.brgy_name.toUpperCase()}</option>`
+                            );
+                        });
+                    }
+                }
+            });
+            $('#barangay-name').on('change', function () {
+                var barangay_id = $(this).val();
+                var barangay_name = $(this).find('option:selected').text();
+                BarangayName2.val(barangay_name);
+                BarangayCode.val(barangay_id);
+            });
+
         }
     
         $('#approved').click(function() {

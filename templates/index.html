@@ -241,13 +241,13 @@
 
                        {% comment %} {% if 'Admin' in permissions  %} {% endcomment %}
                            
-                        <li class="menu-item {% if url_name == 'travel-list' %}active{% endif %}">
+                        {% comment %} <li class="menu-item {% if url_name == 'travel-list' %}active{% endif %}">
                             <a href="{% url 'travel-list' %}" class="menu-link">
                                 <i class="menu-icon tf-icons ti ti-components"></i>
                             
                                 <div data-i18n="Travel">Travel</div>
                             </a>
-                        </li>
+                        </li> {% endcomment %}
                         
                         {% comment %} {% endif %} --> {% endcomment %}
 
@@ -374,6 +374,12 @@
                                     <a href="{% url 'remarks' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-color-swatch"></i>
                                         <div data-i18n="Remarks">Remarks</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item {% if url_name == 'means-of-transportation' %}active{% endif %}">
+                                    <a href="{% url 'means-of-transportation' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
+                                        <div data-i18n="Means of Transportation">Means of Transportation</div>
                                     </a>
                                 </li>
                                 <li class="menu-item {% if url_name == 'fare-matrix' %}active{% endif %}">
