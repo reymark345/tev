@@ -387,8 +387,12 @@ def fare_matrix_load(request):
         userData = AuthUser.objects.filter(id=item.created_by)
         full_name = userData[0].first_name + ' ' + userData[0].last_name
         
-        mot_id = MeansofTransportation.objects.filter(id=item.means_of_transportation_id)
-        mot_name = mot_id[0].transportation_name
+        if item.means_of_transportation_id:
+            mot = MeansofTransportation.objects.filter(id=item.means_of_transportation_id).first()
+            mot_name = mot.transportation_name if mot else None
+        else:
+            mot_name = None
+
         item = {
             'id': item.id,
             'province': item.province,

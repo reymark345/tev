@@ -141,7 +141,7 @@
                     id="high-rate-one-way"
                     class="form-control dt-high-rate"
                     name="HireRateOneWay"
-                    placeholder="Enter amount"
+                    placeholder="Enter rate"
                     aria-describedby="high_rate2"
                   />
                 </div>
@@ -153,9 +153,9 @@
                   <input
                     type="number"
                     id="high-rate-whole-day"
-                    class="form-control dt-high-rate"
+                    class="form-control dt-high-rate-whole-day"
                     name="HireRateWholeDay"
-                    placeholder="Enter amount"
+                    placeholder="Enter rate"
                     aria-describedby="high_rate2"
                   />
                 </div>
@@ -265,7 +265,7 @@
             MeansOfTransportation = jQuery(document.querySelector('[name="MeansOfTransportation"]')),
             RateRegularFare = jQuery(document.querySelector('[name="RateRegularFare"]')),
             HireRateOneWay = jQuery(document.querySelector('[name="HireRateOneWay"]')),
-            HireRateWholeDay = jQuery(document.querySelector('[name="HireRateWholeDay]')),
+            HireRateWholeDay = jQuery(document.querySelector('[name="HireRateWholeDay"]')),
             EstimatedDurationOfTravel = jQuery(document.querySelector('[name="EstimatedDurationOfTravel"]')),
             Justification = jQuery(document.querySelector('[name="Justification"]')),
             DtRemarks = jQuery(document.querySelector('[name="DtRemarks"]')),
@@ -342,6 +342,7 @@
                             let prov_code = fields.prov_code;
                             let city_code = fields.city_code;
                             load_select(1,prov_code,city_code);
+
                             let pk = data[0].pk
                             let remarks = $('#province-name');
                             ProvinceName.val(prov_code).trigger('change');
@@ -349,7 +350,7 @@
                             MunicipalityName.val(city_code).trigger('change');
                             BarangayName.val(fields.brgy_code).trigger('change');
                             PurokName.val(fields.purok);
-                            MeansOfTransportation.val(fields.means_of_transportation).trigger('change');
+                            MeansOfTransportation.val(fields.means_of_transportation_id).trigger('change');
                             RateRegularFare.val(fields.rate_regular_fare);
                             HireRateOneWay.val(fields.hire_rate_one_way);
                             HireRateWholeDay.val(fields.hire_rate_whole_day);
@@ -477,20 +478,6 @@
                         },
                     },
                 },
-                // PurokName: {
-                //     validators: {
-                //         notEmpty: {
-                //             message: 'Required!',
-                //         },
-                //     },
-                // },
-                MeansOfTransportation: {
-                    validators: {
-                        notEmpty: {
-                            message: 'Required!',
-                        },
-                    },
-                },
             },
             plugins: {
                 trigger: new FormValidation.plugins.Trigger(),
@@ -514,9 +501,16 @@
                 data: form_data,
             }).done(function (data) {
                 dataTable.ajax.reload();
-                if (data.data == 'success') {
+                console.log(ItemID.val());
+                if (data.data == 'success' && ItemID.val()==0) {
                     toastr.success('Successfully save', 'Success', toast_options);
                     clear_data();
+                }
+                else if (data.data == 'success' && ItemID.val()!=0){
+                    toastr.success('Successfully save', 'Success', toast_options);
+                    clear_data();
+                    offCanvasEl.hide()
+
                 } else {
                     Swal.fire({
                         icon: 'error',
