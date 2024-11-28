@@ -22,4 +22,16 @@ urlpatterns = [
     path('remarks_update', views.remarks_update, name='remarks-update'),
     path('remarks_edit', views.remarks_edit, name='remarks-edit'),
     path('remarks_status_edit', views.remarks_status_edit, name='remarks-status-edit'),
+
+    path('fare_matrix', views.fare_matrix, name='fare-matrix'),
+    path('fare_matrix_load', views.fare_matrix_load, name='fare-matrix-load'),  
+    path('fare_matrix_edit', views.fare_matrix_edit, name='fare-matrix-edit'),
+    path('fare_matrix_add', views.fare_matrix_add, name='fare-matrix-add'),
+    path('fare_matrix_update', views.fare_matrix_update, name='fare-matrix-update'),
+
+    path('means_of_transportation', views.means_of_transportation, name='means-of-transportation'),
+    path('means_of_transportation_load', views.means_of_transportation_load, name='means-of-transportation-load'),  
+    path('means_of_transportation_edit', views.means_of_transportation_edit, name='means-of-transportation-edit'),
+    path('means_of_transportation_add', views.means_of_transportation_add, name='means-of-transportation-add'),
+    path('means_of_transportation_update', views.means_of_transportation_update, name='means-of-transportation-update'),
 ]
