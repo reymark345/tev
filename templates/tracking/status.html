@@ -653,6 +653,8 @@
                           }
                       }, 300);
                       clear_advfilter();
+                      const $selectElements = $('#f-division');
+                      $selectElements.val('').trigger('change');
                       $("#advance-filter").modal("show");
                   }
               },
