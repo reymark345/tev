@@ -97,7 +97,7 @@ CHANNEL_LAYERS = {
 }
 
 DATABASES = {
-    # #for server to server
+    ##for server to server
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tris',
@@ -105,10 +105,6 @@ DATABASES = {
         'PASSWORD': 'vOHA]ko(5))If-LU',
         'HOST': '172.31.240.235',
         'PORT': '3306',
-        'OPTIONS': {
-            'connect_timeout': 60,
-        },
-        'CONN_MAX_AGE': 600, 
     },
     # #for server INFIMOS
     
@@ -119,10 +115,6 @@ DATABASES = {
         'PASSWORD':'vOHA]ko(5))If-LU',
         'HOST':'172.31.240.235',
         'PORT':'3306',
-        'OPTIONS': {
-            'connect_timeout': 60, 
-        },
-        'CONN_MAX_AGE': 600, 
     },
 
     'finance_2024': {
@@ -132,10 +124,6 @@ DATABASES = {
         'PASSWORD':'vOHA]ko(5))If-LU',
         'HOST':'172.31.240.235',
         'PORT':'3306',
-        'OPTIONS': {
-            'connect_timeout': 60,
-        },
-        'CONN_MAX_AGE': 600, 
     },
     
 
