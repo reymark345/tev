@@ -273,6 +273,7 @@
     let status_val =0;
     let dv_no_id =0;
     let employeeList = [];
+    var startYear = 2023;
     $(document).ready(function () {
       var dateField = $('#dateField').flatpickr({
             mode: 'multiple',
@@ -682,6 +683,10 @@
             tooltipTriggerList.forEach(function (tooltipTriggerEl) {
                 new bootstrap.Tooltip(tooltipTriggerEl);
             });
+
+
+
+
             
             
             // setTimeout(function() {
@@ -1187,12 +1192,11 @@
               });
           }
       })
-      $('div.head-label').html('<h5 class="card-title mb-0">'+
+      
+      {% comment %} $('div.head-label').html('<h5 class="card-title mb-0">'+
       '<select id="dp-year" name="DpYear" class="form-select">'+
-          '<option value="2023">2023</option>'+
-          '<option value="2024">2024</option>'+
-          '</select>'
-      +'</h5>')
+      +'</h5>');
+       {% endcomment %}
 
       dataTable.on('processing.dt', function(e, settings, processing) {
         if (!processing) {
@@ -1276,7 +1280,7 @@
       });
       
       $(document).ready(function () {
-          $('#dp-year').val(year_now); 
+          //$('#dp-year').val(year_now); 
       });
 
       $('#dp-year').change(function () {
