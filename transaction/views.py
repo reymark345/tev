@@ -700,7 +700,7 @@ def journal_load(request):
             'division_name': item['division'],
             'division_chief': item['division_chief'],
             'status': item['status_id'],
-            'b_d_forwarded': item['b_d_forwarded'],
+            'b_d_forwarded': item.get('b_d_forwarded', ""),
             'box_b_out': item['j_d_forwarded'],
             'd_received': item['j_d_received'],
             'd_forwarded': item['j_d_forwarded'],

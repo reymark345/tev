@@ -88,8 +88,12 @@ def status_load(request):
 
     if DpYear == "2023":
         finance_database_alias = 'finance' 
+
+    elif DpYear == "2025":
+        finance_database_alias = 'finance_2025'
     else:
         finance_database_alias = 'finance_2024' 
+        
 
     year = int(DpYear) % 100
     formatted_year = str(year)+"-"

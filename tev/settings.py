@@ -162,6 +162,14 @@ DATABASES = {
         'HOST':'localhost',
         'PORT':'3306',
     },
+    # 'finance_2025': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2025',
+    #     'USER':'root',
+    #     'PASSWORD':'',
+    #     'HOST':'localhost',
+    #     'PORT':'3306',
+    # },
 
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',

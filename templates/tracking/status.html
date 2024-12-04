@@ -1193,10 +1193,13 @@
           }
       })
       
-      {% comment %} $('div.head-label').html('<h5 class="card-title mb-0">'+
-      '<select id="dp-year" name="DpYear" class="form-select">'+
-      +'</h5>');
-       {% endcomment %}
+      $('div.head-label').html('<h5 class="card-title mb-0">'+
+        '<select id="dp-year" name="DpYear" class="form-select">'+
+            '<option value="2023">2023</option>'+
+            '<option value="2024">2024</option>'+
+            '<option value="2025">2025</option>'+
+            '</select>'
+      +'</h5>')
 
       dataTable.on('processing.dt', function(e, settings, processing) {
         if (!processing) {
@@ -1280,7 +1283,7 @@
       });
       
       $(document).ready(function () {
-          //$('#dp-year').val(year_now); 
+          $('#dp-year').val(year_now); 
       });
 
       $('#dp-year').change(function () {
