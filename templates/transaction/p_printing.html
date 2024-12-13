@@ -293,11 +293,9 @@
             </div>
           </div>
           <br>
-
-          <!-- <div class="alert alert-warning" role="alert">
-              <h6 class="alert-heading mb-2">Amount</h6>
-                  <span id ="current_amount">₱ 0</span>
-              </div> -->
+          <label class="form-label">AMOUNT ALLOCATE : <span id="amt_allocate" name ="AmtAllocate"><b>₱ 0.00</b></span></label> <br>
+          <label class="form-label">REMAINING : <span id="amt_remaining" name ="AmtAllocate"><b>₱ 0.00</b></span></label>
+          <br>
 
 
           <form id="tev-correctness-form" class="row g-3" onsubmit="return false">
@@ -371,6 +369,7 @@
           FCluster = jQuery(document.querySelector('[name="FCluster"]')),
           FName = jQuery(document.querySelector('[name="FName"]')),
           AmountIssued = jQuery(document.querySelector('[name="AmountIssued"]')),
+          AmtAllocate = jQuery(document.querySelector('[name="AmtAllocate"]')),
           MDivision = jQuery(document.querySelector('[name="MDivision"]')),
           MCluster = jQuery(document.querySelector('[name="MCluster"]')),
           MDvNumber = jQuery(document.querySelector('[name="MDvNumber"]')),
@@ -652,6 +651,7 @@
                     let amount = data.amount;
                     FName.val(full_name);
                     AmountIssued.val(amount);
+                    AmtAllocate.text(amount);
                     $('.rows-container').empty();
                     chargesList = data.data.map(item => item.charges_id);
                     amountList = data.data.map(item => item.amount);
@@ -672,7 +672,7 @@
                             '<span class="error-label">Required</span>'+
                             '</div>' +
                             '<div class="col-5">' +
-                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" autocomplete="off" />'+
                             '<span class="error-label-amount">Required</span>'+
                             '</div>' +
                             '<div class="col-2">' +
@@ -697,7 +697,7 @@
                         '<span class="error-label">Required</span>'+
                         '</div>' +
                         '<div class="col-5">' +
-                        '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                        '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" autocomplete="off" />'+
                         '<span class="error-label-amount">Required</span>'+
                         '</div>' +
                         '<div class="col-2">' +
@@ -1067,7 +1067,6 @@
                             `<a class="btn btn-sm btn-icon item-amount" id="${itemId.id}"><i class="text-primary fa fa-edit"></i></a>`
                         
                         );
-                        // return `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
                     },
                 },
                 
@@ -1137,7 +1136,7 @@
           allowInput: true,
           dateFormat: 'd-m-Y',
           locale: {
-              'firstDayOfWeek': 1 // start week on Monday
+              'firstDayOfWeek': 1
           },
         });
         
@@ -1150,7 +1149,7 @@
             allowInput: true,
             dateFormat: 'd-m-Y',
             locale: {
-                'firstDayOfWeek': 1 // start week on Monday
+                'firstDayOfWeek': 1
             },
           });
         $("#dateField").on("change", function() {
@@ -1231,29 +1230,67 @@
                 })
             }
         })
+        } 
+        function updateTotal() {
+            let totalAllocate = 0;
+            $('.rows-container input[name="ChargesAmount"]').each(function () {
+                const value = parseFloat($(this).val()) || 0; 
+                totalAllocate += value;
+            });
 
-        }   
-        $('#add_charges').click(function () {     
-            var newRow = $('<div class="row mt-2">' +
-                '<div class="col-5">' +
-                '<select class="form-select select-charges" id="select-charges">' +
-                    '<option></option>'+
-                    '{% for row in charges %}'+
-                    '<option value="{{ row.id }}">{{ row.name }}</option>'+
-                    '{% endfor %}'+
-                '</select>' +
-                '<span class="error-label">Required</span>'+
-                '</div>' +
-                '<div class="col-5">' +
-                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
-                '<span class="error-label-amount">Required</span>'+
-                '</div>' +
-                '<div class="col-2">' +
-                '<button type="button" class="btn btn-warning delete-row">-</button>' +
-                '</div>' +
-                '</div>');
-                newRow.find('.error-label, .error-label-amount').hide();
+            $('#amt_allocate').text("₱ " + totalAllocate.toFixed(2));
+
+            const amountIssued = parseFloat($('#amount-issued').val()) || 0;
+
+            const remainingAmount = amountIssued - totalAllocate;
+            const amtRemainingSpan = $('#amt_remaining');
+            amtRemainingSpan.text("₱ " + remainingAmount.toFixed(2));
+            if (remainingAmount < 0) {
+                amtRemainingSpan.css("color", "red");
+            } else {
+                amtRemainingSpan.css("color", "");
+            }
+        }
+        $('#add_charges').click(function () {
+            var newRow = $(
+                '<div class="row mt-2">' +
+                    '<div class="col-5">' +
+                    '<select class="form-select select-charges" id="select-charges">' +
+                        '<option></option>' +
+                        '{% for row in charges %}' +
+                        '<option value="{{ row.id }}">{{ row.name }}</option>' +
+                        '{% endfor %}' +
+                    '</select>' +
+                    '<span class="error-label">Required</span>' +
+                    '</div>' +
+                    '<div class="col-5">' +
+                    '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" autocomplete="off" />' +
+                    '<span class="error-label-amount">Required</span>' +
+                    '</div>' +
+                    '<div class="col-2">' +
+                    '<button type="button" class="btn btn-warning delete-row">-</button>' +
+                    '</div>' +
+                '</div>'
+            );
+            newRow.find('.error-label, .error-label-amount').hide();
             $('.rows-container').append(newRow);
+        });
+
+        $(document).on('input', 'input[name="ChargesAmount"]', function () {
+            const value = $(this).val();
+            if (!/^\d*\.?\d*$/.test(value)) {
+                $(this).val(value.slice(0, -1));
+            }
+            updateTotal();
+        });
+
+        $(document).on('input', '#amount-issued', function () {
+            updateTotal();
+        });
+
+        $(document).on('click', '.delete-row', function () {
+            $(this).closest('.row').remove();
+            updateTotal();
         });
 
         $('.container').on('click', '.delete-row', function () {
@@ -1294,7 +1331,6 @@
         });
 
 
-        
         $(document).on("change", ".emp-charges", function () {
             let dataTable = $('#tbl-box-a').DataTable();
             let closestRow = dataTable.row($(this).closest('tr'));
@@ -1324,6 +1360,7 @@
                         let amount = data.amount;
                         FName.val(full_name);
                         AmountIssued.val(amount);
+                        AmtAllocate.text("₱ "+amount);
                         $('.rows-container').empty();
                         chargesList = data.data.map(item => item.charges_id);
                         amountList = data.data.map(item => item.amount);
@@ -1342,7 +1379,7 @@
                                 '<span class="error-label">Required</span>'+
                                 '</div>' +
                                 '<div class="col-5">' +
-                                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" />'+
+                                '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="' + amountList[i] + '" autocomplete="off" />'+
                                 '<span class="error-label-amount">Required</span>'+
                                 '</div>' +
                                 '<div class="col-2">' +
@@ -1367,7 +1404,7 @@
                             '<span class="error-label">Required</span>'+
                             '</div>' +
                             '<div class="col-5">' +
-                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" />'+
+                            '<input type="text" id="charges_amount" name="ChargesAmount" placeholder="0.00" class="form-control input-date" value="" autocomplete="off" />'+
                             '<span class="error-label-amount">Required</span>'+
                             '</div>' +
                             '<div class="col-2">' +

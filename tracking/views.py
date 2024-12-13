@@ -93,10 +93,16 @@ def status_load(request):
         finance_database_alias = 'finance_2025'
     else:
         finance_database_alias = 'finance_2024' 
-        
+
 
     year = int(DpYear) % 100
     formatted_year = str(year)+"-"
+    year_ = str(year)
+
+    print("testttttyear")
+    print(formatted_year)
+
+
     
     EmployeeList = request.GET.getlist('EmployeeList[]')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
@@ -108,6 +114,7 @@ def status_load(request):
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if FAdvancedFilter:
+        print("conditioneadvancefilter")
         FStartDate = request.GET.get('FStartDate') 
         FEndDate = request.GET.get('FEndDate') 
         formatted_start_date = None
@@ -134,9 +141,11 @@ def status_load(request):
                 ON tev_incoming.id = tev_bridge.tev_incoming_id
                 LEFT JOIN tev_outgoing
                 ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-                WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
+                WHERE tev_incoming.date_travel LIKE %s
             """
-            params = [f'{formatted_year}%']
+            params = [f'%{DpYear}%']
+
+            # WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
 
             if FTransactionCode:
                 query += " AND tev_incoming.code = %s"
@@ -210,6 +219,7 @@ def status_load(request):
                 finance_data = filtered_rows
 
     elif _search:
+        print("conditionelifstatement")
         with connection.cursor() as cursor:
             query = """
                 SELECT
@@ -256,14 +266,18 @@ def status_load(request):
                     OR tev_incoming.division LIKE %s
                     OR tev_incoming.section LIKE %s
                     OR tev_outgoing.dv_no LIKE %s)
-                    AND (tev_outgoing.dv_no LIKE %s OR dv_no IS NULL)
+                    AND tev_incoming.date_travel LIKE %s
                 ORDER BY
                     tev_incoming.id DESC;
             """
-            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{formatted_year}%'])
+            #AND (tev_outgoing.dv_no LIKE %s OR dv_no IS NULL)
+            # cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{formatted_year}%'])
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{DpYear}%'])
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
+        print("conditionelsestatement")
+        print(formatted_year)
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
@@ -285,9 +299,15 @@ def status_load(request):
                 ON tev_incoming.id = tev_bridge.tev_incoming_id
                 LEFT JOIN tev_outgoing
                 ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-                WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
+                WHERE tev_incoming.date_travel LIKE %s
                 ORDER BY tev_incoming.id DESC;
-            """, [f'{formatted_year}%'])
+            """, [f'%{DpYear}%'])
+            print("DpYear")
+            print(year_)
+
+            # WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
+            #     ORDER BY tev_incoming.id DESC;
+            # """, [f'{formatted_year}%'])
             
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
