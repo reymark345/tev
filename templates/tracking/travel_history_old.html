@@ -1,0 +1,1322 @@
+<div id="loading-screen">
+    <center>
+        <div class="col">
+            <!-- Fold -->
+            <div class="sk-fold sk-primary">
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+              <div class="sk-fold-cube"></div>
+            </div>
+          </div>  
+    </center>
+  </div>
+  {% extends 'index.html' %} {% block content %} {% load staticfiles %}
+  <link rel="stylesheet" href="{% static 'custom/custom.css' %}" />
+  <!-- Content wrapper -->
+  <div class="content-wrapper">
+      <!-- Content -->
+      <div class="container-fluid flex-grow-1 container-p-y">
+          <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Tracking /</span> Status</h4>
+  
+          <!-- DataTable with Buttons -->
+          <div class="card">
+              <div class="card-datatable table-responsive pt-0">
+                  <table id="tbl-items" class="table">
+                      <thead>
+                          <tr>
+                              <th>Code</th>
+                              <th>Dv No</th>
+                              <th>Employee Name</th>
+                              <th>Date Travel</th>
+                              <th>Office</th>
+                              <th>Amt. Certified</th>
+                              <th>Received</th>
+                              <th>Reviewed</th>
+                              <th>Payroll</th>
+                              <th>Outgoing</th>
+                              <th>Obligate</th>
+                              <th>Journal</th>
+                              <th>Certified</th>
+                              <th>Approval</th>
+                              <th>Check Issued</th>
+                              <th>ID</th>
+                          </tr>
+                      </thead>
+                      <tbody></tbody>
+                  </table>
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  
+  <!--  modal history-->
+  <div class="modal fade" id="tracking-history" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered" style="min-width: 35%; min-height: 70%;" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="exampleModalLabel4">Travel History</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-header">
+                <h5 class="modal-title"><span class="badge bg-label-warning" id="employee-id-no"></span>&nbsp;&nbsp;&nbsp;<span class="badge bg-label-primary" id="employee-full-name"></span></h5>
+              </div>
+              <div class="modal-body">
+                  <div class="col-xl-12">
+                    <div class="card">
+                      <h5 class="card-header">Status</h5>
+  
+                      <div class="card-body pb-0">
+                        <ul class="timeline mt-3 mb-0">
+                          <div class="main-container"></div>
+                        </ul>
+                      </div>                    
+                    </div>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  
+  <!-- Edit User Modal -->
+  <div class="modal fade" id="advance-filter" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center mb-4">
+            <h3 class="mb-2">Advanced Filter </h3>
+            <p class="text-muted">Filter data by filling the details below</p>
+            </div>
+            <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
+                <div class="col-12 col-md-12">
+                    <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                        <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
+                            <option></option>
+                        </select>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditUserFirstName">ID Number</label>
+                    <input
+                    type="text"
+                    id="f-id-number"
+                    name="FIdNumber"
+                    class="form-control"
+                    placeholder="16-0000"
+                    />
+                </div>
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditUserLastName">Transaction Code</label>
+                    <input
+                    type="text"
+                    id="f-transaction-code"
+                    name="FTransactionCode"
+                    class="form-control"
+                    placeholder="23-00-00000"
+                    />
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label" for="modalEditTaxID">Date Travel</label>
+                    <input type="text" class="form-control" name="FDateTravel" placeholder="DD-MM-YYYY" id="dateField" autocomplete="off"/>
+                </div>
+    
+                <div class="col-12 col-md-6">
+                    <label class="form-label">DV Number</label>
+                    <div class="input-group">
+                    <input
+                        type="number"
+                        id="dv-number"
+                        name="NDVNumber"
+                        class="form-control phone-number-mask"
+                        placeholder="23-00-0000"
+                    />
+                    </div>
+                </div>
+  
+                <div class="col-12 col-md-12">
+                  <label for="dateRangePicker" class="form-label">Date Range</label>
+                  <div class="input-group input-daterange" id="divDateRange">
+                    <input type="text" id="startDate" placeholder="MM/DD/YYYY" class="form-control" name="FStartDate"/>
+                    <span class="input-group-text">to</span>
+                    <input type="text" id="endDate" placeholder="MM/DD/YYYY" class="form-control" name="FEndDate" />
+                  </div>
+                </div>
+  
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="modalFStatus">Status</label>
+                  <select id="f-status" name="FStatus" class="form-select">
+                      <option></option>
+                      <option value="1">Received</option>
+                      <option value="2">Reviewed</option>
+                      <option value="3">Returned</option>
+                      <option value="5">Payroll</option>
+                      <option value="8">Outgoing</option>
+                      <option value="10">Obligate</option>
+                      <option value="12">Journal</option>
+                      <option value="13">Certified</option>
+                      <option value="14">Approval</option>
+                      <option value="16">Check Issued</option>
+                  </select>
+                </div>
+  
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="modalDivision">Offices</label>
+                  <select id="f-division" name="FDivision" class="form-select">
+                      <option></option>
+                      {% for row in division %}
+                        <option value="{{ row.name }}">{{ row.name }}</option>
+                      {% endfor %}
+                  </select>
+                </div>
+                    <input
+                    type="hidden"
+                    id="f-first-name"
+                    name="FFirstName"
+                    class="form-control"
+                    placeholder="Firstname"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-middle-name"
+                    name="FMiddleName"
+                    class="form-control"
+                    placeholder="Middle"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-last-name"
+                    name="FLastName"
+                    class="form-control"
+                    placeholder="Lastname"
+                    />
+    
+                    <input
+                    type="hidden"
+                    id="f-adv-filter"
+                    name="FAdvancedFilter"
+                    class="form-control"
+                    placeholder="AdvFilter"
+                    />
+            
+                <div class="col-12 text-center">
+                    <button type="button" id="search-advance-filter" class="btn btn-primary me-sm-3 me-1">Search</button>
+                    <button type="button" id="reset-advance-filter" class="btn btn-warning me-sm-3 me-1">Reset</button>
+                    <button type="button" id="clear-advance-filter" class="btn btn-label-secondary">Clear</button>
+                
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+    </div>
+    <!--/ Edit User Modal -->
+  
+  
+        
+  <!-- Modal to add new record -->
+  <div class="offcanvas offcanvas-end" id="add-new-record">
+      <div class="offcanvas-header border-bottom">
+          <h5 class="offcanvas-title" id="exampleModalLabel"><p class="title-name">Add Record</p></h5>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body flex-grow-1">
+          <form class="add-new-record pt-0 row g-2" id="item-form">
+              <input type="hidden" id="item-id" name="ItemID" />
+              <div class="col-sm-12">
+                  <label class="form-label" for="employee-name">Employee Name</label>
+                  <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
+                      <option></option>
+                      <option>Reymark N. Valdehueza</option>
+                      <option>Saton Goru</option>
+                      <option>Monkey D luffy</option>
+                  </select>
+              </div>
+  
+              <div class="col-sm-12">
+                  <div class="form-group">
+                      <label class="form-label" for="original-amount">Amount</label>
+                      <input id="original-amount" name="OriginalAmount" class="form-control amount"type="number"placeholder="0.00"/>
+                  </div>
+              </div>
+  
+              <div class="col-sm-12">
+                  <div class="form-group">
+                      <label class="form-label" for="remarks">Remarks</label>
+                      <div class="input-group input-group-merge">
+                          <textarea class="form-control dt-sales-remarks" placeholder="Enter remarks (optional)" rows="6" id="remarks" name="Remarks"></textarea>
+                          <span class="input-group-text">
+                            <i class="ti ti-microphone cursor-pointer text-to-speech-toggle"></i>
+                          </span>
+                         
+                        </div>
+                  </div>
+              </div>
+              
+              <div class="col-sm-12 mt-4">
+                  <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
+                  <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+              </div>
+          </form>
+      </div>
+  </div>
+  
+  {% endblock %} {% block footer_scripts %}
+  <script>
+      let clicked_id = 0;
+      let status_val =0;
+      let dv_no_id =0;
+      let employeeList = [];
+      $(document).ready(function () {
+        var dateField = $('#dateField').flatpickr({
+              mode: 'multiple',
+              allowInput: true,
+              dateFormat: 'd-m-Y',
+              locale: {
+                  'firstDayOfWeek': 1 // start week on Monday
+              },
+        });
+        var dateFieldRange = $('#startDate, #endDate').datepicker({
+          format: 'mm/dd/yyyy',
+          autoclose: true
+        });
+  
+        $('#loading-screen').hide();
+        const currentDate = new Date();
+        let year_now  = "";
+        if(!year_now){year_now = currentDate.getFullYear().toString();}  
+        const table = $('#tbl-items')
+        const ItemFormValidation = document.getElementById('item-form'),
+            EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
+            OriginalAmount = jQuery(document.querySelector('[name="OriginalAmount"]')),
+            Remarks = jQuery(document.querySelector('[name="Remarks"]')),
+            FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
+            FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
+            FDateTravel= jQuery(document.querySelector('[name="FDateTravel"]')),
+            FDivision= jQuery(document.querySelector('[name="FDivision"]')),
+            FIdNumber = jQuery(document.querySelector('[name="FIdNumber"]')),
+            NDVNumber = jQuery(document.querySelector('[name="NDVNumber"]')),
+            FStatus = jQuery(document.querySelector('[name="FStatus"]')),
+            FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
+            FEndDate = jQuery(document.querySelector('[name="FEndDate"]')),
+            FTransactionCode = jQuery(document.querySelector('[name="FTransactionCode"]')),
+            DpYear = jQuery(document.querySelector('[name="DpYear"]')),
+            search_advance_filter = $('#search-advance-filter'),
+            reset_advance_filter = $('#reset-advance-filter'),
+            clear_advance_filter = $('#clear-advance-filter'),
+            offCanvasElement = document.querySelector('#add-new-record')
+        const offCanvasEl = new bootstrap.Offcanvas(offCanvasElement)
+        const toast_options = (toastr.options = {
+            maxOpened: 1,
+            autoDismiss: true,
+            closeButton: true,
+            newestOnTop: true,
+            progressBar: true,
+            positionClass: 'toast-top-right',
+            rtl: isRtl,
+        });
+        let ItemID = $('#item-id')
+  
+        let dataTable = table.DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{% url 'travel-history-load' %}",
+                data: function (d) {
+                    d.FAdvancedFilter = FAdvancedFilter.val()
+                    d.FIdNumber = FIdNumber.val()
+                    d.FTransactionCode = FTransactionCode.val()
+                    d.NDVNumber = NDVNumber.val()
+                    d.FStatus = FStatus.val()
+                    d.FDateTravel = FDateTravel.val()
+                    d.DpYear = year_now
+                    d.EmployeeList = employeeList
+                    d.FDivision = FDivision.val()
+                    d.FStartDate = FStartDate.val()
+                    d.FEndDate = FEndDate.val()
+                },
+            },
+            columns: [
+                { data: 'code' },
+                { data: 'dv_no' },
+                { data: 'full_name' },
+                { data: 'date_travel'},
+                { data: 'division' },
+                { data: 'final_amount'},
+                { data: 'status'},
+                { data: 'status' },
+                { data: 'status' },
+                { data: 'status' },
+                { data: 'status' },
+                { data: 'amt_budget', status : 'status' },
+                { data: 'amt_journal', status : 'status' },
+                { data: 'approved_date', status : 'status' },
+                { data: 'amt_check', status : 'status' },
+                { data: 'id' },
+  
+            ],
+            columnDefs: [
+  
+            {
+                targets: 0,
+                render: function (data) {
+                    return '<span class="badge bg-label-primary">' + data + '</span>'
+                },
+            },
+            {
+                targets: 1,
+                render: function (data) {
+                    if (data){
+                        return '<span class="badge bg-label-primary">' + data + '</span>'
+                    }
+                    else{
+                        return ``;
+                    }
+                },
+            },
+            {
+                targets: 3,
+                render: function(data) {
+                    var splitValues = data.split(',');  // Split data by comma
+                    var result = '';
+                    
+                    splitValues.forEach(function(value, index) {
+                        if (index !== 0) {
+                            result += '  '; // Add a space before adding subsequent values
+                        }
+                        var dateParts = value.split('-');
+                        var monthNames = ["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."];
+                        var formattedDate = monthNames[parseInt(dateParts[1], 10) - 1] + ' ' + parseInt(dateParts[0], 10) + ', ' + dateParts[2];
+                        
+                        result += '<span class="badge bg-label-primary">' + formattedDate + '</span>';
+                    });
+                    
+                    return result;
+                },
+            },
+            {
+                targets: 4,
+                render: function (data) {
+                  if (data){
+                    return '<span class="badge bg-label-primary">' + data + '</span>'
+                  }
+                  else{
+                    return ''
+                  } 
+                },
+            },
+            {
+                targets: 5,
+                render: function(data) {
+                    var floatValue = parseFloat(data);
+                    if (floatValue !== 0) {
+                        var formattedValue = floatValue.toLocaleString('en-US', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        });
+                        return '<span class="badge bg-label-primary"> ' +formattedValue+'</span>';
+                    } else {
+                        return "";
+                    }
+                },
+            },            
+            {
+                targets: 6,
+                render: function (data) {
+                    data = parseInt(data); 
+                    if (data == 1) {
+                        return '<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-warning" title="Received"><i class="ti ti-check"></i></span></center>';
+                    }
+                    else{
+                      return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>';
+                    }
+                    
+                    
+                  },
+            },
+            {
+                targets: 7,
+                render: function (data) {
+                    data = parseInt(data); 
+                    let tooltip = '';
+                    let status = '';
+                    if(data==3){
+                      tooltip = 'Returned';
+                      status = 'bg-danger';
+  
+                      return '<center><span class="badge badge-center rounded-pill bg-danger" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-x"></i></span></center>'
+                    }
+                    if(data==2){
+                      tooltip = 'For Checking';
+                      return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span></center>'
+                    }
+                    if(data==7){
+                      tooltip = 'Approved';
+                      return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span></center>'
+                    }
+                    else if (data > 3){
+                      tooltip = 'Forwarded';
+                        return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="' + tooltip +'"><i class="ti ti-check"></i></span></center>'
+                    }
+                    else{
+                        return ``;
+                    }
+                    
+                },
+            },
+            {
+                targets: 8,
+                render: function (data) {
+                    data = parseInt(data); 
+                    let tooltip = '';
+                    let status = '';
+                    tooltip = 'For Received';
+                    if (data >= 5 && data < 6 ){
+                      return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Payroll"><i class="ti ti-check"></i></span></center>`
+                    }
+                    if (data >= 6 && data !=7 ){
+                      return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
+                    }
+                    if (data == 4 ){
+                      return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else{
+                      return ``;;
+                    }
+                },
+            },
+            {
+                targets: 9,
+                render: function (data) {
+                    data = parseInt(data); 
+                    let tooltip = '';
+                    let status = '';
+                    tooltip = 'For Received';
+                    if (data >= 6  && data < 8 && data != 7){
+                      return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else if (data == 8 ){
+                      return  `<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else if (data >= 9){
+                      return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else{
+                        return ``;
+                          
+                    }
+                },
+            },
+  
+            {
+                targets: 10,
+                orderable: false,
+                render: function (data, type, row) {
+                    var status = row.status; 
+                    if (status >= 9  && status < 10){
+                      return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else if (status == 10 ){
+                      return  `<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else if (status >= 11){
+                      return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else{
+                        return ``;
+                          
+                    }
+                },
+            },
+  
+            {
+                targets: 11,
+                orderable: false,
+                render: function (data, type, row) {
+                    var status = row.status; 
+                    if (status >= 11  && status < 12){
+                      return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else if (status == 12 ){
+                      return  `<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else if (status >= 13){
+                      return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else{
+                      return ``;
+                          
+                    }
+                },
+            },
+  
+            
+            {
+                targets: 12,
+                orderable: false,
+                render: function (data, type, row) {
+                    var status = row.status; 
+                    if (status >= 13  && status <= 15){
+                      return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else{
+                        return ``;   
+                    }
+                },
+            },
+            
+            //approval
+            {
+                targets: 13,
+                orderable: false,
+                render: function (data, type, row) {
+                    var status = row.status; 
+                    if (status >= 13  && status < 14){
+                      return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else if (status == 14 ){
+                      return  `<center><span class="badge badge-center rounded-pill bg-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else if (status >= 15){
+                      return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded"><i class="ti ti-check"></i></span></center>`
+                    }
+                    else{
+                      return ``;
+                          
+                    }
+                },
+            },
+             //check issued
+  
+            {
+                targets: 14,
+                orderable: false,
+                render: function (data, type, row) {
+                  var status = row.status; 
+                  if (data){
+                    return `<center><span class="badge badge-center rounded-pill bg-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success"><i class="ti ti-check"></i></span></center>`
+                  }
+                  else if (status == 15){
+                    return `<center><span class="badge badge-center rounded-pill bg-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-warning"><i class="ti ti-check"></i></span></center>`
+                  }
+                  else{
+                    return ``;    
+                  }
+                },
+            },
+            { 
+                targets: -1,
+                title: 'Action',
+                orderable: false,
+                searchable: false,
+                render: function (data) {
+                    return (
+                        '<a href="javascript:;" data-id="' + data + '" id="'+data+'" class="item-edit text-body view-data"><i class="text-primary ti ti-eye"></i></a>'
+                    )
+                },
+            },
+            
+            ],
+            dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
+            buttons: [
+                {
+                    className: 'btn btn-label-primary me-2',
+                    text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Advance Filter</span>',
+                    action: function () {
+                        employeeList = [];
+                        const $selectElement = $('#f-employee-name');
+                        $selectElement.empty();
+                        fetchEmployee($selectElement);
+                        FEmployeeName.val('').trigger('change');
+  
+                        setTimeout(function() {
+                            if (FEmployeeName.length) {
+                                FEmployeeName.wrap('<div class="position-relative"></div>')
+                                FEmployeeName.select2({
+                                    placeholder: 'Choose employee',
+                                    dropdownParent: FEmployeeName.parent(),
+                                    allowClear: true,
+                                })
+                            }
+                        }, 300);
+                        clear_advfilter();
+                        $("#advance-filter").modal("show");
+                    }
+                },
+                {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions %}
+                  {
+                      className: 'btn btn-label-primary me-2',
+                      text: '<i class="ti ti-file-search me-sm-1"></i> <span class="d-none d-sm-inline-block">Export</span>',
+                      action: function () {
+                        $('#loading-screen').show();
+                        $.ajax({
+                          type: 'POST',
+                          url: "{% url 'export-status' %}"
+                        }).done(function (data) {
+                          window.location.href = "{% url 'export-status' %}";
+                          setTimeout(function() {
+                            $('#loading-screen').hide();
+                          }, 5000);
+                        });
+                      }
+                  },
+                {% endif %}
+            ],
+            drawCallback: function (settings) { 
+                $('.view-data').on('click', function () {
+                    let id = $(this).attr('id');
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'employee-details' %}",
+                        data:{
+                            dv_id: id,
+                            DpYear: year_now
+                        }
+                    }).done(function (data) {                      
+                        let latest_object = data.data[0];
+                        let l_status = latest_object.status;
+                        let payrolled_date = latest_object.p_d;
+                        let payrolled_by = latest_object.p_by;
+                        let payrolled_d_forwarded = latest_object.p_d_f;
+                        let payrolled_f_by = latest_object.p_f_by;
+                        let outgoing_r_by = latest_object.otg_r_by;
+                        let outgoing_d_r = latest_object.otg_d_received;
+                        let outgoing_d_f = latest_object.otg_d_f;
+                        let outgoing_f_user = latest_object.otg_f_user;
+                        let obligate_f_user = latest_object.b_f_by;
+                        let obligate_r_by = latest_object.b_r_by;
+                        let obligate_d_r = latest_object.b_d_r;
+                        let obligate_d_f = latest_object.b_d_f;
+                        let journal_f_user = latest_object.j_f_by;
+                        let journal_r_by = latest_object.j_r_by;
+                        let journal_d_r = latest_object.j_d_r;
+                        let journal_d_f = latest_object.j_d_f;
+  
+                        let approval_r_by = latest_object.a_r_by;
+                        let approval_d_r = latest_object.a_d_received;
+                        let approval_d_f = latest_object.a_d_f;
+                        let approval_f_user = latest_object.a_f_by;
+  
+                        let certified_date = latest_object.certified_date;
+  
+                        
+                        let check_issued = latest_object.check_issued_status;
+                        let check_issued_date = latest_object.check_issued_date;
+                        let check_issued_released = latest_object.check_issued_released;
+                        
+                        let approval_statusColumn = '';
+                        let journal_statusColumn = '';
+                        let payroll_statusColumn = '';
+                        let outgoing_statusColumn = '';
+                        let obligate_statusColumn = '';
+                        $('.main-container').empty();
+  
+  
+                        if (!check_issued_date){
+                          check_issued_date =  `Not Applicable`;
+                        }
+  
+                        if (!check_issued_released){
+                          check_issued_released =  `Not Applicable`;
+                        }
+  
+                        if (l_status == 4){
+                          payroll_statusColumn = `<td><span class="badge bg-label-warning">For Payroll</span></td>`;
+                          payrolled_date = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          payrolled_d_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          payrolled_f_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          payrolled_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        }
+                        else if (l_status < 4){
+                          payroll_statusColumn = `<td><span class="badge bg-label-warning">N/A</span></td>`;
+  
+                        }
+                        else if (l_status == 7){
+                          payroll_statusColumn = `<td><span class="badge bg-label-warning">N/A</span></td>`;
+  
+                        }
+                        else if (l_status == 5){
+                          payroll_statusColumn = `<td><span class="badge bg-label-warning">For Payroll</span></td>`;
+  
+                        }
+                        else if (l_status == 6){
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          outgoing_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
+                          outgoing_d_r = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          outgoing_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          outgoing_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        }
+                        else if (l_status == 8){
+                          obligate_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
+                          obligate_d_r = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          obligate_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          obligate_r_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          obligate_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          outgoing_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          outgoing_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+  
+                          outgoing_statusColumn = `<td><span class="badge bg-label-primary">Received</span></td>`;
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (l_status == 9){
+                          obligate_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
+                          obligate_d_r = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          obligate_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          obligate_r_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          obligate_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+  
+                        else if (l_status == 10){
+                          obligate_statusColumn = `<td><span class="badge bg-label-primary">Receive</span></td>`;
+                          obligate_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          obligate_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (l_status == 11){
+                          journal_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
+                          journal_d_r = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          journal_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          journal_r_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          journal_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (l_status == 12){
+                          journal_statusColumn = `<td><span class="badge bg-label-primary">Receive</span></td>`;
+                          journal_d_f = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          journal_f_user = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+                        else if (l_status == 13){
+  
+                          approval_d_r = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          approval_r_by = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          approval_f_user = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          approval_d_f = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          approval_statusColumn = `<td><span class="badge bg-label-warning">For Receive</span></td>`;
+                          journal_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        
+                        }
+  
+                        else if (l_status == 14){
+                          approval_d_f = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          approval_f_user = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          approval_statusColumn = `<td><span class="badge bg-label-primary">Received</span></td>`;
+                          journal_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+  
+                        }
+  
+                        else if (l_status == 15){
+                          approval_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          journal_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+  
+                        }
+  
+                        else{
+                          outgoing_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          payroll_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          obligate_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                        }
+  
+                        var check_issued_status =`
+                          <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-p oint-primary"></span>
+                            <div class="timeline-event">
+                              <div class="timeline-header border-bottom mb-3">
+                                <h6 class="mb-0">Check Issued</h6>
+                              </div>
+                              <div class="d-flex justify-content-between flex-wrap mb-2">
+                                <div>
+                                  Date Issued : <span class="badge bg-label-primary">${check_issued_date}</span>
+                                </div>
+                              </div>
+  
+                              <div class="timeline-header border-bottom mb-3">
+                                <span >Date Released : <span class="badge bg-label-primary">${check_issued_released}</span></span>
+                              </div>
+                             
+                          </li>
+                        `;
+  
+                        var approval_status =`
+                          <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-p oint-primary"></span>
+                            <div class="timeline-event">
+                              <div class="timeline-header border-bottom mb-3">
+                                <h6 class="mb-0">Approval</h6>
+                                <span class="text-muted">Date Receive : ${approval_d_r} </span>
+                              </div>
+                              <div class="d-flex justify-content-between flex-wrap mb-2">
+                                <div>
+                                  <span>Receive By: ${approval_r_by} </span>
+                                  <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${approval_statusColumn}
+                                </div>
+                              </div>
+                              <div class="timeline-header border-bottom mb-3">
+                                <span>Forwarded By: ${approval_f_user}</span>
+                                <span class="text-muted">Date Forwarded : ${approval_d_f}</span>
+                                </div>
+                            </div>
+                          </li>
+                        `;
+  
+                        var certified_status =`
+                          <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-p oint-primary"></span>
+                            <div class="timeline-event">
+                              <div class="timeline-header border-bottom mb-3">
+                                <h6 class="mb-0">Certified</h6>
+                                <span class="text-muted">Date Forwarded : ${journal_d_f} </span>
+                              </div>
+                              <div class="d-flex justify-content-between flex-wrap mb-2">
+                                <div>
+                                  <span>Forwarded By: ${journal_f_user} </span>
+                                  <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${journal_statusColumn}
+                                </div>
+                              </div>
+                              <div class="timeline-header border-bottom mb-3">
+                                
+                                <span >Date Certified : <span class="badge bg-label-primary">${certified_date}</span></span>
+                              </div>
+                            </div>
+                          </li>
+                        `;
+  
+                        var journal_status =`
+                          <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-p oint-primary"></span>
+                            <div class="timeline-event">
+                              <div class="timeline-header border-bottom mb-3">
+                                <h6 class="mb-0">Journal</h6>
+                                <span class="text-muted">Date Receive : ${journal_d_r} </span>
+                              </div>
+                              <div class="d-flex justify-content-between flex-wrap mb-2">
+                                <div>
+                                  <span>Receive By: ${journal_r_by} </span>
+                                  <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${journal_statusColumn}
+                                </div>
+                              </div>
+                              <div class="timeline-header border-bottom mb-3">
+                                <span>Forwarded By: ${journal_f_user}</span>
+                                <span class="text-muted">Date Forwarded : ${journal_d_f}</span>
+                                </div>
+                            </div>
+                          </li>
+                        `;
+  
+                        var obligate_status =`
+                          <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-p oint-primary"></span>
+                            <div class="timeline-event">
+                              <div class="timeline-header border-bottom mb-3">
+                                <h6 class="mb-0">Obligate</h6>
+                                <span class="text-muted">Date Receive : ${obligate_d_r} </span>
+                              </div>
+                              <div class="d-flex justify-content-between flex-wrap mb-2">
+                                <div>
+                                  <span>Receive By: ${obligate_r_by} </span>
+                                  <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${obligate_statusColumn}
+                                </div>
+                              </div>
+                              <div class="timeline-header border-bottom mb-3">
+                                <span>Forwarded By: ${obligate_f_user}</span>
+                                <span class="text-muted">Date Forwarded : ${obligate_d_f}</span>
+                                </div>
+                            </div>
+                          </li>
+                        `;
+  
+                        var outgoing_status =`
+                          <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-p oint-primary"></span>
+                            <div class="timeline-event">
+                              <div class="timeline-header border-bottom mb-3">
+                                <h6 class="mb-0">Outgoing</h6>
+                                <span class="text-muted">Date Received : ${outgoing_d_r} </span>
+                              </div>
+                              <div class="d-flex justify-content-between flex-wrap mb-2">
+                                <div>
+                                  <span>Outgoing By: ${outgoing_r_by} </span>
+                                  <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${outgoing_statusColumn}
+                                </div>
+                              </div>
+                              <div class="timeline-header border-bottom mb-3">
+                                <span>Forwarded By: ${outgoing_f_user}</span>
+                                <span class="text-muted">Date Forwarded : ${outgoing_d_f}</span>
+                                </div>
+                            </div>
+                          </li>
+                        `;
+  
+                        var payroll_status =`
+                          <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                            <span class="timeline-point timeline-p oint-primary"></span>
+                            <div class="timeline-event">
+                              <div class="timeline-header border-bottom mb-3">
+                                <h6 class="mb-0">Payroll</h6>
+                                <span class="text-muted">Date Payroll : ${payrolled_date} </span>
+                              </div>
+                              <div class="d-flex justify-content-between flex-wrap mb-2">
+                                <div>
+                                  <span>Payroll By: ${payrolled_by} </span>
+                                  <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status : ${payroll_statusColumn}
+                                </div>
+                              </div>
+                              <div class="timeline-header border-bottom mb-3">
+                                <span>Forwarded By: ${payrolled_f_by}</span>
+                                <span class="text-muted">Date Forwarded : ${payrolled_d_forwarded}</span>
+                                </div>
+                            </div>
+                          </li>
+                        `;
+  
+  
+                        if (check_issued){
+                          $('.main-container').append(check_issued_status);
+                        }
+  
+                        if (l_status >=13 ){
+                          
+                          $('.main-container').append(approval_status);
+                          $('.main-container').append(certified_status);
+                        }
+                        if (l_status >=11 ){
+                          $('.main-container').append(journal_status);
+                        }
+                        if (l_status >=9 ){
+                          $('.main-container').append(obligate_status);
+                        }
+  
+                        if (l_status >=6 && l_status !=7 ){
+                          $('.main-container').append(outgoing_status);
+                        }
+  
+                        if (l_status >=4 && l_status !=7 ){
+                          $('.main-container').append(payroll_status);
+                        }
+                        data.data.forEach(function (item, index) {
+                          let message = '';
+                          message = (index == 0) ? `<span ><i>(Latest)</i></span>` : `<span><i>(Old)</i></span>`;
+                          let received_date = item.incoming_in ;
+                          let forward_date = item.incoming_out ;
+                          let r_forwarded_by = item.received_forwarded_by;
+                          let incoming_by = item.incoming_by ;
+                          let reviewed_by = item.reviewed_by;
+                          let date_reviewed = item.date_reviewed;
+                          let status = item.status;
+                          let remarks = item.remarks;
+                          let original_amt = parseFloat(item.original_amount).toFixed(2);
+                          let final_amt = parseFloat(item.final_amount).toFixed(2);
+  
+                          if (!r_forwarded_by){
+                            r_forwarded_by = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          }
+                          if (!forward_date){
+                            forward_date = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          }
+                          if (!reviewed_by){
+                            reviewed_by = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          }
+  
+                          if (!date_reviewed){
+                            date_reviewed = `<span class="badge bg-label-primary">Not Applicable</span>`
+                          }
+  
+                          if (!remarks){
+                            remarks = `<span class="badge bg-label-primary">None</span>`
+                          }
+  
+                          if (status ==1){
+                            receive_statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
+                            review_statusColumn = `<td><span class="badge bg-label-warning">N/A</span></td>`;
+                          }
+                          else if (status ==2){
+                            receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                            review_statusColumn = `<td><span class="badge bg-label-warning">For Checking</span></td>`;
+                          }
+                          else if (status ==3){
+                            receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                            review_statusColumn = `<td><span class="badge bg-label-danger">Returned</span></td>`;
+                          }
+  
+                          else if (status > 3 && status!=7){
+                            receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                            review_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          }
+  
+                          else if (status ==7){
+                            receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                            review_statusColumn = `<td><span class="badge bg-label-success">Approved</span></td>`;
+                          }
+                          else {
+                            receive_statusColumn = `<td><span class="badge bg-label-primary">Forwarded</span></td>`;
+                          }
+  
+                          var reviewed_status =`
+                            <li class="timeline-item timeline-item-primary pb-4 border-left-dashed">
+                                <span class="timeline-point timeline-p oint-primary"></span>
+                                <div class="timeline-event">
+                                  <div class="timeline-header border-bottom mb-3">
+                                    <h6 class="mb-0">Review</h6>
+                                    <span class="text-muted">Date Reviewed : ${date_reviewed}</span>
+                                  </div>
+                                  <div class="d-flex justify-content-between flex-wrap mb-2">
+                                    <div>
+                                      <span>Reviewed By: ${reviewed_by}</span>
+                                      <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${review_statusColumn }
+                                    </div>
+                                  </div>
+                                  <div class="timeline-header border-bottom mb-3">
+                                    <span>Forwarded By: ${r_forwarded_by}</span>
+                                    <span class="text-muted">Date Forwarded : ${forward_date}</span>
+                                    </div>
+                                    <div>
+                                  
+                                      <span class="text-muted">Remarks : </span>${remarks}<br>
+                                      <span class="text-muted">Original Amt : </span>₱ ${original_amt} <br>
+                                      <span class="text-muted">Amt Certified : </span>₱ ${final_amt}<br>
+                                    </div>
+                                </div>
+                            </li>
+                          `;
+  
+                          var receive_status =`
+                            <li class="timeline-item timeline-item-primary pb-3 border-0">
+                                  <span class="timeline-point timeline-p oint-primary"></span>
+                                  <div class="timeline-event">
+                                    <div class="timeline-header border-bottom mb-3">
+                                      <h6 class="mb-0">Receive</h6>
+                                      <span class="text-muted">Date Received : ${received_date} </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between flex-wrap mb-2">
+                                      <div>
+                                        <span>Received By: ${incoming_by} </span>
+                                        <i class="ti ti-arrow-right scaleX-n1-rtl mx-3"></i> Status :  ${receive_statusColumn }
+                                      </div>
+                                    </div>
+                                    <div class="timeline-header border-bottom mb-3">
+                                      <span>Forwarded By: ${r_forwarded_by}</span>
+                                      <span class="text-muted">Date Forwarded : ${forward_date}</span>
+                                      </div>
+                                  </div>
+                              </li>
+                            `;
+  
+                    
+                        if (status !=1){
+                          $('.main-container').append(reviewed_status);
+                          }
+                          $('.main-container').append(receive_status);
+                        })
+                        
+                        const tableId = 'tbl-history';
+                        const tbody = $(`#${tableId} tbody`);
+                        let fullname = data.full_name;
+                        let id_number = data.id_number;
+                        tbody.empty();
+                        $('#employee-id-no').text(id_number);
+                        $('#employee-full-name').text(fullname);
+                        $('#tracking-history').modal('show');
+                    })
+                    
+                });
+            }
+        })
+        $('div.head-label').html('<h5 class="card-title mb-0">'+
+        '<select id="dp-year" name="DpYear" class="form-select">'+
+            '<option value="2023">2023</option>'+
+            '<option value="2024">2024</option>'+
+            '</select>'
+        +'</h5>')
+  
+        $('.view-data').on('click', function () {
+            let id = $(this).attr('id');
+            dv_no_id = id
+            
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'employee-dv' %}",
+                data:{
+                    dv_id: id
+                }
+            }).done(function (data) {
+                dv_number = '';
+                charges = '';
+                outgoing_id = 0;
+                dv_number = data.dv_number;
+                charges = data.charges;
+                outgoing_id = data.outgoing_id;
+                $("#f-outgoing-id").val(data.outgoing_id)
+                let is_print = data.is_print;
+                tbody.empty();
+                data.data.forEach(function (item) {
+                  const formattedFinalAmount = parseFloat(item.final_amount).toFixed(2);
+                  let amountColumn = '';
+                  let editColumn = '';
+                  let deleteColumn = '';
+                  let purposeColumn = '';
+                  let chargesColumn = '';
+                  selectOptions = '';
+                  for (var i = 0; i < charges.length; i++) {
+                      var charge = charges[i];
+                      selectOptions += `<option value="${charge.id}" ${charge.name === item.charge ? 'selected' : ''}>${charge.name}</option>`;
+                  }
+                  if (is_print) {
+                    $(".create-new").prop("disabled", true);
+                    amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}" disabled></td>`;
+                    purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}" disabled></td>`;
+                    chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true" disabled>${selectOptions}</select></td>`;
+                    editColumn = `<a class="btn btn-sm btn-icon" id="${item.id}"><i class="text-primary ti ti-edit-off"></i></a>`;
+                    deleteColumn = `<a class="btn btn-sm btn-icon" id="${item.id}" ><i class="text-primary ti ti-trash-off"></i></a>`;
+                } else {
+                  $(".create-new").prop("disabled", false);
+                    amountColumn = `<td><input type="text" class="form-control emp-amount" value="${formattedFinalAmount}"></td>`;
+                    purposeColumn = `<td><input type="text" class="form-control emp-purpose" value="${item.purpose}"></td>`;
+                    chargesColumn = `<td><select name="emp-charges" class="form-select emp-charges" data-allow-clear="true">${selectOptions}</select></td>`;
+                    editColumn = `<a class="btn btn-sm btn-icon item-edit" id="${item.id}"><i class="text-primary ti ti-edit"></i></a>`;
+                    deleteColumn = `<a class="btn btn-sm btn-icon item-delete" id="${item.id}" ><i class="text-primary ti ti-trash"></i></a>`;
+                }
+                  const row = `
+                      <tr>
+                          <td><input type="checkbox"></td>
+                          <td><span class="badge bg-label-primary">${item.code}</span></td>
+                          <td><span class="badge bg-label-warning">${item.account_no}</span></td>
+                          <td><span class="badge bg-label-primary">${item.id_no}</span></td>
+                          <td>${item.name}</td>
+                          ${amountColumn}
+                          ${purposeColumn}
+                          ${chargesColumn}
+                          <td>${editColumn}${deleteColumn}</td>
+                      </tr>
+                  `;
+                  tbody.append(row);
+              });
+              $('#emp-charges').html(selectOptions);
+                let totalAmount = data.total_amount;
+                totalAmount = parseFloat(data.total_amount).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                $('#update-transaction').modal('show');
+            })
+        });
+        
+        $(document).ready(function () {
+            $('#dp-year').val(year_now); 
+        });
+  
+        $('#dp-year').change(function () {
+              year_now = $(this).val();
+              let dataTable = $('#tbl-items').DataTable();
+              dataTable.ajax.reload();
+        });
+        
+        $('#f-employee-name').change(function() {
+              var selectedOptions = $(this).find('option:selected');
+              selectedOptions.each(function() {
+                  var optionValue = $(this).val();
+                  if (employeeList.indexOf(optionValue) === -1) {
+                    employeeList.push(optionValue);
+                  }
+              });
+              $(this).find('option:not(:selected)').each(function() {
+                  var optionValue = $(this).val();
+                  var index = employeeList.indexOf(optionValue);
+                  if (index !== -1) {
+                    employeeList.splice(index, 1);
+                  }
+              });
+        });
+  
+        function fetchEmployee($selectElement) {
+          const employees = JSON.parse(localStorage.getItem('employees'));
+          if (employees) {
+              $.each(employees, function (index, employee) {
+                  const optionText = `${employee.firstName} ${employee.middleInitial} ${employee.lastName}`;
+                  const $option = $('<option>', {
+                      value: employee.idNumber,
+                      text: optionText,
+                      id: employee.idNumber
+                  });
+                  $selectElement.append($option);
+              });
+          } else {
+              console.log("No employee data found in local storage.");
+          }
+      }
+  
+        search_advance_filter.on('click', function () {
+          FAdvancedFilter.val("true");
+          $('#f-employee-name').empty();
+          $("#advance-filter").modal("hide");
+          dataTable.ajax.reload();
+          toastr.success('Search successfully', 'Success', toast_options);
+        });
+  
+        reset_advance_filter.on('click', function () {
+          FAdvancedFilter.val('');
+          $('#f-employee-name').empty();
+          $("#advance-filter").modal("hide");
+          dataTable.ajax.reload();
+          toastr.success('Data has been reset', 'Success', toast_options);
+        });
+  
+        clear_advance_filter.on('click', function () {
+          clear_advfilter();
+          toastr.success('Clear successfully', 'Success', toast_options);
+        });
+  
+        function clear_advfilter(){
+          FIdNumber.val('');
+          FTransactionCode.val('');
+          NDVNumber.val('');
+          FStatus.val('').trigger('change');
+          FDivision.val('').trigger('change');
+          dateField.clear();
+          FEmployeeName.val('').trigger('change');
+          FStartDate.val('');
+          FEndDate.val('');
+        }
+  
+        if (FStatus.length) {
+          FStatus.wrap('<div class="position-relative"></div>')
+          FStatus.select2({
+              placeholder: 'Choose Status',
+              dropdownParent: FStatus.parent(),
+              allowClear: true,
+          })
+        }
+  
+        if (FDivision.length) {
+          FDivision.wrap('<div class="position-relative"></div>')
+          FDivision.select2({
+              placeholder: 'Choose Office',
+              dropdownParent: FDivision.parent(),
+              allowClear: true,
+          })
+        }
+  
+      })
+  </script>
+  
+  {% endblock footer_scripts %}
+  

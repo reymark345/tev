@@ -35,7 +35,7 @@ def format_datetime(dt):
 @login_required(login_url='login')
 @csrf_exempt
 def status(request):
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff", "Budget staff", "Journal staff", "Approval staff", "End user"] 
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff", "Budget staff", "Journal staff", "Approval staff", "Administrative"] 
 
     user_id = request.session.get('user_id', 0)
 
@@ -114,7 +114,6 @@ def status_load(request):
         filter_conditions |= Q(**{f'{field}__icontains': _search})
 
     if FAdvancedFilter:
-        print("conditioneadvancefilter")
         FStartDate = request.GET.get('FStartDate') 
         FEndDate = request.GET.get('FEndDate') 
         formatted_start_date = None
@@ -219,7 +218,6 @@ def status_load(request):
                 finance_data = filtered_rows
 
     elif _search:
-        print("conditionelifstatement")
         with connection.cursor() as cursor:
             query = """
                 SELECT
@@ -276,8 +274,6 @@ def status_load(request):
             columns = [col[0] for col in cursor.description]
             finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
-        print("conditionelsestatement")
-        print(formatted_year)
         with connection.cursor() as cursor:
             cursor.execute("""
                 SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
@@ -732,6 +728,7 @@ def travel_history(request):
 
 @csrf_exempt
 def export_status(request):
+    year = request.POST.get('year_') or request.GET.get('year_')
     with connection.cursor() as cursor:
         cursor.execute("""
             SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
@@ -761,8 +758,9 @@ def export_status(request):
             ON pb.id = tev_incoming.payrolled_by
             LEFT JOIN status AS st
             ON st.id = tev_incoming.status_id
+            WHERE tev_incoming.date_travel LIKE %s
             ORDER BY tev_incoming.id DESC;
-        """)
+        """, [f"%{year}%"])
         rows = cursor.fetchall()
 
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
@@ -872,7 +870,7 @@ def export_status(request):
 @login_required(login_url='login')
 @csrf_exempt
 def travel_calendar(request):
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff","Payroll staff","Certified staff", "End user"] 
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff","Payroll staff","Certified staff", "Administrative", "Claimant"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
@@ -887,9 +885,357 @@ def travel_calendar(request):
         return render(request, 'tracking/travel_calendar.html', context)
     else:
         return redirect("travel-history")
-        # return render(request, 'pages/unauthorized.html')
-
+    
+@login_required(login_url='login')
 def travel_history_load(request):
+    total = 0
+    data = []
+    _search = request.GET.get('search[value]')
+
+    FIdNumber= request.GET.get('FIdNumber')
+    FStatus= request.GET.get('FStatus') 
+    FTransactionCode = request.GET.get('FTransactionCode')
+    FDateTravel= request.GET.get('FDateTravel') 
+    FDivision = request.GET.get('FDivision')
+    DpYear= request.GET.get('DpYear') 
+
+    user_id = request.session.get('user_id', 0)
+    user_details_ = AuthUser.objects.filter(id=user_id).first()
+    first_name_ = user_details_.first_name
+    last_name_ = user_details_.last_name
+
+    if DpYear == "2023":
+        finance_database_alias = 'finance' 
+
+    elif DpYear == "2025":
+        finance_database_alias = 'finance_2025'
+    else:
+        finance_database_alias = 'finance_2024' 
+
+
+    year = int(DpYear) % 100
+    formatted_year = str(year)+"-"
+    year_ = str(year)
+
+    print("testttttyear")
+    print(formatted_year)
+
+
+    
+    EmployeeList = request.GET.getlist('EmployeeList[]')
+    FAdvancedFilter =  request.GET.get('FAdvancedFilter')
+
+    search_fields = ['code', 'first_name', 'last_name', 'dv_no'] 
+    filter_conditions = Q()
+
+    for field in search_fields:
+        filter_conditions |= Q(**{f'{field}__icontains': _search})
+
+    if FAdvancedFilter:
+        FStartDate = request.GET.get('FStartDate') 
+        FEndDate = request.GET.get('FEndDate') 
+        formatted_start_date = None
+        formatted_end_date = None
+        with connection.cursor() as cursor:
+
+            query = """
+                SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
+                    tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
+                    tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
+                    tev_incoming.incoming_out, tev_incoming.slashed_out,tev_incoming.updated_at, tev_incoming.division, tev_incoming.section,
+                    tev_incoming.date_reviewed, tev_incoming.date_payrolled, tev_incoming.review_date_forwarded,
+                    tev_bridge.purpose AS purposes, tev_outgoing.dv_no AS dv_no,
+                    tev_outgoing.box_date_out, tev_outgoing.box_b_in, tev_outgoing.box_b_out, tev_outgoing.ard_in, tev_outgoing.otg_d_received, tev_outgoing.otg_d_forwarded,
+                    tev_outgoing.b_d_received,tev_outgoing.b_d_forwarded, tev_outgoing.j_d_received, tev_outgoing.j_d_forwarded, tev_outgoing.a_d_received, tev_outgoing.a_d_forwarded
+                FROM tev_incoming
+                INNER JOIN (
+                    SELECT MAX(id) AS max_id
+                    FROM tev_incoming
+                    GROUP BY code
+                ) AS latest_ids
+                ON tev_incoming.id = latest_ids.max_id
+                LEFT JOIN tev_bridge
+                ON tev_incoming.id = tev_bridge.tev_incoming_id
+                LEFT JOIN tev_outgoing
+                ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                WHERE tev_incoming.date_travel LIKE %s AND tev_incoming.first_name = %s AND last_name = %s
+            """
+            params = [f'%{DpYear}%', first_name_, last_name_]
+
+            # WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
+
+            if FTransactionCode:
+                query += " AND tev_incoming.code = %s"
+                params.append(FTransactionCode)
+
+            if FDateTravel:
+                query += " AND tev_incoming.date_travel LIKE %s"
+                params.append(f'%{FDateTravel}%')
+
+            if FDivision:
+                query += " AND tev_incoming.division = %s"
+                params.append(FDivision)
+
+            if FIdNumber:
+                query += " AND tev_incoming.id_no = %s"
+                params.append(FIdNumber)
+
+            if FStatus:
+                if FStatus == "5":
+                    FStatus = (4,5,6)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                elif FStatus == "8" or FStatus == "9":
+                    FStatus = (6,8,9)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                elif FStatus == "10" or FStatus == "11":
+                    FStatus = (9,10,11)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                elif FStatus == "12" or FStatus == "13":
+                    FStatus = (11,12,13)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                elif FStatus == "14":
+                    FStatus = (13,14,15)
+                    query += " AND tev_incoming.status_id IN %s"
+                    params.append(FStatus)
+
+                else:
+                    query += " AND tev_incoming.status_id = %s"
+                    params.append(FStatus)
+
+            if EmployeeList:
+                placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
+                query += f" AND tev_incoming.id_no IN ({placeholders})"
+                params.extend(EmployeeList)
+            query += "ORDER BY tev_incoming.id DESC;"
+
+            cursor.execute(query, params)
+            columns = [col[0] for col in cursor.description]
+            finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+            if FStartDate and FEndDate:
+                formatted_start_date = datetime.strptime(FStartDate, '%m/%d/%Y').date()
+                formatted_end_date = datetime.strptime(FEndDate, '%m/%d/%Y').date()
+                filtered_rows = []
+
+                for row in finance_data:
+                    dates = row['date_travel'].split(',')
+                    date_objects = [datetime.strptime(date.strip(), '%d-%m-%Y').date() for date in dates if date.strip()]
+                    for date in date_objects:
+                        if formatted_start_date <= date <= formatted_end_date:
+                            filtered_rows.append(row)
+                            break
+                finance_data = []
+                finance_data = filtered_rows
+
+    elif _search:
+        with connection.cursor() as cursor:
+            query = """
+                SELECT
+                    tev_incoming.id,
+                    tev_incoming.code,
+                    tev_incoming.first_name,
+                    tev_incoming.middle_name,
+                    tev_incoming.last_name,
+                    tev_incoming.date_travel,
+                    tev_incoming.status_id,
+                    tev_incoming.original_amount,
+                    tev_incoming.final_amount,
+                    tev_incoming.incoming_in,
+                    tev_incoming.incoming_out,
+                    tev_incoming.slashed_out,
+                    tev_incoming.updated_at,
+                    tev_bridge.purpose AS purposes,
+                    tev_outgoing.dv_no AS dv_no,
+                    tev_incoming.division,
+                    tev_incoming.section,
+                    tev_incoming.date_reviewed,
+                    tev_incoming.date_payrolled,
+                    tev_incoming.review_date_forwarded,
+                    tev_outgoing.box_date_out, tev_outgoing.box_b_in, tev_outgoing.box_b_out, tev_outgoing.ard_in, tev_outgoing.otg_d_received, tev_outgoing.otg_d_forwarded,
+                    tev_outgoing.b_d_received,tev_outgoing.b_d_forwarded, tev_outgoing.j_d_received, tev_outgoing.j_d_forwarded, tev_outgoing.a_d_received, tev_outgoing.a_d_forwarded
+                FROM
+                    tev_incoming
+                INNER JOIN (
+                    SELECT
+                        MAX(id) AS max_id
+                    FROM
+                        tev_incoming
+                    GROUP BY
+                        code
+                ) AS latest_ids ON tev_incoming.id = latest_ids.max_id
+                LEFT JOIN
+                    tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
+                LEFT JOIN
+                    tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                WHERE
+                    (tev_incoming.code LIKE %s
+                    OR tev_incoming.first_name LIKE %s
+                    OR tev_incoming.last_name LIKE %s
+                    OR tev_incoming.division LIKE %s
+                    OR tev_incoming.section LIKE %s
+                    OR tev_outgoing.dv_no LIKE %s)
+                    AND tev_incoming.date_travel LIKE %s
+                    AND tev_incoming.first_name = %s AND last_name = %s
+                ORDER BY
+                    tev_incoming.id DESC;
+            """
+            #AND (tev_outgoing.dv_no LIKE %s OR dv_no IS NULL)
+            # cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{formatted_year}%'])
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{DpYear}%', first_name_, last_name_])
+            columns = [col[0] for col in cursor.description]
+            finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    else:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT tev_incoming.id, tev_incoming.code, tev_incoming.first_name, tev_incoming.middle_name,
+                    tev_incoming.last_name, tev_incoming.date_travel, tev_incoming.status_id,
+                    tev_incoming.original_amount, tev_incoming.final_amount, tev_incoming.incoming_in,
+                    tev_incoming.incoming_out,tev_incoming.slashed_out,tev_incoming.updated_at, tev_incoming.division, tev_incoming.section,
+                    tev_incoming.date_reviewed, tev_incoming.date_payrolled, tev_incoming.review_date_forwarded,
+                    tev_bridge.purpose AS purposes, tev_outgoing.dv_no AS dv_no,
+                    tev_outgoing.box_date_out, tev_outgoing.box_b_in, tev_outgoing.box_b_out, tev_outgoing.ard_in, tev_outgoing.otg_d_received, tev_outgoing.otg_d_forwarded,
+                    tev_outgoing.b_d_received,tev_outgoing.b_d_forwarded, tev_outgoing.j_d_received, tev_outgoing.j_d_forwarded, tev_outgoing.a_d_received, tev_outgoing.a_d_forwarded
+                FROM tev_incoming
+                INNER JOIN (
+                    SELECT MAX(id) AS max_id
+                    FROM tev_incoming
+                    GROUP BY code
+                ) AS latest_ids
+                ON tev_incoming.id = latest_ids.max_id
+                LEFT JOIN tev_bridge
+                ON tev_incoming.id = tev_bridge.tev_incoming_id
+                LEFT JOIN tev_outgoing
+                ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                WHERE tev_incoming.date_travel LIKE %s
+                AND tev_incoming.first_name = %s AND last_name = %s
+                ORDER BY tev_incoming.id DESC;
+            """, [f'%{DpYear}%', first_name_, last_name_])
+
+            # WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
+            #     ORDER BY tev_incoming.id DESC;
+            # """, [f'{formatted_year}%'])
+            
+            columns = [col[0] for col in cursor.description]
+            finance_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
+    
+    total = len(finance_data)
+    _start = request.GET.get('start')
+    _length = request.GET.get('length')
+    if _start and _length:
+        start = int(_start)
+        length = int(_length)
+        page = math.ceil(start / length) + 1
+        per_page = length
+        finance_data = finance_data[start:start + length]
+
+    for row in finance_data:
+        amt_certified = ''
+        amt_journal = ''
+        amt_budget = ''
+        amt_check = ''
+        approved_date = ''
+
+        finance_query = """
+            SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
+            FROM transactions AS ts
+            LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
+        """
+        if row['dv_no']:
+            with connections[finance_database_alias].cursor() as cursor2:
+                cursor2.execute(finance_query, (row['dv_no'],))
+                finance_results = cursor2.fetchall()
+
+            if finance_results:
+                amt_certified = finance_results[0][1]
+                amt_journal = finance_results[0][2]
+                amt_budget = finance_results[0][3]
+                amt_check = finance_results[0][4]
+                approved_date = finance_results[0][5]
+                
+        first_name = row['first_name'] if row['first_name'] else ''
+        middle_name = row['middle_name'] if row['middle_name'] else ''
+        last_name = row['last_name'] if row['last_name'] else ''
+        
+        emp_fullname = f"{first_name} {middle_name} {last_name}".strip()
+
+        acronym = row['division']
+        section = row['section']
+
+        acr = ("4Ps" if acronym == 'Pantawid Pamilyang Pilipino Program' else 
+          "AD" if acronym == 'Administrative Division' else
+          "FMD" if acronym == 'Financial Management Division' else
+          "DRMD" if acronym == 'Disaster Response Management Division' else
+          "HRMDD" if acronym == 'Human Resource Management and Development Division' else
+          "PSD" if acronym == 'Protective Services Division' else
+          "PPD" if acronym == 'Policy and Plans Division' else
+          "ORD" if acronym == 'Office of the Regional Director' else
+          "AD" if acronym == 'Administrative Division' else
+          "PD/SLP" if acronym == 'Promotive Services Division' and section == 'Sustainable Livelihood Program'  else
+          "PD" if acronym == 'Promotive Services Division'else
+          "")
+        
+        if approved_date:
+            approved_date = approved_date.strftime('%B %d, %Y')
+        else:
+            approved_date = None
+        
+        item = {
+            'division': acr,
+            'code': row['code'],
+            'full_name': emp_fullname,
+            'date_travel': row['date_travel'],
+            'status': row['status_id'],
+            'original_amount': row['original_amount'],
+            'final_amount': row['final_amount'],
+            'incoming_in': format_datetime(row['incoming_in']) if row['incoming_in'] is not None else '',
+            'incoming_out': format_datetime(row['incoming_out']) if row['incoming_out'] is not None else '',
+            'slashed_out': format_datetime(row['slashed_out']) if row['slashed_out'] is not None else '',
+            'updated_at': format_datetime(row['updated_at']) if row['updated_at'] is not None else '',
+            'date_reviewed': format_datetime(row['date_reviewed']) if row['date_reviewed'] is not None else '',
+            'date_payrolled': format_datetime(row['date_payrolled']) if row['date_payrolled'] is not None else '',
+            'review_date_forwarded': format_datetime(row['review_date_forwarded']) if row['review_date_forwarded'] is not None else '',
+            'box_date_out': format_datetime(row['box_date_out']) if row['box_date_out'] is not None else '',
+            'box_b_in': format_datetime(row['box_b_in']) if row['box_b_in'] is not None else '',
+            'box_b_out': format_datetime(row['box_b_out']) if row['box_b_out'] is not None else '',
+            'ard_in': format_datetime(row['ard_in']) if row['ard_in'] is not None else '',
+            'otg_d_received': format_datetime(row['otg_d_received']) if row['otg_d_received'] is not None else '',
+            'otg_d_forwarded': format_datetime(row['otg_d_forwarded']) if row['otg_d_forwarded'] is not None else '',
+            'b_d_received': format_datetime(row['b_d_received']) if row['b_d_received'] is not None else '',
+            'b_d_forwarded': format_datetime(row['b_d_forwarded']) if row['b_d_forwarded'] is not None else '',
+            'j_d_received': format_datetime(row['j_d_received']) if row['j_d_received'] is not None else '',
+            'j_d_forwarded': format_datetime(row['j_d_forwarded']) if row['j_d_forwarded'] is not None else '',
+            'a_d_received': format_datetime(row['a_d_received']) if row['a_d_received'] is not None else '',
+            'a_d_forwarded': format_datetime(row['a_d_forwarded']) if row['a_d_forwarded'] is not None else '',
+            'purpose': row['purposes'],
+            'dv_no': row['dv_no'],
+            'id': row['id'],
+            'amt_certified': amt_certified,
+            'amt_journal': amt_journal,
+            'amt_budget': amt_budget,
+            'amt_check': amt_check,
+            'approved_date': approved_date,
+            'section': row['section']
+        }
+        data.append(item)
+        
+    response = {
+        'data': data,
+        'page': page,
+        'per_page': per_page,
+        'recordsTotal': total,
+        'recordsFiltered': total,
+    }
+    return JsonResponse(response)
+
+def travel_history_load_old(request):
     total = 0
     data = []
     _search = request.GET.get('search[value]')

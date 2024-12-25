@@ -576,6 +576,16 @@ def update_password(request):
     except Exception as e:
         return JsonResponse({'data': 'error'})
     
+@csrf_exempt
+def update_own_password(request):
+    try:
+        user_id = request.session.get('user_id', 0)
+        password_ = request.POST.get('ModalPassword')
+        AuthUser.objects.filter(id=user_id).update(password = make_password(password_))
+        return JsonResponse({'data': 'success'})
+    except Exception as e:
+        return JsonResponse({'data': 'error'})
+    
 
 def user_load(request):
     _search = request.GET.get('search[value]')

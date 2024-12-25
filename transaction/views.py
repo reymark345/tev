@@ -57,7 +57,6 @@ def list(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
 
-    # if role.role_name in allowed_roles:
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'role_permission' : role_names,
@@ -1319,6 +1318,7 @@ def payroll_load(request):
     FFinalAmount= request.GET.get('FFinalAmount')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
     EmployeeList = request.GET.getlist('EmployeeList[]')
+    year = request.GET.get('DpYear')
 
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
@@ -1365,6 +1365,9 @@ def payroll_load(request):
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
             query += f" AND id_no IN ({placeholders})"
             params.extend(EmployeeList)
+
+        query += " AND date_travel LIKE %s"
+        params.append(f'%{year}%')
         
         query += "GROUP BY t1.id ORDER BY t1.incoming_out DESC;"
 
@@ -1383,19 +1386,22 @@ def payroll_load(request):
                     OR t1.last_name LIKE %s
                     OR t1.id_no LIKE %s
                 )
+                AND date_travel LIKE %s
                 GROUP BY t1.id ORDER BY t1.incoming_out DESC;
             """
-            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%'])
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{_search}%', f'%{year}%'])
             columns = [col[0] for col in cursor.description]
             results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        
     else:
         query = """
             SELECT t1.* FROM `tev_incoming` t1
-            WHERE t1.status_id = 4 GROUP BY t1.id ORDER BY t1.incoming_out DESC;
+            WHERE t1.status_id = 4 
+            AND date_travel LIKE %s
+            GROUP BY t1.id ORDER BY t1.incoming_out DESC;
         """
         with connection.cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, [f'%{year}%'])
+            # cursor.execute(query)
             columns = [col[0] for col in cursor.description]
             results = [dict(zip(columns, row)) for row in cursor.fetchall()]
     

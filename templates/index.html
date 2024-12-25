@@ -215,15 +215,14 @@
                                         <div data-i18n="Dashboard">Dashboard</div>
                                     </a>
                                 </li>
-
-                                <li class="menu-item {% if url_name == 'profile' or url_name == 'accomplishment' %}active  {% endif %}">
-                                    <a href="{% url 'profile' %}" class="menu-link">
-                                     
-                                        <i class="menu-icon ti ti-user-check me-2 ti-sm"></i>
-                                        <div data-i18n="My Profile">My Profile</div>
-                                    </a>
-                                </li>
                             {% endif %}
+                            <li class="menu-item {% if url_name == 'profile' or url_name == 'accomplishment' %}active  {% endif %}">
+                                <a href="{% url 'profile' %}" class="menu-link">
+                                
+                                    <i class="menu-icon ti ti-user-check me-2 ti-sm"></i>
+                                    <div data-i18n="My Profile">My Profile</div>
+                                </a>
+                            </li>
                         {% endif %}
 
 
@@ -323,7 +322,7 @@
                             <span class="menu-header-text">Tracking</span>
                         </li>
                         
-                        {% if 'Claimant' not in permissions %}
+                        {% if 'Claimant' not in permissions or 'Administrative' in permissions %}
                         <li class="menu-item {% if url_name == 'status' %}active{% endif %}" >
                             <a href="{% url 'status' %}" class="menu-link">
                             

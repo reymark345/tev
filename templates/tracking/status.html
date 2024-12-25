@@ -667,9 +667,13 @@
                       $('#loading-screen').show();
                       $.ajax({
                         type: 'POST',
-                        url: "{% url 'export-status' %}"
+                        url: "{% url 'export-status' %}",
+                        data:{
+                          year_: year_now
+                        }
                       }).done(function (data) {
-                        window.location.href = "{% url 'export-status' %}";
+                        //window.location.href = "{% url 'export-status' %}";
+                        window.location.href = "{% url 'export-status' %}?year_=" + year_now;
                         setTimeout(function() {
                           $('#loading-screen').hide();
                         }, 5000);

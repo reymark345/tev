@@ -362,7 +362,9 @@
     let selectedCb = [];
 
     $(document).ready(function () {
-
+        const currentDate = new Date();
+        let year_now  = "";
+        if(!year_now){year_now = currentDate.getFullYear().toString();}  
         $('#f-employee-name').on('select2:open', function() {
             $('.select2-search__field').keydown(function(e) {
                 if (e.keyCode === 9) { 
@@ -466,6 +468,7 @@
             EmpLastname = jQuery(document.querySelector('[name="EmpLastname"]')),
             RemarksList= jQuery(document.querySelector('[name="RemarksList"]')),
             offCanvasElement = document.querySelector('#add-new-record'),
+            DpYear = jQuery(document.querySelector('[name="DpYear"]')),
             search_advance_filter = $('#search-advance-filter'),
             reset_advance_filter = $('#reset-advance-filter'),
             clear_advance_filter = $('#clear-advance-filter')
@@ -501,6 +504,7 @@
                     d.FMiddleName = FMiddleName.val()
                     d.FLastName = FLastName.val()
                     d.EmployeeList = employeeList
+                    d.DpYear = year_now
                 },
             },
             columns: [
@@ -952,9 +956,13 @@
         })
         // $('div.head-label').html('<h5 class="card-title mb-0">Items</h5>')
         $('div.head-label').html('<h5 class="card-title mb-0 d-flex align-items-center">'+
-        '<button type="submit" id="forward" class="btn btn-primary">Forward</button>' +
+            '<button type="submit" id="forward" class="btn btn-primary">Forward</button>&nbsp;&nbsp;&nbsp;' +
+            '<select id="dp-year" name="DpYear" class="form-select">'+
+                '<option value="2023">2023</option>'+
+                '<option value="2024">2024</option>'+
+                '<option value="2025">2025</option>'+
+                '</select>'+
         '</h5>');
-
         const newRecord = document.querySelector('.create-new')
             if (newRecord) {
                 newRecord.addEventListener('click', function () {
@@ -1547,6 +1555,16 @@
     clear_advance_filter.on('click', function () {
         clear_advfilter();
         toastr.success('Clear successfully', 'Success', toast_options);
+    });
+    
+    $(document).ready(function () {
+        $('#dp-year').val(year_now); 
+    });
+
+    $('#dp-year').change(function () {
+        year_now = $(this).val();
+        let dataTable = $('#tbl-items').DataTable();
+        dataTable.ajax.reload();
     });
 
     function clear_advfilter(){
