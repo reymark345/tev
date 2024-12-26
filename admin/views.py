@@ -383,8 +383,7 @@ def adduser(request):
             add_user_details = StaffDetails(
                 sex = sex_, address = address_, position = position_,role_id =role_id , user_id = AuthUser.objects.last().id)
             add_user_details.save()
-
-
+            
             return JsonResponse({'data': 'success'})
         
 @csrf_exempt
