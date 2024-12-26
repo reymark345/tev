@@ -264,7 +264,9 @@ def item_load(request):
     FAdvancedFilter = request.GET.get('FAdvancedFilter')
     EmployeeList = request.GET.getlist('EmployeeList[]')
     id_numbers = EmployeeList if EmployeeList else []
-    
+    year = request.GET.get('DpYear')
+    year = int(year)
+
     base_query = """
         SELECT t1.*, 
                GROUP_CONCAT(CONCAT('<strong><u>', t3.name, '</u></strong> - ', DATE_FORMAT(t2.date, '%%M %%d, %%Y')) SEPARATOR '<br>') AS formatted_remarks,
@@ -315,6 +317,10 @@ def item_load(request):
         """
         base_query += search_filters
         params.extend(['%' + _search + '%'] * 5)
+
+    date_travel_filter = " AND date_travel LIKE %s"
+    base_query += date_travel_filter
+    params.append(f"%{year}%")
     base_query += " GROUP BY t1.id ORDER BY id DESC;"
     
     with connection.cursor() as cursor:
@@ -464,6 +470,7 @@ def checking_load(request):
     EmployeeList = request.GET.getlist('EmployeeList[]')
     FReviewedBy = request.GET.get('FReviewedBy')
     FCreatedBy = request.GET.get('FCreatedBy')
+    year = request.GET.get('DpYear')
 
     status_txt = ''
     if _search in "returned":
@@ -536,6 +543,9 @@ def checking_load(request):
             placeholders = ', '.join(['%s' for _ in range(len(EmployeeList))])
             query += f" AND t1.id_no IN ({placeholders})"
             params.extend(EmployeeList)
+
+        query += " AND date_travel LIKE %s"
+        params.append(year)
         query += " GROUP BY t1.id ORDER BY t1.incoming_out DESC;"
 
 
@@ -557,7 +567,9 @@ def checking_load(request):
             OR id_no LIKE %s
             OR original_amount LIKE %s
             OR final_amount LIKE %s
-            )GROUP BY t1.id ORDER BY id DESC;
+            )
+            AND date_travel LIKE %s
+            GROUP BY t1.id ORDER BY id DESC;
         """
 
         params = [
@@ -567,6 +579,7 @@ def checking_load(request):
             '%' + _search + '%' if _search else "%%",
             '%' + _search + '%' if _search else "%%",
             '%' + _search + '%' if _search else "%%",
+            '%' + year + '%' if year else "%%",
         ]
     else:
 
@@ -576,9 +589,9 @@ def checking_load(request):
             LEFT JOIN remarks_r AS t2 ON t2.incoming_id = t1.id
             LEFT JOIN remarks_lib AS t3 ON t3.id = t2.remarks_lib_id
             WHERE (t1.status_id = 2
-                            OR t1.status_id = 7
-                            OR t1.status_id = 16
-                            OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
+                    OR t1.status_id = 7
+                    OR t1.status_id = 16
+                    OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
             )
             AND (code LIKE %s
             OR id_no LIKE %s
@@ -588,9 +601,11 @@ def checking_load(request):
             OR final_amount LIKE %s
             OR remarks LIKE %s
             OR status_id LIKE %s
-            )GROUP BY t1.id ORDER BY id DESC;
+            )
+            AND date_travel LIKE %s
+            GROUP BY t1.id ORDER BY id DESC;
         """
-        params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%']
+        params = ['%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%', '%' + _search + '%','%' + status_txt + '%','%' + year + '%']
     
     with connection.cursor() as cursor:
         cursor.execute(query, params)
