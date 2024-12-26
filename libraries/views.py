@@ -129,14 +129,8 @@ def division_update(request):
     approval = request.POST.get('Approval')
     ap_designation = request.POST.get('APDesignation')
     user_id = request.session.get('user_id', 0)
-
-    if Division.objects.filter(name=division, status = 0).exclude(id=id):
-        return JsonResponse({'data': 'error', 'message': 'Duplicate Division'})
-    else:
-        # division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id, status=0)
-        Division.objects.filter(id=id).update(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id,updated_at =date.datetime.now())
-
-        return JsonResponse({'data': 'success'})
+    Division.objects.filter(id=id).update(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id,updated_at =date.datetime.now())
+    return JsonResponse({'data': 'success'})
     
 def division_edit(request):
     id = request.GET.get('id')

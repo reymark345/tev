@@ -383,7 +383,7 @@ def adduser(request):
             add_user_details = StaffDetails(
                 sex = sex_, address = address_, position = position_,role_id =role_id , user_id = AuthUser.objects.last().id)
             add_user_details.save()
-
+            
             return JsonResponse({'data': 'success'})
         
 @csrf_exempt
@@ -570,6 +570,16 @@ def role_update(request):
 def update_password(request):
     try:
         user_id= request.POST.get('PasswordID')
+        password_ = request.POST.get('ModalPassword')
+        AuthUser.objects.filter(id=user_id).update(password = make_password(password_))
+        return JsonResponse({'data': 'success'})
+    except Exception as e:
+        return JsonResponse({'data': 'error'})
+    
+@csrf_exempt
+def update_own_password(request):
+    try:
+        user_id = request.session.get('user_id', 0)
         password_ = request.POST.get('ModalPassword')
         AuthUser.objects.filter(id=user_id).update(password = make_password(password_))
         return JsonResponse({'data': 'success'})
