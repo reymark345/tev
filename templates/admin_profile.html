@@ -87,12 +87,9 @@
               <div class="row">
                 <div class="col-md-12">
                   <ul class="nav nav-pills flex-column flex-sm-row mb-4">
-                    <li class="nav-item">
-                      <a class="nav-link active"
-                        ><i class="ti-xs ti ti-user-check me-1"></i> Profile</a
-                      >
-                    </li>
-                   
+                    <button type="submit" id="change-ps" class="btn btn-primary">
+                      <i class="ti ti-user-check me-1"></i> Change Password
+                    </button>
                   </ul>
                 </div>
               </div>
@@ -226,6 +223,68 @@
             </div>
             <!-- / Content -->
 
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="changepassword" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+      <div class="modal-content p-3 p-md-5">
+      <div class="modal-body">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="text-center mb-4">
+          <h3 class="mb-2">Change Password</h3>
+          <p>Change your password with confirmation</p>
+          </div>
+          <p>Enter your password for your account, please make sure to remember your password.</p>
+          <form id="update-password" class="row g-3" onsubmit="return false">
+          <input type="hidden" id="password-id" name="PasswordID" />
+
+          <div class="col-sm-12 form-password-toggle">
+              <label class="form-label" for="modalEnableOTPPhone">Password</label><br>
+              <div class="input-group">
+              <input
+                  type="password"
+                  id="modalpassword"
+                  class="form-control dt-password"
+                  name="ModalPassword"
+                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                  aria-describedby="password"
+              />
+              <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+              </div>
+          </div>
+          <div class="col-sm-12 form-password-toggle">
+              <label class="form-label" for="modalEnableOTPPhone">Confirm Password</label>
+              <div class="input-group">
+      
+              <input
+                  type="password"
+                  id="modalconfirmpassword"
+                  class="form-control dt-password"
+                  name="ModalConfirmPassword"
+                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                  aria-describedby="password"
+              />
+          <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+              </div>
+          </div>
+          <div class="col-12">
+              <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+              <button
+              type="reset"
+              class="btn btn-label-secondary"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+              >
+              Cancel
+              </button>
+          </div>
+          </form>
+      </div>
+      </div>
+  </div>
+</div>
+<!--/ Enable OTP Modal -->
+
+
   {% endblock %}
   {% block footer_scripts %}
   <script src="{% static 'assets/vendor/libs/bs-stepper/bs-stepper.js' %}"></script>
@@ -237,6 +296,9 @@
       var steps = document.querySelectorAll('.step-trigger');
       const FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
             FEndDate = jQuery(document.querySelector('[name="FEndDate"]'));
+      const UpdatePasswordFormValidation = document.getElementById('update-password'),
+            ModalPassword = jQuery(document.querySelector('[name="ModalPassword"]')),
+            ModalConfirmPassword = jQuery(document.querySelector('[name="ModalConfirmPassword"]'));
       const toast_options = (toastr.options = {
         maxOpened: 1,
         autoDismiss: true,
@@ -249,19 +311,107 @@
 
       steps.forEach(function(step) {
         step.addEventListener('click', function() {
-          
-          // Remove active state from all steps
           steps.forEach(function(s) {
             s.classList.remove('active');
           });
-          
-          // Add active state to the clicked step
           this.classList.add('active');
         });
       });
 
+      $('#change-ps').on('click', function() {
+        clear();
+        $('#changepassword').modal('show');
+      });
 
+      const updatepassword = FormValidation.formValidation(UpdatePasswordFormValidation, {
+        fields: {
+            ModalPassword: {
+                validators: {
+                    notEmpty: {
+                        message: 'Please Enter Password',
+                    },
+                },
+            },
+            ModalConfirmPassword: {
+                validators: {
+                    notEmpty: {
+                        message: 'Please Enter Confirm password',
+                    },
+                },
+            },
+        },
+        plugins: {
+            trigger: new FormValidation.plugins.Trigger(),
+            bootstrap5: new FormValidation.plugins.Bootstrap5(),
+            submitButton: new FormValidation.plugins.SubmitButton(),
+            autoFocus: new FormValidation.plugins.AutoFocus(),
+        },
+        init: (instance) => {
+            instance.on('plugins.message.placed', function (e) {
+                if (e.element.parentElement.classList.contains('input-group')) {
+                    e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                }
+            })
+        },
+    }).on('core.form.valid', function () {
+        $('#changepassword').modal('hide');
+        let password = ModalPassword.val();
+        let confirm_password = ModalConfirmPassword.val();
+        if (password ==confirm_password){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Update it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+                allowOutsideClick: false,
+            }).then(function (result) {
+                if (result.value) {
+                    var form_data = $('#update-password').serialize();
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'update-own-password' %}",
+                        data: form_data,
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Password has been update',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                            dataTable.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            });
+        }
+        else{
+            toastr.error('Password not match', 'Invalid!', toast_options);
+        }
+    });
 
+    function clear(){
+      ModalPassword.val('');
+      ModalConfirmPassword.val('');
+    }
+      
       $('#generate-accomplishment-admin').on('click', function() {
           $.ajax({
             type: 'POST',

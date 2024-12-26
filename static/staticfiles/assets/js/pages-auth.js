@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 message: 'Please enter username'
               },
               stringLength: {
-                min: 6,
-                message: 'Username must be more than 6 characters'
+                min: 4,
+                message: 'Username must be more than 4 characters'
               }
             }
           },
@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 message: 'Please enter email / username'
               },
               stringLength: {
-                min: 6,
-                message: 'Username must be more than 6 characters'
+                min: 3,
+                message: 'Username must be more than 3 characters'
               }
             }
           },
@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 message: 'Please enter your password'
               },
               stringLength: {
-                min: 6,
-                message: 'Password must be more than 6 characters'
+                min: 3,
+                message: 'Password must be more than 3 characters'
               }
             }
           },
@@ -66,8 +66,8 @@ document.addEventListener('DOMContentLoaded', function (e) {
                 message: 'The password and its confirm are not the same'
               },
               stringLength: {
-                min: 6,
-                message: 'Password must be more than 6 characters'
+                min: 3,
+                message: 'Password must be more than 3 characters'
               }
             }
           },

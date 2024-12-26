@@ -206,8 +206,15 @@ def dashboard(request):
     }
     if any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'dashboard.html',context)
-    elif "End user" in role_names:
+    
+    elif "Administrative" in role_names:
         return redirect("status")
+        
+    elif "Budget staff" in role_names:
+        return redirect("budget-list")  
+    
+    elif "Approval staff" in role_names:
+        return redirect("approval-list")  
     else:
         return redirect("travel-history")
     
@@ -366,7 +373,6 @@ def profile(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff" , "Certified staff"] 
     user_id = request.session.get('user_id', 0)
 
-
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
@@ -390,8 +396,12 @@ def profile(request):
 
     if "Admin" in role_names:
         return render(request, 'admin_profile.html',context) 
+    
     elif any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'profile.html',context)
+    
+    elif "Administrative" in role_names or "Claimant" in role_names or "Approval staff" in role_names or "Budget staff" in role_names:
+        return render(request, 'aa_profile.html',context)
     else:
         return redirect("status")
     
