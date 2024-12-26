@@ -343,6 +343,9 @@
     let selectedCb = [];
     
     $(document).ready(function () {
+        const currentDate = new Date();
+        let year_now  = "";
+        if(!year_now){year_now = currentDate.getFullYear().toString();}  
         const table = $('#tbl-items')
         var fdateField = $('#f-dateField').flatpickr({
             mode: 'multiple',
@@ -391,6 +394,7 @@
             EmpName = jQuery(document.querySelector('[name="EmpName"]')),
             EmpMiddle = jQuery(document.querySelector('[name="EmpMiddle"]')),
             EmpLastname = jQuery(document.querySelector('[name="EmpLastname"]')),
+            DpYear = jQuery(document.querySelector('[name="DpYear"]')),
 
             search_advance_filter = $('#search-advance-filter'),
             reset_advance_filter = $('#reset-advance-filter'),
@@ -428,19 +432,17 @@
                     d.FMiddleName = FMiddleName.val()
                     d.FLastName = FLastName.val()
                     d.EmployeeList = employeeList
+                    d.DpYear = year_now
                 },
 
             },
             columns: [
-
                 { data: 'code' },
                 { data: 'name' },
                 { data: 'date_travel'},
                 { data: 'final_amount'},
                 { data: 'status' },
                 { data: 'id' },
-                
-
             ],
             columnDefs: [
                  {
@@ -697,7 +699,12 @@
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0 d-flex align-items-center">'+
-        '<button type="submit" id="forward" class="btn btn-primary">Forward</button>' +
+        '<button type="submit" id="forward" class="btn btn-primary">Forward</button>&nbsp;&nbsp;&nbsp;' +
+        '<select id="dp-year" name="DpYear" class="form-select">'+
+            '<option value="2023">2023</option>'+
+            '<option value="2024">2024</option>'+
+            '<option value="2025">2025</option>'+
+        '</select>'+
         '</h5>');
 
         const fv = FormValidation.formValidation(ItemFormValidation, {
@@ -1110,6 +1117,16 @@
         });
         $('.container').on('click', '.delete-row', function () {
             $(this).closest('.row').remove();
+        });
+
+        $(document).ready(function () {
+            $('#dp-year').val(year_now); 
+        });
+    
+        $('#dp-year').change(function () {
+            year_now = $(this).val();
+            let dataTable = $('#tbl-items').DataTable();
+            dataTable.ajax.reload();
         });
 
         function tev_details(amount,selectedRemarks,status,emp_id, selectedDates){

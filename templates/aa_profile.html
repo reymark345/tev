@@ -1,0 +1,288 @@
+{% extends 'index.html' %} {% block content %} {% load staticfiles %}
+<!-- Content -->
+<!-- <div class="container-fluid flex-grow-1 container-p-y"> -->
+<div class="container-fluid flex-grow-1 container-p-y">
+  <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">User Profile</span></h4>
+
+  <!-- Header -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="user-profile-header-banner">
+          <img src="{% static 'assets/img/pages/profile-banner.png' %}" alt="Banner image" class="rounded-top" />
+        </div>
+        <div class="user-profile-header d-flex flex-column flex-sm-row text-sm-start text-center mb-4">
+          <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
+            {% if image_path %}
+            <img
+              src="{{image_path}}"
+              alt="user image"
+              class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img"
+            />
+            {% else %}
+            <img
+            src="{% static 'assets/img/avatars/14.png' %}"
+              alt="user image"
+              class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img"
+            />
+            {% endif %}
+          </div>
+          <div class="flex-grow-1 mt-3 mt-sm-5">
+            <div
+              class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-4 flex-md-row flex-column gap-4"
+            >
+              <div class="user-profile-info">
+                <h4>{{ request.user.first_name }} {{ request.user.last_name }}</h4>
+                <ul
+                  class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-2"
+                >
+                  <li class="list-inline-item"></i>{{position}}</li>
+                </ul>
+              </div>
+              <a href="javascript:void(0)" class="btn btn-success">
+                <i class="ti ti-user-check me-1"></i>Active
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--/ Header -->
+
+  <!--/ Navbar pills -->
+
+  <!-- Navbar pills -->
+  <div class="row">
+    <div class="col-md-12">
+      <ul class="nav nav-pills flex-column flex-sm-row mb-4">
+        <button type="submit" id="change-ps" class="btn btn-primary">
+          <i class="ti ti-user-check me-1"></i> Change Password
+        </button>
+      </ul>
+    </div>
+  </div>
+  <!--/ Navbar pills -->
+
+  <!-- Alerts with Icons -->
+  <div class="row">
+    <div class="col-xl-12 col-lg-5 col-md-5">
+      <!-- About User -->
+      <div class="card mb-12">
+        <div class="card-body">
+          <small class="card-text text-uppercase">About</small>
+          <ul class="list-unstyled mb-4 mt-3">
+            <li class="d-flex align-items-center mb-3">
+              <i class="ti ti-user"></i><span class="fw-bold mx-2">Full Name:</span> <span>{{ request.user.first_name }} {{ request.user.last_name }}</span>
+            </li>
+            <li class="d-flex align-items-center mb-3">
+              <i class="ti ti-file-description"></i><span class="fw-bold mx-2">Id Number:</span>
+              <span>{{id_number}}</span>
+            </li>
+            <li class="d-flex align-items-center mb-3">
+              <i class="ti ti-crown"></i><span class="fw-bold mx-2">Position:</span> <span>{{position}}</span>
+            </li>
+            <li class="d-flex align-items-center mb-3">
+              <i class="ti ti-user"></i><span class="fw-bold mx-2">Sex:</span> <span>{{sex}}</span>
+            </li>
+            <li class="d-flex align-items-center mb-3">
+              <i class="ti ti-flag"></i><span class="fw-bold mx-2">Division:</span> <span>{{division_name}}</span>
+            </li>
+          </ul>
+          <small class="card-text text-uppercase">Contacts</small>
+          <ul class="list-unstyled mb-4 mt-3">
+            <li class="d-flex align-items-center mb-3">
+              <i class="ti ti-mail"></i><span class="fw-bold mx-2">Email:</span>
+              <span>{{ request.user.email }} </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  
+  
+  </div>
+
+  <br>
+  
+
+</div>
+<!-- / Content -->
+
+<!-- Enable OTP Modal -->
+<div class="modal fade" id="changepassword" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+      <div class="modal-content p-3 p-md-5">
+      <div class="modal-body">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <div class="text-center mb-4">
+          <h3 class="mb-2">Change Password</h3>
+          <p>Change your password with confirmation</p>
+          </div>
+          <p>Enter your password for your account, please make sure to remember your password.</p>
+          <form id="update-password" class="row g-3" onsubmit="return false">
+          <input type="hidden" id="password-id" name="PasswordID" />
+
+          <div class="col-sm-12 form-password-toggle">
+              <label class="form-label" for="modalEnableOTPPhone">Password</label><br>
+              <div class="input-group">
+              <input
+                  type="password"
+                  id="modalpassword"
+                  class="form-control dt-password"
+                  name="ModalPassword"
+                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                  aria-describedby="password"
+              />
+              <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+              </div>
+          </div>
+          <div class="col-sm-12 form-password-toggle">
+              <label class="form-label" for="modalEnableOTPPhone">Confirm Password</label>
+              <div class="input-group">
+      
+              <input
+                  type="password"
+                  id="modalconfirmpassword"
+                  class="form-control dt-password"
+                  name="ModalConfirmPassword"
+                  placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;"
+                  aria-describedby="password"
+              />
+          <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+              </div>
+          </div>
+          <div class="col-12">
+              <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+              <button
+              type="reset"
+              class="btn btn-label-secondary"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+              >
+              Cancel
+              </button>
+          </div>
+          </form>
+      </div>
+      </div>
+  </div>
+</div>
+<!--/ Enable OTP Modal -->
+
+  {% endblock %}
+  {% block footer_scripts %}
+  <script>
+    $(document).ready(function() {
+      const FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
+            FEndDate = jQuery(document.querySelector('[name="FEndDate"]'));
+      const UpdatePasswordFormValidation = document.getElementById('update-password'),
+            ModalPassword = jQuery(document.querySelector('[name="ModalPassword"]')),
+            ModalConfirmPassword = jQuery(document.querySelector('[name="ModalConfirmPassword"]'));
+      const toast_options = (toastr.options = {
+        maxOpened: 1,
+        autoDismiss: true,
+        closeButton: true,
+        newestOnTop: true,
+        progressBar: true,
+        positionClass: 'toast-top-right',
+        rtl: isRtl,
+      });
+
+      $('#change-ps').on('click', function() {
+        clear();
+        $('#changepassword').modal('show');
+      });
+
+      const updatepassword = FormValidation.formValidation(UpdatePasswordFormValidation, {
+        fields: {
+            ModalPassword: {
+                validators: {
+                    notEmpty: {
+                        message: 'Please Enter Password',
+                    },
+                },
+            },
+            ModalConfirmPassword: {
+                validators: {
+                    notEmpty: {
+                        message: 'Please Enter Confirm password',
+                    },
+                },
+            },
+        },
+        plugins: {
+            trigger: new FormValidation.plugins.Trigger(),
+            bootstrap5: new FormValidation.plugins.Bootstrap5(),
+            submitButton: new FormValidation.plugins.SubmitButton(),
+            autoFocus: new FormValidation.plugins.AutoFocus(),
+        },
+        init: (instance) => {
+            instance.on('plugins.message.placed', function (e) {
+                if (e.element.parentElement.classList.contains('input-group')) {
+                    e.element.parentElement.insertAdjacentElement('afterend', e.messageElement)
+                }
+            })
+        },
+    }).on('core.form.valid', function () {
+        $('#changepassword').modal('hide');
+        let password = ModalPassword.val();
+        let confirm_password = ModalConfirmPassword.val();
+        if (password ==confirm_password){
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Update it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+                allowOutsideClick: false,
+            }).then(function (result) {
+                if (result.value) {
+                    var form_data = $('#update-password').serialize();
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'update-own-password' %}",
+                        data: form_data,
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Password has been update',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                            dataTable.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            });
+        }
+        else{
+            toastr.error('Password not match', 'Invalid!', toast_options);
+        }
+    });
+
+    function clear(){
+      ModalPassword.val('');
+      ModalConfirmPassword.val('');
+    }
+
+    });
+  </script>
+  {% endblock footer_scripts %}
