@@ -528,6 +528,7 @@ def journal_load(request):
                 division.chief AS division_chief,
                 tev_outgoing.status_id,
                 tev_outgoing.box_b_in,
+                tev_outgoing.b_d_forwarded,
                 tev_outgoing.j_d_received,
                 tev_outgoing.j_r_user_id,
                 tev_outgoing.j_d_forwarded,
@@ -548,10 +549,9 @@ def journal_load(request):
                 charges AS charges2 ON payrolled_charges.charges_id = charges2.id
             LEFT JOIN
                 division ON division.id = tev_outgoing.division_id
-            WHERE tev_outgoing.status_id IN (11,12,13)
+            WHERE tev_outgoing.status_id IN (11,12,13) AND tev_outgoing.dv_no LIKE %s
         """
-
-        params = []
+        params = [f'%{dv_no_string}%']
 
         if FCluster:
             query += " AND tev_outgoing.cluster = %s"
@@ -599,6 +599,7 @@ def journal_load(request):
                     division.chief AS division_chief,
                     tev_outgoing.status_id,
                     tev_outgoing.box_b_in,
+                    tev_outgoing.b_d_forwarded,
                     tev_outgoing.j_d_received,
                     tev_outgoing.j_r_user_id,
                     tev_outgoing.j_d_forwarded,
@@ -624,12 +625,13 @@ def journal_load(request):
                     tev_outgoing.dv_no LIKE %s
                     OR division.name LIKE %s
                 )
+                AND tev_outgoing.dv_no LIKE %s
                 GROUP BY
                     tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.box_b_in,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id
                 ORDER BY
                     tev_outgoing.dv_no DESC;
             """
-            cursor.execute(query, [f'%{_search}%', f'%{_search}%'])
+            cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{dv_no_string}%'])
             columns = [col[0] for col in cursor.description]
             item_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
     else:
@@ -662,15 +664,15 @@ def journal_load(request):
                     charges AS charges2 ON payrolled_charges.charges_id = charges2.id
                 LEFT JOIN
                         division ON division.id = tev_outgoing.division_id
-                WHERE tev_outgoing.status_id IN (11,12,13)
+                WHERE tev_outgoing.status_id IN (11,12,13) AND tev_outgoing.dv_no LIKE %s
                 GROUP BY
                         tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.b_d_forwarded,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id
                 ORDER BY
                         tev_outgoing.dv_no DESC;
         """
-        
+        params = [f'%{dv_no_string}%']
         with connection.cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, params)
             columns = [col[0] for col in cursor.description]
             item_data = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
@@ -700,6 +702,7 @@ def journal_load(request):
             full_name_receiver = userData_received[0].first_name + ' ' + userData_received[0].last_name
         else:
             full_name_receiver = ""
+            
         new_item = {
             'id': item['id'],
             'dv_no': item['dv_no'],
@@ -707,7 +710,7 @@ def journal_load(request):
             'division_name': item['division'],
             'division_chief': item['division_chief'],
             'status': item['status_id'],
-            'b_d_forwarded': item.get('b_d_forwarded', ""),
+            'b_d_forwarded': item['b_d_forwarded'],
             'box_b_out': item['j_d_forwarded'],
             'd_received': item['j_d_received'],
             'd_forwarded': item['j_d_forwarded'],
@@ -719,11 +722,6 @@ def journal_load(request):
 
         data.append(new_item)
             
-
-
-
-
-
     response = {
         'data': data,
         'page': page,
