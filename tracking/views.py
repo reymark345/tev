@@ -99,11 +99,6 @@ def status_load(request):
     formatted_year = str(year)+"-"
     year_ = str(year)
 
-    print("testttttyear")
-    print(formatted_year)
-
-
-    
     EmployeeList = request.GET.getlist('EmployeeList[]')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
 
@@ -298,9 +293,7 @@ def status_load(request):
                 WHERE tev_incoming.date_travel LIKE %s
                 ORDER BY tev_incoming.id DESC;
             """, [f'%{DpYear}%'])
-            print("DpYear")
-            print(year_)
-
+            
             # WHERE (tev_outgoing.dv_no LIKE %s OR tev_outgoing.dv_no IS NULL)
             #     ORDER BY tev_incoming.id DESC;
             # """, [f'{formatted_year}%'])
@@ -917,11 +910,6 @@ def travel_history_load(request):
     formatted_year = str(year)+"-"
     year_ = str(year)
 
-    print("testttttyear")
-    print(formatted_year)
-
-
-    
     EmployeeList = request.GET.getlist('EmployeeList[]')
     FAdvancedFilter =  request.GET.get('FAdvancedFilter')
 
