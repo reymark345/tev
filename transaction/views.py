@@ -856,8 +856,10 @@ def preview_box_a(request):
 
     if year == 2023:
         finance_database_alias = 'finance' 
-    else:
+    elif year ==2024:
         finance_database_alias = 'finance_2024' 
+    else:
+        finance_database_alias = 'finance_2025' 
 
     userData = AuthUser.objects.filter(id=user_id)
     full_name = userData[0].first_name + ' ' + userData[0].last_name
