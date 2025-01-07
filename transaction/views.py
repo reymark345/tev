@@ -1991,8 +1991,12 @@ def transmittal_details(request):
 
     if year == '2023':
         finance_database_name = 'finance'
+
+    if year == '2024':
+        finance_database_name = 'finance_2024'
+        
     else:
-        finance_database_name = 'infimos_2024'
+        finance_database_name = 'infimos_2025'
 
     with connection.cursor() as cursor:
         query = f"""
