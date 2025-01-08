@@ -244,7 +244,6 @@ def chat_data_staff(request):
 # def chat_data_staff(request):
 
 #     if request.method == 'POST':
-#         print("heeereeeeeeeeeeeeeeeeeeeeeee")
 #         username = request.POST['username']
 #         room = request.POST['room']
 
