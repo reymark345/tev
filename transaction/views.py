@@ -281,11 +281,11 @@ def outgoing_load(request):
         BoxStatus = request.GET.get('BoxStatus')
         dv_list = request.GET.getlist('ListDv[]')
         if any(role_name in allowed_roles for role_name in role_names):
-            # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [6,8,9], box_b_in__startswith=year)
-            item_data = TevOutgoing.objects.filter(status_id__in = [6,8,9], box_b_in__startswith=year)
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [6,8,9], box_b_in__startswith=year)
+            # item_data = TevOutgoing.objects.filter(status_id__in = [6,8,9], box_b_in__startswith=year)
         else:
-            # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [6,8,9],division_id = division_id, box_b_in__startswith=year)
-            item_data = TevOutgoing.objects.filter(status_id__in = [6,8,9],division_id = division_id, box_b_in__startswith=year)
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string, status_id__in = [6,8,9],division_id = division_id, box_b_in__startswith=year)
+            # item_data = TevOutgoing.objects.filter(status_id__in = [6,8,9],division_id = division_id, box_b_in__startswith=year)
 
         if FCluster:
                 item_data = item_data.filter(cluster=FCluster)
@@ -311,8 +311,8 @@ def outgoing_load(request):
 
     elif _search:
         if any(role_name in allowed_roles for role_name in role_names):
-            # item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9], box_b_in__startswith=year).select_related().distinct().order_by(_order_dash + 'id')
-            item_data = TevOutgoing.objects.filter(filter_conditions, status_id__in = [6,8,9], box_b_in__startswith=year).select_related().distinct().order_by(_order_dash + 'id')
+            item_data = TevOutgoing.objects.filter(filter_conditions,dv_no__startswith=dv_no_string, status_id__in = [6,8,9], box_b_in__startswith=year).select_related().distinct().order_by(_order_dash + 'id')
+            # item_data = TevOutgoing.objects.filter(filter_conditions, status_id__in = [6,8,9], box_b_in__startswith=year).select_related().distinct().order_by(_order_dash + 'id')
         else:
             item_data = TevOutgoing.objects.filter(filter_conditions, status_id__in = [6,8,9],division_id = division_id, box_b_in__startswith=year).select_related().distinct().order_by(_order_dash + 'id')
     else:
@@ -320,14 +320,14 @@ def outgoing_load(request):
         user = AuthUser.objects.filter(id=user_id).first()
 
         if any(role_name in allowed_roles for role_name in role_names) :
-            # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9], box_b_in__startswith="2025").select_related().distinct().order_by('-id')
-            item_data = TevOutgoing.objects.filter(status_id__in = [6,8,9], box_b_in__startswith=year).select_related().distinct().order_by('-id')
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9], box_b_in__startswith="2025").select_related().distinct().order_by('-id')
+            # item_data = TevOutgoing.objects.filter(status_id__in = [6,8,9], box_b_in__startswith=year).select_related().distinct().order_by('-id')
         elif user.is_staff:
-            # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id__in = [division_id,2,3,4,5,6,7,8,11,12,15,16], box_b_in__startswith="2025").select_related().distinct().order_by('-id')
-            item_data = TevOutgoing.objects.filter(status_id__in = [6,8,9],division_id__in = [division_id,2,3,4,5,6,7,8,11,12,15,16], box_b_in__startswith=year).select_related().distinct().order_by('-id')
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id__in = [division_id,2,3,4,5,6,7,8,11,12,15,16], box_b_in__startswith="2025").select_related().distinct().order_by('-id')
+            # item_data = TevOutgoing.objects.filter(status_id__in = [6,8,9],division_id__in = [division_id,2,3,4,5,6,7,8,11,12,15,16], box_b_in__startswith=year).select_related().distinct().order_by('-id')
         else:
-            # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id = division_id, box_b_in__startswith="2025").select_related().distinct().order_by('-id')
-            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id = division_id, box_b_in__startswith=year).select_related().distinct().order_by('-id')
+            item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id = division_id, box_b_in__startswith="2025").select_related().distinct().order_by('-id')
+            # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [6,8,9],division_id = division_id, box_b_in__startswith=year).select_related().distinct().order_by('-id')
 
     total = item_data.count()
 
@@ -582,7 +582,7 @@ def journal_load(request):
             query += f" AND tev_outgoing.id IN ({placeholders})"
             params.extend(dv_list)
 
-        query += "GROUP BY tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.box_b_in,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id ORDER BY tev_outgoing.dv_no DESC;"
+        query += "GROUP BY tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.box_b_in,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id ORDER BY tev_outgoing.b_d_forwarded DESC;"
 
         with connection.cursor() as cursor:
             cursor.execute(query, params)
@@ -629,7 +629,7 @@ def journal_load(request):
                 GROUP BY
                     tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.box_b_in,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id
                 ORDER BY
-                    tev_outgoing.dv_no DESC;
+                    tev_outgoing.b_d_forwarded DESC;
             """
             cursor.execute(query, [f'%{_search}%', f'%{_search}%', f'%{dv_no_string}%'])
             columns = [col[0] for col in cursor.description]
@@ -668,7 +668,7 @@ def journal_load(request):
                 GROUP BY
                         tev_outgoing.id,tev_outgoing.dv_no,tev_outgoing.cluster,tev_outgoing.division_id,tev_outgoing.status_id, tev_outgoing.b_d_forwarded,tev_outgoing.j_d_received,tev_outgoing.j_d_forwarded,tev_outgoing.j_r_user_id,tev_outgoing.j_out_user_id
                 ORDER BY
-                        tev_outgoing.dv_no DESC;
+                        tev_outgoing.b_d_forwarded DESC;
         """
         params = [f'%{dv_no_string}%']
         with connection.cursor() as cursor:
@@ -856,8 +856,10 @@ def preview_box_a(request):
 
     if year == 2023:
         finance_database_alias = 'finance' 
-    else:
+    elif year ==2024:
         finance_database_alias = 'finance_2024' 
+    else:
+        finance_database_alias = 'finance_2025' 
 
     userData = AuthUser.objects.filter(id=user_id)
     full_name = userData[0].first_name + ' ' + userData[0].last_name
@@ -1643,6 +1645,9 @@ def box_load(request):
     _order_dash = '-' if _order_dir == 'desc' else ''
     _order_col_num = request.GET.get('order[0][column]')
     year = request.GET.get('DpYear')
+
+    print(year)
+    print("testttt")
     year = int(year)
     last_two_digits = year % 100
     dv_no_string = f"{last_two_digits:02d}-"
@@ -1661,6 +1666,7 @@ def box_load(request):
         BoxStatus = request.GET.get('BoxStatus')
         dv_list = request.GET.getlist('ListDv[]')
         item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11])
+        # item_data = TevOutgoing.objects.filter(box_b_in__year=year,status_id__in = [5,6,8,9,10,11])
 
         if FCluster:
             item_data = item_data.filter(cluster=FCluster)
@@ -1682,9 +1688,10 @@ def box_load(request):
 
     elif _search:
         item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by(_order_dash + 'id')
+        # item_data = TevOutgoing.objects.filter().filter(filter_conditions,box_b_in__year=year,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by(_order_dash + 'id')
     else:
+        # item_data = TevOutgoing.objects.filter(box_b_in__year=year,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by('-id')
         item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by('-id')
-
     total = item_data.count()
 
     _start = request.GET.get('start')
@@ -1984,8 +1991,12 @@ def transmittal_details(request):
 
     if year == '2023':
         finance_database_name = 'finance'
+
+    if year == '2024':
+        finance_database_name = 'finance_2024'
+        
     else:
-        finance_database_name = 'infimos_2024'
+        finance_database_name = 'infimos_2025'
 
     with connection.cursor() as cursor:
         query = f"""
