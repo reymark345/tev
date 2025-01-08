@@ -1665,8 +1665,8 @@ def box_load(request):
         FBoxOut = request.GET.get('FBoxOut')
         BoxStatus = request.GET.get('BoxStatus')
         dv_list = request.GET.getlist('ListDv[]')
-        # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11])
-        item_data = TevOutgoing.objects.filter(box_b_in__year=year,status_id__in = [5,6,8,9,10,11])
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11])
+        # item_data = TevOutgoing.objects.filter(box_b_in__year=year,status_id__in = [5,6,8,9,10,11])
 
         if FCluster:
             item_data = item_data.filter(cluster=FCluster)
@@ -1687,11 +1687,11 @@ def box_load(request):
             item_data = item_data.filter(id__in=dv_list)
 
     elif _search:
-        # item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by(_order_dash + 'id')
-        item_data = TevOutgoing.objects.filter().filter(filter_conditions,box_b_in__year=year,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by(_order_dash + 'id')
+        item_data = TevOutgoing.objects.filter().filter(filter_conditions,dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by(_order_dash + 'id')
+        # item_data = TevOutgoing.objects.filter().filter(filter_conditions,box_b_in__year=year,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by(_order_dash + 'id')
     else:
-        item_data = TevOutgoing.objects.filter(box_b_in__year=year,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by('-id')
-        # item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by('-id')
+        # item_data = TevOutgoing.objects.filter(box_b_in__year=year,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by('-id')
+        item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11]).select_related().distinct().order_by('-id')
     total = item_data.count()
 
     _start = request.GET.get('start')
