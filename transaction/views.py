@@ -1984,16 +1984,15 @@ def update_purpose(request):
 
 @csrf_exempt
 def transmittal_details(request):
-    finance_database_name = 'finance'
     data_result = []
     year = request.GET.get('year')
     selected_dv = request.GET.getlist('selectedDv')
 
     if year == '2023':
-        finance_database_name = 'finance'
+        finance_database_name = 'infimos_2023'
 
     if year == '2024':
-        finance_database_name = 'finance_2024'
+        finance_database_name = 'infimos_2024'
         
     else:
         finance_database_name = 'infimos_2025'
@@ -2453,8 +2452,13 @@ def forward_journal(request):
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
 
-    year = request.GET.get('year')
-    finance_database_name = 'finance' if year == '2023' else 'infimos_2024'
+    year = request.POST.get('year')
+    if year == '2023':
+        finance_database_name = 'infimos_2023'
+    elif year == '2024':
+        finance_database_name = 'infimos_2024'
+    else:
+        finance_database_name = 'infimos_2025'
 
     for status_id in out_list_int:
         check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
