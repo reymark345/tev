@@ -215,29 +215,6 @@ def chat_staff(request):
     else:
         return render(request, 'pages/unauthorized.html')
 
-# @csrf_exempt 
-# def chat_data_staff(request, room_name, user_name):
-#     print("testtttt")
-#     print(room_name)
-#     print(user_name)
-#     get_room = Room.objects.get(room_name="rooms")
-#     # if request.method == 'POST':
-#         # message = request.POST['message']
-#         # print(message)
-
-#         # new_message = Message(room=get_room, sender=user_name, message=message)
-#         # new_message.save()
-
-#     get_messages = Message.objects.filter(room=get_room)
-
-#     context = {
-#         "messages": get_messages,
-#         "user": user_name,
-#         "room_name": "rooms",
-#     }
-#     # return render(request, 'admin/chat_admin.html', context)
-
-#     return redirect('room', room_name=room_name, username=user_name)
 
 @csrf_exempt
 def chat_data_staff(request):
@@ -267,7 +244,6 @@ def chat_data_staff(request):
 # def chat_data_staff(request):
 
 #     if request.method == 'POST':
-#         print("heeereeeeeeeeeeeeeeeeeeeeeee")
 #         username = request.POST['username']
 #         room = request.POST['room']
 
