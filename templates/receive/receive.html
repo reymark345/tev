@@ -353,7 +353,7 @@
 {% endblock %} {% block footer_scripts %}
 <script src="{% static 'assets/js/forms-pickers.js' %}"></script>
 <script>
-    let clicked_id = 0;
+    let clicked_id =0;
     let status_val =0;
     let formattedDates = ''
     let employeeList = [];
@@ -363,8 +363,16 @@
 
     $(document).ready(function () {
         const currentDate = new Date();
-        let year_now  = "";
-        if(!year_now){year_now = currentDate.getFullYear().toString();}  
+        //let year_now  = "";
+        //if(!year_now){year_now = currentDate.getFullYear().toString();}  
+
+        const year_now = localStorage.getItem('selected_year');
+        if (year_now) {
+            //selectedYearElement.val(savedYear).trigger('change'); 
+            console.log(`Year ${year_now} retrieved data`);
+        }
+
+        
         $('#f-employee-name').on('select2:open', function() {
             $('.select2-search__field').keydown(function(e) {
                 if (e.keyCode === 9) { 
@@ -383,7 +391,7 @@
             allowInput: true,
             dateFormat: 'd-m-Y',
             locale: {
-                'firstDayOfWeek': 1 // start week on Monday
+                'firstDayOfWeek': 1 
             },
         });
         var fdateField = $('#f-dateField').flatpickr({
@@ -391,12 +399,12 @@
             allowInput: true,
             dateFormat: 'd-m-Y',
             locale: {
-                'firstDayOfWeek': 1 // start week on Monday
+                'firstDayOfWeek': 1 
             },
         });
 
         $('#fileInput').change(function() {
-            var fileName = $(this).val().split('\\').pop(); // Get the selected file name
+            var fileName = $(this).val().split('\\').pop();
             $('#selectedFileName').text(fileName);
         });
 
@@ -483,6 +491,8 @@
             rtl: isRtl,
       });
         let ItemID = $('#item-id')
+
+
 
         let dataTable = table.DataTable({
             processing: true,
@@ -908,6 +918,15 @@
                         $(this).data('checked', false); 
                     }
                 });
+
+                const selectedYearElement = jQuery(document.querySelector('[name="selected_year"]'));
+                selectedYearElement.on('change', function () {
+                    const selectedYear = jQuery(this).val();
+                    console.log(selectedYear);
+                    //dataTable.ajax.reload();
+                    //localStorage.setItem('selected_year', selectedYear); 
+                });
+    
 
                 $('#check-all').change(function () {
                     var isChecked = $(this).is(':checked');
@@ -1562,7 +1581,10 @@
     });
 
     $('#dp-year').change(function () {
-        year_now = $(this).val();
+        console.log(year_now);
+        console.log('testtt');
+
+        year_now = $(this).val().toString();
         let dataTable = $('#tbl-items').DataTable();
         dataTable.ajax.reload();
     });
