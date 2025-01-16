@@ -461,17 +461,13 @@
 
                         <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
                             <!-- Search -->
-                            {% comment %} <div class="navbar-nav align-items-center">
-                                <div class="nav-item navbar-search-wrapper mb-0">
-                                    <a class="nav-item nav-link search-toggler d-flex align-items-center px-0" href="javascript:void(0);">
-                                        <i class="ti ti-search ti-md me-2"></i>
-                                        <span class="d-none d-md-inline-block text-muted">Search (Ctrl+/)</span>
-                                    </a>
-                                </div>
-                            </div> {% endcomment %}
                             <!-- /Search -->
-
                             <ul class="navbar-nav flex-row align-items-center ms-auto">
+                                <!-- <select id="selected_year" class="select2 form-select" name="selected_year">
+                                    <option>2023</option>
+                                    <option>2024</option>
+                                    <option>2025</option>
+                                </select> -->
                                 <!-- Style Switcher -->
                                 <li class="nav-item me-2 me-xl-0">
                                     <a class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);">
@@ -736,21 +732,22 @@
         <script src="{% static 'assets/js/dashboards-ecommerce.js' %}"></script>
 
         <script src="{% static 'assets/js/pages-profile.js' %}"></script>
-
-        {% comment %} <script src="{% static 'assets/js/form-wizard-numbered.js' %}"></script>
-        <script src="{% static 'assets/js/form-wizard-validation.js' %}"></script> {% endcomment %}
-
-        {% comment %} <script src="{% static 'assets/js/app-chat.js' %}"></script>  {% endcomment %}
-        <!-- <script src="../../assets/js/modal-add-new-address.js"></script>
-        <script src="../../assets/js/wizard-ex-checkout.js"></script> -->
-
-        <!-- <script src="{% static 'assets/js/tables-datatables-basic.js' %}"></script> -->
-
-
         <script>
-        let socket = null;  // Declare socket outside to maintain the state
+        let socket = null;
+
+        // const selectedYearElement = jQuery(document.querySelector('[name="selected_year"]')); 
 
         $(document).ready(function(){
+            // const savedYear = localStorage.getItem('selected_year');
+            // if (savedYear) {
+            //     selectedYearElement.val(savedYear).trigger('change'); 
+            //     console.log(`Year ${savedYear} retrieved from localStorage`);
+            // }
+            // selectedYearElement.on('change', function () {
+            //     const selectedYear = jQuery(this).val();
+            //     localStorage.setItem('selected_year', selectedYear); 
+            // });
+
             // $('#room').change(function(){
             //     var roomName = $('select[name="room"]').val();
             //     console.log(roomName);

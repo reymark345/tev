@@ -103,7 +103,7 @@ DATABASES = {
         'NAME': 'tris',
         'USER': 'tris',
         'PASSWORD': 'vOHA]ko(5))If-LU',
-        'HOST': '172.31.240.235',
+        'HOST': '172.31.240.135',
         'PORT': '3306',
     },
     # #for server INFIMOS
@@ -161,23 +161,23 @@ DATABASES = {
     #     'USER':'root',
     #     'PASSWORD':'',
     #     'HOST':'localhost',
-    #     'PORT':'3306',
+    #     'PORT':'3307',
     # },
     # 'finance_2024': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'infimos_2024',
     #     'USER':'root',
-    #     'PASSWORD':'',
+    #     'PASSWORD':'qw1234',
     #     'HOST':'localhost',
-    #     'PORT':'3306',
+    #     'PORT':'3307',
     # },
     # 'finance_2025': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'infimos_2025',
     #     'USER':'root',
-    #     'PASSWORD':'',
+    #     'PASSWORD':'qw1234',
     #     'HOST':'localhost',
-    #     'PORT':'3306',
+    #     'PORT':'3307',
     # },
 
 
