@@ -1458,13 +1458,13 @@
             }).then(function (result) {
                 if (result.value) {
                     let post_url = status_id == '0' ? "{% url 'receive-journal' %}" : "{% url 'forward-journal' %}"
-
                     $.ajax({
                         type: 'POST',
                         url: post_url,
                         data:{
                             out_list: selectedCb,
-                            journal_date:date_journal
+                            journal_date:date_journal,
+                            year:year_now
                         }
                     }).done(function (data) {
                         if (data.data == 'success') {

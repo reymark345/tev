@@ -215,29 +215,6 @@ def chat_staff(request):
     else:
         return render(request, 'pages/unauthorized.html')
 
-# @csrf_exempt 
-# def chat_data_staff(request, room_name, user_name):
-#     print("testtttt")
-#     print(room_name)
-#     print(user_name)
-#     get_room = Room.objects.get(room_name="rooms")
-#     # if request.method == 'POST':
-#         # message = request.POST['message']
-#         # print(message)
-
-#         # new_message = Message(room=get_room, sender=user_name, message=message)
-#         # new_message.save()
-
-#     get_messages = Message.objects.filter(room=get_room)
-
-#     context = {
-#         "messages": get_messages,
-#         "user": user_name,
-#         "room_name": "rooms",
-#     }
-#     # return render(request, 'admin/chat_admin.html', context)
-
-#     return redirect('room', room_name=room_name, username=user_name)
 
 @csrf_exempt
 def chat_data_staff(request):
@@ -267,7 +244,6 @@ def chat_data_staff(request):
 # def chat_data_staff(request):
 
 #     if request.method == 'POST':
-#         print("heeereeeeeeeeeeeeeeeeeeeeeee")
 #         username = request.POST['username']
 #         room = request.POST['room']
 
@@ -505,9 +481,6 @@ def user_update(request):
         user_id = request.session.get('user_id', 0)
         status = request.POST.get('ModalStatus')
         staff = 1 if request.POST.get('ModalStaff') == 'true' else 0
-
-        print("Testttt")
-        print(staff)
 
         if AuthUser.objects.filter(username=user_name).exclude(id=id):
             return JsonResponse({'data': 'error', 'message': 'Username Taken'})
@@ -784,13 +757,9 @@ def CreateRoom(request):
     
 @csrf_exempt
 def MessageView(request, room_name, username):
-    print("aaaa")
-    print(room_name)
-    print(username)
     get_room = Room.objects.get(room_name=room_name)
 
     if request.method == 'POST':
-        print("POST")
         message = request.POST['message']
         new_message = Message(room=get_room, sender=username, message=message)
         new_message.save()
@@ -803,7 +772,6 @@ def MessageView(request, room_name, username):
     # Convert the QuerySet to a list of dictionaries
     messages_list = list(get_messages.values())
 
-    print(messages_list)
 
     context = {
         "messages": messages_list,
