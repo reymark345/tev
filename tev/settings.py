@@ -161,23 +161,23 @@ DATABASES = {
     #     'USER':'root',
     #     'PASSWORD':'',
     #     'HOST':'localhost',
-    #     'PORT':'3306',
+    #     'PORT':'3307',
     # },
     # 'finance_2024': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'infimos_2024',
     #     'USER':'root',
-    #     'PASSWORD':'',
+    #     'PASSWORD':'qw1234',
     #     'HOST':'localhost',
-    #     'PORT':'3306',
+    #     'PORT':'3307',
     # },
     # 'finance_2025': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'infimos_2025',
     #     'USER':'root',
-    #     'PASSWORD':'',
+    #     'PASSWORD':'qw1234',
     #     'HOST':'localhost',
-    #     'PORT':'3306',
+    #     'PORT':'3307',
     # },
 
 
