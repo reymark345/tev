@@ -267,9 +267,6 @@ def item_load(request):
     year = request.GET.get('DpYear')
     year = int(year)
 
-    print("testing")
-    print(year)
-
     base_query = """
         SELECT t1.*, 
                GROUP_CONCAT(CONCAT('<strong><u>', t3.name, '</u></strong> - ', DATE_FORMAT(t2.date, '%%M %%d, %%Y')) SEPARATOR '<br>') AS formatted_remarks,

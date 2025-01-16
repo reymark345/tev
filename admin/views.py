@@ -482,9 +482,6 @@ def user_update(request):
         status = request.POST.get('ModalStatus')
         staff = 1 if request.POST.get('ModalStaff') == 'true' else 0
 
-        print("Testttt")
-        print(staff)
-
         if AuthUser.objects.filter(username=user_name).exclude(id=id):
             return JsonResponse({'data': 'error', 'message': 'Username Taken'})
         
@@ -760,13 +757,9 @@ def CreateRoom(request):
     
 @csrf_exempt
 def MessageView(request, room_name, username):
-    print("aaaa")
-    print(room_name)
-    print(username)
     get_room = Room.objects.get(room_name=room_name)
 
     if request.method == 'POST':
-        print("POST")
         message = request.POST['message']
         new_message = Message(room=get_room, sender=username, message=message)
         new_message.save()
@@ -779,7 +772,6 @@ def MessageView(request, room_name, username):
     # Convert the QuerySet to a list of dictionaries
     messages_list = list(get_messages.values())
 
-    print(messages_list)
 
     context = {
         "messages": messages_list,

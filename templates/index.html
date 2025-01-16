@@ -463,11 +463,11 @@
                             <!-- Search -->
                             <!-- /Search -->
                             <ul class="navbar-nav flex-row align-items-center ms-auto">
-                                <select id="selected_year" class="select2 form-select" name="selected_year">
+                                <!-- <select id="selected_year" class="select2 form-select" name="selected_year">
                                     <option>2023</option>
                                     <option>2024</option>
                                     <option>2025</option>
-                                </select>
+                                </select> -->
                                 <!-- Style Switcher -->
                                 <li class="nav-item me-2 me-xl-0">
                                     <a class="nav-link style-switcher-toggle hide-arrow" href="javascript:void(0);">
@@ -735,18 +735,18 @@
         <script>
         let socket = null;
 
-        const selectedYearElement = jQuery(document.querySelector('[name="selected_year"]'));
+        // const selectedYearElement = jQuery(document.querySelector('[name="selected_year"]')); 
 
         $(document).ready(function(){
-            const savedYear = localStorage.getItem('selected_year');
-            if (savedYear) {
-                selectedYearElement.val(savedYear).trigger('change'); 
-                console.log(`Year ${savedYear} retrieved from localStorage`);
-            }
-            selectedYearElement.on('change', function () {
-                const selectedYear = jQuery(this).val();
-                localStorage.setItem('selected_year', selectedYear); 
-            });
+            // const savedYear = localStorage.getItem('selected_year');
+            // if (savedYear) {
+            //     selectedYearElement.val(savedYear).trigger('change'); 
+            //     console.log(`Year ${savedYear} retrieved from localStorage`);
+            // }
+            // selectedYearElement.on('change', function () {
+            //     const selectedYear = jQuery(this).val();
+            //     localStorage.setItem('selected_year', selectedYear); 
+            // });
 
             // $('#room').change(function(){
             //     var roomName = $('select[name="room"]').val();

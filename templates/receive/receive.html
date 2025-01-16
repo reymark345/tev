@@ -363,14 +363,14 @@
 
     $(document).ready(function () {
         const currentDate = new Date();
-        //let year_now  = "";
-        //if(!year_now){year_now = currentDate.getFullYear().toString();}  
+        let year_now  = "";
+        if(!year_now){year_now = currentDate.getFullYear().toString();}  
 
-        const year_now = localStorage.getItem('selected_year');
-        if (year_now) {
-            //selectedYearElement.val(savedYear).trigger('change'); 
-            console.log(`Year ${year_now} retrieved data`);
-        }
+        // const year_now = localStorage.getItem('selected_year');
+        // if (year_now) {
+        //     //selectedYearElement.val(savedYear).trigger('change'); 
+        //     console.log(`Year ${year_now} retrieved data`);
+        // }
 
         
         $('#f-employee-name').on('select2:open', function() {
@@ -919,13 +919,13 @@
                     }
                 });
 
-                const selectedYearElement = jQuery(document.querySelector('[name="selected_year"]'));
-                selectedYearElement.on('change', function () {
-                    const selectedYear = jQuery(this).val();
-                    console.log(selectedYear);
-                    //dataTable.ajax.reload();
-                    //localStorage.setItem('selected_year', selectedYear); 
-                });
+                // const selectedYearElement = jQuery(document.querySelector('[name="selected_year"]'));
+                // selectedYearElement.on('change', function () {
+                //     const selectedYear = jQuery(this).val();
+                //     console.log(selectedYear);
+                //     //dataTable.ajax.reload();
+                //     //localStorage.setItem('selected_year', selectedYear); 
+                // });
     
 
                 $('#check-all').change(function () {
