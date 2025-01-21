@@ -157,9 +157,9 @@ DATABASES = {
     # #for localhost INFIMOS database
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'finance',
+    #     'NAME': 'infimos_2023',
     #     'USER':'root',
-    #     'PASSWORD':'',
+    #     'PASSWORD':'qw1234',
     #     'HOST':'localhost',
     #     'PORT':'3307',
     # },

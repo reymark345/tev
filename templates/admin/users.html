@@ -526,6 +526,7 @@
 <script>
     let clicked_id = 0;
     $(document).ready(function () {
+        employeelist();
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             FEmployeeName = jQuery(document.querySelector('[name="FEmployeeName"]')),
@@ -1157,6 +1158,48 @@
                 }
             });
         });
+
+        function employeelist(){
+            $.ajax({
+                type: 'GET',
+                url: "{% url 'receive-api' %}",
+                dataType: 'json',
+            }).done(function (data) {
+                let fields = data.data;
+                let employees = [];
+                $.each(fields, function (index, employee) {
+                    let firstName = employee.first_name;
+                    let middleName = employee.middle_name;
+                    let middleInitial = middleName.charAt(0);
+                    let lastName = employee.last_name;
+                    let idNumber = employee.id_number;
+                    let accNumber = employee.account_number;
+                    let division = employee.division;
+                    let position = employee.position;
+                    let gender = employee.gender;
+                    let section = employee.section;
+                    let image_path = employee.image_path;
+                    let contact = employee.contact;
+            
+                    let employeeObj = {
+                        firstName: firstName,
+                        middleInitial: middleInitial,
+                        lastName: lastName,
+                        idNumber: idNumber,
+                        accNumber: accNumber,
+                        division: division,
+                        position: position,
+                        gender: gender,
+                        section: section,
+                        image: image_path,
+                        contact_no: contact
+                    };
+                    employees.push(employeeObj);
+                });
+                localStorage.setItem('employees', JSON.stringify(employees));
+            });
+            
+        }
 
         function fetchEmployee($selectElement) {
             $selectElement.empty();
