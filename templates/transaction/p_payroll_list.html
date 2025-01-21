@@ -344,8 +344,18 @@
     
     $(document).ready(function () {
         const currentDate = new Date();
+        const DpYear = jQuery(document.querySelector('[name="DpYear"]'));
         let year_now  = "";
         if(!year_now){year_now = currentDate.getFullYear().toString();}  
+        const year_ls = localStorage.getItem('selected_year');
+        if (year_ls) {
+            DpYear.val(year_ls).trigger('change'); 
+            year_now = year_ls;
+        }
+        else{year_now = currentDate.getFullYear().toString();}
+
+
+
         const table = $('#tbl-items')
         var fdateField = $('#f-dateField').flatpickr({
             mode: 'multiple',
@@ -394,8 +404,6 @@
             EmpName = jQuery(document.querySelector('[name="EmpName"]')),
             EmpMiddle = jQuery(document.querySelector('[name="EmpMiddle"]')),
             EmpLastname = jQuery(document.querySelector('[name="EmpLastname"]')),
-            DpYear = jQuery(document.querySelector('[name="DpYear"]')),
-
             search_advance_filter = $('#search-advance-filter'),
             reset_advance_filter = $('#reset-advance-filter'),
             clear_advance_filter = $('#clear-advance-filter');
@@ -1122,13 +1130,13 @@
         $(document).ready(function () {
             $('#dp-year').val(year_now); 
         });
-    
         $('#dp-year').change(function () {
-            year_now = $(this).val();
+            year_now = $(this).val().toString();
+            localStorage.setItem('selected_year', year_now); 
+    
             let dataTable = $('#tbl-items').DataTable();
             dataTable.ajax.reload();
         });
-
         function tev_details(amount,selectedRemarks,status,emp_id, selectedDates){
             var hasError = false;
             var url_ = (status === 7) ? "{% url 'update-tev-amount' %}" : "{% url 'update-tev-details' %}";
