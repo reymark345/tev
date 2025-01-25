@@ -6,13 +6,15 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, RemarksLib, RolePermissions, FareMatrix, MeansofTransportation)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, RemarksLib, RolePermissions, FareMatrix, MeansofTransportation, \
+                         LibProvinces, LibMunicipalities, LibBarangays)
 import math
 from django.core.serializers import serialize
 from django.db import IntegrityError
 from decimal import Decimal, InvalidOperation
 import datetime as date
 from django.db.models import Q, Max
+import json
  
 @login_required(login_url='login')
 def division(request):
@@ -73,11 +75,15 @@ def fare_matrix(request):
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
+    testt = LibProvinces.objects.filter(psgc_region = "160000000")
+    print("testttt")
+    print(testt)
     
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'm_o_t' : MeansofTransportation.objects.filter(),
             'permissions' : role_names,
+            'provinces' : LibProvinces.objects.filter(psgc_region = "160000000")
         }
         return render(request, 'libraries/fare_matrix.html', context)
     else:
@@ -482,7 +488,7 @@ def fare_matrix_add(request):
         except InvalidOperation:
             return None
 
-    ProvinceName = request.POST.get('ProvinceName')
+    ProvinceName = request.POST.get('ProvinceName_')
     ProvinceName2 = request.POST.get('ProvinceName2')
     ProvinceAcronym = request.POST.get('ProvinceAcronym2')
     MunicipalityName = request.POST.get('MunicipalityName')
@@ -502,6 +508,13 @@ def fare_matrix_add(request):
     BarangayCode = request.POST.get('BarangayCode')
 
     user_id = request.session.get('user_id', 0)
+
+    print(ProvinceCode)
+    print(MunicipalityCode)
+    print(BarangayCode)
+    print(PurokName)
+    print(MeansOfTransportation)
+    print("eehh")
     try:
         if FareMatrix.objects.filter(
             prov_code=ProvinceCode,
@@ -535,6 +548,69 @@ def fare_matrix_add(request):
             return JsonResponse({'data': 'success'})
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
+    
+    
+# @csrf_exempt
+# def fare_matrix_add(request):
+#     def parse_decimal(value):
+#         try:
+#             return Decimal(value) if value else None
+#         except InvalidOperation:
+#             return None
+
+#     ProvinceName = request.POST.get('ProvinceName')
+#     ProvinceName2 = request.POST.get('ProvinceName2')
+#     ProvinceAcronym = request.POST.get('ProvinceAcronym2')
+#     MunicipalityName = request.POST.get('MunicipalityName')
+#     MunicipalityName2 = request.POST.get('MunicipalityName2')
+#     BarangayName = request.POST.get('BarangayName')
+#     BarangayName2 = request.POST.get('BarangayName2')
+#     PurokName = request.POST.get('PurokName')
+#     MeansOfTransportation = request.POST.get('MeansOfTransportation')
+#     RateRegularFare = parse_decimal(request.POST.get('RateRegularFare'))
+#     HireRateOneWay = parse_decimal(request.POST.get('HireRateOneWay'))
+#     HireRateWholeDay = parse_decimal(request.POST.get('HireRateWholeDay'))
+#     EstimatedDurationOfTravel = request.POST.get('EstimatedDurationOfTravel')
+#     Justification = request.POST.get('Justification')
+#     DtRemarks = request.POST.get('DtRemarks')
+#     ProvinceCode = request.POST.get('ProvinceCode')
+#     MunicipalityCode = request.POST.get('MunicipalityCode')
+#     BarangayCode = request.POST.get('BarangayCode')
+
+#     user_id = request.session.get('user_id', 0)
+#     try:
+#         if FareMatrix.objects.filter(
+#             prov_code=ProvinceCode,
+#             city_code=MunicipalityCode,
+#             brgy_code=BarangayCode,
+#             purok=PurokName,
+#             means_of_transportation_id = MeansOfTransportation
+#         ).exists():
+#             return JsonResponse({'data': 'error', 'message': 'Fare Matrix Already Exist'})
+#         else:
+#             fare_matrix = FareMatrix(
+#                 prov_code=ProvinceCode,
+#                 city_code=MunicipalityCode,
+#                 brgy_code=BarangayCode,
+#                 province=ProvinceName2,
+#                 province_acronym=ProvinceAcronym,
+#                 municipality=MunicipalityName2,
+#                 barangay=BarangayName2,
+#                 purok=PurokName,
+#                 means_of_transportation_id=MeansOfTransportation,
+#                 rate_regular_fare=RateRegularFare,
+#                 hire_rate_one_way=HireRateOneWay,
+#                 hire_rate_whole_day=HireRateWholeDay,
+#                 estimated_duration_of_travel=EstimatedDurationOfTravel,
+#                 justification=Justification,
+#                 remarks=DtRemarks,
+#                 created_by=user_id,
+#                 created_at=date.datetime.now(),
+#             )
+#             fare_matrix.save()
+#             return JsonResponse({'data': 'success'})
+#     except IntegrityError as e:
+#         return JsonResponse({'data': 'error'})
     
 @csrf_exempt
 def fare_matrix_update(request):
@@ -637,4 +713,40 @@ def means_of_transportation_update(request):
             return JsonResponse({'data': 'success'})
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
+    
+
+
+
+
+@csrf_exempt
+def get_lib_mun(request):
+    print("testtttmunn")
+    if request.method == "GET":
+        prov_id = request.GET.get('prov_id')
+        if not prov_id:
+            return JsonResponse({'message': 'prov_id is required'}, status=400)
+     
+        data = LibMunicipalities.objects.filter(psgc_province=prov_id)
+        serialized_data = json.loads(serialize('json', data))
+        return JsonResponse({'data': serialized_data, 'message': 'success'}, status=200)
+
+    else:
+        return JsonResponse({'message': 'Invalid HTTP method. Only GET is allowed.'}, status=405)
+    
+@csrf_exempt
+def get_lib_brgy(request):
+    print("testttt")
+    if request.method == "GET":
+        mun_id = request.GET.get('mun_id')
+
+        print(mun_id)
+        if not mun_id:
+            return JsonResponse({'message': 'mun_id is required'}, status=400)
+
+        data = LibBarangays.objects.filter(psgc_mun=mun_id)
+        serialized_data = json.loads(serialize('json', data))
+        return JsonResponse({'data': serialized_data, 'message': 'success'}, status=200)
+
+    else:
+        return JsonResponse({'message': 'Invalid HTTP method. Only GET is allowed.'}, status=405)
  

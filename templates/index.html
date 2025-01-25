@@ -352,6 +352,20 @@
                                 <li class="menu-header small text-uppercase">
                                     <span class="menu-header-text">Libraries</span>
                                 </li>
+                                <li class="menu-item {% if url_name == 'fare-matrix' %}active{% endif %}">
+                                    <a href="{% url 'fare-matrix' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-chart-pie"></i>
+                                        <div data-i18n="Fare Matrix">Fare Matrix</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item {% if url_name == 'means-of-transportation' %}active{% endif %}">
+                                    <a href="{% url 'means-of-transportation' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
+                                        <div data-i18n="Means of Transportation">Means of Transportation</div>
+                                    </a>
+                                </li>
+
+
                                 <li class="menu-item {% if url_name == 'charges' %}active{% endif %}">
                                     <a href="{% url 'charges' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti fa-list-check"></i>
@@ -370,18 +384,6 @@
                                     <a href="{% url 'remarks' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-color-swatch"></i>
                                         <div data-i18n="Remarks">Remarks</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item {% if url_name == 'means-of-transportation' %}active{% endif %}">
-                                    <a href="{% url 'means-of-transportation' %}" class="menu-link">
-                                        <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
-                                        <div data-i18n="Means of Transportation">Means of Transportation</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item {% if url_name == 'fare-matrix' %}active{% endif %}">
-                                    <a href="{% url 'fare-matrix' %}" class="menu-link">
-                                        <i class="menu-icon tf-icons ti ti-chart-pie"></i>
-                                        <div data-i18n="Fare Matrix">Fare Matrix</div>
                                     </a>
                                 </li>
                             {% endif %}      
