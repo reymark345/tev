@@ -75,10 +75,7 @@ def fare_matrix(request):
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
-    testt = LibProvinces.objects.filter(psgc_region = "160000000")
-    print("testttt")
-    print(testt)
-    
+
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'm_o_t' : MeansofTransportation.objects.filter(),
@@ -720,7 +717,6 @@ def means_of_transportation_update(request):
 
 @csrf_exempt
 def get_lib_mun(request):
-    print("testtttmunn")
     if request.method == "GET":
         prov_id = request.GET.get('prov_id')
         if not prov_id:
@@ -735,7 +731,6 @@ def get_lib_mun(request):
     
 @csrf_exempt
 def get_lib_brgy(request):
-    print("testttt")
     if request.method == "GET":
         mun_id = request.GET.get('mun_id')
 
