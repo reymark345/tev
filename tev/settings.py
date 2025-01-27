@@ -98,15 +98,15 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     ##for server to server
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'tris',
-    #     'USER': 'tris',
-    #     'PASSWORD': 'vOHA]ko(5))If-LU',
-    #     'HOST': '172.31.240.135',
-    #     'PORT': '3306',
-    # },
-    # # #for server INFIMOS
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'tris',
+        'USER': 'tris',
+        'PASSWORD': 'vOHA]ko(5))If-LU',
+        'HOST': '172.31.240.135',
+        'PORT': '3306',
+    },
+    # #for server INFIMOS
     
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
