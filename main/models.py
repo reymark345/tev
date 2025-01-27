@@ -414,9 +414,9 @@ class FareMatrix(models.Model):
     barangay = models.CharField(max_length=255, blank=True, null=True)
     purok = models.CharField(max_length=255, blank=True, null=True)
     means_of_transportation_id = models.CharField(max_length=11, blank=True, null=True)
-    rate_regular_fare = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
-    hire_rate_one_way = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
-    hire_rate_whole_day = models.DecimalField(max_digits=30, decimal_places=10, blank=True, null=True , default=0)
+    rate_regular_fare = models.DecimalField(max_digits=50, decimal_places=10, blank=True, null=True , default=0)
+    hire_rate_one_way = models.DecimalField(max_digits=50, decimal_places=10, blank=True, null=True , default=0)
+    hire_rate_whole_day = models.DecimalField(max_digits=50, decimal_places=10, blank=True, null=True , default=0)
     estimated_duration_of_travel = models.CharField(max_length=128, blank=True, null=True)
     justification = models.CharField(max_length=255, blank=True, null=True)
     remarks = models.TextField(blank=True, null=True)
@@ -427,6 +427,41 @@ class FareMatrix(models.Model):
     class Meta:
         managed = True
         db_table = 'fare_matrix'
+
+
+class LibProvinces(models.Model):
+    psgc_province = models.IntegerField()
+    prov_name = models.CharField(max_length=255, blank=True, null=True)
+    psgc_region = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField()
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'lib_provinces'
+
+class LibMunicipalities(models.Model):
+    psgc_mun = models.IntegerField()
+    mun_name = models.CharField(max_length=255, blank=True, null=True)
+    psgc_province = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField()
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'lib_municipalities'
+
+class LibBarangays(models.Model):
+    psgc_brgy = models.IntegerField()
+    brgy_name = models.CharField(max_length=255, blank=True, null=True)
+    psgc_mun = models.IntegerField()
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_by = models.IntegerField()
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'lib_barangays'
+
 
 
 
