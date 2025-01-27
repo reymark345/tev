@@ -338,7 +338,7 @@
                                 <div data-i18n="Travel History">Travel History</div>
                             </a>
                         </li>
-                        {% if permissions %}
+                        <!-- {% if permissions %}
                             {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions %}
                                 <li class="menu-item {% if url_name == 'travel-calendar' %}active{% endif %}">
                                     <a href="{% url 'travel-calendar' %}" class="menu-link">
@@ -346,7 +346,7 @@
                                         <div data-i18n="Travel Calendar">Travel Calendar</div>
                                     </a>
                                 </li>
-                        {% endif %}
+                        {% endif %} -->
                             {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions %}
                                 <!-- Libraries -->
                                 <li class="menu-header small text-uppercase">
