@@ -46,9 +46,11 @@
         <form class="add-new-record pt-0 row g-2" id="item-form">
             <input type="hidden" id="item-id" name="ItemID" />
             <div class="col-sm-12">
-                <label class="form-label" for="province-name">Province</label>
-                <select id="province-name" name="ProvinceName" class="form-select province-name" data-allow-clear="true">
-                    <option></option>
+                <label class="form-label" for="province-name_">Province</label>
+                <select id="province-name_" name="ProvinceName_" class="form-select province-name_" data-allow-clear="true">
+                    {% for row in provinces %}
+                    <option value="{{ row.psgc_province }}">{{ row.prov_name }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="col-sm-12">
@@ -233,7 +235,6 @@
             <input type="hidden" id="province-name2" class="form-control dt-province-name2" name="ProvinceName2" placeholder="" />
             <input type="hidden" id="municipality-name2" class="form-control dt-municipality-name2" name="MunicipalityName2" placeholder="" />
             <input type="hidden" id="barangay-name2" class="form-control dt-barangay-name2" name="BarangayName2" placeholder="" />
-
             <input type="hidden" id="province-acronym2" class="form-control dt-province-acronym2" name="ProvinceAcronym2" placeholder="" />
             <input type="hidden" id="province-code" class="form-control dt-province-acronym" name="ProvinceCode" placeholder="" />
             <input type="hidden" id="municipality-code" class="form-control dt-province-acronym" name="MunicipalityCode" placeholder=""/>
@@ -248,13 +249,13 @@
     let clicked_id = 0;
     let dataTable;
     $(document).ready(function () {
-        psgc_api();
+
         const table = $('#tbl-items')
         const ItemFormValidation = document.getElementById('item-form'),
             ProvinceCode = jQuery(document.querySelector('[name="ProvinceCode"]')),
             MunicipalityCode = jQuery(document.querySelector('[name="MunicipalityCode"]')),
             BarangayCode = jQuery(document.querySelector('[name="BarangayCode"]')),
-            ProvinceName = jQuery(document.querySelector('[name="ProvinceName"]')),
+            ProvinceName = jQuery(document.querySelector('[name="ProvinceName_"]')),
             ProvinceAcronym = jQuery(document.querySelector('[name="ProvinceAcronym"]')),
             ProvinceAcronym2 = jQuery(document.querySelector('[name="ProvinceAcronym2"]')),
             MunicipalityName = jQuery(document.querySelector('[name="MunicipalityName"]')),
@@ -342,14 +343,20 @@
                             let fields = data[0].fields
                             let prov_code = fields.prov_code;
                             let city_code = fields.city_code;
+                            let brgy_code = fields.brgy_code;
                             load_select(1,prov_code,city_code);
-
                             let pk = data[0].pk
                             let remarks = $('#province-name');
                             ProvinceName.val(prov_code).trigger('change');
                             ProvinceAcronym.val(fields.province_acronym);
-                            MunicipalityName.val(city_code).trigger('change');
-                            BarangayName.val(fields.brgy_code).trigger('change');
+                            setTimeout(() => {
+                                MunicipalityName.val(city_code).trigger('change');
+
+                            }, 200);
+                            setTimeout(() => {
+                                BarangayName.val(fields.brgy_code).trigger('change');
+
+                            }, 500);
                             PurokName.val(fields.purok);
                             MeansOfTransportation.val(fields.means_of_transportation_id).trigger('change');
                             RateRegularFare.val(fields.rate_regular_fare);
@@ -360,6 +367,8 @@
                             DtRemarks.val(fields.remarks);
                             ItemID.val(pk)
                             offCanvasEl.show();
+
+               
                         }
                     })
                 }),
@@ -458,7 +467,7 @@
         // Form validation for Add new record
         const fv = FormValidation.formValidation(ItemFormValidation, {
             fields: {
-                ProvinceName: {
+                ProvinceName_: {
                     validators: {
                         notEmpty: {
                             message: 'Required!',
@@ -597,17 +606,6 @@
                     });
                 }
 
-                if (selectedProvince) {
-                    let selectedCity = selectedProvince.cities.find(city => city.city_id == city_code);
-                    if (selectedCity && selectedCity.barangays) {
-                        selectedCity.barangays.forEach(barangay => {
-                            $('#barangay-name').append(
-                                `<option value="${barangay.brgy_id}">${barangay.brgy_name.toUpperCase()}</option>`
-                            );
-                        });
-                    }
-                }
-
             }).fail(function (jqXHR, textStatus, errorThrown) {
                 console.error("AJAX request failed: " + textStatus + ", " + errorThrown);
             });
@@ -665,50 +663,8 @@
                     })
                 }
             }, 100);
-            //edit data
-            if (value ==1){
-                ProvinceName.empty();
-                psgcData.forEach(function(province) {
-                    let capitalizedProvName = province.prov_name.toUpperCase();
-                    ProvinceName.append('<option value="' + province.prov_id + '">' + capitalizedProvName + '</option>');
-                });
 
-                let selectedProvince = psgcData.find(province => province.prov_id == prov_code);
-                if (selectedProvince && selectedProvince.cities) {
-                    selectedProvince.cities.forEach(city => {
-                        $('#municipality-name').append(
-                            `<option value="${city.city_id}">${city.city_name.toUpperCase()}</option>`
-                        );
-                    });
-                }
-
-                if (selectedProvince) {
-                    let selectedCity = selectedProvince.cities.find(city => city.city_id == city_code);
-                    if (selectedCity && selectedCity.barangays) {
-                        selectedCity.barangays.forEach(barangay => {
-                            $('#barangay-name').append(
-                                `<option value="${barangay.brgy_id}">${barangay.brgy_name.toUpperCase()}</option>`
-                            );
-                        });
-                    }
-                }
-            }
-            //add record
-            else{
-                clear_data();
-                let storedData = localStorage.getItem('psgc_data');
-                if (storedData) {
-                    let psgcData = JSON.parse(storedData);
-
-                    ProvinceName.empty();
-                    psgcData.forEach(function(province) {
-                        let capitalizedProvName = province.prov_name.toUpperCase();
-                        ProvinceName.append('<option value="' + province.prov_id + '">' + capitalizedProvName + '</option>');
-                    });
-                    ProvinceName.val('').trigger('change');
-                }
-            }
-            $('#province-name').on('change', function () {
+            $('#province-name_').on('change', function () {
                 var prov_id = $(this).val(); 
                 var prov_name = $(this).find('option:selected').text();
                 var prov_name2 = $(this).find('option:selected').text();
@@ -720,44 +676,64 @@
                         return word.charAt(0); 
                     }).join(''); 
                 }
-                ProvinceName2.val(prov_name2);
+                ProvinceName2.val(prov_name);
                 ProvinceAcronym.val(abbreviation);
                 ProvinceAcronym2.val(abbreviation);
                 ProvinceCode.val(prov_id);
-                $('#municipality-name').empty().append('<option></option>');
-                $('#barangay-name').empty().append('<option></option>'); // Clear barangay dropdown
 
-                let selectedProvince = psgcData.find(province => province.prov_id == prov_id);
-                if (selectedProvince && selectedProvince.cities) {
-                    selectedProvince.cities.forEach(city => {
-                        $('#municipality-name').append(
-                            `<option value="${city.city_id}">${city.city_name.toUpperCase()}</option>`
-                        );
-                    });
-                }
+                $.ajax({
+                    type: 'GET',
+                    url: "{% url 'get-lib-mun' %}",
+                    data: {
+                        prov_id: prov_id
+                    },
+                    success: function (data) {
+                        if (data.message === 'success') {
+                            let selectElement = $('select[name="MunicipalityName"]');
+                            selectElement.empty();
+                            data.data.forEach(function (municipality) {
+                                selectElement.append(
+                                    `<option value="${municipality.fields.psgc_mun}">${municipality.fields.mun_name}</option>`
+                                );
+                            });
+                            MunicipalityName.val('').trigger('change');
+                            BarangayName.val('').trigger('change');
+
+                            // toastr.success('Successfully retrieved municipalities', 'Success', toast_options);
+                        } else {
+                            toastr.error('Failed to retrieve municipalities', 'Error', toast_options);
+                        }
+                    },
+                });
             });
+
             $('#municipality-name').on('change', function () {
-                var city_id = $(this).val();
-                var city_name = $(this).find('option:selected').text();
-                MunicipalityCode.val(city_id);
+                var mun_id = $(this).val();
+                var mun_name = $(this).find('option:selected').text();
 
-                $('#barangay-name').empty().append('<option></option>');
-
-                let selectedProvince = psgcData.find(province =>
-                    province.cities.some(city => city.city_id == city_id)
-                );
-                MunicipalityName2.val(city_name);
-
-                if (selectedProvince) {
-                    let selectedCity = selectedProvince.cities.find(city => city.city_id == city_id);
-                    if (selectedCity && selectedCity.barangays) {
-                        selectedCity.barangays.forEach(barangay => {
-                            $('#barangay-name').append(
-                                `<option value="${barangay.brgy_id}">${barangay.brgy_name.toUpperCase()}</option>`
-                            );
-                        });
+                MunicipalityCode.val(mun_id);
+                MunicipalityName2.val(mun_name);
+                $.ajax({
+                    type: 'GET',
+                    url: "{% url 'get-lib-brgy' %}",
+                    data: {
+                        mun_id: mun_id
+                    },
+                    success: function (data) {
+                        if (data.message === 'success') {
+                            let selectElement = $('select[name="BarangayName"]');
+                            selectElement.empty(); 
+                            data.data.forEach(function (barangay) {
+                                selectElement.append(
+                                    `<option value="${barangay.fields.psgc_brgy}">${barangay.fields.brgy_name}</option>`
+                                );
+                            });
+                            BarangayName.val('').trigger('change');
+                        } else {
+                            toastr.error('Failed to retrieve municipalities', 'Error', toast_options);
+                        }
                     }
-                }
+                });
             });
             $('#barangay-name').on('change', function () {
                 var barangay_id = $(this).val();
@@ -765,6 +741,8 @@
                 BarangayName2.val(barangay_name);
                 BarangayCode.val(barangay_id);
             });
+
+
 
         }
     
@@ -819,7 +797,7 @@
                     toastr.error('Data not saved', 'Danger', toast_options);
                 }
             });
-            }
+        }
     })
 </script>
 {% endblock footer_scripts %}

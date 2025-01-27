@@ -275,6 +275,7 @@
     let employeeList = [];
     var startYear = 2023;
     $(document).ready(function () {
+      employeelist_();
       var dateField = $('#dateField').flatpickr({
             mode: 'multiple',
             allowInput: true,
@@ -289,8 +290,17 @@
       });
 
       const currentDate = new Date();
+      const DpYear = jQuery(document.querySelector('[name="DpYear"]'));
       let year_now  = "";
       if(!year_now){year_now = currentDate.getFullYear().toString();}  
+      const year_ls = localStorage.getItem('selected_year');
+      if (year_ls) {
+          DpYear.val(year_ls).trigger('change'); 
+          year_now = year_ls;
+      }
+      else{year_now = currentDate.getFullYear().toString();}
+
+
       const table = $('#tbl-items')
       const ItemFormValidation = document.getElementById('item-form'),
           EmployeeName = jQuery(document.querySelector('[name="EmployeeName"]')),
@@ -306,7 +316,6 @@
           FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
           FEndDate = jQuery(document.querySelector('[name="FEndDate"]')),
           FTransactionCode = jQuery(document.querySelector('[name="FTransactionCode"]')),
-          DpYear = jQuery(document.querySelector('[name="DpYear"]')),
           search_advance_filter = $('#search-advance-filter'),
           reset_advance_filter = $('#reset-advance-filter'),
           clear_advance_filter = $('#clear-advance-filter'),
@@ -1289,11 +1298,54 @@
       $(document).ready(function () {
           $('#dp-year').val(year_now); 
       });
-
+      
+      function employeelist_(){
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'receive-api' %}",
+            dataType: 'json',
+        }).done(function (data) {
+            let fields = data.data;
+            let employees = [];
+            $.each(fields, function (index, employee) {
+                let firstName = employee.first_name;
+                let middleName = employee.middle_name;
+                let middleInitial = middleName.charAt(0);
+                let lastName = employee.last_name;
+                let idNumber = employee.id_number;
+                let accNumber = employee.account_number;
+                let division = employee.division;
+                let position = employee.position;
+                let gender = employee.gender;
+                let section = employee.section;
+                let image_path = employee.image_path;
+                let contact = employee.contact;
+        
+                let employeeObj = {
+                    firstName: firstName,
+                    middleInitial: middleInitial,
+                    lastName: lastName,
+                    idNumber: idNumber,
+                    accNumber: accNumber,
+                    division: division,
+                    position: position,
+                    gender: gender,
+                    section: section,
+                    image: image_path,
+                    contact_no: contact
+                };
+                employees.push(employeeObj);
+            });
+            localStorage.setItem('employees', JSON.stringify(employees));
+        });
+        
+    }
       $('#dp-year').change(function () {
-            year_now = $(this).val();
-            let dataTable = $('#tbl-items').DataTable();
-            dataTable.ajax.reload();
+        year_now = $(this).val().toString();
+        localStorage.setItem('selected_year', year_now); 
+
+        let dataTable = $('#tbl-items').DataTable();
+        dataTable.ajax.reload();
       });
       
       $('#f-employee-name').change(function() {

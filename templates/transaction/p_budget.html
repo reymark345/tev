@@ -277,8 +277,15 @@
         const table_box_a = $('#tbl-box-a')
         const table = $('#tbl-items');
         const currentDate = new Date();
+        const DpYear = jQuery(document.querySelector('[name="DpYear"]'));
         let year_now  = "";
         if(!year_now){year_now = currentDate.getFullYear().toString();}  
+        const year_ls = localStorage.getItem('selected_year');
+        if (year_ls) {
+            DpYear.val(year_ls).trigger('change'); 
+            year_now = year_ls;
+        }
+        else{year_now = currentDate.getFullYear().toString();}
       
         const ItemFormValidation = document.getElementById('item-form'),
             AddRecordDv = document.getElementById('add-record-dv'),
@@ -300,7 +307,6 @@
             search_advance_filter = $('#search-advance-filter'),
             FAdvancedFilter= jQuery(document.querySelector('[name="FAdvancedFilter"]')),
             PayrollName = jQuery(document.querySelector('[name="PayrollName"]')),
-            DpYear = jQuery(document.querySelector('[name="DpYear"]')),
             reset_advance_filter = $('#reset-advance-filter'),
             clear_advance_filter = $('#clear-advance-filter');
   
@@ -1021,10 +1027,12 @@
           });
   
           $('#dp-year').change(function () {
-              year_now = $(this).val();
-              let dataTable = $('#tbl-items').DataTable();
-              dataTable.ajax.reload();
-          });
+            year_now = $(this).val().toString();
+            localStorage.setItem('selected_year', year_now); 
+    
+            let dataTable = $('#tbl-items').DataTable();
+            dataTable.ajax.reload();
+        });
   
           $(document).on("change", ".emp-purpose", function () {
               let dataTable = $('#tbl-box-a').DataTable();
