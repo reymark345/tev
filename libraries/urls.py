@@ -34,4 +34,7 @@ urlpatterns = [
     path('means_of_transportation_edit', views.means_of_transportation_edit, name='means-of-transportation-edit'),
     path('means_of_transportation_add', views.means_of_transportation_add, name='means-of-transportation-add'),
     path('means_of_transportation_update', views.means_of_transportation_update, name='means-of-transportation-update'),
+
+    path('get_lib_mun', views.get_lib_mun, name='get-lib-mun'), 
+    path('get_lib_brgy', views.get_lib_brgy, name='get-lib-brgy'), 
 ]

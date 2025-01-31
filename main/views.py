@@ -13,6 +13,7 @@ from datetime import timedelta, date
 from django.db.models.functions import TruncMonth
 from django.db.models import Q
 import datetime
+from .forms import LoginForm
 
 
 def index(request):
@@ -28,24 +29,76 @@ def landing(request):
     return render(request, 'landing_page.html')
 
 
-@csrf_exempt
 def login(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            auth_login(request, user)
-            request.session['user_id'] = user.id
-            request.session['username'] = user.username
-            request.session['fullname'] = user.first_name + user.last_name
-            return redirect("dashboard")
-        else:
-            messages.error(request, 'Invalid Username and Password.')
 
-    return render(request, 'login.html')
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                auth_login(request, user)
+                request.session['user_id'] = user.id
+                request.session['username'] = user.username
+                request.session['fullname'] = user.first_name + user.last_name
+                return redirect("dashboard")
+            else:
+                messages.error(request, 'Invalid Username or Password.')
+        else:
+            messages.error(request, 'Invalid reCAPTCHA.')
+
+    else:
+        form = LoginForm()
+
+    return render(request, 'login.html', {'form': form})
+
+# @csrf_exempt
+# def login(request):
+#     if request.user.is_authenticated:
+#         return redirect("dashboard")
+    
+#     form = LoginForm(request.POST or None)
+
+#     if request.method == 'POST':
+#         if form.is_valid():  # CAPTCHA validation
+#             username = form.cleaned_data.get('username')
+#             password = form.cleaned_data.get('password')
+#             user = authenticate(request, username=username, password=password)
+
+#             if user is not None:
+#                 auth_login(request, user)
+#                 request.session['user_id'] = user.id
+#                 request.session['username'] = user.username
+#                 request.session['fullname'] = user.first_name + " " + user.last_name
+#                 return redirect("dashboard")
+#             else:
+#                 messages.error(request, 'Invalid Username and Password.')
+#         else:
+#             messages.error(request, 'Invalid CAPTCHA. Please try again.')
+
+#     return render(request, 'login.html', {'form': form})
+
+# @csrf_exempt
+# def login(request):
+#     if request.user.is_authenticated:
+#         return redirect("dashboard")
+#     if request.method == 'POST':
+#         username = request.POST['username']
+#         password = request.POST['password']
+#         user = authenticate(request, username=username, password=password)
+#         if user is not None:
+#             auth_login(request, user)
+#             request.session['user_id'] = user.id
+#             request.session['username'] = user.username
+#             request.session['fullname'] = user.first_name + user.last_name
+#             return redirect("dashboard")
+#         else:
+#             messages.error(request, 'Invalid Username and Password.')
+
+#     return render(request, 'login.html')
 
 
 @login_required(login_url='login')

@@ -17,6 +17,7 @@
   </div>
 <head>
 </head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <style>
 #loading-screen {
   position: fixed;
@@ -56,6 +57,65 @@
   margin-bottom: 20px;
   padding: 0 10px;
 }
+
+.navbar-brand {
+  font-family: Arial, sans-serif;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  text-decoration: none;
+}
+
+.navbar-collapse {
+  display: flex;
+}
+
+.navbar-collapse ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.navbar-collapse ul li {
+  display: inline-block;
+}
+
+.navbar-collapse button {
+  font-size: 14px;
+  margin-top: 8px;
+  margin-right: 150px; /* Added margin-right to ensure proper spacing */
+}
+
+.navbar-collapse {
+  margin-right: 30px; /* Adjusted for spacing from the right */
+}
+
+#dswd-logo {
+  height:55px;
+  width:160px;
+  margin-top: 7px;
+}
+
+#ph-img {
+  position: relative;
+  width:65px;
+  height:55px;
+  top: -7px; /* Adjust this value to move the image up */
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  height:35px;
+}
+
   
 .print-button {
   background-color: #b2c2ce;
@@ -202,8 +262,17 @@ margin-top: 200%;
 <body>
     <div class="container-wrapper">
         <div class="container">
-          <h3></h3>
-          <button class="print-button" onclick="printForms('{{ finance.0.dv_no }}')">Print</button>
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">
+              <img src="{% static 'assets/img/custom/dswd-logo.png' %}" alt="First Logo" id="dswd-logo">
+              <img src="{% static 'assets/img/custom/bp-logo.png' %}" alt="Second Logo" id="ph-img">
+            </a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+              <li><button type="button" class="btn btn-primary" onclick="printForms()" id="floatprint" title="Print" style="font-size: 14px;"><i class="fas fa-print"></i> Print</button></li>
+            </ul>
+          </div>
         </div>
 
         <div class="container-body3">
@@ -259,6 +328,10 @@ margin-top: 200%;
 $(document).ready(function () {
   $('#loading-screen').hide();
 });
+
+function printForms() {
+    window.print();
+  }
 
 </script>
 </html>

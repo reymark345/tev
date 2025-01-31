@@ -338,7 +338,7 @@
                                 <div data-i18n="Travel History">Travel History</div>
                             </a>
                         </li>
-                        {% if permissions %}
+                        <!-- {% if permissions %}
                             {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions or 'Certified staff' in permissions %}
                                 <li class="menu-item {% if url_name == 'travel-calendar' %}active{% endif %}">
                                     <a href="{% url 'travel-calendar' %}" class="menu-link">
@@ -346,12 +346,26 @@
                                         <div data-i18n="Travel Calendar">Travel Calendar</div>
                                     </a>
                                 </li>
-                        {% endif %}
+                        {% endif %} -->
                             {% if 'Admin' in permissions or 'Incoming staff' in permissions or 'Payroll staff' in permissions or 'Validating staff' in permissions %}
                                 <!-- Libraries -->
                                 <li class="menu-header small text-uppercase">
                                     <span class="menu-header-text">Libraries</span>
                                 </li>
+                                <li class="menu-item {% if url_name == 'fare-matrix' %}active{% endif %}">
+                                    <a href="{% url 'fare-matrix' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-chart-pie"></i>
+                                        <div data-i18n="Fare Matrix">Fare Matrix</div>
+                                    </a>
+                                </li>
+                                <li class="menu-item {% if url_name == 'means-of-transportation' %}active{% endif %}">
+                                    <a href="{% url 'means-of-transportation' %}" class="menu-link">
+                                        <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
+                                        <div data-i18n="Means of Transportation">Means of Transportation</div>
+                                    </a>
+                                </li>
+
+
                                 <li class="menu-item {% if url_name == 'charges' %}active{% endif %}">
                                     <a href="{% url 'charges' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti fa-list-check"></i>
@@ -370,18 +384,6 @@
                                     <a href="{% url 'remarks' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-color-swatch"></i>
                                         <div data-i18n="Remarks">Remarks</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item {% if url_name == 'means-of-transportation' %}active{% endif %}">
-                                    <a href="{% url 'means-of-transportation' %}" class="menu-link">
-                                        <i class="menu-icon tf-icons ti ti-brand-tabler"></i>
-                                        <div data-i18n="Means of Transportation">Means of Transportation</div>
-                                    </a>
-                                </li>
-                                <li class="menu-item {% if url_name == 'fare-matrix' %}active{% endif %}">
-                                    <a href="{% url 'fare-matrix' %}" class="menu-link">
-                                        <i class="menu-icon tf-icons ti ti-chart-pie"></i>
-                                        <div data-i18n="Fare Matrix">Fare Matrix</div>
                                     </a>
                                 </li>
                             {% endif %}      

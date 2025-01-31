@@ -912,7 +912,7 @@ def preview_box_a(request):
             for row in rows:
                 if row[11] == None:
 
-                    return render(request, 'pages/not_found.html', {'message': "There was Travel with no assigned charges!",'text': "You must assign charges under this DV"})
+                    return render(request, 'pages/not_found.html', {'message': "There was a travel with no assigned charges!",'text': "You must assign charges under this DV"})
                 else:
                     total_final_amount += Decimal(row[11]) if row[11] is not None else Decimal('0.0')
                     data_dict = {
@@ -2568,23 +2568,26 @@ def receive_budget(request):
     
 @csrf_exempt
 def forward_budget(request):
-    missing_items = []
-    out_list = request.POST.getlist('out_list[]')
-    user_id = request.session.get('user_id', 0)
-    out_list_int = [int(item) for item in out_list]
-    for status_id in out_list_int:
-        check_status = TevOutgoing.objects.filter(id=status_id, status_id=9).values_list('dv_no', flat=True)
-        if check_status:
-            status = [item for item in check_status]
-            missing_items.extend(status)
-    if missing_items:
-        return JsonResponse({'data':'Dvs must receive first!','message': ', '.join(map(str, missing_items))})
-    else:
-        ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-        TevIncoming.objects.filter(id__in=ids).update(status_id=11)
-        for item_id  in out_list:
-            TevOutgoing.objects.filter(id=item_id).update(status_id=11,b_out_user_id = user_id,b_d_forwarded=date_time.datetime.now())
-        return JsonResponse({'data': 'success'})
+    try:
+        missing_items = []
+        out_list = request.POST.getlist('out_list[]')
+        user_id = request.session.get('user_id', 0)
+        out_list_int = [int(item) for item in out_list]
+        for status_id in out_list_int:
+            check_status = TevOutgoing.objects.filter(id=status_id, status_id=9).values_list('dv_no', flat=True)
+            if check_status:
+                status = [item for item in check_status]
+                missing_items.extend(status)
+        if missing_items:
+            return JsonResponse({'data': 'Dvs must receive first!', 'message': ', '.join(map(str, missing_items))})
+        else:
+            ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
+            TevIncoming.objects.filter(id__in=ids).update(status_id=11)
+            for item_id in out_list:
+                TevOutgoing.objects.filter(id=item_id).update(status_id=11, b_out_user_id=user_id, b_d_forwarded=date_time.datetime.now())
+            return JsonResponse({'data': 'success'})
+    except Exception as e:
+        return JsonResponse({'data': 'error', 'message': str(e)})
 
 @csrf_exempt
 def receive_journal(request):
