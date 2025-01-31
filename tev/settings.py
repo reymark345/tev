@@ -20,6 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+GOOGLE_RECAPTCHA_SECRET_KEY = '6LfBfsgqAAAAAKsANK7ROm7OGslrc2e8KyIQsI_t'
+RECAPTCHA_PUBLIC_KEY = '6LfBfsgqAAAAAKsANK7ROm7OGslrc2e8KyIQsI_t'
+RECAPTCHA_PRIVATE_KEY = '6LfBfsgqAAAAAEEHpMdVD6ZyYU92kViCR3u-glX8'
+
 SECRET_KEY = 'django-insecure-e&691z)oh*#_&yv(h^3sn^*=gxs09(%(5395)=xe+_im_bk^l&'
 PSGC_TOKEN  = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2R4Y2xvdWQuZHN3ZC5nb3YucGgvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3Mzc3NzA3NjYsImV4cCI6MTgzMjM3ODc2NiwibmJmIjoxNzM3NzcwNzY2LCJqdGkiOiJyS1pNMm90NmJlaHFNaWtzIiwic3ViIjoyMTEsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.q5MOfNtcQC-zcCg2kdsfZwf_gOm6Sw2QuiA5lDvfA6g"
 PORTAL_TOKEN  = "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
@@ -55,6 +59,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'channels',
+    'django_recaptcha',
 ]
 
 
