@@ -20,6 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+GOOGLE_RECAPTCHA_SECRET_KEY = '6LfBfsgqAAAAAKsANK7ROm7OGslrc2e8KyIQsI_t'
+RECAPTCHA_PUBLIC_KEY = '6LfBfsgqAAAAAKsANK7ROm7OGslrc2e8KyIQsI_t'
+RECAPTCHA_PRIVATE_KEY = '6LfBfsgqAAAAAEEHpMdVD6ZyYU92kViCR3u-glX8'
+
 SECRET_KEY = 'django-insecure-e&691z)oh*#_&yv(h^3sn^*=gxs09(%(5395)=xe+_im_bk^l&'
 PSGC_TOKEN  = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2R4Y2xvdWQuZHN3ZC5nb3YucGgvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3Mzc3NzA3NjYsImV4cCI6MTgzMjM3ODc2NiwibmJmIjoxNzM3NzcwNzY2LCJqdGkiOiJyS1pNMm90NmJlaHFNaWtzIiwic3ViIjoyMTEsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.q5MOfNtcQC-zcCg2kdsfZwf_gOm6Sw2QuiA5lDvfA6g"
 PORTAL_TOKEN  = "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
@@ -55,6 +59,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'channels',
+    'django_recaptcha',
 ]
 
 
@@ -98,42 +103,42 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     #for server to server
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tris',
-        'USER': 'tris',
-        'PASSWORD': 'vOHA]ko(5))If-LU',
-        'HOST': '172.31.240.135',
-        'PORT': '3306',
-    },
-    # #for server INFIMOS
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'tris',
+    #     'USER': 'tris',
+    #     'PASSWORD': 'vOHA]ko(5))If-LU',
+    #     'HOST': '172.31.240.135',
+    #     'PORT': '3306',
+    # },
+    # # #for server INFIMOS
     
-    'finance': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'infimos_2023',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
-        'PORT':'3306',
-    },
+    # 'finance': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2023',
+    #     'USER':'tris',
+    #     'PASSWORD':'vOHA]ko(5))If-LU',
+    #     'HOST':'172.31.240.235',
+    #     'PORT':'3306',
+    # },
 
-    'finance_2024': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'infimos_2024',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
-        'PORT':'3306',
-    },
+    # 'finance_2024': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2024',
+    #     'USER':'tris',
+    #     'PASSWORD':'vOHA]ko(5))If-LU',
+    #     'HOST':'172.31.240.235',
+    #     'PORT':'3306',
+    # },
 
-    'finance_2025': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'infimos_2025',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
-        'PORT':'3306',
-    },
+    # 'finance_2025': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2025',
+    #     'USER':'tris',
+    #     'PASSWORD':'vOHA]ko(5))If-LU',
+    #     'HOST':'172.31.240.235',
+    #     'PORT':'3306',
+    # },
     
 
     ##for server local but live database
@@ -146,39 +151,39 @@ DATABASES = {
     #     'PORT': '3306',
     # },
     #for localhost main database
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'tev_db',
-    #     'USER': 'root',
-    #     'PASSWORD': '',
-    #     'HOST': 'localhost',
-    #     'PORT': '3306',
-    # },
-    # #for localhost INFIMOS database
-    # 'finance': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2023',
-    #     'USER':'root',
-    #     'PASSWORD':'qw1234',
-    #     'HOST':'localhost',
-    #     'PORT':'3307',
-    # },
-    # 'finance_2024': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2024',
-    #     'USER':'root',
-    #     'PASSWORD':'qw1234',
-    #     'HOST':'localhost',
-    #     'PORT':'3307',
-    # },
-    # 'finance_2025': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2025',
-    #     'USER':'root',
-    #     'PASSWORD':'qw1234',
-    #     'HOST':'localhost',
-    #     'PORT':'3307',
-    # },
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'tev_db',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    },
+    #for localhost INFIMOS database
+    'finance': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'infimos_2023',
+        'USER':'root',
+        'PASSWORD':'qw1234',
+        'HOST':'localhost',
+        'PORT':'3307',
+    },
+    'finance_2024': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'infimos_2024',
+        'USER':'root',
+        'PASSWORD':'qw1234',
+        'HOST':'localhost',
+        'PORT':'3307',
+    },
+    'finance_2025': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'infimos_2025',
+        'USER':'root',
+        'PASSWORD':'qw1234',
+        'HOST':'localhost',
+        'PORT':'3307',
+    },
 
 
     # 'finance': {
