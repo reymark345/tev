@@ -354,6 +354,7 @@ def status_load(request):
           "ORD" if acronym == 'Office of the Regional Director' else
           "AD" if acronym == 'Administrative Division' else
           "PD/SLP" if acronym == 'Promotive Services Division' and section == 'Sustainable Livelihood Program'  else
+          "ID" if acronym == 'Innovation Division' else
           "PD" if acronym == 'Promotive Services Division'else
           "")
         
@@ -1167,6 +1168,7 @@ def travel_history_load(request):
           "ORD" if acronym == 'Office of the Regional Director' else
           "AD" if acronym == 'Administrative Division' else
           "PD/SLP" if acronym == 'Promotive Services Division' and section == 'Sustainable Livelihood Program'  else
+          "ID" if acronym == 'Innovation Division' else
           "PD" if acronym == 'Promotive Services Division'else
           "")
         
@@ -1475,6 +1477,7 @@ def travel_history_load_old(request):
           "ORD" if acronym == 'Office of the Regional Director' else
           "AD" if acronym == 'Administrative Division' else
           "PD/SLP" if acronym == 'Promotive Services Division' and section == 'Sustainable Livelihood Program'  else
+          "ID" if acronym == 'Innovation Division' else
           "PD" if acronym == 'Promotive Services Division'else
           "")
         

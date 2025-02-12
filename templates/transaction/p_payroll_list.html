@@ -1,3 +1,4 @@
+{% extends 'index.html' %} {% block content %} {% load staticfiles %}
 <div id="loading-screen">
     <center>
         <div class="col">
@@ -11,7 +12,7 @@
           </div>  
     </center>
 </div>
-{% extends 'index.html' %} {% block content %} {% load staticfiles %}
+
 <link rel="stylesheet" href="{% static 'custom/custom.css' %}" />
 <!-- Content wrapper -->
 <div class="content-wrapper">
@@ -707,7 +708,6 @@
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0 d-flex align-items-center">'+
-        '<button type="submit" id="forward" class="btn btn-primary">Forward</button>&nbsp;&nbsp;&nbsp;' +
         '<select id="dp-year" name="DpYear" class="form-select">'+
             '<option value="2023">2023</option>'+
             '<option value="2024">2024</option>'+
@@ -834,61 +834,6 @@
         dataTable.on('xhr.dt', function() {
             $('#loading-screen').hide();
         });
-        function incoming_out(){
-            Swal.fire({
-                title: 'Forward?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, Forward!',
-                customClass: {
-                    confirmButton: 'btn btn-primary me-3',
-                    cancelButton: 'btn btn-label-secondary',
-                },
-                buttonsStyling: false,
-            }).then(function (result) {
-                if (result.value) {
-                    selectedCb = $.grep(selectedCb, function(value) {
-                        return value !== 'on';
-                    });
-                    let post_url = ItemID.val() != '0' ? "{% url 'item-update' %}" : "{% url 'item-add' %}"
-       
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'out-checking-tev' %}",
-                        data:{
-                            out_list: selectedCb
-                        }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Successfully save!',
-                                text: 'Item has been added.',
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-
-                            dataTable.ajax.reload()
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    })
-                }
-            })
-
-        }
-
-        
-
 
         function fetchEmployee($selectElement) {
             const employees = JSON.parse(localStorage.getItem('employees'));
@@ -1025,15 +970,6 @@
                    employeeList.splice(index, 1);
                 }
             });
-        });
-
-        $('#forward').on('click', function(){
-            if(selectedCb.length ===0){
-                toastr.error('Selected item first', 'Invalid', toast_options);
-            }
-            else{
-                incoming_out();
-            }
         });
         $('#employee-name').change(function() {
             var selectedOption = $(this).find('option:selected');
