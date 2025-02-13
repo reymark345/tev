@@ -12,6 +12,7 @@
 >	
     <head>
         <meta charset="utf-8" />
+        
         <meta name="viewport" content="width=device-width, initial-scale=0.6, user-scalable=yes, minimum-scale=0.6, maximum-scale=0.6" />
 
         <title>TRIPS</title>
@@ -183,6 +184,18 @@
 
 
     <body>
+        <div id="loading-screen">
+            <center>
+                <div class="col">
+                    <div class="sk-fold sk-primary">
+                        <div class="sk-fold-cube"></div>
+                        <div class="sk-fold-cube"></div>
+                        <div class="sk-fold-cube"></div>
+                        <div class="sk-fold-cube"></div>
+                    </div>
+                </div>  
+            </center>
+        </div>
         <!-- Layout wrapper -->
         <div class="layout-wrapper layout-content-navbar">
             <div class="layout-container">
@@ -425,12 +438,12 @@
                                     </a>
                                 </li>
 
-                                <li class="menu-item {% if url_name == 'chat' %}active{% endif %}">
+                                {% comment %} <li class="menu-item {% if url_name == 'chat' %}active{% endif %}">
                                     <a href="{% url 'chat' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-messages"></i>
                                         <div data-i18n="Chat">Chat</div>
                                     </a>
-                                </li>
+                                </li> {% endcomment %}
                                 
                                 <li class="menu-item {% if url_name == 'sms' %}active{% endif %}">
                                     <a href="{% url 'sms' %}" class="menu-link">

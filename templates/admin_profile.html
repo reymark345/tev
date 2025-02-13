@@ -26,9 +26,6 @@
     justify-content: center; /* Horizontally center the items */
     text-align: center; /* Ensure text is centered */
   }
-
-
-  
 </style>
             <!-- Content -->
             <!-- <div class="container-fluid flex-grow-1 container-p-y"> -->
@@ -293,6 +290,7 @@
   
   <script>
     $(document).ready(function() {
+      $('#loading-screen').hide();
       var steps = document.querySelectorAll('.step-trigger');
       const FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
             FEndDate = jQuery(document.querySelector('[name="FEndDate"]'));

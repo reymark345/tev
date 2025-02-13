@@ -1312,20 +1312,46 @@ def out_checking_tev(request):
 
     out_list = request.POST.getlist('out_list[]')  
     user_id = request.session.get('user_id', 0) 
+
+    print("testtttt")
+    print(out_list)
     
     for item_id in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).first()  
+        trips_data = TevIncoming.objects.filter(id=item_id).first()  
 
-        if tev_update:
-            if tev_update.status_id == 3:
-                tev_update.slashed_out = date_time.datetime.now()
-                tev_update.review_date_forwarded = date_time.datetime.now()
-                tev_update.review_forwarded_by = user_id
+        if trips_data:
+            if trips_data.status_id == 3:  # returned
+                trips_data.slashed_out = date_time.datetime.now()
+                if trips_data.remarks: #if duplicate condition
+                    contact_no = "09518149919"
+                    formatted_dates = convert_date_string(trips_data.date_travel)
+
+                    print("testttt")
+                    print(convert_date_string(trips_data.date_travel))
+
+                    # message = "Good day, {}! Your TE Claims from {} were found to be duplicate and are subject to a MEMO -The DSWD Caraga TRIPS Team.".format(trips_data.first_name, convert_date_string(trips_data.date_travel))
+                    message = "Good day, {}!\n\nYour TE Claims from {} were found to be duplicate and are subject to a MEMO.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name, formatted_dates)
+                    send_notification(message, contact_no)
+
+                    # contact_numbers = [{first_name: ['09518149919']}]
+                    # for contact in contact_numbers:
+                    #     for k, vs in contact.items():
+                    #         for v in vs:
+                    #             send_notification('Good day,{}! Your Travel From January 25 2024 is being Forwarded to Budget Section and Ready to Obligate - DSWD CARAGA TRIS SYSTEM'.format(k, formatted_dates), v)
+    
+                    print("Duplicate")
+
+                else:
+                    print("no duplication remarks")
+
             else:
-                tev_update.status_id = 4
-            tev_update.review_date_forwarded = date_time.datetime.now()
-            tev_update.review_forwarded_by = user_id
-            tev_update.save()
+                trips_data.status_id = 4  # for payroll
+
+            # trips_data.review_date_forwarded = date_time.datetime.now()
+            # trips_data.review_forwarded_by = user_id
+            # trips_data.save()
+
+
             # fullname = tev_update.first_name
             # contact_no = "09518149919"
             # date_travel = tev_update.date_travel
@@ -1337,8 +1363,8 @@ def out_checking_tev(request):
             #     for k, vs in contact.items():
             #         for v in vs:
             #             send_notification('Good day,{}! Your Travel From January 25 2024 is being Forwarded to Budget Section and Ready to Obligate - DSWD CARAGA TRIS SYSTEM'.format(k, formatted_dates), v)
-        else:
-            pass 
+        # else:
+        #     pass 
 
     return JsonResponse({'data': 'success'})
 

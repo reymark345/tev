@@ -535,6 +535,7 @@
 
   {% endblock %}{% block footer_scripts %}
   <script>
+    $('#loading-screen').hide();
     var startYear = 2024;
     var currentYear = parseInt($('#current_year').val());
     var endYear = currentYear + 1;
@@ -545,7 +546,6 @@
       $('#dp-year').append('<option value="' + year + '" ' + selected + '>' + year + '</option>');
     }
 
-    
     let cardColor, headingColor, labelColor, borderColor, legendColor;
     if (isDarkStyle) {
       cardColor = config.colors_dark.cardColor;
