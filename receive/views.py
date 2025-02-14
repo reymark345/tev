@@ -1322,34 +1322,72 @@ def out_checking_tev(request):
         if trips_data:
             if trips_data.status_id == 3:  # returned
                 trips_data.slashed_out = date_time.datetime.now()
-                if trips_data.remarks: #if duplicate condition
-                    contact_no = "09518149919"
-                    formatted_dates = convert_date_string(trips_data.date_travel)
 
-                    print("testttt")
-                    print(convert_date_string(trips_data.date_travel))
-
-                    # message = "Good day, {}! Your TE Claims from {} were found to be duplicate and are subject to a MEMO -The DSWD Caraga TRIPS Team.".format(trips_data.first_name, convert_date_string(trips_data.date_travel))
-                    message = "Good day, {}!\n\nYour TE Claims from {} were found to be duplicate and are subject to a MEMO.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name, formatted_dates)
-                    send_notification(message, contact_no)
-
-                    # contact_numbers = [{first_name: ['09518149919']}]
-                    # for contact in contact_numbers:
-                    #     for k, vs in contact.items():
-                    #         for v in vs:
-                    #             send_notification('Good day,{}! Your Travel From January 25 2024 is being Forwarded to Budget Section and Ready to Obligate - DSWD CARAGA TRIS SYSTEM'.format(k, formatted_dates), v)
-    
-                    print("Duplicate")
-
+                remarks_data = Remarks_r.objects.filter(incoming_id=trips_data.id).values('remarks_lib_id', 'date')
+                remarks_list = [
+                    f"{RemarksLib.objects.get(id=remark['remarks_lib_id']).name} - {remark['date'].strftime('%B %d, %Y')}"
+                    for remark in remarks_data
+                ]
+                remarks_str = '; '.join(remarks_list)
+                w_remarks_data = remarks_str
+                contact_no = "09518149919"
+                formatted_dates_list = convert_date_string(trips_data.date_travel).split(', ')
+                if len(formatted_dates_list) > 1:
+                    formatted_dates = f"{formatted_dates_list[0]} to {formatted_dates_list[-1]}"
                 else:
-                    print("no duplication remarks")
+                    formatted_dates = formatted_dates_list[0]
+
+                print("formatted_dates")
+                print(w_remarks_data)
+
+
+
+                forfeited_dates = [remark.split(' - ')[1] for remark in w_remarks_data.split('; ') if 'FORFEITED' in remark]
+                if len(forfeited_dates) > 1:
+                    date_forfeited = f"{forfeited_dates[0]} to {forfeited_dates[-1]}"
+                elif len(forfeited_dates) == 1:
+                    date_forfeited = forfeited_dates[0]
+                else:
+                    date_forfeited = None
+
+                not_forefeited_dates = [remark.split(' - ')[1] for remark in w_remarks_data.split('; ') if 'FORFEITED' not in remark]
+                if len(not_forefeited_dates) > 1:
+                    date_not_forfeited = f"{not_forefeited_dates[0]} to {not_forefeited_dates[-1]}"
+                elif len(not_forefeited_dates) == 1:
+                    date_not_forfeited = not_forefeited_dates[0]
+                else:
+                    date_not_forfeited = None
+
+                # print("date_forfeited")
+                # print(date_forfeited)
+
+                if trips_data.remarks: #if returned and it has duplicate condition
+                    formatted_incoming_in = trips_data.incoming_in.strftime("%B %d, %Y")
+                    message = "Good day, {}!\n\nYour TE claim for the period of {} was found to be a duplicate of another claim submitted on {}, and is subject for a memo\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), trips_data.remarks, formatted_incoming_in)
+                    # message = "Good day, {}!\n\nYour TE claim for the period of {} was found to be a duplicate of another claim submitted on {}, and is subject for a memo\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates, trips_data.remarks)
+                    # print("duplicate")
+                    # send_notification(message, contact_no)
+
+                elif "FORFEITED" in w_remarks_data:
+                    message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), date_forfeited)
+                    # send_notification(message, contact_no)
+
+                    if w_remarks_data and "FORFEITED" not in w_remarks_data:
+                        message = "Good day, {}!\n\nYour TE claim for the period of {}, will be returned to your respective division. Please retrieve it for compliance.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), date_not_forfeited)
+                        # send_notification(message, contact_no)
+                    # print("with remarkssss")
+                    message = "Good day, {}!\n\nYour TE claim for the period of {}, will be returned to your respective division.Please retrieve it for compliance.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates, w_remarks_data)
+                    # send_notification(message, contact_no)
+ 
+                else:
+                    print("no remarks")
 
             else:
                 trips_data.status_id = 4  # for payroll
 
-            # trips_data.review_date_forwarded = date_time.datetime.now()
-            # trips_data.review_forwarded_by = user_id
-            # trips_data.save()
+            trips_data.review_date_forwarded = date_time.datetime.now()
+            trips_data.review_forwarded_by = user_id
+            trips_data.save()
 
 
             # fullname = tev_update.first_name

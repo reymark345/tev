@@ -1022,6 +1022,7 @@
                 buttonsStyling: false,
             }).then(function (result) {
                 if (result.value) {
+                    $('#loading-screen').show();
                     selectedCb = $.grep(selectedCb, function(value) {
                         return value !== 'on';
                     });
@@ -1034,6 +1035,7 @@
                             out_list: selectedCb
                         }
                     }).done(function (data) {
+                        $('#loading-screen').hide();
                         if (data.data == 'success') {
                             Swal.fire({
                                 icon: 'success',
