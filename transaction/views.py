@@ -29,6 +29,7 @@ from django.template.defaultfilters import date
 from django.db.models import CharField
 from django.db.models.functions import Cast
 from django.db.utils import OperationalError
+from django.utils.html import strip_tags
 
 
 def generate_code():
@@ -2247,7 +2248,7 @@ def transmittal_details(request):
 @csrf_exempt
 def add_dv(request):
     if request.method == 'POST':
-        dv_number = request.POST.get('DvNumber')
+        dv_number = strip_tags(request.POST.get('DvNumber'))
         if TevOutgoing.objects.filter(dv_no=dv_number).exists():
             return JsonResponse({'status': 'error', 'message': 'DV Number Already exists'})
         user_id = request.session.get('user_id', 0)

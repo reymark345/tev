@@ -269,6 +269,7 @@
 <script>
   window.Helpers.initCustomOptionCheck();
   $(document).ready(function () {
+      $('#loading-screen').hide();
       const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
       const wsEndpoint = `${websocketProtocol}://caraga-tris-staging.dswd.gov.ph/ws/notification/`;
       

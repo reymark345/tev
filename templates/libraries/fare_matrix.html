@@ -405,8 +405,15 @@
                 });
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">Fare Matrix</h5>')
-
+        $('div.head-label').html('<h5 class="card-title mb-0">Fare Matrix</h5>');
+        dataTable.on('processing.dt', function(e, settings, processing) {
+            if (!processing) {
+                $('#loading-screen').hide();
+            }
+          });
+        dataTable.on('xhr.dt', function() {
+            $('#loading-screen').hide();
+        });
         const newRecord = document.querySelector('.create-new');
         if (newRecord) {
             newRecord.addEventListener('click', function () {
@@ -419,50 +426,6 @@
                 offCanvasEl.show();
             });
         }
-   
-
-        // setTimeout(() => {
-        //     if (newRecord) {
-        //         newRecord.addEventListener('click', function () {
-        //             ItemID.val(0);
-                 
-        //             $('.title-name').text('Add Record');
-        //             clear_data();
-        //             load_select();
-        //             const select_me = jQuery(document.querySelector('[name="ProvinceName"]'));
-
-        //             let storedData = localStorage.getItem('psgc_data');
-        //             if (storedData) {
-        //                 let psgcData = JSON.parse(storedData);
-        //                 select_me.empty();
-                    
-        //                 psgcData.forEach(function(province) {
-        //                     let capitalizedProvName = province.prov_name.toUpperCase();
-                    
-        //                     select_me.append('<option value="' + province.prov_id + '">' + capitalizedProvName + '</option>');
-        //                 });
-        //             } else {
-        //                 console.log("No data found in localStorage.");
-        //             }
-        //             $('.form-control').val('');
-        //             $('#province-name').on('change', function () {
-        //                 var prov_id = $(this).val(); 
-        //                 var prov_name = $(this).find('option:selected').text();
-        //                 if (prov_name === "DINAGAT ISLANDS") {
-        //                     var abbreviation = "PDI";
-        //                 } else {
-        //                     var abbreviation = prov_name.split(' ').map(function(word) {
-        //                         return word.charAt(0); 
-        //                     }).join(''); 
-        //                 }
-                      
-        //                 ProvinceAcronym.val(abbreviation);
-        //                 ProvinceCode.val(prov_id);
-        //             });
-        //             offCanvasEl.show();
-        //         })
-        //     }
-        // }, 200)
 
         // Form validation for Add new record
         const fv = FormValidation.formValidation(ItemFormValidation, {

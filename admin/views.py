@@ -22,6 +22,7 @@ from django.utils import timezone
 from django.db import connection
 from suds.client import Client
 from django.db.models import Q
+from django.utils.html import strip_tags
 
 
 def is_member_of_inventory_staff(user):
@@ -402,23 +403,26 @@ def date_actual_update(request):
 
 @csrf_exempt
 def user_add(request):
-    user_name = request.POST.get('Username')
-    firstname = request.POST.get('Firstname')
-    middleinitial = request.POST.get('MiddleInitial')
-    id_no = request.POST.get('IdNo')
-    lastname = request.POST.get('Lastname')
-    password = request.POST.get('Password')
-    email = request.POST.get('Email')
-    image = request.POST.get('ImagePath')
-    role_ids = request.POST.getlist('Roles')
-    staff = request.POST.get('IsStaff')
+    user_name = strip_tags(request.POST.get('Username'))
+    firstname = strip_tags(request.POST.get('Firstname'))
+    middleinitial = strip_tags(request.POST.get('MiddleInitial'))
+    id_no = strip_tags(request.POST.get('IdNo'))
+    lastname = strip_tags(request.POST.get('Lastname'))
+    password = strip_tags(request.POST.get('Password'))
+    email = strip_tags(request.POST.get('Email'))
+    image = strip_tags(request.POST.get('ImagePath'))
+    role_ids = (request.POST.getlist('Roles'))
+    staff = strip_tags(request.POST.get('IsStaff'))
     superuser = 0
-    sex = request.POST.get('Sex')
-    address = request.POST.get('Address')
-    position = request.POST.get('Position')
-    division = request.POST.get('Division')
-    password = make_password(password)
-    user_id = request.session.get('user_id', 0)
+    sex = strip_tags(request.POST.get('Sex'))
+    address = strip_tags(request.POST.get('Address'))
+    position = strip_tags(request.POST.get('Position'))
+    division = strip_tags(request.POST.get('Division'))
+    password = strip_tags(make_password(password))
+    user_id = strip_tags(request.session.get('user_id', 0))
+
+    print("testttroleee")
+    print(role_ids)
 
     if '1' in role_ids: 
         superuser = 1
@@ -461,8 +465,7 @@ def user_add(request):
                 role_p_lib.save()
 
             return JsonResponse({'data': 'error','message': 'Division in Table not Exists'})
-            
-
+        
     
 #End User function ---------------->
 
@@ -471,15 +474,15 @@ def user_add(request):
 def user_update(request):
     try:
         id = request.POST.get('ModalID')
-        user_name = request.POST.get('ModalUsername')
-        firstname = request.POST.get('ModalFname')
-        lastname = request.POST.get('ModalLname')
-        email = request.POST.get('ModalEmail')
-        sex = request.POST.get('ModalSex')
-        address = request.POST.get('ModalAddress')
-        position = request.POST.get('ModalPosition')
-        user_id = request.session.get('user_id', 0)
-        status = request.POST.get('ModalStatus')
+        user_name = strip_tags(request.POST.get('ModalUsername'))
+        firstname = strip_tags(request.POST.get('ModalFname'))
+        lastname = strip_tags(request.POST.get('ModalLname'))
+        email = strip_tags(request.POST.get('ModalEmail'))
+        sex = strip_tags(request.POST.get('ModalSex'))
+        address = strip_tags(request.POST.get('ModalAddress'))
+        position = strip_tags(request.POST.get('ModalPosition'))
+        user_id = strip_tags(request.session.get('user_id', 0))
+        status = strip_tags(request.POST.get('ModalStatus'))
         staff = 1 if request.POST.get('ModalStaff') == 'true' else 0
 
         if AuthUser.objects.filter(username=user_name).exclude(id=id):

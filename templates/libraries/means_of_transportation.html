@@ -193,6 +193,14 @@
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0">Means of Transportation</h5>')
+        dataTable.on('processing.dt', function(e, settings, processing) {
+            if (!processing) {
+                $('#loading-screen').hide();
+            }
+          });
+        dataTable.on('xhr.dt', function() {
+            $('#loading-screen').hide();
+        });
 
         const newRecord = document.querySelector('.create-new')
         if (newRecord) {
