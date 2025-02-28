@@ -12,6 +12,7 @@
 >	
     <head>
         <meta charset="utf-8" />
+        
         <meta name="viewport" content="width=device-width, initial-scale=0.6, user-scalable=yes, minimum-scale=0.6, maximum-scale=0.6" />
 
         <title>TRIPS</title>
@@ -19,7 +20,7 @@
         <meta name="description" content="" />
 
         <!-- Favicon -->
-        <link rel="icon" type="image/x-icon" href="{% static 'assets/img/branding/logo.png' %}" />
+        <link rel="icon" type="image/x-icon" href="{% static 'assets/img/branding/t_logo.png' %}" />
 
         <!-- Fonts -->
         {% comment %}
@@ -183,6 +184,18 @@
 
 
     <body>
+        <div id="loading-screen">
+            <center>
+                <div class="col">
+                    <div class="sk-fold sk-primary">
+                        <div class="sk-fold-cube"></div>
+                        <div class="sk-fold-cube"></div>
+                        <div class="sk-fold-cube"></div>
+                        <div class="sk-fold-cube"></div>
+                    </div>
+                </div>  
+            </center>
+        </div>
         <!-- Layout wrapper -->
         <div class="layout-wrapper layout-content-navbar">
             <div class="layout-container">
@@ -191,8 +204,8 @@
                 <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
                     <div class="app-brand demo">
                         <a href="#" class="app-brand-link">
-                            <span class="app-brand-logo demo" style="width: 40px !important; height: 40px !important">
-                                <img class="w-100" src="{% static 'assets/img/branding/logo.png' %}" />
+                            <span class="app-brand-logo demo" style="width: 30px !important; height: 30px !important">
+                                <img class="w-100" src="{% static 'assets/img/branding/t_logo.png' %}" />
                             </span>
                             <span class="app-brand-text demo menu-text fw-bold">TRIPS </span>
                         </a>
@@ -425,12 +438,12 @@
                                     </a>
                                 </li>
 
-                                <li class="menu-item {% if url_name == 'chat' %}active{% endif %}">
+                                {% comment %} <li class="menu-item {% if url_name == 'chat' %}active{% endif %}">
                                     <a href="{% url 'chat' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-messages"></i>
                                         <div data-i18n="Chat">Chat</div>
                                     </a>
-                                </li>
+                                </li> {% endcomment %}
                                 
                                 <li class="menu-item {% if url_name == 'sms' %}active{% endif %}">
                                     <a href="{% url 'sms' %}" class="menu-link">
