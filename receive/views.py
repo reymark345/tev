@@ -538,6 +538,8 @@ def checking_load(request):
             params.append(FCreatedBy)
 
         if FReviewedBy:
+            print("reviewwww")
+            print(FStatus)
             query += " AND t1.reviewed_by = %s"
             params.append(FReviewedBy)
 
@@ -547,9 +549,8 @@ def checking_load(request):
             params.extend(EmployeeList)
 
         query += " AND date_travel LIKE %s"
-        params.append(year)
+        params.append(f"%{year}%")
         query += " GROUP BY t1.id ORDER BY t1.incoming_out DESC;"
-
 
 
     elif _search:
@@ -1314,6 +1315,7 @@ def out_checking_tev(request):
 
     out_list = request.POST.getlist('out_list[]')  
     user_id = request.session.get('user_id', 0) 
+    message = ""
 
     for item_id in out_list:
         trips_data = TevIncoming.objects.filter(id=item_id).first()  
@@ -1343,27 +1345,32 @@ def out_checking_tev(request):
             else:
                 formatted_dates = formatted_dates_list[0]
 
+            
+
             if trips_data.status_id == 3:  # returned
                 if trips_data.remarks:
                     # Ensure correct formatting of remarks
                     formatted_remarks = re.sub(r'(\d{1,2}), (\d{4})', r'\1 \2', trips_data.remarks)
                     formatted_incoming_in = trips_data.incoming_in.strftime("%b. %d %Y")
                     message = "Good day, {}!\n\nYour TE claim for the period of {} was found to be a duplicate of another claim submitted on {} and is subject for a memo\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_remarks, formatted_incoming_in)
+                    send_notification(message, contact_no)
 
                 elif w_remarks_data and "FORFEITED" not in w_remarks_data:
                     message = "Good day, {}!\n\nYour TE claim for the period of {}, will be returned to your respective division.Please retrieve it for compliance.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates, w_remarks_data)
+                    send_notification(message, contact_no)
 
                 elif "FORFEITED" in w_remarks_data:
                     message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
+                    send_notification(message, contact_no)
     
             elif trips_data.status_id == 7 and "FORFEITED" in w_remarks_data: #approved but has forfeited
 
                 message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
+                send_notification(message, contact_no)
                 trips_data.status_id = 4
             else:
                 trips_data.status_id = 4  # for payroll
                 
-            send_notification(message, contact_no)
             trips_data.review_date_forwarded = date_time.datetime.now()
             trips_data.review_forwarded_by = user_id
             trips_data.save()
