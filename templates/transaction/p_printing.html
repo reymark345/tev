@@ -45,7 +45,7 @@
           </div>
           <form id="assign-form" class="row g-3" onsubmit="return false">
             <div class="col-12">
-                <label class="form-label w-100" for="modalAddCard">DV Number</label>
+                <label class="form-label w-100" for="modalAddCard">DV Number<span style="color: red;font-weight: bold;"> *</span></label>
                 <div class="input-group input-group-merge">
                 <input
                     id="m-dvnumber"
@@ -62,7 +62,7 @@
             </div>
     
             <div class="col-sm-12">
-                <label class="form-label" for="cluster-name">Cluster</label>
+                <label class="form-label" for="cluster-name">Cluster<span style="color: red;font-weight: bold;"> *</span></label>
                 <select id="m-cluster" name="MCluster" class="form-select cluster" data-allow-clear="true">
                     <option></option>
                     {% for row in cluster %}
@@ -72,7 +72,7 @@
             </div>
     
             <div class="col-sm-12">
-                <label class="form-label" for="division-name">Division</label>
+                <label class="form-label" for="division-name">Division<span style="color: red;font-weight: bold;"> *</span></label>
                 <select id="m-division" name="MDivision" class="form-select division" data-allow-clear="true">
                     <option></option>
                     {% for row in division %}
