@@ -39,7 +39,7 @@
 
             <div class="col-sm-12">
                 <div class="col-md-12 mb-2">
-                  <label for="flatpickr-multi" class="form-label">Vehicle Name</label>
+                  <label for="flatpickr-multi" class="form-label">Vehicle Name<span style="color: red;font-weight: bold;"> *</span></label>
                   <input
                     type="text"
                     id="mot-name"
@@ -193,6 +193,14 @@
             },
         })
         $('div.head-label').html('<h5 class="card-title mb-0">Means of Transportation</h5>')
+        dataTable.on('processing.dt', function(e, settings, processing) {
+            if (!processing) {
+                $('#loading-screen').hide();
+            }
+          });
+        dataTable.on('xhr.dt', function() {
+            $('#loading-screen').hide();
+        });
 
         const newRecord = document.querySelector('.create-new')
         if (newRecord) {

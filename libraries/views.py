@@ -15,6 +15,7 @@ from decimal import Decimal, InvalidOperation
 import datetime as date
 from django.db.models import Q, Max
 import json
+from django.utils.html import strip_tags
  
 @login_required(login_url='login')
 def division(request):
@@ -107,12 +108,12 @@ def means_of_transportation(request):
     
 @csrf_exempt
 def division_add(request):
-    division = request.POST.get('Division')
-    acrym = request.POST.get('Acronym')
-    divchief = request.POST.get('Chief')
-    ap_designation = request.POST.get('APDesignation')
-    approval = request.POST.get('Approval')
-    c_designation = request.POST.get('CDesignation')
+    division = strip_tags(request.POST.get('Division'))
+    acrym = strip_tags(request.POST.get('Acronym'))
+    divchief = strip_tags(request.POST.get('Chief'))
+    ap_designation = strip_tags(request.POST.get('APDesignation'))
+    approval = strip_tags(request.POST.get('Approval'))
+    c_designation = strip_tags(request.POST.get('CDesignation'))
     user_id = request.session.get('user_id', 0)
     try:
         division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation,created_by = user_id)
@@ -125,12 +126,12 @@ def division_add(request):
 @csrf_exempt
 def division_update(request):
     id = request.POST.get('ItemID')
-    division = request.POST.get('Division')
-    acrym = request.POST.get('Acronym')
-    divchief = request.POST.get('Chief')
-    c_designate = request.POST.get('CDesignation')
-    approval = request.POST.get('Approval')
-    ap_designation = request.POST.get('APDesignation')
+    division = strip_tags(request.POST.get('Division'))
+    acrym = strip_tags(request.POST.get('Acronym'))
+    divchief = strip_tags(request.POST.get('Chief'))
+    c_designate = strip_tags(request.POST.get('CDesignation'))
+    approval = strip_tags(request.POST.get('Approval'))
+    ap_designation = strip_tags(request.POST.get('APDesignation'))
     user_id = request.session.get('user_id', 0)
     Division.objects.filter(id=id).update(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id,updated_at =date.datetime.now())
     return JsonResponse({'data': 'success'})
@@ -186,11 +187,9 @@ def division_load(request):
     }
     return JsonResponse(response)
 
-
-
 @csrf_exempt
 def charges_add(request):
-    charges = request.POST.get('Charges')
+    charges = strip_tags(request.POST.get('Charges'))
     user_id = request.session.get('user_id', 0)
     charges_add = Charges(name=charges, created_by = user_id)
     try:
@@ -202,9 +201,7 @@ def charges_add(request):
 @csrf_exempt
 def charges_update(request):
     id = request.POST.get('ItemID')
-    charges = request.POST.get('Charges')
-
-
+    charges = strip_tags(request.POST.get('Charges'))
     if Charges.objects.filter(name=charges).exclude(id=id):
         return JsonResponse({'data': 'error', 'message': 'Duplicate Charges'})
     else:
@@ -260,7 +257,7 @@ def charges_load(request):
 
 @csrf_exempt
 def remarks_add(request):
-    remarks = request.POST.get('Remarks')
+    remarks = strip_tags(request.POST.get('Remarks'))
     user_id = request.session.get('user_id', 0)
     try:
         if RemarksLib.objects.filter(name=remarks):
@@ -275,13 +272,11 @@ def remarks_add(request):
 @csrf_exempt
 def remarks_update(request):
     id = request.POST.get('ItemID')
-    charges = request.POST.get('Remarks')
-
-
-    if RemarksLib.objects.filter(name=charges).exclude(id=id):
+    remarks = strip_tags(request.POST.get('Remarks'))
+    if RemarksLib.objects.filter(name=remarks).exclude(id=id):
         return JsonResponse({'data': 'error', 'message': 'Duplicate Remarks'})
     else:
-        RemarksLib.objects.filter(id=id).update(name=charges)
+        RemarksLib.objects.filter(id=id).update(name=remarks)
         return JsonResponse({'data': 'success'})
     
 @csrf_exempt  
@@ -477,76 +472,6 @@ def means_of_transportation_load(request):
     }
     return JsonResponse(response)
 
-@csrf_exempt
-def fare_matrix_add(request):
-    def parse_decimal(value):
-        try:
-            return Decimal(value) if value else None
-        except InvalidOperation:
-            return None
-
-    ProvinceName = request.POST.get('ProvinceName_')
-    ProvinceName2 = request.POST.get('ProvinceName2')
-    ProvinceAcronym = request.POST.get('ProvinceAcronym2')
-    MunicipalityName = request.POST.get('MunicipalityName')
-    MunicipalityName2 = request.POST.get('MunicipalityName2')
-    BarangayName = request.POST.get('BarangayName')
-    BarangayName2 = request.POST.get('BarangayName2')
-    PurokName = request.POST.get('PurokName')
-    MeansOfTransportation = request.POST.get('MeansOfTransportation')
-    RateRegularFare = parse_decimal(request.POST.get('RateRegularFare'))
-    HireRateOneWay = parse_decimal(request.POST.get('HireRateOneWay'))
-    HireRateWholeDay = parse_decimal(request.POST.get('HireRateWholeDay'))
-    EstimatedDurationOfTravel = request.POST.get('EstimatedDurationOfTravel')
-    Justification = request.POST.get('Justification')
-    DtRemarks = request.POST.get('DtRemarks')
-    ProvinceCode = request.POST.get('ProvinceCode')
-    MunicipalityCode = request.POST.get('MunicipalityCode')
-    BarangayCode = request.POST.get('BarangayCode')
-
-    user_id = request.session.get('user_id', 0)
-
-    print(ProvinceCode)
-    print(MunicipalityCode)
-    print(BarangayCode)
-    print(PurokName)
-    print(MeansOfTransportation)
-    print("eehh")
-    try:
-        if FareMatrix.objects.filter(
-            prov_code=ProvinceCode,
-            city_code=MunicipalityCode,
-            brgy_code=BarangayCode,
-            purok=PurokName,
-            means_of_transportation_id = MeansOfTransportation
-        ).exists():
-            return JsonResponse({'data': 'error', 'message': 'Fare Matrix Already Exist'})
-        else:
-            fare_matrix = FareMatrix(
-                prov_code=ProvinceCode,
-                city_code=MunicipalityCode,
-                brgy_code=BarangayCode,
-                province=ProvinceName2,
-                province_acronym=ProvinceAcronym,
-                municipality=MunicipalityName2,
-                barangay=BarangayName2,
-                purok=PurokName,
-                means_of_transportation_id=MeansOfTransportation,
-                rate_regular_fare=RateRegularFare,
-                hire_rate_one_way=HireRateOneWay,
-                hire_rate_whole_day=HireRateWholeDay,
-                estimated_duration_of_travel=EstimatedDurationOfTravel,
-                justification=Justification,
-                remarks=DtRemarks,
-                created_by=user_id,
-                created_at=date.datetime.now(),
-            )
-            fare_matrix.save()
-            return JsonResponse({'data': 'success'})
-    except IntegrityError as e:
-        return JsonResponse({'data': 'error'})
-    
-    
 # @csrf_exempt
 # def fare_matrix_add(request):
 #     def parse_decimal(value):
@@ -555,25 +480,24 @@ def fare_matrix_add(request):
 #         except InvalidOperation:
 #             return None
 
-#     ProvinceName = request.POST.get('ProvinceName')
-#     ProvinceName2 = request.POST.get('ProvinceName2')
-#     ProvinceAcronym = request.POST.get('ProvinceAcronym2')
-#     MunicipalityName = request.POST.get('MunicipalityName')
-#     MunicipalityName2 = request.POST.get('MunicipalityName2')
-#     BarangayName = request.POST.get('BarangayName')
-#     BarangayName2 = request.POST.get('BarangayName2')
-#     PurokName = request.POST.get('PurokName')
-#     MeansOfTransportation = request.POST.get('MeansOfTransportation')
-#     RateRegularFare = parse_decimal(request.POST.get('RateRegularFare'))
-#     HireRateOneWay = parse_decimal(request.POST.get('HireRateOneWay'))
-#     HireRateWholeDay = parse_decimal(request.POST.get('HireRateWholeDay'))
-#     EstimatedDurationOfTravel = request.POST.get('EstimatedDurationOfTravel')
-#     Justification = request.POST.get('Justification')
-#     DtRemarks = request.POST.get('DtRemarks')
-#     ProvinceCode = request.POST.get('ProvinceCode')
-#     MunicipalityCode = request.POST.get('MunicipalityCode')
-#     BarangayCode = request.POST.get('BarangayCode')
-
+#     ProvinceName = strip_tags(request.POST.get('ProvinceName_'))
+#     ProvinceName2 = strip_tags(request.POST.get('ProvinceName2'))
+#     ProvinceAcronym = strip_tags(request.POST.get('ProvinceAcronym2'))
+#     MunicipalityName = strip_tags(request.POST.get('MunicipalityName'))
+#     MunicipalityName2 = strip_tags(request.POST.get('MunicipalityName2'))
+#     BarangayName = strip_tags(request.POST.get('BarangayName'))
+#     BarangayName2 = strip_tags(request.POST.get('BarangayName2'))
+#     PurokName = strip_tags(request.POST.get('PurokName'))
+#     MeansOfTransportation = strip_tags(request.POST.get('MeansOfTransportation'))
+#     RateRegularFare = strip_tags(parse_decimal(request.POST.get('RateRegularFare')))
+#     HireRateOneWay = strip_tags(parse_decimal(request.POST.get('HireRateOneWay')))
+#     HireRateWholeDay = strip_tags(parse_decimal(request.POST.get('HireRateWholeDay')))
+#     EstimatedDurationOfTravel = strip_tags(request.POST.get('EstimatedDurationOfTravel'))
+#     Justification = strip_tags(request.POST.get('Justification'))
+#     DtRemarks = strip_tags(request.POST.get('DtRemarks'))
+#     ProvinceCode = strip_tags(request.POST.get('ProvinceCode'))
+#     MunicipalityCode = strip_tags(request.POST.get('MunicipalityCode'))
+#     BarangayCode = strip_tags(request.POST.get('BarangayCode'))
 #     user_id = request.session.get('user_id', 0)
 #     try:
 #         if FareMatrix.objects.filter(
@@ -608,7 +532,71 @@ def fare_matrix_add(request):
 #             return JsonResponse({'data': 'success'})
 #     except IntegrityError as e:
 #         return JsonResponse({'data': 'error'})
-    
+
+@csrf_exempt
+def fare_matrix_add(request):
+    def parse_decimal(value):
+        try:
+            return Decimal(value) if value else Decimal('0.00')  # Ensure valid decimal
+        except InvalidOperation:
+            return Decimal('0.00')  # Fallback to 0.00 if invalid
+
+    # Get and sanitize inputs
+    ProvinceName = strip_tags(request.POST.get('ProvinceName_', ''))
+    ProvinceName2 = strip_tags(request.POST.get('ProvinceName2', ''))
+    ProvinceAcronym = strip_tags(request.POST.get('ProvinceAcronym2', ''))
+    MunicipalityName = strip_tags(request.POST.get('MunicipalityName', ''))
+    MunicipalityName2 = strip_tags(request.POST.get('MunicipalityName2', ''))
+    BarangayName = strip_tags(request.POST.get('BarangayName', ''))
+    BarangayName2 = strip_tags(request.POST.get('BarangayName2', ''))
+    PurokName = strip_tags(request.POST.get('PurokName', ''))
+    MeansOfTransportation = strip_tags(request.POST.get('MeansOfTransportation', ''))
+    RateRegularFare = parse_decimal(request.POST.get('RateRegularFare'))
+    HireRateOneWay = parse_decimal(request.POST.get('HireRateOneWay'))
+    HireRateWholeDay = parse_decimal(request.POST.get('HireRateWholeDay'))
+    EstimatedDurationOfTravel = strip_tags(request.POST.get('EstimatedDurationOfTravel', ''))
+    Justification = strip_tags(request.POST.get('Justification', ''))
+    DtRemarks = strip_tags(request.POST.get('DtRemarks', ''))
+    ProvinceCode = strip_tags(request.POST.get('ProvinceCode', ''))
+    MunicipalityCode = strip_tags(request.POST.get('MunicipalityCode', ''))
+    BarangayCode = strip_tags(request.POST.get('BarangayCode', ''))
+    user_id = request.session.get('user_id', 0)
+
+    try:
+        if FareMatrix.objects.filter(
+            prov_code=ProvinceCode,
+            city_code=MunicipalityCode,
+            brgy_code=BarangayCode,
+            purok=PurokName,
+            means_of_transportation_id=MeansOfTransportation
+        ).exists():
+            return JsonResponse({'data': 'error', 'message': 'Fare Matrix Already Exist'})
+
+        fare_matrix = FareMatrix(
+            prov_code=ProvinceCode,
+            city_code=MunicipalityCode,
+            brgy_code=BarangayCode,
+            province=ProvinceName2,
+            province_acronym=ProvinceAcronym,
+            municipality=MunicipalityName2,
+            barangay=BarangayName2,
+            purok=PurokName,
+            means_of_transportation_id=MeansOfTransportation,
+            rate_regular_fare=RateRegularFare,
+            hire_rate_one_way=HireRateOneWay,
+            hire_rate_whole_day=HireRateWholeDay,
+            estimated_duration_of_travel=EstimatedDurationOfTravel,
+            justification=Justification,
+            remarks=DtRemarks,
+            created_by=user_id,
+            created_at=date.datetime.now(),
+        )
+        fare_matrix.save()
+        return JsonResponse({'data': 'success'})
+
+    except IntegrityError:
+        return JsonResponse({'data': 'error', 'message': 'Database Integrity Error'})
+
 @csrf_exempt
 def fare_matrix_update(request):
     def parse_decimal(value):
@@ -618,24 +606,24 @@ def fare_matrix_update(request):
             return None
 
     id = request.POST.get('ItemID')
-    ProvinceName = request.POST.get('ProvinceName')
-    ProvinceName2 = request.POST.get('ProvinceName2')
-    ProvinceAcronym = request.POST.get('ProvinceAcronym2')
-    MunicipalityName = request.POST.get('MunicipalityName')
-    MunicipalityName2 = request.POST.get('MunicipalityName2')
-    BarangayName = request.POST.get('BarangayName')
-    BarangayName2 = request.POST.get('BarangayName2')
-    PurokName = request.POST.get('PurokName')
-    MeansOfTransportation = request.POST.get('MeansOfTransportation')
-    RateRegularFare = parse_decimal(request.POST.get('RateRegularFare'))
-    HireRateOneWay = parse_decimal(request.POST.get('HireRateOneWay'))
-    HireRateWholeDay = parse_decimal(request.POST.get('HireRateWholeDay'))
-    EstimatedDurationOfTravel = request.POST.get('EstimatedDurationOfTravel')
-    Justification = request.POST.get('Justification')
-    DtRemarks = request.POST.get('DtRemarks')
-    ProvinceCode = request.POST.get('ProvinceCode')
-    MunicipalityCode = request.POST.get('MunicipalityCode')
-    BarangayCode = request.POST.get('BarangayCode')
+    ProvinceName = strip_tags(request.POST.get('ProvinceName'))
+    ProvinceName2 = strip_tags(request.POST.get('ProvinceName2'))
+    ProvinceAcronym = strip_tags(request.POST.get('ProvinceAcronym2'))
+    MunicipalityName = strip_tags(request.POST.get('MunicipalityName'))
+    MunicipalityName2 = strip_tags(request.POST.get('MunicipalityName2'))
+    BarangayName = strip_tags(request.POST.get('BarangayName'))
+    BarangayName2 = strip_tags(request.POST.get('BarangayName2'))
+    PurokName = strip_tags(request.POST.get('PurokName'))
+    MeansOfTransportation = strip_tags(request.POST.get('MeansOfTransportation'))
+    RateRegularFare = strip_tags(parse_decimal(request.POST.get('RateRegularFare')))
+    HireRateOneWay = strip_tags(parse_decimal(request.POST.get('HireRateOneWay')))
+    HireRateWholeDay = strip_tags(parse_decimal(request.POST.get('HireRateWholeDay')))
+    EstimatedDurationOfTravel = strip_tags(request.POST.get('EstimatedDurationOfTravel'))
+    Justification = strip_tags(request.POST.get('Justification'))
+    DtRemarks = strip_tags(request.POST.get('DtRemarks'))
+    ProvinceCode = strip_tags(request.POST.get('ProvinceCode'))
+    MunicipalityCode = strip_tags(request.POST.get('MunicipalityCode'))
+    BarangayCode = strip_tags(request.POST.get('BarangayCode'))
     user_id = request.session.get('user_id', 0)
     try:
         if FareMatrix.objects.filter(
@@ -672,7 +660,7 @@ def fare_matrix_update(request):
 
 @csrf_exempt
 def means_of_transportation_add(request):
-    MotName = request.POST.get('MotName')
+    MotName = strip_tags(request.POST.get('MotName'))
 
     user_id = request.session.get('user_id', 0)
     try:
@@ -694,7 +682,7 @@ def means_of_transportation_add(request):
 @csrf_exempt
 def means_of_transportation_update(request):
     id = request.POST.get('ItemID')
-    MotName = request.POST.get('MotName')
+    MotName = strip_tags(request.POST.get('MotName'))
     user_id = request.session.get('user_id', 0)
 
     try:
@@ -733,8 +721,6 @@ def get_lib_mun(request):
 def get_lib_brgy(request):
     if request.method == "GET":
         mun_id = request.GET.get('mun_id')
-
-        print(mun_id)
         if not mun_id:
             return JsonResponse({'message': 'mun_id is required'}, status=400)
 

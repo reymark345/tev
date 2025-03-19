@@ -32,6 +32,8 @@ from decimal import Decimal
 from suds.client import Client
 from django.db import transaction
 from django.conf import settings
+import platform
+import re
 
 
 def generate_code():
@@ -536,6 +538,8 @@ def checking_load(request):
             params.append(FCreatedBy)
 
         if FReviewedBy:
+            print("reviewwww")
+            print(FStatus)
             query += " AND t1.reviewed_by = %s"
             params.append(FReviewedBy)
 
@@ -545,9 +549,8 @@ def checking_load(request):
             params.extend(EmployeeList)
 
         query += " AND date_travel LIKE %s"
-        params.append(year)
+        params.append(f"%{year}%")
         query += " GROUP BY t1.id ORDER BY t1.incoming_out DESC;"
-
 
 
     elif _search:
@@ -1081,7 +1084,7 @@ def item_returned(request):
     id = request.POST.get('ItemID')
 
     data = TevIncoming.objects.filter(id=id).first()
-    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,incoming_in =date_time.datetime.now(),user_id=data.user_id, division = data.division, section = data.section)
+    tev_add = TevIncoming(code=data.code,first_name=data.first_name,middle_name=data.middle_name,last_name = data.last_name,id_no = data.id_no, account_no = data.account_no, date_travel = travel_date_spaces,original_amount=data.original_amount,final_amount = data.final_amount,incoming_in =date_time.datetime.now(),user_id=data.user_id, division = data.division, section = data.section, contact_no = data.contact_no)
     tev_add.save()
 
     last_added_tevincoming = TevIncoming.objects.latest('id')
@@ -1312,33 +1315,66 @@ def out_checking_tev(request):
 
     out_list = request.POST.getlist('out_list[]')  
     user_id = request.session.get('user_id', 0) 
-    
-    for item_id in out_list:
-        tev_update = TevIncoming.objects.filter(id=item_id).first()  
+    message = ""
 
-        if tev_update:
-            if tev_update.status_id == 3:
-                tev_update.slashed_out = date_time.datetime.now()
-                tev_update.review_date_forwarded = date_time.datetime.now()
-                tev_update.review_forwarded_by = user_id
+    for item_id in out_list:
+        trips_data = TevIncoming.objects.filter(id=item_id).first()  
+
+        if trips_data:
+
+            trips_data.slashed_out = date_time.datetime.now()
+
+            remarks_data = Remarks_r.objects.filter(incoming_id=trips_data.id).values('remarks_lib_id', 'date')
+            remarks_list = [
+                f"{RemarksLib.objects.get(id=remark['remarks_lib_id']).name} - {remark['date'].strftime('%B %d, %Y')}"
+                for remark in remarks_data
+            ]
+            remarks_str = '; '.join(remarks_list)
+            w_remarks_data = remarks_str
+            contact_no = trips_data.contact_no
+            formatted_dates_list = convert_date_string(trips_data.date_travel).split(', ')
+        
+            day_format = "%-d" if platform.system() != "Windows" else "%#d"
+            formatted_dates_list = [
+                datetime.strptime(date, "%B %d %Y").strftime(f"%b. {day_format} %Y")
+                for date in formatted_dates_list
+            ]
+
+            if len(formatted_dates_list) > 1:
+                formatted_dates = f"{formatted_dates_list[0]} to {formatted_dates_list[-1]}"
             else:
-                tev_update.status_id = 4
-            tev_update.review_date_forwarded = date_time.datetime.now()
-            tev_update.review_forwarded_by = user_id
-            tev_update.save()
-            # fullname = tev_update.first_name
-            # contact_no = "09518149919"
-            # date_travel = tev_update.date_travel
-            # formatted_dates = convert_date_string(date_travel)
-            # message = 'Good day,{}! Your Travel in {} is being Forwarded to Budget Section and Ready to Obligate - DSWD CARAGA TRIS SYSTEM'.format(fullname,formatted_dates)
-            # send_notification(message, contact_no)
-            # contact_numbers = [{first_name: ['09518149919']}]
-            # for contact in contact_numbers:
-            #     for k, vs in contact.items():
-            #         for v in vs:
-            #             send_notification('Good day,{}! Your Travel From January 25 2024 is being Forwarded to Budget Section and Ready to Obligate - DSWD CARAGA TRIS SYSTEM'.format(k, formatted_dates), v)
-        else:
-            pass 
+                formatted_dates = formatted_dates_list[0]
+
+            
+
+            if trips_data.status_id == 3:  # returned
+                if trips_data.remarks:
+                    # Ensure correct formatting of remarks
+                    formatted_remarks = re.sub(r'(\d{1,2}), (\d{4})', r'\1 \2', trips_data.remarks)
+                    formatted_incoming_in = trips_data.incoming_in.strftime("%b. %d %Y")
+                    message = "Good day, {}!\n\nYour TE claim for the period of {} was found to be a duplicate of another claim submitted on {} and is subject for a memo\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_remarks, formatted_incoming_in)
+                    send_notification(message, contact_no)
+
+                elif w_remarks_data and "FORFEITED" not in w_remarks_data:
+                    message = "Good day, {}!\n\nYour TE claim for the period of {}, will be returned to your respective division.Please retrieve it for compliance.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates, w_remarks_data)
+                    send_notification(message, contact_no)
+
+                elif "FORFEITED" in w_remarks_data:
+                    message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
+                    send_notification(message, contact_no)
+    
+            elif trips_data.status_id == 7 and "FORFEITED" in w_remarks_data: #approved but has forfeited
+
+                message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
+                send_notification(message, contact_no)
+                trips_data.status_id = 4
+            else:
+                trips_data.status_id = 4  # for payroll
+                
+            trips_data.review_date_forwarded = date_time.datetime.now()
+            trips_data.review_forwarded_by = user_id
+            trips_data.save()
+
 
     return JsonResponse({'data': 'success'})
 

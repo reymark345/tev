@@ -1,16 +1,3 @@
-<div id="loading-screen">
-  <center>
-      <div class="col">
-          <!-- Fold -->
-          <div class="sk-fold sk-primary">
-            <div class="sk-fold-cube"></div>
-            <div class="sk-fold-cube"></div>
-            <div class="sk-fold-cube"></div>
-            <div class="sk-fold-cube"></div>
-          </div>
-        </div>  
-  </center>
-</div>
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
 <link rel="stylesheet" href="{% static 'custom/custom.css' %}" />
 <!-- Content wrapper -->
@@ -57,55 +44,55 @@
           <p class="text-muted">Update data to complete payroll detail</p>
           </div>
           <form id="assign-form" class="row g-3" onsubmit="return false">
-          <div class="col-12">
-              <label class="form-label w-100" for="modalAddCard">DV Number</label>
-              <div class="input-group input-group-merge">
-              <input
-                  id="m-dvnumber"
-                  name="MDvNumber"
-                  class="form-control"
-                  type="text"
-                  placeholder="23-07-0000"
-                 
-              />
-              <span class="input-group-text cursor-pointer p-1" id="modalAddCard2"
-                  ><span class="card-type"></span
-              ></span>
-              </div>
-          </div>
-  
-          <div class="col-sm-12">
-              <label class="form-label" for="cluster-name">Cluster</label>
-              <select id="m-cluster" name="MCluster" class="form-select cluster" data-allow-clear="true">
-                  <option></option>
-                  {% for row in cluster %}
-                  <option value="{{ row.id }}">{{ row.name }}</option>
-                  {% endfor %}
-              </select>
-          </div>
-  
-          <div class="col-sm-12">
-              <label class="form-label" for="division-name">Division</label>
-              <select id="m-division" name="MDivision" class="form-select division" data-allow-clear="true">
-                  <option></option>
-                  {% for row in division %}
-                  <option value="{{ row.id }}">{{ row.name }} : {{ row.chief }}</option>
-                  {% endfor %}
-              </select>
-          </div>
-         
-  
-          <div class="col-12 text-center">
-              <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
-              <button
-              type="reset"
-              class="btn btn-label-secondary btn-reset"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-              >
-              Cancel
-              </button>
-          </div>
+            <div class="col-12">
+                <label class="form-label w-100" for="modalAddCard">DV Number<span style="color: red;font-weight: bold;"> *</span></label>
+                <div class="input-group input-group-merge">
+                <input
+                    id="m-dvnumber"
+                    name="MDvNumber"
+                    class="form-control"
+                    type="text"
+                    placeholder="23-07-0000"
+                    
+                />
+                <span class="input-group-text cursor-pointer p-1" id="modalAddCard2"
+                    ><span class="card-type"></span
+                ></span>
+                </div>
+            </div>
+    
+            <div class="col-sm-12">
+                <label class="form-label" for="cluster-name">Cluster<span style="color: red;font-weight: bold;"> *</span></label>
+                <select id="m-cluster" name="MCluster" class="form-select cluster" data-allow-clear="true">
+                    <option></option>
+                    {% for row in cluster %}
+                    <option value="{{ row.id }}">{{ row.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+    
+            <div class="col-sm-12">
+                <label class="form-label" for="division-name">Division<span style="color: red;font-weight: bold;"> *</span></label>
+                <select id="m-division" name="MDivision" class="form-select division" data-allow-clear="true">
+                    <option></option>
+                    {% for row in division %}
+                    <option value="{{ row.id }}">{{ row.name }} : {{ row.chief }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+    
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
+                <button
+                type="reset"
+                class="btn btn-label-secondary btn-reset"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                >
+                Cancel
+                </button>
+            </div>
           </form>
       </div>
       </div>
@@ -827,63 +814,65 @@
                 },
         }).on('core.form.valid', function () {
           $('#assign-dv').modal('hide');
-          Swal.fire({
-              title: '<strong>DV number <u>'+MDvNumber.val()+'</u> <br> Cluster : 0'+MCluster.val()+' </strong>',
-              text: "You won't be able to revert this!",
-              icon: 'warning',
-              showCancelButton: true,
-              confirmButtonText: 'Yes, save it!',
-              customClass: {
-                  confirmButton: 'btn btn-primary me-3',
-                  cancelButton: 'btn btn-label-secondary',
-              },
-              buttonsStyling: false,
-          }).then(function (result) {
-              if (result.value) {
-                let dv_number = MDvNumber.val();
-                let cluster = MCluster.val();
-                let division = MDivision.val();
+            var dvNumberText = $("<div>").html(MDvNumber.val()).text();
 
-                  $.ajax({
-                      type: 'POST',
-                      url: "{% url 'add-dv' %}",
-                      data: {
-                          DvNumber: dv_number,
-                          Cluster: cluster,
-                          Division: division,
-                        }
-                  }).done(function (data) {
-                      if (data.data == 'success') {
+            Swal.fire({
+                title: '<strong>DV number <u>'+dvNumberText+'</u> <br> Cluster : 0'+MCluster.val()+' </strong>',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, save it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+            }).then(function (result) {
+                if (result.value) {
+                    let dv_number = MDvNumber.val();
+                    let cluster = MCluster.val();
+                    let division = MDivision.val();
 
-                          let code = data.g_code;
-                          if (code){
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'add-dv' %}",
+                        data: {
+                            DvNumber: dv_number,
+                            Cluster: cluster,
+                            Division: division,
+                            }
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+
+                            let code = data.g_code;
+                            if (code){
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Update Successfully!',
+                                    html:
+                                    'Successfully <b>Save!</b>',
+                                    customClass: {
+                                        confirmButton: 'btn btn-success',
+                                    },
+                                })
+                            }
+                            MCluster.val("").trigger('change');
+                            MDvNumber.val("");
+                            MDivision.val("").trigger('change');
+                            dataTable.ajax.reload();
+                        } else {
                             Swal.fire({
-                                  icon: 'success',
-                                  title: 'Update Successfully!',
-                                  html:
-                                  'Successfully <b>Save!</b>',
-                                  customClass: {
-                                      confirmButton: 'btn btn-success',
-                                  },
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
                             })
-                          }
-                          MCluster.val("").trigger('change');
-                          MDvNumber.val("");
-                          MDivision.val("").trigger('change');
-                          dataTable.ajax.reload();
-                      } else {
-                          Swal.fire({
-                              icon: 'error',
-                              title: 'Error saving!',
-                              text: data.message,
-                              customClass: {
-                                  confirmButton: 'btn btn-success',
-                              },
-                          })
-                      }
-                  })
-              }
-          })
+                        }
+                    })
+                }
+            })
       });
 
 

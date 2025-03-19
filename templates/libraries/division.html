@@ -40,7 +40,7 @@
         <form class="add-new-record pt-0 row g-2" id="item-form">
             <input type="hidden" id="item-id" name="ItemID" />
             <div class="col-sm-12">
-                <label class="form-label">Office </label>
+                <label class="form-label">Office <span style="color: red;font-weight: bold;"> *</span></label>
                 
                 <input
                   type="text"
@@ -53,7 +53,7 @@
             </div>
 
             <div class="col-sm-12">
-                <label class="form-label">Acronym</label>
+                <label class="form-label">Acronym<span style="color: red;font-weight: bold;"> *</span></label>
                 
                 <input
                   type="text"
@@ -66,7 +66,7 @@
             </div>
 
             <div class="col-sm-12">
-                <label class="form-label">Name </label>
+                <label class="form-label">Name <span style="color: red;font-weight: bold;"> *</span></label>
                 
                 <input
                   type="text"
@@ -78,7 +78,7 @@
                 />
             </div>
             <div class="col-sm-12">
-                <label class="form-label">Designation </label>
+                <label class="form-label">Designation <span style="color: red;font-weight: bold;"> *</span></label>
                 
                 <input
                   type="text"
@@ -90,7 +90,7 @@
                 />
             </div>
             <div class="col-sm-12">
-                <label class="form-label">Approval </label>
+                <label class="form-label">Approval <span style="color: red;font-weight: bold;"> *</span></label>
                 
                 <input
                   type="text"
@@ -102,7 +102,7 @@
                 />
             </div>
             <div class="col-sm-12">
-                <label class="form-label">Approval Designation </label>
+                <label class="form-label">Approval Designation <span style="color: red;font-weight: bold;"> *</span></label>
                 
                 <input
                   type="text"
@@ -227,7 +227,15 @@
 
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">OFFICES</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0">OFFICES</h5>');
+        dataTable.on('processing.dt', function(e, settings, processing) {
+            if (!processing) {
+                $('#loading-screen').hide();
+            }
+        });
+        dataTable.on('xhr.dt', function() {
+            $('#loading-screen').hide();
+        });
 
         const newRecord = document.querySelector('.create-new')
 
@@ -405,7 +413,7 @@
                     toastr.danger('Data not saved', 'Danger', toast_options);
                 }
             });
-            }
+        }
     })
 </script>
 {% endblock footer_scripts %}

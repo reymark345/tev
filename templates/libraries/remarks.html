@@ -36,7 +36,7 @@
         <form class="add-new-record pt-0 row g-2" id="item-form">
             <input type="hidden" id="item-id" name="ItemID" />
             <div class="col-sm-12">
-                <label class="form-label">Remarks </label>
+                <label class="form-label">Remarks Name <span style="color: red;font-weight: bold;"> *</span></label>
                 
                 <input
                   type="text"
@@ -259,9 +259,17 @@
                 });
             },
         })
-        $('div.head-label').html('<h5 class="card-title mb-0">Remarks</h5>')
+        $('div.head-label').html('<h5 class="card-title mb-0">Remarks</h5>');
+        dataTable.on('processing.dt', function(e, settings, processing) {
+            if (!processing) {
+                $('#loading-screen').hide();
+            }
+        });
+        dataTable.on('xhr.dt', function() {
+            $('#loading-screen').hide();
+        });
 
-        const newRecord = document.querySelector('.create-new')
+        const newRecord = document.querySelector('.create-new');
 
         setTimeout(() => {
             if (newRecord) {
