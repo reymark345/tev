@@ -42,7 +42,6 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -102,7 +101,7 @@ CHANNEL_LAYERS = {
 }
 
 DATABASES = {
-    #for server to server
+    # for server to server
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tris',
