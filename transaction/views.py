@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges, RolePermissions, RemarksLib, Remarks_r)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges, RolePermissions, RemarksLib, Remarks_r, LibProjectSrc)
 import json 
 from django.core import serializers
 from datetime import datetime, timedelta
@@ -2248,19 +2248,91 @@ def transmittal_details(request):
 @csrf_exempt
 def add_dv(request):
     if request.method == 'POST':
-        dv_number = strip_tags(request.POST.get('DvNumber'))
-        if TevOutgoing.objects.filter(dv_no=dv_number).exists():
-            return JsonResponse({'status': 'error', 'message': 'DV Number Already exists'})
         user_id = request.session.get('user_id', 0)
         cluster_id = request.POST.get('Cluster')
+        project_source = request.POST.get('ProjectSource')
+        amt_certified = request.POST.get('AmtCertified')
+        purpose = request.POST.get('Purpose')
+        year = request.POST.get('DpYear')
         div_id = request.POST.get('Division')
+        dv_result = ''
+
+        user = AuthUser.objects.filter(id=user_id).first()
+        full_name = f"{user.first_name} {user.last_name}" if user else "NULL"
         
-        outgoing = TevOutgoing(dv_no=dv_number, cluster=cluster_id, box_b_in=date_time.datetime.now(), user_id=user_id, division_id=div_id)
-        outgoing.save()
-        
-        return JsonResponse({'data': 'success'})
+
+        if year == 2023:
+            finance_database_alias = 'finance' 
+        elif year ==2024:
+            finance_database_alias = 'finance_2024' 
+        else:
+            finance_database_alias = 'finance_2025' 
+
+        finance_query = """
+            SELECT _value
+            FROM _config
+            WHERE _handler = "GENERATE_DV"
+            LIMIT 1
+        """
+
+        with connections[finance_database_alias].cursor() as cursor:
+            cursor.execute(finance_query)
+            dv_result = cursor.fetchone()
+        _value = dv_result[0] if dv_result else None
+
+        if _value:
+            prefix, number = _value.rsplit('-', 1)
+            yy, mm = prefix.split('-')
+            current_month = f"{datetime.now().month:02d}"
+            if mm != current_month:
+                mm = current_month
+
+            new_number = str(int(number) + 1).zfill(4)
+
+            generated_dv = f"{yy}-{mm}-{new_number}"
+
+            print("Updated Value:", generated_dv)
+            print("daaaaaaaaa")
+
+            
+            insert_query = """
+                INSERT INTO transactions (dv_no, payee, modepayment, amt_certified, accountable)  
+                VALUES (%s, %s, %s, %s, %s);
+            """
+
+            update_query = """
+                UPDATE _config
+                SET _value = %s
+                WHERE _handler = "GENERATE_DV"
+            """
+
+            outgoing = TevOutgoing(dv_no=generated_dv, cluster=cluster_id, box_b_in=date_time.datetime.now(), user_id=user_id, division_id=div_id)
+            outgoing.save()
+
+            with connections[finance_database_alias].cursor() as cursor:
+                cursor.execute(insert_query, (generated_dv,"LBP", purpose, amt_certified, full_name))
+                cursor.execute(update_query, [generated_dv])
+            return JsonResponse({'data': 'success', 'dv_no': generated_dv})
+        return JsonResponse({'data': 'error', 'message': 'No value found'})
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+        return JsonResponse({'data': 'error', 'message': 'Invalid request method'})
+
+# @csrf_exempt
+# def add_dv(request):
+#     if request.method == 'POST':
+#         dv_number = strip_tags(request.POST.get('DvNumber'))
+#         if TevOutgoing.objects.filter(dv_no=dv_number).exists():
+#             return JsonResponse({'status': 'error', 'message': 'DV Number Already exists'})
+#         user_id = request.session.get('user_id', 0)
+#         cluster_id = request.POST.get('Cluster')
+#         div_id = request.POST.get('Division')
+        
+#         outgoing = TevOutgoing(dv_no=dv_number, cluster=cluster_id, box_b_in=date_time.datetime.now(), user_id=user_id, division_id=div_id)
+#         outgoing.save()
+        
+#         return JsonResponse({'data': 'success'})
+#     else:
+#         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 @csrf_exempt
 def add_emp_dv(request):
@@ -2941,6 +3013,36 @@ def addtevdetails(request):
     tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,remarks=remarks,status_id=status)
 
     return JsonResponse({'data': 'success'})
+
+
+# @csrf_exempt
+# def get_project_src(request):
+#     cluster_id = request.GET.get('cluster_id')
+#     print("testt11")
+#     print(cluster_id)
+#     project_src = list(LibProjectSrc.objects.filter(cluster_id=cluster_id).values())  # Convert QuerySet to list of dicts
+
+
+#     return JsonResponse({'data': project_src})
+
+@csrf_exempt
+def get_project_src(request):
+    data = []
+    cluster_id = request.GET.get('cluster_id')
+    project_src = LibProjectSrc.objects.filter(cluster_id=cluster_id)
+    for item in project_src:
+        item_entry = {
+            'id': item.id,
+            'name': item.name  
+        }
+        data.append(item_entry)
+
+    return JsonResponse({'data': data})
+
+    
+
+
+
 
 
 

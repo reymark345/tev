@@ -35,16 +35,16 @@
 
 <!-- Add New Credit Card Modal -->
 <div class="modal fade" id="assign-dv" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered1 modal-simple modal-add-new-cc">
-      <div class="modal-content p-3 p-md-5">
-      <div class="modal-body">
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          <div class="text-center mb-4">
+    <div class="modal-dialog modal-lg modal-simple modal-edit-user">
+        <div class="modal-content p-3 p-md-5">
+        <div class="modal-body">
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div class="text-center mb-4">
           <h3 class="mb-2">Assign Details</h3>
           <p class="text-muted">Update data to complete payroll detail</p>
           </div>
           <form id="assign-form" class="row g-3" onsubmit="return false">
-            <div class="col-12">
+            {% comment %} <div class="col-6">
                 <label class="form-label w-100" for="modalAddCard">DV Number<span style="color: red;font-weight: bold;"> *</span></label>
                 <div class="input-group input-group-merge">
                 <input
@@ -59,9 +59,9 @@
                     ><span class="card-type"></span
                 ></span>
                 </div>
-            </div>
+            </div> {% endcomment %}
     
-            <div class="col-sm-12">
+            <div class="col-sm-4">
                 <label class="form-label" for="cluster-name">Cluster<span style="color: red;font-weight: bold;"> *</span></label>
                 <select id="m-cluster" name="MCluster" class="form-select cluster" data-allow-clear="true">
                     <option></option>
@@ -70,8 +70,20 @@
                     {% endfor %}
                 </select>
             </div>
+
+            <div class="col-sm-8">
+                <label class="form-label" for="cluster-name">Project Source<span style="color: red;font-weight: bold;"> *</span></label>
+                <select id="project-source" name="PSource" class="form-select project-source" data-allow-clear="true">
+                    <option></option>
+                </select>
+            </div>
+
+            <div class="col-sm-4">
+                <label class="form-label" for="amount-certified">Amount Certified<span style="color: red;font-weight: bold;"> *</span></label>
+                <input id="p-amount-certified" name="PAmountCertified" class="form-control p-amount-certified"type="number"placeholder="0.00"/>
+            </div>
     
-            <div class="col-sm-12">
+            <div class="col-sm-8">
                 <label class="form-label" for="division-name">Division<span style="color: red;font-weight: bold;"> *</span></label>
                 <select id="m-division" name="MDivision" class="form-select division" data-allow-clear="true">
                     <option></option>
@@ -80,7 +92,22 @@
                     {% endfor %}
                 </select>
             </div>
-            
+
+            <div class="col-sm-12">
+                <label class="form-label" for="purpose">
+                    Purpose
+                </label>
+                <textarea
+                    id="p-purpose"
+                    class="form-control dt-justification-rate"
+                    name="PPurpose"
+                    placeholder="Enter the purpose"
+                    aria-describedby="e111"
+                    autocomplete="off"
+                    style="height: 100px;"></textarea>
+            </div>
+
+
     
             <div class="col-12 text-center">
                 <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
@@ -360,6 +387,9 @@
           FBoxOut= jQuery(document.querySelector('[name="FBoxOut"]')),
           FDivision = jQuery(document.querySelector('[name="FDivision"]')),
           FCluster = jQuery(document.querySelector('[name="FCluster"]')),
+          PSource = jQuery(document.querySelector('[name="PSource"]')),
+          PAmountCertified = jQuery(document.querySelector('[name="PAmountCertified"]')),
+          PPurpose = jQuery(document.querySelector('[name="PPurpose"]')),
           FName = jQuery(document.querySelector('[name="FName"]')),
           AmountIssued = jQuery(document.querySelector('[name="AmountIssued"]')),
           AmtAllocate = jQuery(document.querySelector('[name="AmtAllocate"]')),
@@ -563,26 +593,57 @@
                     className: 'create-new btn btn-primary',
                     action: function () {
 
-                      if (MCluster.length) {
-                        MCluster.wrap('<div class="position-relative"></div>')
-                        MCluster.select2({
-                              placeholder: 'Choose Cluster',
-                              dropdownParent: MCluster.parent(),
-                              allowClear: true,
-                          })
-                      }
-                      if (MDivision.length) {
-                        MDivision.wrap('<div class="position-relative"></div>')
-                        MDivision.select2({
-                              placeholder: 'Choose Division',
-                              dropdownParent: MDivision.parent(),
-                              allowClear: true,
-                          })
-                      }
-                      $('#assign-dv').modal('show');
-                      const year = currentDate.getFullYear().toString().slice(-2); 
-                      const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
-                      MDvNumber.val(`${year}-${month}-`);
+                        if (MCluster.length) {
+                            MCluster.wrap('<div class="position-relative"></div>')
+                            MCluster.select2({
+                                placeholder: 'Choose Cluster',
+                                dropdownParent: MCluster.parent(),
+                                allowClear: true,
+                            })
+                        }
+                        if (PSource.length) {
+                            PSource.wrap('<div class="position-relative"></div>')
+                            PSource.select2({
+                                placeholder: 'Choose Project Source',
+                                dropdownParent: PSource.parent(),
+                                allowClear: true,
+                            })
+                        }
+                        if (MDivision.length) {
+                            MDivision.wrap('<div class="position-relative"></div>')
+                            MDivision.select2({
+                                placeholder: 'Choose Division',
+                                dropdownParent: MDivision.parent(),
+                                allowClear: true,
+                            })
+                        }
+                        $('#assign-dv').modal('show');
+                        const year = currentDate.getFullYear().toString().slice(-2); 
+                        const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
+                        MDvNumber.val(`${year}-${month}-`);
+
+
+                        $("#m-cluster").on("change", function () {
+                            let selectedValueId = $(this).val();
+
+                            $.ajax({
+                                type: 'GET',
+                                url: "{% url 'get-project-src' %}",
+                                data: {
+                                    cluster_id: selectedValueId
+                                }
+                            }).done(function (data) {
+                                let select = $("#project-source");
+                                select.empty();
+                                select.append('<option value="">Select a project source</option>');
+
+                                $.each(data.data, function (index, item) {
+                                    select.append('<option value="' + item.id + '">' + item.name + '</option>');
+                                });
+                            }).fail(function () {
+                                console.error("Error fetching project sources.");
+                            });
+                        });
 
                     }
                 },
@@ -777,17 +838,24 @@
 
       const fvassign = FormValidation.formValidation(ItemFormAssignValidation, {
                 fields: {
-                    MDvNumber: {
+                    MCluster: {
+                        validators: {
+                            notEmpty: {
+                              message: 'Required!',
+                            },
+                        },
+                    },
+                    PSource: {
                         validators: {
                             notEmpty: {
                                 message: 'Required!',
                             },
                         },
                     },
-                    MCluster: {
+                    PAmountCertified: {
                         validators: {
                             notEmpty: {
-                              message: 'Required!',
+                                message: 'Required!',
                             },
                         },
                     },
@@ -817,7 +885,7 @@
             var dvNumberText = $("<div>").html(MDvNumber.val()).text();
 
             Swal.fire({
-                title: '<strong>DV number <u>'+dvNumberText+'</u> <br> Cluster : 0'+MCluster.val()+' </strong>',
+                title: '<strong>Are you sure?<br> Cluster : 0'+MCluster.val()+' </strong>',
                 text: "You won't be able to revert this!",
                 icon: 'warning',
                 showCancelButton: true,
@@ -829,36 +897,45 @@
                 buttonsStyling: false,
             }).then(function (result) {
                 if (result.value) {
-                    let dv_number = MDvNumber.val();
+                    // let dv_number = MDvNumber.val();
                     let cluster = MCluster.val();
+                    let p_source = PSource.val();
+                    let amount_certified = PAmountCertified.val();
+                    let purpose = PPurpose.val();
                     let division = MDivision.val();
 
+         
                     $.ajax({
                         type: 'POST',
                         url: "{% url 'add-dv' %}",
-                        data: {
-                            DvNumber: dv_number,
+                        data: 
+                        {
+                            DpYear : year_now,
                             Cluster: cluster,
+                            ProjectSource: p_source,
+                            AmtCertified: amount_certified,
+                            Purpose: purpose,
                             Division: division,
-                            }
+                        }
                     }).done(function (data) {
-                        if (data.data == 'success') {
-
-                            let code = data.g_code;
-                            if (code){
+                        if (data.data === 'success') {
+                            if (data.dv_no){
                                 Swal.fire({
                                     icon: 'success',
-                                    title: 'Update Successfully!',
+                                    title: 'Added Successfully!',
                                     html:
                                     'Successfully <b>Save!</b>',
                                     customClass: {
                                         confirmButton: 'btn btn-success',
                                     },
                                 })
+                                // MCluster.val("").trigger('change');
+                                // PAmountCertified.val("");
+                                // PPurpose.val("");
+                                // PSource.val("").trigger('change');
+                                // MDivision.val("").trigger('change');
                             }
-                            MCluster.val("").trigger('change');
-                            MDvNumber.val("");
-                            MDivision.val("").trigger('change');
+
                             dataTable.ajax.reload();
                         } else {
                             Swal.fire({
@@ -1106,18 +1183,18 @@
         });
 
         search_advance_filter.on('click', function () {
-                FAdvancedFilter.val("true");
-                $("#advance-filter").modal("hide");
-                dataTable.ajax.reload();
-                clear_advfilter();
-                toastr.success('Search successfully', 'Success', toast_options);
+            FAdvancedFilter.val("true");
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            clear_advfilter();
+            toastr.success('Search successfully', 'Success', toast_options);
         });
 
         reset_advance_filter.on('click', function () {
-                FAdvancedFilter.val('');
-                $("#advance-filter").modal("hide");
-                dataTable.ajax.reload();
-                toastr.success('Data has been reset', 'Success', toast_options);
+            FAdvancedFilter.val('');
+            $("#advance-filter").modal("hide");
+            dataTable.ajax.reload();
+            toastr.success('Data has been reset', 'Success', toast_options);
         });
 
         clear_advance_filter.on('click', function () {

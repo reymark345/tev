@@ -185,6 +185,7 @@ DATABASES = {
     },
 
 
+
     # 'finance': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'infimos_2023',

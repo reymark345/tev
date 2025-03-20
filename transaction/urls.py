@@ -64,5 +64,9 @@ urlpatterns = [
     path('add_emp_journal', views.add_emp_journal, name='add-emp-journal'), 
     path('update_purpose', views.update_purpose , name='update-purpose'),  
     path('transmittal_details', views.transmittal_details , name='transmittal-details'),  
+
+    path('get_project_src', views.get_project_src , name='get-project-src'),  
+
+    
     
 ]
