@@ -140,9 +140,9 @@ def save_payroll(request):
                 
         return JsonResponse({'data': 'success'})
     else:
-        return render(request, 'pages/unauthorized.html')    
-    
-    
+        return render(request, 'pages/unauthorized.html')  
+
+
 @login_required(login_url='login')
 def box_a(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
@@ -152,18 +152,54 @@ def box_a(request):
     role_names = [entry['role_name'] for entry in role_details]
 
     if any(role_name in allowed_roles for role_name in role_names):
+        # Connect to 'libraries' database
+        with connections['libraries'].cursor() as cursor:
+            cursor.execute("""
+                SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table FROM lib_supplier
+                UNION ALL
+                SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table FROM lib_others_payee;
+            """)
+            rows = cursor.fetchall()
+
+        # Convert the result into a list of dictionaries
+        payee = [{'payee_id': row[0], 'payee_name': row[1], 'source_table': row[2]} for row in rows]
+
         context = {
             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
             'permissions' : role_names,
             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
             'cluster' : Cluster.objects.filter().order_by('id'),
+            'payee' : payee,  # List of dictionaries [{'payee_id': 1, 'payee_name': 'ABC Corp'}, ...]
             'division' : Division.objects.filter().order_by('id'),
             'charges' : Charges.objects.filter().order_by('name')
-
         }
         return render(request, 'transaction/p_printing.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return render(request, 'pages/unauthorized.html') 
+    
+    
+# @login_required(login_url='login')
+# def box_a(request):
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+#     user_id = request.session.get('user_id', 0)
+#     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+#     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+#     role_names = [entry['role_name'] for entry in role_details]
+
+#     if any(role_name in allowed_roles for role_name in role_names):
+#         context = {
+#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+#             'permissions' : role_names,
+#             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
+#             'cluster' : Cluster.objects.filter().order_by('id'),
+#             'payee' : Division.objects.filter().order_by('id'),
+#             'division' : Division.objects.filter().order_by('id'),
+#             'charges' : Charges.objects.filter().order_by('name')
+
+#         }
+#         return render(request, 'transaction/p_printing.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
     
 @login_required(login_url='login')
 def outgoing_list(request):
@@ -2255,19 +2291,25 @@ def add_dv(request):
         purpose = request.POST.get('Purpose')
         year = request.POST.get('DpYear')
         div_id = request.POST.get('Division')
-        dv_result = ''
+        payee_id = request.POST.get('PayeeId')
+        payee_name = request.POST.get('PayeeName')
+        source_table = request.POST.get('SourceTable')
+
+        formatted_date_now = datetime.now().strftime('%Y-%m-%d')
 
         user = AuthUser.objects.filter(id=user_id).first()
         full_name = f"{user.first_name} {user.last_name}" if user else "NULL"
-        
+        user_name = f"{user.username}" if user else "NULL"
 
-        if year == 2023:
+        # Select appropriate database based on year
+        if year == "2023":
             finance_database_alias = 'finance' 
-        elif year ==2024:
+        elif year == "2024":
             finance_database_alias = 'finance_2024' 
         else:
             finance_database_alias = 'finance_2025' 
 
+        # Retrieve the latest DV number
         finance_query = """
             SELECT _value
             FROM _config
@@ -2278,26 +2320,29 @@ def add_dv(request):
         with connections[finance_database_alias].cursor() as cursor:
             cursor.execute(finance_query)
             dv_result = cursor.fetchone()
+        
         _value = dv_result[0] if dv_result else None
 
         if _value:
             prefix, number = _value.rsplit('-', 1)
             yy, mm = prefix.split('-')
             current_month = f"{datetime.now().month:02d}"
-            if mm != current_month:
-                mm = current_month
-
-            new_number = str(int(number) + 1).zfill(4)
-
-            generated_dv = f"{yy}-{mm}-{new_number}"
-
-            print("Updated Value:", generated_dv)
-            print("daaaaaaaaa")
-
             
+            if mm != current_month:
+                mm = current_month  # Reset month if changed
+            
+            new_number = str(int(number) + 1).zfill(4)  # Increment sequence
+            generated_dv = f"{yy}-{mm}-{new_number}"  # Create new DV number
+
+            # Extract DV components
+            dv_yr = yy
+            dv_month = mm
+            dv_sequence = new_number
+
+            # Insert into `transactions`
             insert_query = """
-                INSERT INTO transactions (dv_no, payee, modepayment, amt_certified, accountable)  
-                VALUES (%s, %s, %s, %s, %s);
+                INSERT INTO transactions (dv_no, dv_date, payee, modepayment, amt_certified, approval_date, recon, alobs_item, prov_id, mun_id, brgy_id, userlog, scaned_voucher, submit_coa, accountable, projectsrc_id, payee_table_name, payee_id, is_active)  
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
             """
 
             update_query = """
@@ -2306,16 +2351,212 @@ def add_dv(request):
                 WHERE _handler = "GENERATE_DV"
             """
 
-            outgoing = TevOutgoing(dv_no=generated_dv, cluster=cluster_id, box_b_in=date_time.datetime.now(), user_id=user_id, division_id=div_id)
+            outgoing = TevOutgoing(dv_no=generated_dv, cluster=cluster_id, box_b_in=datetime.now(), user_id=user_id, division_id=div_id)
             outgoing.save()
 
             with connections[finance_database_alias].cursor() as cursor:
-                cursor.execute(insert_query, (generated_dv,"LBP", purpose, amt_certified, full_name))
+                cursor.execute(insert_query, (generated_dv, formatted_date_now, payee_name, purpose, amt_certified, None, 0, 0, 0, 0, 0, user_name, None, None, full_name, project_source, source_table, payee_id, 0))
+
+                # Get the last inserted transaction_id
+                cursor.execute("SELECT LAST_INSERT_ID()")
+                transaction_id = cursor.fetchone()[0]
+
+                # Insert into `trans_payeename`
+                insert_trans_payeename_query = """
+                    INSERT INTO trans_payeename (transaction_id, dv_no, dv_yr, dv_month, dv_sequence, is_cancel, is_multiple, validate_budget)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(insert_trans_payeename_query, (transaction_id, generated_dv, dv_yr, dv_month, dv_sequence, 0, 0, 0))
+
+                # Insert 10 records into `tbl_transaction_checklist`
+                checklist_items = [249, 46, 47, 48, 49, 250, 50, 51, 52, 248]
+                insert_checklist_query = """
+                    INSERT INTO tbl_transaction_checklist (transaction_id, checklist_transaction_id, checklist_id, is_active)
+                    VALUES (%s, %s, %s, %s)
+                """
+
+                for checklist_id in checklist_items:
+                    cursor.execute(insert_checklist_query, (transaction_id, 7, checklist_id, 0))
+
+                # Update _config table
                 cursor.execute(update_query, [generated_dv])
+
             return JsonResponse({'data': 'success', 'dv_no': generated_dv})
         return JsonResponse({'data': 'error', 'message': 'No value found'})
+
     else:
         return JsonResponse({'data': 'error', 'message': 'Invalid request method'})
+
+
+
+# @csrf_exempt
+# def add_dv(request):
+#     if request.method == 'POST':
+#         user_id = request.session.get('user_id', 0)
+#         cluster_id = request.POST.get('Cluster')
+#         project_source = request.POST.get('ProjectSource')
+#         amt_certified = request.POST.get('AmtCertified')
+#         purpose = request.POST.get('Purpose')
+#         year = request.POST.get('DpYear')
+#         div_id = request.POST.get('Division')
+#         payee_id = request.POST.get('PayeeId')
+#         payee_name = request.POST.get('PayeeName')
+#         source_table = request.POST.get('SourceTable')
+
+#         formatted_date_now = datetime.now().strftime('%Y-%m-%d')
+
+#         user = AuthUser.objects.filter(id=user_id).first()
+#         full_name = f"{user.first_name} {user.last_name}" if user else "NULL"
+#         user_name = f"{user.username}" if user else "NULL"
+
+#         # Select appropriate database based on year
+#         if year == "2023":
+#             finance_database_alias = 'finance' 
+#         elif year == "2024":
+#             finance_database_alias = 'finance_2024' 
+#         else:
+#             finance_database_alias = 'finance_2025' 
+
+#         # Retrieve the latest DV number
+#         finance_query = """
+#             SELECT _value
+#             FROM _config
+#             WHERE _handler = "GENERATE_DV"
+#             LIMIT 1
+#         """
+
+#         with connections[finance_database_alias].cursor() as cursor:
+#             cursor.execute(finance_query)
+#             dv_result = cursor.fetchone()
+        
+#         _value = dv_result[0] if dv_result else None
+
+#         if _value:
+#             prefix, number = _value.rsplit('-', 1)
+#             yy, mm = prefix.split('-')
+#             current_month = f"{datetime.now().month:02d}"
+            
+#             if mm != current_month:
+#                 mm = current_month  # Reset month if changed
+            
+#             new_number = str(int(number) + 1).zfill(4)  # Increment sequence
+#             generated_dv = f"{yy}-{mm}-{new_number}"  # Create new DV number
+
+#             # Extract DV components
+#             dv_yr = yy
+#             dv_month = mm
+#             dv_sequence = new_number
+
+#             # Insert into `transactions`
+#             insert_query = """
+#                 INSERT INTO transactions (dv_no, dv_date, payee, modepayment, amt_certified, approval_date, recon, alobs_item, prov_id, mun_id, brgy_id, userlog, scaned_voucher, submit_coa, accountable, projectsrc_id, payee_table_name, payee_id, is_active)  
+#                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+#             """
+
+#             update_query = """
+#                 UPDATE _config
+#                 SET _value = %s
+#                 WHERE _handler = "GENERATE_DV"
+#             """
+
+#             outgoing = TevOutgoing(dv_no=generated_dv, cluster=cluster_id, box_b_in=datetime.now(), user_id=user_id, division_id=div_id)
+#             outgoing.save()
+
+#             with connections[finance_database_alias].cursor() as cursor:
+#                 cursor.execute(insert_query, (generated_dv, formatted_date_now, payee_name, purpose, amt_certified, None, 0, 0, 0, 0, 0, user_name, None, None, full_name, project_source, source_table, payee_id, 0))
+
+#                 # Get the last inserted transaction_id
+#                 cursor.execute("SELECT LAST_INSERT_ID()")
+#                 transaction_id = cursor.fetchone()[0]
+
+#                 # Insert into `trans_payeename`
+#                 insert_trans_payeename_query = """
+#                     INSERT INTO trans_payeename (transaction_id, dv_no, dv_yr, dv_month, dv_sequence, is_cancel, is_multiple, validate_budget)
+#                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+#                 """
+#                 cursor.execute(insert_trans_payeename_query, (transaction_id, generated_dv, dv_yr, dv_month, dv_sequence, 0, 0, 0))
+
+#                 # Update _config table
+#                 cursor.execute(update_query, [generated_dv])
+
+#             return JsonResponse({'data': 'success', 'dv_no': generated_dv})
+#         return JsonResponse({'data': 'error', 'message': 'No value found'})
+
+#     else:
+#         return JsonResponse({'data': 'error', 'message': 'Invalid request method'})
+
+
+# @csrf_exempt
+# def add_dv(request):
+#     if request.method == 'POST':
+#         user_id = request.session.get('user_id', 0)
+#         cluster_id = request.POST.get('Cluster')
+#         project_source = request.POST.get('ProjectSource')
+#         amt_certified = request.POST.get('AmtCertified')
+#         purpose = request.POST.get('Purpose')
+#         year = request.POST.get('DpYear')
+#         div_id = request.POST.get('Division')
+#         payee_id = request.POST.get('PayeeId')
+#         payee_name = request.POST.get('PayeeName')
+#         source_table = request.POST.get('SourceTable')
+        
+#         dv_result = ''
+#         formatted_date_now = datetime.now().strftime('%Y-%m-%d')
+
+#         user = AuthUser.objects.filter(id=user_id).first()
+#         full_name = f"{user.first_name} {user.last_name}" if user else "NULL"
+#         user_name = f"{user.username}" if user else "NULL"
+        
+#         if year == 2023:
+#             finance_database_alias = 'finance' 
+#         elif year ==2024:
+#             finance_database_alias = 'finance_2024' 
+#         else:
+#             finance_database_alias = 'finance_2025' 
+
+#         finance_query = """
+#             SELECT _value
+#             FROM _config
+#             WHERE _handler = "GENERATE_DV"
+#             LIMIT 1
+#         """
+
+#         with connections[finance_database_alias].cursor() as cursor:
+#             cursor.execute(finance_query)
+#             dv_result = cursor.fetchone()
+#         _value = dv_result[0] if dv_result else None
+
+#         if _value:
+#             prefix, number = _value.rsplit('-', 1)
+#             yy, mm = prefix.split('-')
+#             current_month = f"{datetime.now().month:02d}"
+#             if mm != current_month:
+#                 mm = current_month
+
+#             new_number = str(int(number) + 1).zfill(4)
+
+#             generated_dv = f"{yy}-{mm}-{new_number}"
+
+#             insert_query = """
+#                 INSERT INTO transactions (dv_no, dv_date, payee, modepayment, amt_certified, approval_date, recon, alobs_item, prov_id, mun_id, brgy_id, userlog, scaned_voucher, submit_coa, accountable, projectsrc_id, payee_table_name, payee_id, is_active)  
+#                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+#             """
+#             update_query = """
+#                 UPDATE _config
+#                 SET _value = %s
+#                 WHERE _handler = "GENERATE_DV"
+#             """
+
+#             outgoing = TevOutgoing(dv_no=generated_dv, cluster=cluster_id, box_b_in=date_time.datetime.now(), user_id=user_id, division_id=div_id)
+#             outgoing.save()
+
+#             with connections[finance_database_alias].cursor() as cursor:
+#                 cursor.execute(insert_query, (generated_dv, formatted_date_now, payee_name, purpose, amt_certified, None, 0, 0, 0, 0, 0, user_name, None, None, full_name, project_source, source_table, payee_id, 0))
+#                 cursor.execute(update_query, [generated_dv])
+#             return JsonResponse({'data': 'success', 'dv_no': generated_dv})
+#         return JsonResponse({'data': 'error', 'message': 'No value found'})
+#     else:
+#         return JsonResponse({'data': 'error', 'message': 'Invalid request method'})
 
 # @csrf_exempt
 # def add_dv(request):

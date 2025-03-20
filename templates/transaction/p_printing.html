@@ -61,7 +61,7 @@
                 </div>
             </div> {% endcomment %}
     
-            <div class="col-sm-4">
+            <div class="col-sm-6">
                 <label class="form-label" for="cluster-name">Cluster<span style="color: red;font-weight: bold;"> *</span></label>
                 <select id="m-cluster" name="MCluster" class="form-select cluster" data-allow-clear="true">
                     <option></option>
@@ -71,19 +71,32 @@
                 </select>
             </div>
 
-            <div class="col-sm-8">
+            <div class="col-sm-6">
                 <label class="form-label" for="cluster-name">Project Source<span style="color: red;font-weight: bold;"> *</span></label>
                 <select id="project-source" name="PSource" class="form-select project-source" data-allow-clear="true">
                     <option></option>
                 </select>
             </div>
 
-            <div class="col-sm-4">
+            <div class="col-sm-6">
+                <label class="form-label" for="cluster-name">Payee<span style="color: red;font-weight: bold;"> *</span></label>
+                <select id="p-payee" name="PPayee" class="form-select p-payee" data-allow-clear="true">
+                    <option></option>
+                    {% for row in payee %}
+                    <option value="{{ row.payee_id }}" data-source="{{ row.source_table }}"{% if row.payee_name == "LBP" %}selected{% endif %}>
+                        {{ row.payee_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="col-sm-6">
                 <label class="form-label" for="amount-certified">Amount Certified<span style="color: red;font-weight: bold;"> *</span></label>
                 <input id="p-amount-certified" name="PAmountCertified" class="form-control p-amount-certified"type="number"placeholder="0.00"/>
             </div>
     
-            <div class="col-sm-8">
+            <div class="col-sm-12">
                 <label class="form-label" for="division-name">Division<span style="color: red;font-weight: bold;"> *</span></label>
                 <select id="m-division" name="MDivision" class="form-select division" data-allow-clear="true">
                     <option></option>
@@ -388,6 +401,7 @@
           FDivision = jQuery(document.querySelector('[name="FDivision"]')),
           FCluster = jQuery(document.querySelector('[name="FCluster"]')),
           PSource = jQuery(document.querySelector('[name="PSource"]')),
+          PPayee = jQuery(document.querySelector('[name="PPayee"]')),
           PAmountCertified = jQuery(document.querySelector('[name="PAmountCertified"]')),
           PPurpose = jQuery(document.querySelector('[name="PPurpose"]')),
           FName = jQuery(document.querySelector('[name="FName"]')),
@@ -606,6 +620,14 @@
                             PSource.select2({
                                 placeholder: 'Choose Project Source',
                                 dropdownParent: PSource.parent(),
+                                allowClear: true,
+                            })
+                        }
+                        if (PPayee.length) {
+                            PPayee.wrap('<div class="position-relative"></div>')
+                            PPayee.select2({
+                                placeholder: 'Choose Project Source',
+                                dropdownParent: PPayee.parent(),
                                 allowClear: true,
                             })
                         }
@@ -852,6 +874,13 @@
                             },
                         },
                     },
+                    PPayee: {
+                        validators: {
+                            notEmpty: {
+                              message: 'Required!',
+                            },
+                        },
+                    },
                     PAmountCertified: {
                         validators: {
                             notEmpty: {
@@ -900,11 +929,16 @@
                     // let dv_number = MDvNumber.val();
                     let cluster = MCluster.val();
                     let p_source = PSource.val();
+                    let p_payee_id = PPayee.val();
                     let amount_certified = PAmountCertified.val();
                     let purpose = PPurpose.val();
                     let division = MDivision.val();
 
-         
+                    let p_payee_name = jQuery("#p-payee option:selected").text().trim();
+                    
+                    let selected_option = jQuery("#p-payee option:selected");
+                    let source_table = selected_option.data("source");
+
                     $.ajax({
                         type: 'POST',
                         url: "{% url 'add-dv' %}",
@@ -914,6 +948,9 @@
                             Cluster: cluster,
                             ProjectSource: p_source,
                             AmtCertified: amount_certified,
+                            PayeeId: p_payee_id,
+                            PayeeName: p_payee_name,
+                            SourceTable: source_table,
                             Purpose: purpose,
                             Division: division,
                         }
