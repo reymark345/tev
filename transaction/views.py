@@ -141,7 +141,7 @@ def save_payroll(request):
         return JsonResponse({'data': 'success'})
     else:
         return render(request, 'pages/unauthorized.html')  
-
+    
 
 @login_required(login_url='login')
 def box_a(request):
@@ -152,30 +152,76 @@ def box_a(request):
     role_names = [entry['role_name'] for entry in role_details]
 
     if any(role_name in allowed_roles for role_name in role_names):
-        # Connect to 'libraries' database
-        with connections['libraries'].cursor() as cursor:
-            cursor.execute("""
-                SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table FROM lib_supplier
-                UNION ALL
-                SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table FROM lib_others_payee;
-            """)
-            rows = cursor.fetchall()
-
-        # Convert the result into a list of dictionaries
-        payee = [{'payee_id': row[0], 'payee_name': row[1], 'source_table': row[2]} for row in rows]
-
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'permissions' : role_names,
-            'dv_number' : TevOutgoing.objects.filter().order_by('id'),
-            'cluster' : Cluster.objects.filter().order_by('id'),
-            'payee' : payee,  # List of dictionaries [{'payee_id': 1, 'payee_name': 'ABC Corp'}, ...]
-            'division' : Division.objects.filter().order_by('id'),
-            'charges' : Charges.objects.filter().order_by('name')
+            'employee_list': TevIncoming.objects.order_by('first_name'),
+            'permissions': role_names,
+            'dv_number': TevOutgoing.objects.order_by('id'),
+            'cluster': Cluster.objects.order_by('id'),
+            'payee': [],  # Empty list; AJAX will populate this
+            'division': Division.objects.order_by('id'),
+            'charges': Charges.objects.order_by('name')
         }
         return render(request, 'transaction/p_printing.html', context)
     else:
-        return render(request, 'pages/unauthorized.html') 
+        return render(request, 'pages/unauthorized.html')
+    
+
+@login_required(login_url='login')
+def search_payee(request):
+    query = request.GET.get('q', '').strip()
+    payee_limit = 50  # Set limit per search result
+
+    with connections['libraries'].cursor() as cursor:
+        sql = """
+            SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table
+            FROM lib_supplier
+            WHERE supplier_name LIKE %s
+            UNION ALL
+            SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table
+            FROM lib_others_payee
+            WHERE name LIKE %s
+            LIMIT %s
+        """
+        cursor.execute(sql, [f"%{query}%", f"%{query}%", payee_limit])
+        results = cursor.fetchall()
+
+    payees = [{'id': row[0], 'text': row[1]} for row in results]
+    return JsonResponse({'results': payees})
+
+
+# @login_required(login_url='login')
+# def box_a(request):
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+#     user_id = request.session.get('user_id', 0)
+#     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+#     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+#     role_names = [entry['role_name'] for entry in role_details]
+
+#     if any(role_name in allowed_roles for role_name in role_names):
+#         # Connect to 'libraries' database
+#         with connections['libraries'].cursor() as cursor:
+#             cursor.execute("""
+#                 SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table FROM lib_supplier
+#                 UNION ALL
+#                 SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table FROM lib_others_payee;
+#             """)
+#             rows = cursor.fetchall()
+
+#         # Convert the result into a list of dictionaries
+#         payee = [{'payee_id': row[0], 'payee_name': row[1], 'source_table': row[2]} for row in rows]
+
+#         context = {
+#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+#             'permissions' : role_names,
+#             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
+#             'cluster' : Cluster.objects.filter().order_by('id'),
+#             'payee' : payee,  # List of dictionaries [{'payee_id': 1, 'payee_name': 'ABC Corp'}, ...]
+#             'division' : Division.objects.filter().order_by('id'),
+#             'charges' : Charges.objects.filter().order_by('name')
+#         }
+#         return render(request, 'transaction/p_printing.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html') 
     
     
 # @login_required(login_url='login')
