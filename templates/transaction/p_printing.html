@@ -40,8 +40,8 @@
         <div class="modal-body">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             <div class="text-center mb-4">
-          <h3 class="mb-2">Assign Details</h3>
-          <p class="text-muted">Update data to complete payroll detail</p>
+          <h3 class="mb-2">Incoming Disbursement Voucher</h3>
+          <p class="text-muted">Travel Expense : Reimbursement</p>
           </div>
           <form id="assign-form" class="row g-3" onsubmit="return false">
             {% comment %} <div class="col-6">
@@ -72,7 +72,7 @@
             </div>
 
             <div class="col-sm-6">
-                <label class="form-label" for="cluster-name">Project Source<span style="color: red;font-weight: bold;"> *</span></label>
+                <label class="form-label" for="p-source">Project Source<span style="color: red;font-weight: bold;"> *</span></label>
                 <select id="project-source" name="PSource" class="form-select project-source" data-allow-clear="true">
                     <option></option>
                 </select>
@@ -80,20 +80,21 @@
 
             <div class="col-sm-6">
                 <label class="form-label" for="cluster-name">Payee<span style="color: red;font-weight: bold;"> *</span></label>
-                <select id="p-payee" name="PPayee" class="form-select p-payee" data-allow-clear="true">
+                <!-- <select id="p-payee" name="PPayee" class="form-select p-payee" data-allow-clear="true">
                     <option></option>
                     {% for row in payee %}
-                    <option value="{{ row.payee_id }}" data-source="{{ row.source_table }}"{% if row.payee_name == "LBP" %}selected{% endif %}>
-                        {{ row.payee_name }}
+                    <option value="{{ row.id }}" {% if row.text == "LBP" %}selected{% endif %}>
+                        {{ row.text }}
                     </option>
                     {% endfor %}
-                </select>
+                </select> -->
+                <select id="p-payee" name="PPayee" class="form-select p-payee" data-allow-clear="true"></select>
             </div>
 
 
             <div class="col-sm-6">
                 <label class="form-label" for="amount-certified">Amount Certified<span style="color: red;font-weight: bold;"> *</span></label>
-                <input id="p-amount-certified" name="PAmountCertified" class="form-control p-amount-certified"type="number"placeholder="0.00"/>
+                <input id="p-amount-certified" name="PAmountCertified" class="form-control p-amount-certified" type="number" placeholder="0.00"/>
             </div>
     
             <div class="col-sm-12">
@@ -108,7 +109,7 @@
 
             <div class="col-sm-12">
                 <label class="form-label" for="purpose">
-                    Purpose
+                    Purpose<span style="color: red;font-weight: bold;"> *</span>
                 </label>
                 <textarea
                     id="p-purpose"
@@ -607,6 +608,13 @@
                     className: 'create-new btn btn-primary',
                     action: function () {
 
+                        MCluster.val(null).trigger('change');
+                        PSource.val(null).trigger('change');
+                        PPayee.val(null).trigger('change');
+                        PAmountCertified.val('');
+                        MDivision.val(null).trigger('change');
+                        PPurpose.val('');
+
                         if (MCluster.length) {
                             MCluster.wrap('<div class="position-relative"></div>')
                             MCluster.select2({
@@ -623,13 +631,63 @@
                                 allowClear: true,
                             })
                         }
+                        // if (PPayee.length) {
+                        //     PPayee.wrap('<div class="position-relative"></div>');
+                        //     PPayee.select2({
+                        //         placeholder: 'Choose Payee',
+                        //         dropdownParent: PPayee.parent(),
+                        //         allowClear: true,
+                        //         ajax: {
+                        //             url: "{% url 'get-payees' %}",
+                        //             dataType: 'json',
+                        //             delay: 250,
+                        //             data: function (params) {
+                        //                 return {
+                        //                     term: params.term
+                        //                 };
+                        //             },
+                        //             processResults: function (data) {
+                        //                 return {
+                        //                     results: data.results
+                        //                 };
+                        //             },
+                        //             cache: true
+                        //         }
+                        //     });
+                        // }
                         if (PPayee.length) {
-                            PPayee.wrap('<div class="position-relative"></div>')
+                            PPayee.wrap('<div class="position-relative"></div>');
                             PPayee.select2({
-                                placeholder: 'Choose Project Source',
+                                placeholder: 'Choose Payee',
                                 dropdownParent: PPayee.parent(),
                                 allowClear: true,
-                            })
+                                ajax: {
+                                    url: "{% url 'get-payees' %}",  // Make sure this URL is correct
+                                    dataType: 'json',
+                                    delay: 250,
+                                    data: function (params) {
+                                        return { term: params.term };  // Send search term
+                                    },
+                                    processResults: function (data) {
+                                        return { results: data.results };
+                                    },
+                                    cache: true
+                                }
+                            });
+
+                            // **✅ Pre-select "LBP" after Select2 initializes**
+                            $.ajax({
+                                url: "{% url 'get-payees' %}",
+                                dataType: "json",
+                                data: { term: "LBP" },
+                                success: function (data) {
+                                    let lbpOption = data.results.find(option => option.text === "LBP");
+                                    if (lbpOption) {
+                                        let newOption = new Option(lbpOption.text, lbpOption.id, true, true);
+                                        PPayee.append(newOption).trigger('change');  // Set selected
+                                    }
+                                }
+                            });
                         }
                         if (MDivision.length) {
                             MDivision.wrap('<div class="position-relative"></div>')
@@ -643,6 +701,24 @@
                         const year = currentDate.getFullYear().toString().slice(-2); 
                         const month = (currentDate.getMonth() + 1).toString().padStart(2, '0');
                         MDvNumber.val(`${year}-${month}-`);
+
+
+
+                       
+                        // $("#p-payee").on("change", function () {
+                        //     $.ajax({
+                        //         url: "#",  // Make sure the URL matches your Django route
+                        //         dataType: 'json',
+                        //         delay: 250,  // Delay search for better performance
+                        //         data: function(params) {
+                        //             return { q: params.term };  // Send search query
+                        //         },
+                        //         processResults: function(data) {
+                        //             return { results: data.results };
+                        //         },
+                        //         cache: true
+                        //     }); // <-- Corrected closing parenthesis
+                        // });
 
 
                         $("#m-cluster").on("change", function () {
@@ -889,6 +965,13 @@
                         },
                     },
                     MDivision: {
+                        validators: {
+                            notEmpty: {
+                              message: 'Required!',
+                            },
+                        },
+                    },
+                    PPurpose: {
                         validators: {
                             notEmpty: {
                               message: 'Required!',

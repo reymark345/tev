@@ -139,11 +139,11 @@ DATABASES = {
     #     'PORT':'3306',
     # },
 
-    # 'libraries': {
+    # 'libraries_isps': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'libraries_isps',
-    #     'USER':'mavaleroso',
-    #     'PASSWORD':'_fG72ycR(r9q*G0)',
+    #     'USER':'rnvaldehueza',
+    #     'PASSWORD':'sspI7g)yRx@WskZZ',
     #     'HOST':'172.31.240.235',
     #     'PORT':'3306',
     # },
@@ -202,9 +202,9 @@ DATABASES = {
         'PORT':'3307',
     },
 
-    'libraries': {
+    'libraries_isps': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'libraries',
+        'NAME': 'libraries_isps',
         'USER':'root',
         'PASSWORD':'qw1234',
         'HOST':'localhost',

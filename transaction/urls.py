@@ -66,7 +66,9 @@ urlpatterns = [
     path('transmittal_details', views.transmittal_details , name='transmittal-details'),  
 
     path('get_project_src', views.get_project_src , name='get-project-src'),  
+    path('get_payees', views.get_payees , name='get-payees'),  
 
-    
+
+
     
 ]
