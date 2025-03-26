@@ -30,7 +30,7 @@ from django.db.models import CharField
 from django.db.models.functions import Cast
 from django.db.utils import OperationalError
 from django.utils.html import strip_tags
-
+from django.db.models import Sum
 
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
@@ -50,6 +50,17 @@ def generate_code():
     code = year + '-' + month + '-' + f'{series:05d}'
 
     return code
+
+def get_finance_connection(year):
+    if year == '2023':
+        return 'finance'
+    elif year == '2024':
+        return 'finance_2024'
+    elif year == '2025':
+        return 'finance_2025'
+    else:
+        return 'testttt'
+    
 
 @login_required(login_url='login')
 def list(request):
@@ -242,9 +253,6 @@ def box_a(request):
         """
         cursor.execute(sql) 
         lib_isps = cursor.fetchall()
-
-    print(lib_isps)
-    print("results_isps")
 
     payees = [{'id': row[0], 'text': row[1]} for row in lib_isps]
     
@@ -1435,6 +1443,12 @@ def employee_journal(request):
 @csrf_exempt
 def multiple_charges_details(request):
     pp_id = request.POST.get('payroll_id')
+    amt = request.POST.get('amt')
+    dv_number = request.POST.get('payroll_id')
+    year = request.POST.get('year_now')
+
+    finance_connection = get_finance_connection(year)
+    
     data = []
     charges = PayrolledCharges.objects.filter(incoming_id=pp_id)
     incoming_amount= TevIncoming.objects.filter(id=pp_id).first()
@@ -2036,24 +2050,90 @@ def add_multiple_charges(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
+# @csrf_exempt
+# def update_multiple_charges(request):
+#     if request.method == 'POST':
+
+#         amount = request.POST.getlist('amount[]')
+#         charges_id = request.POST.getlist('charges_id[]')
+#         incoming_id = request.POST.get('incoming_id')
+#         amt_issued = request.POST.get('amt_issued')
+#         year = request.POST.get('year_now')
+
+#         if year == '2023':
+#             finance_connection = 'finance'
+#         elif year == '2024':
+#             finance_connection = 'finance_2024'
+#         else:
+#             finance_connection = 'finance_2025'
+
+
+
+
+#         TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt_issued)
+#         PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
+#         for amt, ch_id in zip(amount, charges_id):
+#             PayrolledCharges.objects.create(
+#                 incoming_id=incoming_id,
+#                 amount=amt,
+#                 charges_id=ch_id
+#         )
+#         return JsonResponse({'data': 'success'})
+#     else:
+#         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
 @csrf_exempt
 def update_multiple_charges(request):
     if request.method == 'POST':
-        amount = request.POST.getlist('amount[]')
+
+        amount_list = request.POST.getlist('amount[]')  # Renamed for clarity
         charges_id = request.POST.getlist('charges_id[]')
         incoming_id = request.POST.get('incoming_id')
         amt_issued = request.POST.get('amt_issued')
+        dv_number = request.POST.get('dv_number')
+        year = request.POST.get('year_now')
+
+        finance_connection = get_finance_connection(year)
+
+        
+        charges_total = PayrolledCharges.objects.filter(incoming_id=incoming_id).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+
+        amt_issued_dec = Decimal(amt_issued)  # Convert amt_issued to Decimal
+        amt_dec = amt_issued_dec - charges_total  # Calculate the difference
+
+        print("amt_issued:", amt_issued_dec)
+        print("charges_total:", charges_total)
+        print("amt_dec (Difference):", amt_dec)
+
+        if amt_dec != Decimal('0'):  # Only update if there's a difference
+            print("testtt1111")
+            with transaction.atomic():
+                with connections[finance_connection].cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE transactions
+                        SET amt_certified = amt_certified + %s
+                        WHERE dv_no = %s
+                    """, [amt_dec, dv_number])  # Now, amt_dec contains the difference
+        else:  # Exists
+            print("testtt2")
+
+        
+
+        # Update other models after the transaction
         TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt_issued)
         PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
-        for amt, ch_id in zip(amount, charges_id):
+
+        for amt, ch_id in zip(amount_list, charges_id):
             PayrolledCharges.objects.create(
                 incoming_id=incoming_id,
                 amount=amt,
                 charges_id=ch_id
-        )
+            )
+
         return JsonResponse({'data': 'success'})
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
     
 @csrf_exempt
 def check_charges(request):
@@ -2070,20 +2150,49 @@ def check_charges(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
-@csrf_exempt
-def payroll_add_charges(request):
-    if request.method == 'POST':
-        incoming_id = request.POST.get('incoming_id')
-        amt = request.POST.get('amt')
-        charge_id = request.POST.get('charge_id')
-        try:
-            PayrolledCharges(amount=amt,charges_id=charge_id,incoming_id=incoming_id).save()
-            return JsonResponse({'data': 'success'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+# @csrf_exempt
+# def payroll_add_charges(request):
+#     if request.method == 'POST':
+#         incoming_id = request.POST.get('incoming_id')
+#         amt = request.POST.get('amt')
+#         charge_id = request.POST.get('charge_id')
+#         try:
+#             PayrolledCharges(amount=amt,charges_id=charge_id,incoming_id=incoming_id).save()
+#             return JsonResponse({'data': 'success'})
+#         except Exception as e:
+#             return JsonResponse({'status': 'error', 'message': str(e)})
+#     else:
+#         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
+
+# @csrf_exempt
+# def payroll_add_charges(request):
+#     if request.method == 'POST':
+#         incoming_id = request.POST.get('incoming_id')
+#         amt = request.POST.get('amt')
+#         charge_id = request.POST.get('charge_id')
+#         dv_number = request.POST.get('dv_number')
+#         year = request.POST.get('year_now')
+        
+#         if year == '2023':
+#             finance_database_name = 'infimos_2023'
+
+#         elif year == '2024':
+#             finance_database_name = 'infimos_2024'
+            
+#         else:
+#             finance_database_name = 'infimos_2025'
+        
+#         try:
+#             with transaction.atomic():
+#                 PayrolledCharges.objects.create(amount=amt, charges_id=charge_id, incoming_id=incoming_id)
+#             return JsonResponse({'data': 'success'})
+#         except Exception as e:
+#             return JsonResponse({'data': str(e)})
+#     else:
+#         return JsonResponse({'data': 'Invalid request method'})
+
+
 
 @csrf_exempt
 def payroll_add_charges(request):
@@ -2091,15 +2200,79 @@ def payroll_add_charges(request):
         incoming_id = request.POST.get('incoming_id')
         amt = request.POST.get('amt')
         charge_id = request.POST.get('charge_id')
+        dv_number = request.POST.get('dv_number')
+        year = request.POST.get('year_now')
+
+        if not amt:
+            return JsonResponse({'data': 'Amount is required'}, status=400)
+
+        try:
+            amt = float(amt)  # Convert amt to float for calculations
+        except ValueError:
+            return JsonResponse({'data': 'Invalid amount'}, status=400)
         
+        finance_connection = get_finance_connection(year)  
+
         try:
             with transaction.atomic():
+                # Insert into PayrolledCharges table
                 PayrolledCharges.objects.create(amount=amt, charges_id=charge_id, incoming_id=incoming_id)
+
+                # Update amt_certified in transactions table
+                with connections[finance_connection].cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE transactions
+                        SET amt_certified = amt_certified + %s
+                        WHERE dv_no = %s
+                    """, [amt, dv_number])
+
             return JsonResponse({'data': 'success'})
+
         except Exception as e:
-            return JsonResponse({'data': str(e)})
-    else:
-        return JsonResponse({'data': 'Invalid request method'})
+            return JsonResponse({'data': str(e)}, status=500)
+
+    return JsonResponse({'data': 'Invalid request method'}, status=400)
+
+
+# @csrf_exempt
+# def remove_charges(request):
+#     if request.method == 'POST':
+#         incoming_id = request.POST.get('incoming_id')
+#         charge_id = request.POST.get('charge_id')
+#         amt = request.POST.get('amt')
+#         year = request.POST.get('year_now')
+#         dv_number = request.POST.get('dv_number')
+#         finance_connection = get_finance_connection(year)
+    
+#         if not amt:
+#             return JsonResponse({'status': 'error', 'message': 'Amount is required'}, status=400)
+
+#         try:
+#             amt = float(amt)  # Convert amt to float to ensure it's a number
+#         except ValueError:
+#             return JsonResponse({'status': 'error', 'message': 'Invalid amount'}, status=400)
+
+#         try:
+#             with transaction.atomic():
+#                 # Delete the charge entry from PayrolledCharges table
+#                 PayrolledCharges.objects.filter(incoming_id=incoming_id, charges_id=charge_id).delete()
+
+#                 # Subtract the amount from amt_certified in transactions table
+#                 with connections[finance_connection].cursor() as cursor:
+#                     cursor.execute("""
+#                         UPDATE transactions
+#                         SET amt_certified = GREATEST(amt_certified - %s, 0)
+#                         WHERE dv_no = %s
+#                     """, [amt, dv_number])
+
+#             return JsonResponse({'data': 'success', 'message': 'Charge removed successfully'})
+
+#         except Exception as e:
+#             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+#     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+    
     
 @csrf_exempt
 def remove_charges(request):
@@ -2107,6 +2280,8 @@ def remove_charges(request):
         incoming_id = request.POST.get('incoming_id')
         charge_id = request.POST.get('charge_id')
         amt = request.POST.get('amt')
+        year = request.POST.get('year_now')
+        finance_connection = get_finance_connection(year)
         try:
             PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
             PayrolledCharges(amount=amt,charges_id=charge_id,incoming_id =incoming_id).save()
@@ -2399,7 +2574,7 @@ def add_dv(request):
         user_id = request.session.get('user_id', 0)
         cluster_id = request.POST.get('Cluster')
         project_source = request.POST.get('ProjectSource')
-        amt_certified = request.POST.get('AmtCertified')
+        # amt_certified = request.POST.get('AmtCertified')
         purpose = request.POST.get('Purpose')
         year = request.POST.get('DpYear')
         div_id = request.POST.get('Division')
@@ -2412,14 +2587,7 @@ def add_dv(request):
         user = AuthUser.objects.filter(id=user_id).first()
         full_name = f"{user.first_name} {user.last_name}" if user else "NULL"
         user_name = f"{user.username}" if user else "NULL"
-
-        # Select appropriate database based on year
-        if year == "2023":
-            finance_database_alias = 'finance' 
-        elif year == "2024":
-            finance_database_alias = 'finance_2024' 
-        else:
-            finance_database_alias = 'finance_2025' 
+        finance_connection = get_finance_connection(year)
 
         # Retrieve the latest DV number
         finance_query = """
@@ -2429,7 +2597,7 @@ def add_dv(request):
             LIMIT 1
         """
 
-        with connections[finance_database_alias].cursor() as cursor:
+        with connections[finance_connection].cursor() as cursor:
             cursor.execute(finance_query)
             dv_result = cursor.fetchone()
         
@@ -2466,8 +2634,8 @@ def add_dv(request):
             outgoing = TevOutgoing(dv_no=generated_dv, cluster=cluster_id, box_b_in=datetime.now(), user_id=user_id, division_id=div_id)
             outgoing.save()
 
-            with connections[finance_database_alias].cursor() as cursor:
-                cursor.execute(insert_query, (generated_dv, formatted_date_now, payee_name, purpose, amt_certified, None, 0, 0, 0, 0, 0, user_name, None, None, full_name, project_source, source_table, payee_id, 0))
+            with connections[finance_connection].cursor() as cursor:
+                cursor.execute(insert_query, (generated_dv, formatted_date_now, payee_name, purpose, 0, None, 0, 0, 0, 0, 0, user_name, None, None, full_name, project_source, source_table, payee_id, 0))
 
                 # Get the last inserted transaction_id
                 cursor.execute("SELECT LAST_INSERT_ID()")
@@ -2690,6 +2858,8 @@ def add_dv(request):
 @csrf_exempt
 def add_emp_dv(request):
     if request.method == 'POST':
+        print('testtttttt')
+
         user_id = request.session.get('user_id', 0)
         tev_id = request.POST.get('tev_id')
         dv_no = request.POST.get('dv_no')
@@ -2862,15 +3032,106 @@ def retrieve_employee(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+# @csrf_exempt
+# def delete_box_list(request):
+#     incoming_id = request.POST.get('emp_id')
+#     dv_number = request.POST.get('dv_number')
+#     year = request.POST.get('year_now')
+#     TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
+#     TevIncoming.objects.filter(id=incoming_id).update(status_id=4, date_payrolled = None, payrolled_by = None)
+#     response = {
+#         'data': 'success'
+#     }
+#     return JsonResponse(response)
+
+# @csrf_exempt
+# def delete_box_list(request):
+#     if request.method == 'POST':
+#         incoming_id = request.POST.get('emp_id')
+#         dv_number = request.POST.get('dv_number')
+#         year = request.POST.get('year_now')
+
+#         # Determine the correct finance database connection
+#         if year == "2023":
+#             finance_database_alias = 'finance' 
+#         elif year == "2024":
+#             finance_database_alias = 'finance_2024' 
+#         else:
+#             finance_database_alias = 'finance_2025' 
+
+#         try:
+#             with transaction.atomic():
+#                 # Get final_amount from TevIncoming table
+#                 final_amount = TevIncoming.objects.filter(id=incoming_id).values_list('final_amount', flat=True).first()
+
+#                 print(final_amount)
+#                 print("This is Amounttttttttttttttttttttttttttt")
+
+#                 if final_amount is None:
+#                     return JsonResponse({'status': 'error', 'message': 'final_amount not found'}, status=400)
+
+#                 # Subtract final_amount from amt_certified in transactions table
+#                 with connections[finance_database_alias].cursor() as cursor:
+#                     cursor.execute("""
+#                         UPDATE transactions
+#                         SET amt_certified = GREATEST(amt_certified - %s, 0)
+#                         WHERE dv_no = %s
+#                     """, [final_amount, dv_number])
+
+#                 # Delete related records in TevBridge and update TevIncoming status
+#                 TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
+#                 TevIncoming.objects.filter(id=incoming_id).update(status_id=4, date_payrolled=None, payrolled_by=None)
+
+#             return JsonResponse({'data': 'success', 'message': 'Record deleted and amount subtracted'})
+
+#         except Exception as e:
+#             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+#     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+
 @csrf_exempt
 def delete_box_list(request):
-    incoming_id = request.POST.get('emp_id')
-    TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
-    TevIncoming.objects.filter(id=incoming_id).update(status_id=4, date_payrolled = None, payrolled_by = None)
-    response = {
-        'data': 'success'
-    }
-    return JsonResponse(response)
+    if request.method == 'POST':
+        incoming_id = request.POST.get('emp_id')
+        dv_number = request.POST.get('dv_number')
+        year = request.POST.get('year_now')
+        finance_connection = get_finance_connection(year)
+
+        try:
+            charges = PayrolledCharges.objects.filter(incoming_id=incoming_id)
+            with transaction.atomic():
+                final_amount = TevIncoming.objects.filter(id=incoming_id).values_list('final_amount', flat=True).first()
+
+                if final_amount is None:
+                    return JsonResponse({'status': 'error', 'message': 'final_amount not found'}, status=400)
+                
+                if charges.exists():
+                    with connections[finance_connection].cursor() as cursor:
+                        cursor.execute("""
+                            SELECT amt_certified FROM transactions WHERE dv_no = %s
+                        """, [dv_number])
+                        result = cursor.fetchone()
+
+                        if result:
+                            current_amt_certified = result[0]
+                            if current_amt_certified >= final_amount:
+                                cursor.execute("""
+                                    UPDATE transactions
+                                    SET amt_certified = GREATEST(amt_certified - %s, 0)
+                                    WHERE dv_no = %s
+                                """, [final_amount, dv_number])
+
+                TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
+                TevIncoming.objects.filter(id=incoming_id).update(status_id=4, date_payrolled=None, payrolled_by=None)
+
+            return JsonResponse({'data': 'success', 'message': 'Record deleted and amount subtracted'})
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+
 
 
 @csrf_exempt
@@ -3134,18 +3395,10 @@ def forward_journal(request):
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
-
     year = request.POST.get('year')
+    finance_connection = get_finance_connection(year)
     
-    if year == '2023':
-        finance_database_name = 'finance'
-    elif year == '2024':
-        finance_database_name = 'finance_2024'
-    else:
-        finance_database_name = 'finance_2025'
-
-    # Get the database connection based on the selected year
-    finance_connection = connections[finance_database_name]
+    finance_data = connections[finance_connection]
 
     for status_id in out_list_int:
         check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
@@ -3167,7 +3420,7 @@ def forward_journal(request):
                     dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
                     with transaction.atomic():
                         for dv in dv_no_values:
-                            with finance_connection.cursor() as cursor:
+                            with finance_data.cursor() as cursor:
                                 actual_date = datetime.now()
                                 query = f"""
                                 UPDATE transactions SET approval_date = %s WHERE dv_no = %s
@@ -3185,7 +3438,7 @@ def forward_journal(request):
             dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
             with transaction.atomic():
                 for dv in dv_no_values:
-                    with finance_connection.cursor() as cursor:
+                    with finance_data.cursor() as cursor:
                         actual_date = datetime.now()
                         query = f"""
                         UPDATE transactions SET approval_date = %s WHERE dv_no = %s

@@ -78,7 +78,7 @@
                 </select>
             </div>
 
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <label class="form-label" for="cluster-name">Payee<span style="color: red;font-weight: bold;"> *</span></label>
                 <!-- <select id="p-payee" name="PPayee" class="form-select p-payee" data-allow-clear="true">
                     <option></option>
@@ -92,10 +92,10 @@
             </div>
 
 
-            <div class="col-sm-6">
+            <!-- <div class="col-sm-6">
                 <label class="form-label" for="amount-certified">Amount Certified<span style="color: red;font-weight: bold;"> *</span></label>
                 <input id="p-amount-certified" name="PAmountCertified" class="form-control p-amount-certified" type="number" placeholder="0.00"/>
-            </div>
+            </div> -->
     
             <div class="col-sm-12">
                 <label class="form-label" for="division-name">Division<span style="color: red;font-weight: bold;"> *</span></label>
@@ -403,7 +403,6 @@
           FCluster = jQuery(document.querySelector('[name="FCluster"]')),
           PSource = jQuery(document.querySelector('[name="PSource"]')),
           PPayee = jQuery(document.querySelector('[name="PPayee"]')),
-          PAmountCertified = jQuery(document.querySelector('[name="PAmountCertified"]')),
           PPurpose = jQuery(document.querySelector('[name="PPurpose"]')),
           FName = jQuery(document.querySelector('[name="FName"]')),
           AmountIssued = jQuery(document.querySelector('[name="AmountIssued"]')),
@@ -611,7 +610,6 @@
                         MCluster.val(null).trigger('change');
                         PSource.val(null).trigger('change');
                         PPayee.val(null).trigger('change');
-                        PAmountCertified.val('');
                         MDivision.val(null).trigger('change');
                         PPurpose.val('');
 
@@ -861,39 +859,75 @@
                     })
               });
 
-                $('body').on('click', '.item-delete', function () {
-                    let emp_id = $(this).attr('id');
+              $('body').off('click', '.item-delete').on('click', '.item-delete', function () {
+                let emp_id = $(this).attr('id');
 
-                    let dataTable = $('#tbl-box-a').DataTable();
-                    let closestRow = dataTable.row($(this).closest('tr'));
-                    let rowData = closestRow.data();
-                    let p_id = rowData.id;
+                let dataTable = $('#tbl-box-a').DataTable();
+                let closestRow = dataTable.row($(this).closest('tr'));
+                let rowData = closestRow.data();
+                let p_id = rowData.id;
 
-                    $.ajax({
-                        type: 'POST',
-                        url: "{% url 'delete-box-list' %}",
-                        data:{
+
+                $.ajax({
+                    type: 'POST',
+                    url: "{% url 'delete-box-list' %}",
+                    data: {
                         emp_id: p_id,
-                        dv_number: dv_number
+                        dv_number: dv_number,
+                        year_now: year_now
                     }
-                    }).done(function (data) {
-                        if (data.data == 'success') {
-                            employee_list();
-                            dataTable2.ajax.reload();
-                            toastr.success('Removed Successfully', 'Success', toast_options);
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error saving!',
-                                text: data.message,
-                                customClass: {
-                                    confirmButton: 'btn btn-success',
-                                },
-                            })
-                        }
-                    });
-                
+                }).done(function (data) {
+                    if (data.data === 'success') {
+                        employee_list();
+                        dataTable.ajax.reload();  // Ensure this refers to the correct DataTable
+                        toastr.success('Removed Successfully', 'Success', toast_options);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error saving!',
+                            text: data.message,
+                            customClass: {
+                                confirmButton: 'btn btn-success',
+                            },
+                        });
+                    }
                 });
+            });
+
+                // $('body').on('click', '.item-delete', function () {
+                //     let emp_id = $(this).attr('id');
+
+                //     let dataTable = $('#tbl-box-a').DataTable();
+                //     let closestRow = dataTable.row($(this).closest('tr'));
+                //     let rowData = closestRow.data();
+                //     let p_id = rowData.id;
+
+                //     $.ajax({
+                //         type: 'POST',
+                //         url: "{% url 'delete-box-list' %}",
+                //         data:{
+                //         emp_id: p_id,
+                //         dv_number: dv_number,
+                //         year_now:year_now
+                //     }
+                //     }).done(function (data) {
+                //         if (data.data == 'success') {
+                //             employee_list();
+                //             dataTable2.ajax.reload();
+                //             toastr.success('Removed Successfully', 'Success', toast_options);
+                //         } else {
+                //             Swal.fire({
+                //                 icon: 'error',
+                //                 title: 'Error saving!',
+                //                 text: data.message,
+                //                 customClass: {
+                //                     confirmButton: 'btn btn-success',
+                //                 },
+                //             })
+                //         }
+                //     });
+                
+                // });
 
                 $('body').on('click', '.item-amount', function () {
                     let emp_id = $(this).attr('id');
@@ -957,13 +991,6 @@
                             },
                         },
                     },
-                    PAmountCertified: {
-                        validators: {
-                            notEmpty: {
-                                message: 'Required!',
-                            },
-                        },
-                    },
                     MDivision: {
                         validators: {
                             notEmpty: {
@@ -1013,7 +1040,6 @@
                     let cluster = MCluster.val();
                     let p_source = PSource.val();
                     let p_payee_id = PPayee.val();
-                    let amount_certified = PAmountCertified.val();
                     let purpose = PPurpose.val();
                     let division = MDivision.val();
 
@@ -1030,7 +1056,6 @@
                             DpYear : year_now,
                             Cluster: cluster,
                             ProjectSource: p_source,
-                            AmtCertified: amount_certified,
                             PayeeId: p_payee_id,
                             PayeeName: p_payee_name,
                             SourceTable: source_table,
@@ -1536,12 +1561,15 @@
             if (selectedOption.length > 0) {
                 temp_id = rowData.id;
                 if (empChargesText=== "Multiple") {
+                    
                     $("#payrollUpdate").modal("show");
                     $.ajax({
                         type: 'POST',
                         url: "{% url 'multiple-charges-details' %}",
                         data:{
-                            payroll_id: temp_id
+                            payroll_id: temp_id,
+                            dv_number:dv_number,
+                            year_now:year_now
                         }
                     }).done(function (data) {
                         let totalAmount = 0;
@@ -1638,7 +1666,9 @@
                                         data: {
                                             incoming_id: temp_id,
                                             charge_id:empChargesValue,
-                                            amt:amount
+                                            amt:amount,
+                                            dv_number:dv_number,
+                                            year_now:year_now
                                         }
                                     }).done(function (data) {
                                         dataTable.ajax.reload(null, false);
@@ -1653,7 +1683,9 @@
                                 data:{
                                     incoming_id: temp_id,
                                     charge_id:empChargesValue,
-                                    amt:amount
+                                    amt:amount,
+                                    dv_number:dv_number,
+                                    year_now:year_now
                                 }
                             }).done(function (data) {
                                 if (data.data == 'success') {
@@ -1754,7 +1786,9 @@
                             amount: selectedAmount,
                             incoming_id: temp_id,
                             charges_id : selectedIDs,
-                            amt_issued : amt_issued
+                            amt_issued : amt_issued,
+                            dv_number: dv_number,
+                            year_now: year_now
                         }
                         }).done(function(data){
                             if (data.data == 'success') {
