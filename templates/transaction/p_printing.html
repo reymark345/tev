@@ -930,6 +930,7 @@
                 // });
 
                 $('body').on('click', '.item-amount', function () {
+                    alert("testt");
                     let emp_id = $(this).attr('id');
                     let dataTable = $('#tbl-box-a').DataTable();
                     let closestRow = dataTable.row($(this).closest('tr'));
@@ -949,7 +950,9 @@
                         data:{
                         emp_id: p_id,
                         amount: amt,
-                        purpose:pp
+                        purpose:pp,
+                        dv_number: dv_number,
+                        year_now:year_now
                     }
                     }).done(function (data) {
                         if (data.data == 'success') {

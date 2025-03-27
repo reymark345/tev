@@ -2086,26 +2086,18 @@ def add_multiple_charges(request):
 def update_multiple_charges(request):
     if request.method == 'POST':
 
-        amount_list = request.POST.getlist('amount[]')  # Renamed for clarity
+        amount_list = request.POST.getlist('amount[]') 
         charges_id = request.POST.getlist('charges_id[]')
         incoming_id = request.POST.get('incoming_id')
         amt_issued = request.POST.get('amt_issued')
         dv_number = request.POST.get('dv_number')
         year = request.POST.get('year_now')
-
         finance_connection = get_finance_connection(year)
-
-        
         charges_total = PayrolledCharges.objects.filter(incoming_id=incoming_id).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+        amt_issued_dec = Decimal(amt_issued) 
+        amt_dec = amt_issued_dec - charges_total 
 
-        amt_issued_dec = Decimal(amt_issued)  # Convert amt_issued to Decimal
-        amt_dec = amt_issued_dec - charges_total  # Calculate the difference
-
-        print("amt_issued:", amt_issued_dec)
-        print("charges_total:", charges_total)
-        print("amt_dec (Difference):", amt_dec)
-
-        if amt_dec != Decimal('0'):  # Only update if there's a difference
+        if amt_dec != Decimal('0'):
             print("testtt1111")
             with transaction.atomic():
                 with connections[finance_connection].cursor() as cursor:
@@ -2113,13 +2105,8 @@ def update_multiple_charges(request):
                         UPDATE transactions
                         SET amt_certified = amt_certified + %s
                         WHERE dv_no = %s
-                    """, [amt_dec, dv_number])  # Now, amt_dec contains the difference
-        else:  # Exists
-            print("testtt2")
+                    """, [amt_dec, dv_number])
 
-        
-
-        # Update other models after the transaction
         TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt_issued)
         PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
 
@@ -3139,8 +3126,20 @@ def update_amt(request):
     incoming_id = request.POST.get('emp_id')
     amt = request.POST.get('amount')
     pp = request.POST.get('purpose')
+    dv_number = request.POST.get('payroll_id')
+    year = request.POST.get('year_now')
+    finance_connection = get_finance_connection(year)
     try:
         with transaction.atomic():
+
+
+            # with connections[finance_connection].cursor() as cursor:
+            #     cursor.execute("""
+            #         UPDATE transactions
+            #         SET amt_certified = amt_certified + %s
+            #         WHERE dv_no = %s
+            #     """, [amt, dv_number])
+
             data = PayrolledCharges.objects.select_for_update().filter(incoming_id=incoming_id)
             if len(data) == 1:
                 data.update(amount=amt)
