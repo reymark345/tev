@@ -6,7 +6,7 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges, RolePermissions, RemarksLib, Remarks_r)
+from main.models import (AuthUser, TevIncoming, SystemConfiguration,RoleDetails, StaffDetails, Cluster, Charges, TevOutgoing, TevBridge, Division, PayrolledCharges, RolePermissions, RemarksLib, Remarks_r, LibProjectSrc)
 import json 
 from django.core import serializers
 from datetime import datetime, timedelta
@@ -30,7 +30,7 @@ from django.db.models import CharField
 from django.db.models.functions import Cast
 from django.db.utils import OperationalError
 from django.utils.html import strip_tags
-
+from django.db.models import Sum
 
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
@@ -50,6 +50,17 @@ def generate_code():
     code = year + '-' + month + '-' + f'{series:05d}'
 
     return code
+
+def get_finance_connection(year):
+    if year == '2023':
+        return 'finance'
+    elif year == '2024':
+        return 'finance_2024'
+    elif year == '2025':
+        return 'finance_2025'
+    else:
+        return 'testttt'
+    
 
 @login_required(login_url='login')
 def list(request):
@@ -140,9 +151,90 @@ def save_payroll(request):
                 
         return JsonResponse({'data': 'success'})
     else:
-        return render(request, 'pages/unauthorized.html')    
+        return render(request, 'pages/unauthorized.html')  
     
+# @login_required(login_url='login')
+# def box_a(request):
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
     
+#     # Get the user's roles in a more optimized way
+#     user_id = request.session.get('user_id', 0)
+#     role_names = list(RoleDetails.objects.filter(
+#         id__in=RolePermissions.objects.filter(user_id=user_id).values_list('role_id', flat=True)
+#     ).values_list('role_name', flat=True))
+
+#     # Fetch payee list from both tables
+#     with connections['libraries_isps'].cursor() as cursor:
+#         sql = """
+#             SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table
+#             FROM lib_supplier
+#             UNION ALL
+#             SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table
+#             FROM lib_others_payee
+#         """
+#         cursor.execute(sql) 
+#         lib_isps = cursor.fetchall()
+
+#     print("Results:", lib_isps)  # Improved debug log format
+
+#     # Format payees for frontend usage
+#     payees = [{'id': row[0], 'text': row[1]} for row in lib_isps]
+
+#     if any(role in allowed_roles for role in role_names):
+#         context = {
+#             'employee_list': TevIncoming.objects.order_by('first_name'),
+#             'permissions': role_names,
+#             'dv_number': TevOutgoing.objects.order_by('id'),
+#             'cluster': Cluster.objects.order_by('id'),
+#             'payee': payees,
+#             'division': Division.objects.order_by('id'),
+#             'charges': Charges.objects.order_by('name')
+#         }
+#         return render(request, 'transaction/p_printing.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
+    
+
+
+# @login_required(login_url='login')
+# def get_payees(request):
+#     with connections['libraries_isps'].cursor() as cursor:
+#         sql = """
+#             SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table
+#             FROM lib_supplier
+#             UNION ALL
+#             SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table
+#             FROM lib_others_payee
+#         """
+#         cursor.execute(sql)
+#         lib_isps = cursor.fetchall()
+
+#     payees = [{'id': row[0], 'text': row[1]} for row in lib_isps]
+
+#     return JsonResponse({'results': payees})
+
+@login_required(login_url='login')
+def get_payees(request):
+    search_term = request.GET.get('term', '').strip()  # Get search term
+
+    with connections['libraries_isps'].cursor() as cursor:
+        sql = """
+            SELECT supplier_id AS payee_id, supplier_name AS payee_name
+            FROM lib_supplier
+            WHERE supplier_name LIKE %s
+            UNION ALL
+            SELECT others_payee_id AS payee_id, name AS payee_name
+            FROM lib_others_payee
+            WHERE name LIKE %s
+            LIMIT 50
+        """
+        cursor.execute(sql, (f"%{search_term}%", f"%{search_term}%"))
+        lib_isps = cursor.fetchall()
+
+    payees = [{'id': row[0], 'text': row[1]} for row in lib_isps]
+    
+    return JsonResponse({'results': payees})
+
 @login_required(login_url='login')
 def box_a(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
@@ -151,19 +243,83 @@ def box_a(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
 
+    with connections['libraries_isps'].cursor() as cursor:
+        sql = """
+            SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table
+            FROM lib_supplier
+            UNION ALL
+            SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table
+            FROM lib_others_payee
+        """
+        cursor.execute(sql) 
+        lib_isps = cursor.fetchall()
+
+    payees = [{'id': row[0], 'text': row[1]} for row in lib_isps]
+    
+
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
-            'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-            'permissions' : role_names,
-            'dv_number' : TevOutgoing.objects.filter().order_by('id'),
-            'cluster' : Cluster.objects.filter().order_by('id'),
-            'division' : Division.objects.filter().order_by('id'),
-            'charges' : Charges.objects.filter().order_by('name')
-
+            'employee_list': TevIncoming.objects.order_by('first_name'),
+            'permissions': role_names,
+            'dv_number': TevOutgoing.objects.order_by('id'),
+            'cluster': Cluster.objects.order_by('id'),
+            'payee': payees,
+            'division': Division.objects.order_by('id'),
+            'charges': Charges.objects.order_by('name')
         }
         return render(request, 'transaction/p_printing.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
+    
+
+# @login_required(login_url='login')
+# def search_payee(request):
+#     query = request.GET.get('q', '').strip()
+#     payee_limit = 50  # Set limit per search result
+
+#     with connections['libraries_isps'].cursor() as cursor:
+#         sql = """
+#             SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table
+#             FROM lib_supplier
+#             WHERE supplier_name LIKE %s
+#             UNION ALL
+#             SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table
+#             FROM lib_others_payee
+#             WHERE name LIKE %s
+#             LIMIT %s
+#         """
+#         cursor.execute(sql, [f"%{query}%", f"%{query}%", payee_limit])
+#         results = cursor.fetchall()
+
+#         print(results)
+#         print("results")
+
+#     payees = [{'id': row[0], 'text': row[1]} for row in results]
+#     return JsonResponse({'results': payees})
+
+
+# @login_required(login_url='login')
+# def box_a_old(request):
+#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
+#     user_id = request.session.get('user_id', 0)
+#     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
+#     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
+#     role_names = [entry['role_name'] for entry in role_details]
+
+#     if any(role_name in allowed_roles for role_name in role_names):
+#         context = {
+#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
+#             'permissions' : role_names,
+#             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
+#             'cluster' : Cluster.objects.filter().order_by('id'),
+#             'payee' : Division.objects.filter().order_by('id'),
+#             'division' : Division.objects.filter().order_by('id'),
+#             'charges' : Charges.objects.filter().order_by('name')
+
+#         }
+#         return render(request, 'transaction/p_printing.html', context)
+#     else:
+#         return render(request, 'pages/unauthorized.html')
     
 @login_required(login_url='login')
 def outgoing_list(request):
@@ -1287,6 +1443,12 @@ def employee_journal(request):
 @csrf_exempt
 def multiple_charges_details(request):
     pp_id = request.POST.get('payroll_id')
+    amt = request.POST.get('amt')
+    dv_number = request.POST.get('payroll_id')
+    year = request.POST.get('year_now')
+
+    finance_connection = get_finance_connection(year)
+    
     data = []
     charges = PayrolledCharges.objects.filter(incoming_id=pp_id)
     incoming_amount= TevIncoming.objects.filter(id=pp_id).first()
@@ -1666,7 +1828,7 @@ def box_load(request):
         BoxStatus = request.GET.get('BoxStatus')
         dv_list = request.GET.getlist('ListDv[]')
         item_data = TevOutgoing.objects.filter(dv_no__startswith=dv_no_string,status_id__in = [5,6,8,9,10,11])
-        # item_data = TevOutgoing.objects.filter(box_b_in__year=year,status_id__in = [5,6,8,9,10,11])
+
 
         if FCluster:
             item_data = item_data.filter(cluster=FCluster)
@@ -1887,25 +2049,45 @@ def add_multiple_charges(request):
         return JsonResponse({'data': 'success'})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
+
 @csrf_exempt
 def update_multiple_charges(request):
     if request.method == 'POST':
-        amount = request.POST.getlist('amount[]')
+
+        amount_list = request.POST.getlist('amount[]') 
         charges_id = request.POST.getlist('charges_id[]')
         incoming_id = request.POST.get('incoming_id')
         amt_issued = request.POST.get('amt_issued')
+        dv_number = request.POST.get('dv_number')
+        year = request.POST.get('year_now')
+        finance_connection = get_finance_connection(year)
+        charges_total = PayrolledCharges.objects.filter(incoming_id=incoming_id).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+        amt_issued_dec = Decimal(amt_issued) 
+        amt_dec = amt_issued_dec - charges_total 
+
+        if amt_dec != Decimal('0'):
+            with transaction.atomic():
+                with connections[finance_connection].cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE transactions
+                        SET amt_certified = amt_certified + %s
+                        WHERE dv_no = %s
+                    """, [amt_dec, dv_number])
+
         TevIncoming.objects.filter(id=incoming_id).update(final_amount=amt_issued)
         PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
-        for amt, ch_id in zip(amount, charges_id):
+
+        for amt, ch_id in zip(amount_list, charges_id):
             PayrolledCharges.objects.create(
                 incoming_id=incoming_id,
                 amount=amt,
                 charges_id=ch_id
-        )
+            )
+
         return JsonResponse({'data': 'success'})
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
     
 @csrf_exempt
 def check_charges(request):
@@ -1921,21 +2103,7 @@ def check_charges(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
-@csrf_exempt
-def payroll_add_charges(request):
-    if request.method == 'POST':
-        incoming_id = request.POST.get('incoming_id')
-        amt = request.POST.get('amt')
-        charge_id = request.POST.get('charge_id')
-        try:
-            PayrolledCharges(amount=amt,charges_id=charge_id,incoming_id=incoming_id).save()
-            return JsonResponse({'data': 'success'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
+ 
 
 @csrf_exempt
 def payroll_add_charges(request):
@@ -1943,15 +2111,40 @@ def payroll_add_charges(request):
         incoming_id = request.POST.get('incoming_id')
         amt = request.POST.get('amt')
         charge_id = request.POST.get('charge_id')
+        dv_number = request.POST.get('dv_number')
+        year = request.POST.get('year_now')
+
+        if not amt:
+            return JsonResponse({'data': 'Amount is required'}, status=400)
+
+        try:
+            amt = float(amt)  # Convert amt to float for calculations
+        except ValueError:
+            return JsonResponse({'data': 'Invalid amount'}, status=400)
         
+        finance_connection = get_finance_connection(year)  
+
         try:
             with transaction.atomic():
+                # Insert into PayrolledCharges table
                 PayrolledCharges.objects.create(amount=amt, charges_id=charge_id, incoming_id=incoming_id)
+
+                # Update amt_certified in transactions table
+                with connections[finance_connection].cursor() as cursor:
+                    cursor.execute("""
+                        UPDATE transactions
+                        SET amt_certified = amt_certified + %s
+                        WHERE dv_no = %s
+                    """, [amt, dv_number])
+
             return JsonResponse({'data': 'success'})
+
         except Exception as e:
-            return JsonResponse({'data': str(e)})
-    else:
-        return JsonResponse({'data': 'Invalid request method'})
+            return JsonResponse({'data': str(e)}, status=500)
+
+    return JsonResponse({'data': 'Invalid request method'}, status=400)
+
+    
     
 @csrf_exempt
 def remove_charges(request):
@@ -1959,6 +2152,7 @@ def remove_charges(request):
         incoming_id = request.POST.get('incoming_id')
         charge_id = request.POST.get('charge_id')
         amt = request.POST.get('amt')
+        year = request.POST.get('year_now')
         try:
             PayrolledCharges.objects.filter(incoming_id=incoming_id).delete()
             PayrolledCharges(amount=amt,charges_id=charge_id,incoming_id =incoming_id).save()
@@ -1982,169 +2176,6 @@ def update_purpose(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
-
-# @csrf_exempt
-# def transmittal_details(request):
-#     data_result = []
-#     year = request.GET.get('year')
-#     selected_dv = request.GET.getlist('selectedDv')
-
-#     if year == '2023':
-#         finance_database_name = 'infimos_2023'
-
-#     if year == '2024':
-#         finance_database_name = 'infimos_2024'
-        
-#     else:
-#         finance_database_name = 'infimos_2025'
-
-#     with connection.cursor() as cursor:
-#         query = f"""
-#             SELECT
-#                 tev_outgoing.dv_no,
-#                 {finance_database_name}.payee,
-#                 {finance_database_name}.modepayment,
-#                 COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
-#             FROM
-#                 tev_incoming
-#             JOIN
-#                 tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
-#             LEFT JOIN
-#                 tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-#             LEFT JOIN
-#                 charges ON charges.id = tev_bridge.charges_id
-#             LEFT JOIN
-#                 payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
-#             LEFT JOIN
-#                 charges AS charges2 ON payrolled_charges.charges_id = charges2.id
-#             LEFT JOIN
-#                 {finance_database_name}.transactions AS {finance_database_name}
-#                 ON tev_outgoing.dv_no = {finance_database_name}.dv_no
-#             WHERE
-#                 tev_outgoing.id IN %s
-#             GROUP BY
-#                 tev_outgoing.dv_no, {finance_database_name}.payee, {finance_database_name}.modepayment
-#             ORDER BY
-#                 tev_outgoing.dv_no;
-#         """
-
-#         cursor.execute(query, [tuple(selected_dv)])
-#         columns = [col[0] for col in cursor.description]
-#         results = [dict(zip(columns, row)) for row in cursor.fetchall()]
-#     rs_len = len(results)
-#     sl_dv = len(selected_dv)
-#     if rs_len != sl_dv:
-#         return render(request, 'pages/not_found.html', {'message': "Review Travel First",'text': "You must assign at least one travel to this DV to view the data" })
-
-#     else:
-#         date_now = datetime.now().strftime("%Y-%m-%d")
-#         for row in results:
-#             amt_certified = row['charges_amount']
-#             if amt_certified == 0 :
-#                 return render(request, 'pages/not_found.html', {'message': "Invalid Amount Charges",'text': "There is travel with no assigned Charges!" })
-#             else:
-#                 data_dict = {
-#                     "dv_no": row['dv_no'],
-#                     "payee": row['payee'],
-#                     "modepayment": row['modepayment'],
-#                     "date":date_now,
-#                     "charges_amount": amt_certified
-#                 }
-#                 data_result.append(data_dict)
-
-#         response = {
-#             'data': data_result
-#         }
-#         return render(request, 'transaction/preview_transmittal.html', response)
-
-# @csrf_exempt
-# def transmittal_details(request):
-#     data_result = []
-#     year = request.GET.get('year')
-#     selected_dv = request.GET.getlist('selectedDv')
-#     dv_no_query = TevOutgoing.objects.filter(id__in=selected_dv).values_list("dv_no", flat=True)
-#     dv_no_tuple = tuple(dv_no_query)
-
-#     # Determine the finance database connection based on the year
-#     if year == '2023':
-#         finance_connection = 'finance'
-#     elif year == '2024':
-#         finance_connection = 'finance_2024'
-#     elif year == '2025':
-#         finance_connection = 'finance_2025'
-#     else:
-#         return render(request, 'pages/not_found.html', {
-#             'message': "Invalid Year",
-#             'text': "The selected year is not supported."
-#         })
-
-#     # Query default_db (port 3306)
-#     with connections['default'].cursor() as default_cursor:
-#         default_query = """
-#             SELECT
-#                 tev_outgoing.dv_no,
-#                 COALESCE(SUM(payrolled_charges.amount), 0) AS charges_amount
-#             FROM
-#                 tev_incoming
-#             JOIN
-#                 tev_bridge ON tev_incoming.id = tev_bridge.tev_incoming_id
-#             LEFT JOIN
-#                 tev_outgoing ON tev_bridge.tev_outgoing_id = tev_outgoing.id
-#             LEFT JOIN
-#                 charges ON charges.id = tev_bridge.charges_id
-#             LEFT JOIN
-#                 payrolled_charges ON payrolled_charges.incoming_id = tev_incoming.id
-#             WHERE
-#                 tev_outgoing.id IN %s
-#             GROUP BY
-#                 tev_outgoing.dv_no
-#             ORDER BY
-#                 tev_outgoing.dv_no;
-#         """
-#         default_cursor.execute(default_query, [tuple(selected_dv)])
-#         default_results = {row[0]: row[1] for row in default_cursor.fetchall()}  # Map dv_no -> charges_amount
-
-
-
-#     # Query finance_db (port 3307)
-#     with connections[finance_connection].cursor() as finance_cursor:
-#         finance_query = """
-#             SELECT
-#                 dv_no,
-#                 payee,
-#                 modepayment
-#             FROM
-#                 transactions
-#             WHERE
-#                 dv_no IN %s
-#             ORDER BY
-#                 dv_no;
-#         """
-#         finance_cursor.execute(finance_query, [dv_no_tuple])
-#         finance_results = {row[0]: {'payee': row[1], 'modepayment': row[2]} for row in finance_cursor.fetchall()}  # Map dv_no -> details
-
-#     print("default_results")
-#     print(default_results)
-#     print("finance_results")
-#     print(finance_results) 
-
-#     for dv_no, charges_amount in default_results.items():
-
-#         finance_data = finance_results[dv_no]
-#         data_dict = {
-#             "dv_no": dv_no,
-#             "payee": finance_data['payee'],
-#             "modepayment": finance_data['modepayment'],
-#             "date": datetime.now().strftime("%Y-%m-%d"),
-#             "charges_amount": charges_amount
-#         }
-#         data_result.append(data_dict)
-
-#     # Render response
-#     response = {'data': data_result}
-#     return render(request, 'transaction/preview_transmittal.html', response)
-
-
 @csrf_exempt
 def transmittal_details(request):
     data_result = []
@@ -2248,19 +2279,88 @@ def transmittal_details(request):
 @csrf_exempt
 def add_dv(request):
     if request.method == 'POST':
-        dv_number = strip_tags(request.POST.get('DvNumber'))
-        if TevOutgoing.objects.filter(dv_no=dv_number).exists():
-            return JsonResponse({'status': 'error', 'message': 'DV Number Already exists'})
         user_id = request.session.get('user_id', 0)
         cluster_id = request.POST.get('Cluster')
+        project_source = request.POST.get('ProjectSource')
+        purpose = request.POST.get('Purpose')
+        year = request.POST.get('DpYear')
         div_id = request.POST.get('Division')
+        payee_id = request.POST.get('PayeeId')
+        payee_name = request.POST.get('PayeeName')
+        source_table = request.POST.get('SourceTable')
+
+        formatted_date_now = datetime.now().strftime('%Y-%m-%d')
+
+        user = AuthUser.objects.filter(id=user_id).first()
+        full_name = f"{user.first_name} {user.last_name}" if user else "NULL"
+        user_name = f"{user.username}" if user else "NULL"
+        finance_connection = get_finance_connection(year)
+        finance_query = """
+            SELECT _value
+            FROM _config
+            WHERE _handler = "GENERATE_DV"
+            LIMIT 1
+        """
+
+        with connections[finance_connection].cursor() as cursor:
+            cursor.execute(finance_query)
+            dv_result = cursor.fetchone()
         
-        outgoing = TevOutgoing(dv_no=dv_number, cluster=cluster_id, box_b_in=date_time.datetime.now(), user_id=user_id, division_id=div_id)
-        outgoing.save()
-        
-        return JsonResponse({'data': 'success'})
+        _value = dv_result[0] if dv_result else None
+
+        if _value:
+            prefix, number = _value.rsplit('-', 1)
+            yy, mm = prefix.split('-')
+            current_month = f"{datetime.now().month:02d}"
+            
+            if mm != current_month:
+                mm = current_month
+            
+            old_number = str(int(number)).zfill(4)
+            new_number = str(int(number) + 1).zfill(4)
+            generated_dv = f"{yy}-{mm}-{old_number}" 
+            new_generated_dv = f"{yy}-{mm}-{new_number}" 
+            dv_yr = yy
+            dv_month = mm
+            dv_sequence = old_number
+            insert_query = """
+                INSERT INTO transactions (dv_no, dv_date, payee, modepayment, amt_certified, approval_date, recon, alobs_item, prov_id, mun_id, brgy_id, userlog, scaned_voucher, submit_coa, accountable, projectsrc_id, payee_table_name, payee_id, is_active)  
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            """
+
+            update_query = """
+                UPDATE _config
+                SET _value = %s
+                WHERE _handler = "GENERATE_DV"
+            """
+
+            outgoing = TevOutgoing(dv_no=generated_dv, cluster=cluster_id, box_b_in=datetime.now(), user_id=user_id, division_id=div_id)
+            outgoing.save()
+
+            with connections[finance_connection].cursor() as cursor:
+                cursor.execute(insert_query, (generated_dv, formatted_date_now, payee_name, purpose, 0, None, 0, 0, 0, 0, 0, user_name, None, None, full_name, project_source, source_table, payee_id, 0))
+                cursor.execute("SELECT LAST_INSERT_ID()")
+                transaction_id = cursor.fetchone()[0]
+                insert_trans_payeename_query = """
+                    INSERT INTO trans_payeename (transaction_id, dv_no, dv_yr, dv_month, dv_sequence, is_cancel, is_multiple, validate_budget)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                """
+                cursor.execute(insert_trans_payeename_query, (transaction_id, generated_dv, dv_yr, dv_month, dv_sequence, 0, 0, 0))
+                checklist_items = [249, 46, 47, 48, 49, 250, 50, 51, 52, 248]
+                insert_checklist_query = """
+                    INSERT INTO tbl_transaction_checklist (transaction_id, checklist_transaction_id, checklist_id, is_active)
+                    VALUES (%s, %s, %s, %s)
+                """
+
+                for checklist_id in checklist_items:
+                    cursor.execute(insert_checklist_query, (transaction_id, 7, checklist_id, 0))
+                cursor.execute(update_query, [new_generated_dv])
+
+            return JsonResponse({'data': 'success', 'dv_no': new_generated_dv})
+        return JsonResponse({'data': 'error', 'message': 'No value found'})
+
     else:
-        return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+        return JsonResponse({'data': 'error', 'message': 'Invalid request method'})
 
 @csrf_exempt
 def add_emp_dv(request):
@@ -2356,38 +2456,6 @@ def add_emp_journal(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
   
 
-# @csrf_exempt
-# def retrieve_employee(request):
-#     dv_no_id = request.POST.get('dv_no_id')
-#     data = []
-#     dv_number = TevOutgoing.objects.filter(id=dv_no_id).first()
-
-#     list_employee = TevIncoming.objects.filter(status_id=4).order_by('first_name')
-
-#     for row in list_employee:
-#         date_travel_str = row.date_travel
-#         date_travel_list = [datetime.strptime(date_str.strip(), "%d-%m-%Y").replace(tzinfo=pytz.UTC) for date_str in date_travel_str.split(',')]
-#         date_travel_formatted = ', '.join(date_travel.strftime("%b. %d %Y") for date_travel in date_travel_list)
-#         first_name = row.first_name if row.first_name else ''
-#         middle_name = row.middle_name if row.middle_name else ''
-#         last_name = row.last_name if row.last_name else ''
-#         final_amount = row.final_amount if row.final_amount else ''
-#         final_amount = ": Amount: " + f"{Decimal(final_amount):,.2f}"
-#         emp_fullname = f"{first_name} {middle_name} {last_name} {final_amount} : Date Travel: {date_travel_formatted}".strip()
-#         item = {
-#             'id': row.id,
-#             'name': emp_fullname
-#         }
-#         data.append(item)
-
-#     response = {
-#         'data': data,
-#         'dv_no' : dv_number.dv_no,
-#         'status' : dv_number.status_id
-#     }
-
-#     return JsonResponse(response)
-
 @csrf_exempt
 def retrieve_employee(request):
     dv_no_id = request.POST.get('dv_no_id')
@@ -2439,13 +2507,46 @@ def retrieve_employee(request):
 
 @csrf_exempt
 def delete_box_list(request):
-    incoming_id = request.POST.get('emp_id')
-    TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
-    TevIncoming.objects.filter(id=incoming_id).update(status_id=4, date_payrolled = None, payrolled_by = None)
-    response = {
-        'data': 'success'
-    }
-    return JsonResponse(response)
+    if request.method == 'POST':
+        incoming_id = request.POST.get('emp_id')
+        dv_number = request.POST.get('dv_number')
+        year = request.POST.get('year_now')
+        finance_connection = get_finance_connection(year)
+
+        try:
+            charges = PayrolledCharges.objects.filter(incoming_id=incoming_id)
+            with transaction.atomic():
+                final_amount = TevIncoming.objects.filter(id=incoming_id).values_list('final_amount', flat=True).first()
+
+                if final_amount is None:
+                    return JsonResponse({'status': 'error', 'message': 'final_amount not found'}, status=400)
+                
+                if charges.exists():
+                    with connections[finance_connection].cursor() as cursor:
+                        cursor.execute("""
+                            SELECT amt_certified FROM transactions WHERE dv_no = %s
+                        """, [dv_number])
+                        result = cursor.fetchone()
+
+                        if result:
+                            current_amt_certified = result[0]
+                            if current_amt_certified >= final_amount:
+                                cursor.execute("""
+                                    UPDATE transactions
+                                    SET amt_certified = GREATEST(amt_certified - %s, 0)
+                                    WHERE dv_no = %s
+                                """, [final_amount, dv_number])
+
+                TevBridge.objects.filter(tev_incoming_id=incoming_id).delete()
+                TevIncoming.objects.filter(id=incoming_id).update(status_id=4, date_payrolled=None, payrolled_by=None)
+
+            return JsonResponse({'data': 'success', 'message': 'Record deleted and amount subtracted'})
+
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+
 
 
 @csrf_exempt
@@ -2453,8 +2554,25 @@ def update_amt(request):
     incoming_id = request.POST.get('emp_id')
     amt = request.POST.get('amount')
     pp = request.POST.get('purpose')
+    dv_number = request.POST.get('dv_number')
+    year = request.POST.get('year_now')
+    finance_connection = get_finance_connection(year)
+
+    charges_total = PayrolledCharges.objects.filter(incoming_id=incoming_id).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+    amt_issued_dec = Decimal(amt) 
+    amt_dec = amt_issued_dec - charges_total 
+    
     try:
         with transaction.atomic():
+
+
+            with connections[finance_connection].cursor() as cursor:
+                cursor.execute("""
+                    UPDATE transactions
+                    SET amt_certified = amt_certified + %s
+                    WHERE dv_no = %s
+                """, [amt_dec, dv_number])
+
             data = PayrolledCharges.objects.select_for_update().filter(incoming_id=incoming_id)
             if len(data) == 1:
                 data.update(amount=amt)
@@ -2636,71 +2754,6 @@ def receive_journal(request):
             return JsonResponse({'data': 'invalid', 'message': 'The Budget forwarded date must be beyond the Journal date.','dv_no':', '.join(dv_list)})
     return JsonResponse({'data': 'success'})
 
-# @csrf_exempt
-# def forward_journal(request):
-#     missing_items = []
-#     journal_date = request.POST.get('journal_date')
-#     out_list = request.POST.getlist('out_list[]')
-#     user_id = request.session.get('user_id', 0)
-#     out_list_int = [int(item) for item in out_list]
-
-#     year = request.POST.get('year')
-#     if year == '2023':
-#         finance_database_name = 'infimos_2023'
-#     elif year == '2024':
-#         finance_database_name = 'infimos_2024'
-#     else:
-#         finance_database_name = 'infimos_2025'
-
-#     for status_id in out_list_int:
-#         check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
-#         if check_status:
-#             status = [item for item in check_status]
-#             missing_items.extend(status)
-#     if missing_items:
-#         return JsonResponse({'data':'Dvs must receive first!','message': ', '.join(map(str, missing_items))})
-#     else:
-#         dv_list = []
-#         if journal_date:
-#             journal_date_obj = datetime.strptime(journal_date, '%Y-%m-%d %H:%M')
-
-#             for item_id in out_list:
-#                 tev_outgoing = TevOutgoing.objects.filter(id=item_id).first()
-#                 j_d_received = tev_outgoing.j_d_received
-#                 if j_d_received <= journal_date_obj:
-#                     TevOutgoing.objects.filter(id=item_id).update(status_id=13,j_out_user_id = user_id,j_d_forwarded=journal_date_obj)
-#                     dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
-#                     with transaction.atomic():
-#                         for dv in dv_no_values:
-#                             with connection.cursor() as cursor:
-#                                 actual_date = date_time.datetime.now()
-#                                 query = f"""
-#                                 UPDATE {finance_database_name}.transactions SET approval_date = %s WHERE dv_no = %s
-#                                 """
-#                                 params = [actual_date, dv]
-#                                 cursor.execute(query, params)
-#                 else:
-#                     dv_list.append(tev_outgoing.dv_no)
-#         else:
-#             ids = TevBridge.objects.filter(tev_outgoing_id__in=out_list_int).values_list('tev_incoming_id', flat=True)
-#             TevIncoming.objects.filter(id__in=ids).update(status_id=13)
-#             for item_id  in out_list:
-#                 TevOutgoing.objects.filter(id=item_id).update(status_id=13,j_out_user_id = user_id,j_d_forwarded=date_time.datetime.now())
-
-#             dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
-#             with transaction.atomic():
-#                 for dv in dv_no_values:
-#                     with connection.cursor() as cursor:
-#                         actual_date = date_time.datetime.now()
-#                         query = f"""
-#                         UPDATE {finance_database_name}.transactions SET approval_date = %s WHERE dv_no = %s
-#                         """
-#                         params = [actual_date, dv]
-#                         cursor.execute(query, params)
-#         if dv_list:
-#             return JsonResponse({'data': 'invalid', 'message': 'The Journal forwarded date must be beyond the Journal date received.','dv_no':', '.join(dv_list)})
-#     return JsonResponse({'data': 'success'})
-
 
 @csrf_exempt
 def forward_journal(request):
@@ -2709,18 +2762,10 @@ def forward_journal(request):
     out_list = request.POST.getlist('out_list[]')
     user_id = request.session.get('user_id', 0)
     out_list_int = [int(item) for item in out_list]
-
     year = request.POST.get('year')
+    finance_connection = get_finance_connection(year)
     
-    if year == '2023':
-        finance_database_name = 'finance'
-    elif year == '2024':
-        finance_database_name = 'finance_2024'
-    else:
-        finance_database_name = 'finance_2025'
-
-    # Get the database connection based on the selected year
-    finance_connection = connections[finance_database_name]
+    finance_data = connections[finance_connection]
 
     for status_id in out_list_int:
         check_status = TevOutgoing.objects.filter(id=status_id, status_id=11).values_list('dv_no', flat=True)
@@ -2742,7 +2787,7 @@ def forward_journal(request):
                     dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
                     with transaction.atomic():
                         for dv in dv_no_values:
-                            with finance_connection.cursor() as cursor:
+                            with finance_data.cursor() as cursor:
                                 actual_date = datetime.now()
                                 query = f"""
                                 UPDATE transactions SET approval_date = %s WHERE dv_no = %s
@@ -2760,7 +2805,7 @@ def forward_journal(request):
             dv_no_values = TevOutgoing.objects.filter(id__in=out_list_int).values_list('dv_no', flat=True)
             with transaction.atomic():
                 for dv in dv_no_values:
-                    with finance_connection.cursor() as cursor:
+                    with finance_data.cursor() as cursor:
                         actual_date = datetime.now()
                         query = f"""
                         UPDATE transactions SET approval_date = %s WHERE dv_no = %s
@@ -2941,6 +2986,25 @@ def addtevdetails(request):
     tev_update = TevIncoming.objects.filter(id=transaction_id).update(final_amount=amount,remarks=remarks,status_id=status)
 
     return JsonResponse({'data': 'success'})
+
+@csrf_exempt
+def get_project_src(request):
+    data = []
+    cluster_id = request.GET.get('cluster_id')
+    project_src = LibProjectSrc.objects.filter(cluster_id=cluster_id)
+    for item in project_src:
+        item_entry = {
+            'id': item.id,
+            'name': item.name  
+        }
+        data.append(item_entry)
+
+    return JsonResponse({'data': data})
+
+    
+
+
+
 
 
 

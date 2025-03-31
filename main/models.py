@@ -1,6 +1,7 @@
 from django.db import models
 
 from datetime import datetime
+from django.utils.timezone import now
 
 
 class AuthGroup(models.Model):
@@ -461,6 +462,18 @@ class LibBarangays(models.Model):
     class Meta:
         managed = True
         db_table = 'lib_barangays'
+
+class LibProjectSrc(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    cluster_id = models.IntegerField()
+    is_active = models.IntegerField()
+    is_primary = models.IntegerField()
+    created_at = models.DateTimeField(default=now, blank=True, null=True)
+    updated_by = models.IntegerField()
+    updated_at = models.DateTimeField(blank=True, null=True)
+    class Meta:
+        managed = True
+        db_table = 'lib_project_src'
 
 
 
