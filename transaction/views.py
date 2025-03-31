@@ -2598,13 +2598,15 @@ def add_dv(request):
             if mm != current_month:
                 mm = current_month  # Reset month if changed
             
+            old_number = str(int(number)).zfill(4)  # Increment sequence
             new_number = str(int(number) + 1).zfill(4)  # Increment sequence
-            generated_dv = f"{yy}-{mm}-{new_number}"  # Create new DV number
+            generated_dv = f"{yy}-{mm}-{old_number}"  # Create new DV number
+            new_generated_dv = f"{yy}-{mm}-{new_number}" 
 
             # Extract DV components
             dv_yr = yy
             dv_month = mm
-            dv_sequence = new_number
+            dv_sequence = old_number
 
             # Insert into `transactions`
             insert_query = """
@@ -2646,9 +2648,9 @@ def add_dv(request):
                     cursor.execute(insert_checklist_query, (transaction_id, 7, checklist_id, 0))
 
                 # Update _config table
-                cursor.execute(update_query, [generated_dv])
+                cursor.execute(update_query, [new_generated_dv])
 
-            return JsonResponse({'data': 'success', 'dv_no': generated_dv})
+            return JsonResponse({'data': 'success', 'dv_no': new_generated_dv})
         return JsonResponse({'data': 'error', 'message': 'No value found'})
 
     else:
@@ -3126,19 +3128,24 @@ def update_amt(request):
     incoming_id = request.POST.get('emp_id')
     amt = request.POST.get('amount')
     pp = request.POST.get('purpose')
-    dv_number = request.POST.get('payroll_id')
+    dv_number = request.POST.get('dv_number')
     year = request.POST.get('year_now')
     finance_connection = get_finance_connection(year)
+
+    charges_total = PayrolledCharges.objects.filter(incoming_id=incoming_id).aggregate(Sum('amount'))['amount__sum'] or Decimal('0')
+    amt_issued_dec = Decimal(amt) 
+    amt_dec = amt_issued_dec - charges_total 
+    
     try:
         with transaction.atomic():
 
 
-            # with connections[finance_connection].cursor() as cursor:
-            #     cursor.execute("""
-            #         UPDATE transactions
-            #         SET amt_certified = amt_certified + %s
-            #         WHERE dv_no = %s
-            #     """, [amt, dv_number])
+            with connections[finance_connection].cursor() as cursor:
+                cursor.execute("""
+                    UPDATE transactions
+                    SET amt_certified = amt_certified + %s
+                    WHERE dv_no = %s
+                """, [amt_dec, dv_number])
 
             data = PayrolledCharges.objects.select_for_update().filter(incoming_id=incoming_id)
             if len(data) == 1:
