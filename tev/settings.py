@@ -101,7 +101,7 @@ CHANNEL_LAYERS = {
 }
 
 DATABASES = {
-    # for server to server
+    #for server to server
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tris',
@@ -135,6 +135,15 @@ DATABASES = {
         'NAME': 'infimos_2025',
         'USER':'tris',
         'PASSWORD':'vOHA]ko(5))If-LU',
+        'HOST':'172.31.240.235',
+        'PORT':'3306',
+    },
+
+    'libraries_isps': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'libraries_isps',
+        'USER':'rnvaldehueza',
+        'PASSWORD':'sspI7g)yRx@WskZZ',
         'HOST':'172.31.240.235',
         'PORT':'3306',
     },
@@ -183,6 +192,25 @@ DATABASES = {
     #     'HOST':'localhost',
     #     'PORT':'3307',
     # },
+
+    # 'finance_2025': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2025',
+    #     'USER':'root',
+    #     'PASSWORD':'qw1234',
+    #     'HOST':'localhost',
+    #     'PORT':'3307',
+    # },
+
+    # 'libraries_isps': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'libraries_isps',
+    #     'USER':'root',
+    #     'PASSWORD':'qw1234',
+    #     'HOST':'localhost',
+    #     'PORT':'3307',
+    # },
+
 
 
     # 'finance': {
