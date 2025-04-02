@@ -193,15 +193,6 @@ DATABASES = {
     #     'PORT':'3307',
     # },
 
-    # 'finance_2025': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2025',
-    #     'USER':'root',
-    #     'PASSWORD':'qw1234',
-    #     'HOST':'localhost',
-    #     'PORT':'3307',
-    # },
-
     # 'libraries_isps': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'libraries_isps',
