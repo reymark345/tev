@@ -175,6 +175,7 @@
   {% block footer_scripts %}
   <script>
     $(document).ready(function() {
+      $('#loading-screen').hide();
       const FStartDate = jQuery(document.querySelector('[name="FStartDate"]')),
             FEndDate = jQuery(document.querySelector('[name="FEndDate"]'));
       const toast_options = (toastr.options = {
