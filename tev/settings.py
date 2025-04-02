@@ -149,7 +149,7 @@ DATABASES = {
     },
     
 
-    ##for server local but live database
+    #for server local but live database
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'tris',
