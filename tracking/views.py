@@ -355,7 +355,8 @@ def status_load(request):
           "AD" if acronym == 'Administrative Division' else
           "PD/SLP" if acronym == 'Promotive Services Division' and section == 'Sustainable Livelihood Program'  else
           "ID" if acronym == 'Innovation Division' else
-          "PD" if acronym == 'Promotive Services Division'else
+          "PD" if acronym == 'Promotive Services Division' else
+          "OARD" if acronym == 'Office of the Assistant Regional Director for Operation' else
           "")
         
         if approved_date:
