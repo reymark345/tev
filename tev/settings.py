@@ -156,7 +156,7 @@ DATABASES = {
     #     'USER': 'fmdDeveloper',
     #     'PASSWORD': 'M@tth3w6fmd-developer',
     #     'HOST': '172.31.240.235',
-    #     'PORT': '3306',
+    #     'PORT': '3306',   
     # },
     #for localhost main database
     # 'default': {

@@ -1,0 +1,15 @@
+stages:
+  - deploy
+
+deploy_job:
+  stage: deploy
+  tags: 
+    - deploy
+  script:
+    - "cd $DEPLOY_PATH && git pull --force gitlab master"
+    - "systemctl restart tev"
+  after_script:
+    - echo "Cleaning up temporary files..."
+    # - rm -rf /etc/gitlab-runner/builds/
+  only:
+    - master
