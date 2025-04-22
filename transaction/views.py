@@ -1069,7 +1069,7 @@ def preview_box_a(request):
             for row in rows:
                 if row[11] == None:
 
-                    return render(request, 'pages/not_found.html', {'message': "There was a travel with no assigned charges!",'text': "You must assign charges under this DV"})
+                    return render(request, 'pages/not_found.html', {'message': "There was a travel record with no assigned charges!",'text': "You must assign charges under this DV"})
                 else:
                     total_final_amount += Decimal(row[11]) if row[11] is not None else Decimal('0.0')
                     data_dict = {
