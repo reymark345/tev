@@ -142,21 +142,21 @@ DATABASES = {
     'libraries_isps': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'libraries_isps',
-        'USER':'rnvaldehueza',
-        'PASSWORD':'sspI7g)yRx@WskZZ',
+        'USER':'tris',
+        'PASSWORD':'vOHA]ko(5))If-LU',
         'HOST':'172.31.240.235',
         'PORT':'3306',
     },
     
 
-    #for server local but live database
+    ##for server local but live database
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'tris',
     #     'USER': 'fmdDeveloper',
     #     'PASSWORD': 'M@tth3w6fmd-developer',
     #     'HOST': '172.31.240.235',
-    #     'PORT': '3306',
+    #     'PORT': '3306',   
     # },
     #for localhost main database
     # 'default': {
@@ -184,15 +184,6 @@ DATABASES = {
     #     'HOST':'localhost',
     #     'PORT':'3307',
     # },
-    # 'finance_2025': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2025',
-    #     'USER':'root',
-    #     'PASSWORD':'qw1234',
-    #     'HOST':'localhost',
-    #     'PORT':'3307',
-    # },
-
     # 'finance_2025': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'infimos_2025',
