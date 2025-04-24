@@ -1360,13 +1360,11 @@ margin-top: 99%;
                 <th>Name</th>
                 <th>Age</th>
                 <th>City</th>
-                <th>City</th>
               </tr>
             </thead>
             <tbody>
               <tr >
                 <td><b>No.</b></td>
-                <td><b>Account Number</b></td>
                 <td><b>ID NUMBER</b></td>
                 <td><b><center>NAME</center></b></td>
                 <td><b>AMOUNT</b></td>
@@ -1377,7 +1375,6 @@ margin-top: 99%;
               {% for emp in data %}
               <tr>
                 <td class="align-text-right" style="padding: 2; width:6%">{{ forloop.counter }}</td>
-                <td class="align-text-right" style="padding: 4;">{{ emp.account_no }}</td>
                 <td class="align-text-left" style="padding: 4;">{{ emp.id_no }}</td>
                 <td  class="align-text-left" style="padding: 4;">{{ emp.last_name }}, {{ emp.first_name }} {{ emp.middle_name }} </td>
                 <td style="padding: 4;" class="align-text-right">{{ emp.charges_amount|floatformat:2|intcomma }}</td>
@@ -1389,10 +1386,10 @@ margin-top: 99%;
                 <td style="padding: 0;"></td>
                 <td style="padding: 2;"><b>TOTAL</b></td>
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"></td>
                 <td style="padding: 4;" class="align-text-right"><b>{{ total_amount|floatformat:2|intcomma}}</b></td>
                 <td style="padding: 0;"></td>
-                <td style="padding: 0;"><center><b>{{ total_count }}</b></center></td>
+                <td style="padding: 0;"></td>
+                {% comment %} <td style="padding: 0;"><center><b>{{ total_count }}</b></center></td> {% endcomment %}
               </tr>
             </tbody>
           </table>
