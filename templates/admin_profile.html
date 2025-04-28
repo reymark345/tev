@@ -1,4 +1,5 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
+
 <style>
   .bs-stepper-header {
     display: flex;
@@ -235,7 +236,7 @@
           <input type="hidden" id="password-id" name="PasswordID" />
 
           <div class="col-sm-12 form-password-toggle">
-              <label class="form-label" for="modalEnableOTPPhone">Password</label><br>
+              <label class="form-label" for="modalEnableOTPPhone">New Password</label><br>
               <div class="input-group">
               <input
                   type="password"
@@ -249,7 +250,7 @@
               </div>
           </div>
           <div class="col-sm-12 form-password-toggle">
-              <label class="form-label" for="modalEnableOTPPhone">Confirm Password</label>
+              <label class="form-label" for="modalEnableOTPPhone">Confirm New Password</label>
               <div class="input-group">
       
               <input
@@ -287,6 +288,9 @@
   <script src="{% static 'assets/vendor/libs/bs-stepper/bs-stepper.js' %}"></script>
   <script src="{% static 'assets/js/form-wizard-numbered.js' %}"></script>
   <script src="{% static 'assets/js/form-wizard-validation.js' %}"></script>
+
+
+  
   
   <script>
     $(document).ready(function() {
@@ -444,4 +448,7 @@
       });
     });
   </script>
+  <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
   {% endblock footer_scripts %}

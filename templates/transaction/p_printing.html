@@ -1,5 +1,8 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
 <link rel="stylesheet" href="{% static 'custom/custom.css' %}" />
+
+
+
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -356,6 +359,7 @@
 <!--/ Enable OTP Modal -->
 
 {% endblock %} {% block footer_scripts %}
+
 <script>
     let clicked_id = 0;
     let dv_no_id =0;
@@ -369,6 +373,7 @@
     let chargeId = 0;
     let selectedCb = [];
     $(document).ready(function () {
+        
       const table_box_a = $('#tbl-box-a')
       const table = $('#tbl-items');
 
@@ -1800,4 +1805,7 @@
         });
     })
 </script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
 {% endblock footer_scripts %}
