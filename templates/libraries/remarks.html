@@ -1,5 +1,4 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
-
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -411,4 +410,7 @@
             }
     })
 </script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
 {% endblock footer_scripts %}

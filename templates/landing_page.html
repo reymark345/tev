@@ -11,32 +11,22 @@
   <meta content="" name="description">
   <meta content="" name="keywords">
 
-  <!-- Favicons -->
-  {% comment %} <link href="{% static 'assets/herobiz/img/favicon.png' %}" rel="icon">
-  <link href="{% static 'assets/herobiz/img/apple-touch-icon.png' %}" rel="apple-touch-icon"> {% endcomment %}
-
   <link rel="icon" type="image/x-icon" href="{% static 'assets/img/branding/t_logo.png' %}" />
 
   <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Source+Sans+Pro:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&display=swap" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
-
-
   <link rel="stylesheet" href="{% static 'assets/herobiz/vendor/bootstrap/css/bootstrap.min.css' %}" />
   <link rel="stylesheet" href="{% static 'assets/herobiz/vendor/bootstrap-icons/bootstrap-icons.css' %}" />
   <link rel="stylesheet" href="{% static 'assets/herobiz/vendor/aos/aos.css' %}" />
   <link rel="stylesheet" href="{% static 'assets/herobiz/vendor/glightbox/css/glightbox.min.css' %}" />
   <link rel="stylesheet" href="{% static 'assets/herobiz/vendor/swiper/swiper-bundle.min.css' %}" />
-
   <!-- Variables CSS Files. Uncomment your preferred color scheme -->
   <!-- Core CSS -->
 
 
-  <link rel="stylesheet" href="{% static 'assets/vendor/css/rtl/core.css" class="template-customizer-core-css' %}" />
-  <link rel="stylesheet" href="{% static 'assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css' %}" />
+  <link rel="stylesheet" href="{% static 'assets/vendor/css/rtl/core.css' %}" class="template-customizer-core-css" />
+  <link rel="stylesheet" href="{% static 'assets/vendor/css/rtl/theme-default.css' %}" class="template-customizer-theme-css" />
   <link rel="stylesheet" href="{% static 'assets/css/demo.css' %}" />
 
   <!-- Vendors CSS -->
@@ -101,17 +91,12 @@
 
   <section id="hero-animated" class="hero-animated d-flex align-items-center">
     <div class="container d-flex flex-column justify-content-center align-items-center text-center position-relative" data-aos="zoom-out">
-      {% comment %} <img src="{% static 'assets/herobiz/img/hero-carousel/hero-carousel-3.svg' %}" class="img-fluid animated"> {% endcomment %}
       <img src="{% static 'assets/herobiz/img/hero-carousel/landing_pic.png' %}" class="img animated">
-
-      
-
 
       <h2>Welcome to DSWD <span>TRIPS👋</span></h2>
       <p>TRAVEL REIMBURSEMENT INFORMATION PLATFORM SYSTEM</p>
       <div class="d-flex">
         <a href="{% url 'login' %}" class="btn-get-started scrollto">Get Started</a>
-        <!-- <a href="https://www.youtube.com/watch?v=LXb3EKWsInQ" class="glightbox btn-watch-video d-flex align-items-center"><i class="bi bi-play-circle"></i><span>No account?</span></a> -->
       </div>
     </div>
   </section>
@@ -366,11 +351,6 @@
                 <img src="{% static 'assets/herobiz/img/testimonials/reymark.jpg' %}" class="testimonial-img" alt="">
                 <h3>Reymark N. Valdehueza</h3>
                 <h4>Computer Programmer III (Developer)</h4>
-                <!-- <p>
-                  <i class="bi bi-quote quote-icon-left"></i>
-                  Proin iaculis purus consequat sem cure digni ssim donec porttitora entum suscipit rhoncus. Accusantium quam, ultricies eget id, aliquam eget nibh et. Maecen aliquam, risus at semper.
-                  <i class="bi bi-quote quote-icon-right"></i>
-                </p> -->
               </div>
             </div><!-- End testimonial item -->
 
@@ -379,11 +359,6 @@
                 <img src="{% static 'assets/herobiz/img/testimonials/marwen.jpg' %}" class="testimonial-img" alt="">
                 <h3>Marwen A. Valeroso</h3>
                 <h4>Computer Programmer III (Analyst)</h4>
-                <!-- <p>
-                  <i class="bi bi-quote quote-icon-left"></i>
-                  Quis quorum aliqua sint quem legam fore sunt eram irure aliqua veniam tempor noster veniam enim culpa labore duis sunt culpa nulla illum cillum fugiat legam esse veniam culpa fore nisi cillum quid.
-                  <i class="bi bi-quote quote-icon-right"></i>
-                </p> -->
               </div>
             </div><!-- End testimonial item -->
 
@@ -663,80 +638,54 @@
   </main><!-- End #main -->
 
   <!-- ======= Footer ======= -->
-  <footer id="footer" class="footer">
+  <section id="contact">
+    <footer id="footer" class="footer">
+      
+        <div class="footer-content">
+          <div class="container">
+            <div class="row">
 
-    <div class="footer-content">
-      <div class="container">
-        <div class="row">
+              <div class="col-lg-3 col-md-6">
+                <div class="footer-info">
+                  <h4>TRIPS</h4>
+                  <p>
+                    R. Palma Street  <br>
+                    Barangay Dagohoy Butuan City<br><br>
+                    <strong>Contact number:</strong> (085) 342 5619<br>
+                    <strong>Email:</strong> accountingdswd@dswd.gov.ph<br>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-          <div class="col-lg-3 col-md-6">
-            <div class="footer-info">
-              <h3>TRIPS</h3>
-              <p>
-                R. Palma Street  <br>
-                Barangay Dagohoy Butuan City<br><br>
-                <strong>Contact number:</strong> (085) 342 5619<br>
-                <strong>Email:</strong> accountingdswd@dswd.gov.ph<br>
-              </p>
+      <div class="footer-legal text-center">
+        <div class="container d-flex flex-column flex-lg-row justify-content-center justify-content-lg-between align-items-center">
+
+          <div class="d-flex flex-column align-items-center align-items-lg-start">
+            <div class="copyright">
+              &copy; Copyright <strong><span>TRIPS</span></strong>. All Rights Reserved
+            </div>
+            <div class="credits">
+              <!-- All the links in the footer should remain intact. -->
+              <!-- You can delete the links only if you purchased the pro version. -->
+              <!-- Licensing information: https://bootstrapmade.com/license/ -->
+              <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/herobiz-bootstrap-business-template/ -->
+              Designed by <a href="#">DSWD FO CARAGA</a>
             </div>
           </div>
 
-          <div class="col-lg-2 col-md-6 footer-links">
-            <h4>Useful Links</h4>
-            <ul>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Home</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">About us</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Process</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Terms of service</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Privacy policy</a></li>
-            </ul>
+          <div class="social-links order-first order-lg-last mb-3 mb-lg-0">
+            <a href="https://www.facebook.com/dswdcaraga" class="facebook"><i class="bi bi-facebook"></i></a>
           </div>
-
-          <div class="col-lg-3 col-md-6 footer-links">
-            <h4>Our Services</h4>
-            <ul>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Web Design</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Web Development</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Product Management</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Marketing</a></li>
-              <li><i class="bi bi-chevron-right"></i> <a href="#">Graphic Design</a></li>
-            </ul>
-          </div>
-
-
 
         </div>
       </div>
-    </div>
 
-    <div class="footer-legal text-center">
-      <div class="container d-flex flex-column flex-lg-row justify-content-center justify-content-lg-between align-items-center">
 
-        <div class="d-flex flex-column align-items-center align-items-lg-start">
-          <div class="copyright">
-            &copy; Copyright <strong><span>TRIPS</span></strong>. All Rights Reserved
-          </div>
-          <div class="credits">
-            <!-- All the links in the footer should remain intact. -->
-            <!-- You can delete the links only if you purchased the pro version. -->
-            <!-- Licensing information: https://bootstrapmade.com/license/ -->
-            <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/herobiz-bootstrap-business-template/ -->
-            Designed by <a href="#">IT Staff</a>
-          </div>
-        </div>
-
-        <div class="social-links order-first order-lg-last mb-3 mb-lg-0">
-          <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
-          <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
-          <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
-          <a href="#" class="google-plus"><i class="bi bi-skype"></i></a>
-          <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-        </div>
-
-      </div>
-    </div>
-
-  </footer><!-- End Footer -->
+    </footer><!-- End Footer -->
+</section>
 
   <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 

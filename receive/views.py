@@ -538,8 +538,6 @@ def checking_load(request):
             params.append(FCreatedBy)
 
         if FReviewedBy:
-            print("reviewwww")
-            print(FStatus)
             query += " AND t1.reviewed_by = %s"
             params.append(FReviewedBy)
 
