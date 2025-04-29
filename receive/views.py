@@ -34,7 +34,9 @@ from django.db import transaction
 from django.conf import settings
 import platform
 import re
+import urllib3
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
@@ -132,7 +134,6 @@ def api(request):
     except Exception as e:
         return JsonResponse({'error': 'An error occurred', 'details': str(e)}, status=500)
 
-   
 # @csrf_exempt
 # def api(request):
 #     url = settings.PORTAL_API_URL
