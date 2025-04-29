@@ -425,7 +425,6 @@
             },
             success: function(data) {
               $('table .tbody_').empty();
-              console.log(data);
               data.forEach(function(userResult) {
                 
                 var tableId = `#accomplishment-tbl-${userResult.user}`;

@@ -57,7 +57,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'channels',
     'django_recaptcha',
-    'csp',
 ]
 
 
@@ -72,7 +71,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'tev.urls'
@@ -103,18 +101,6 @@ CHANNEL_LAYERS = {
     "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
 }
 
-
-
-CONTENT_SECURITY_POLICY = {
-    'DIRECTIVES': {
-        'style-src': ("'self'", "'unsafe-inline'", "https://fonts.googleapis.com"),
-        'script-src': ("'self'", "'unsafe-inline'", "'unsafe-eval'", "https://www.google.com", "https://www.gstatic.com"),
-        'img-src': ("'self'", "data:", "https://www.google.com"),
-        'connect-src': ("'self'", "https://www.google.com", "https://www.gstatic.com"),
-        'frame-src': ("'self'", "https://www.google.com"),
-        'font-src': ("'self'", "data:", "https://fonts.gstatic.com", "https://www.gstatic.com", "https://www.google.com"),
-    }
-}
 
 DATABASES = {
     #for server to server

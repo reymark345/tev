@@ -1430,8 +1430,6 @@
 
         function outgoing(status_id){
             var date_journal = $('input[name="FJournalDate"]').val();
-            console.log(date_journal);
-
             selectedCb = $.grep(selectedCb, function(value) {
                 return value !== 'on';
             })

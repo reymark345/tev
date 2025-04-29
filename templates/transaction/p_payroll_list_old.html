@@ -735,7 +735,6 @@
                             tev_id: clicked_id
                         }
                     }).done(function (data) {
-                        console.log(data);
                         let duplicate_date = data.remarks;
                         let final_amount = data.final_amount;
                         let lacking = data.lacking;
@@ -763,11 +762,7 @@
                             date_remarks = date_remarks.split(", ")
                             remarks_date = date_remarks;
                             remarks_data = remarks_d;
-                            console.log("remarkssss_data");
-                            console.log(remarks_data);
-
-                            for (let i = 0; i < date_remarks.length; i++) {       
-                                console.log(i);                
+                            for (let i = 0; i < date_remarks.length; i++) {                     
                                 var newRow = $('<div class="row mt-2">' +
                                     '<div class="col-5">' +
                                     '<select class="form-select _select-remarks" id="_remarks-select-'+i+'">' +

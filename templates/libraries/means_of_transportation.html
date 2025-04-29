@@ -247,8 +247,6 @@
                 data: form_data,
             }).done(function (data) {
                 dataTable.ajax.reload();
-                console.log("whatif");
-                console.log(data.data);
                 if (data.data == 'success' && ItemID.val()=='0') {
                     toastr.success('Successfully save', 'Success', toast_options);
                     clear_data();

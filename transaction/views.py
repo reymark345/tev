@@ -31,6 +31,7 @@ from django.db.models.functions import Cast
 from django.db.utils import OperationalError
 from django.utils.html import strip_tags
 from django.db.models import Sum
+from main.database_selector import get_finance_db_alias
 
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
@@ -997,8 +998,7 @@ def approval_load(request):
 
     
 @login_required(login_url='login')
-def preview_box_a(request):
-    finance_database_alias = 'finance'    
+def preview_box_a(request):   
     outgoing_id = request.GET.get('id')
     user_id = request.session.get('user_id', 0)
 
@@ -1012,13 +1012,7 @@ def preview_box_a(request):
     year = int(year)
     outgoing_id = int(ot_id)
 
-    if year == 2023:
-        finance_database_alias = 'finance' 
-    elif year ==2024:
-        finance_database_alias = 'finance_2024' 
-    else:
-        finance_database_alias = 'finance_2025' 
-
+    finance_database_alias = get_finance_db_alias(year)
     userData = AuthUser.objects.filter(id=user_id)
     full_name = userData[0].first_name + ' ' + userData[0].last_name
     

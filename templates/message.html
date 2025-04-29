@@ -71,8 +71,6 @@
     // response from consumer on server
     socket.addEventListener("message", (event) => {
         const messageData = JSON.parse(event.data)['message'];
-        console.log(messageData);
-        
         var sender = messageData['sender'];
         var message = messageData['message'];
 
