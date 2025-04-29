@@ -133,7 +133,7 @@ def api(request):
         return JsonResponse({'data': data})
     except Exception as e:
         return JsonResponse({'error': 'An error occurred', 'details': str(e)}, status=500)
-   
+
 # @csrf_exempt
 # def api(request):
 #     url = settings.PORTAL_API_URL
