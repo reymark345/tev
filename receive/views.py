@@ -117,7 +117,7 @@ def travel_list(request):
         return render(request, 'receive/travel_user.html' , context)
     else:
         return render(request, 'pages/unauthorized.html')
-   
+    
 @csrf_exempt
 def api(request):
     url = settings.PORTAL_API_URL
@@ -125,9 +125,24 @@ def api(request):
     headers = {
         "Authorization": portal_token,
     }
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    return JsonResponse({'data': data})
+    try:
+        response = requests.get(url, headers=headers, verify=False)
+        data = response.json()
+        return JsonResponse({'data': data})
+    except Exception as e:
+        return JsonResponse({'error': 'An error occurred', 'details': str(e)}, status=500)
+
+   
+# @csrf_exempt
+# def api(request):
+#     url = settings.PORTAL_API_URL
+#     portal_token = settings.PORTAL_TOKEN
+#     headers = {
+#         "Authorization": portal_token,
+#     }
+#     response = requests.get(url, headers=headers)
+#     data = response.json()
+#     return JsonResponse({'data': data})
 
 @csrf_exempt
 def psgc_api(request):
