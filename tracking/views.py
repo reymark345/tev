@@ -28,6 +28,7 @@ from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
 from django.utils import timezone
 from django.template.defaultfilters import date
 import decimal
+from main.database_selector import get_finance_db_alias
 
 def format_datetime(dt):
     return dt.strftime('%B %d, %Y %I:%M %p') if dt else None
@@ -85,14 +86,7 @@ def status_load(request):
     FDateTravel= request.GET.get('FDateTravel') 
     FDivision = request.GET.get('FDivision')
     DpYear= request.GET.get('DpYear') 
-
-    if DpYear == "2023":
-        finance_database_alias = 'finance' 
-
-    elif DpYear == "2025":
-        finance_database_alias = 'finance_2025'
-    else:
-        finance_database_alias = 'finance_2024' 
+    finance_database_alias = get_finance_db_alias(DpYear) 
 
 
     year = int(DpYear) % 100
@@ -417,8 +411,7 @@ def status_load(request):
 @csrf_exempt
 def employee_details(request):
     year= request.POST.get('DpYear')
-    finance_database_alias = 'finance_2024' if year == "2024" else 'finance' 
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
+    finance_database_alias = get_finance_db_alias(year)
     fullname = ''
     total_amount = 0
     charges_list = []
@@ -892,21 +885,13 @@ def travel_history_load(request):
     FTransactionCode = request.GET.get('FTransactionCode')
     FDateTravel= request.GET.get('FDateTravel') 
     FDivision = request.GET.get('FDivision')
-    DpYear= request.GET.get('DpYear') 
+    DpYear= request.GET.get('DpYear')
+    finance_database_alias = get_finance_db_alias(DpYear) 
 
     user_id = request.session.get('user_id', 0)
     user_details_ = AuthUser.objects.filter(id=user_id).first()
     first_name_ = user_details_.first_name
     last_name_ = user_details_.last_name
-
-    if DpYear == "2023":
-        finance_database_alias = 'finance' 
-
-    elif DpYear == "2025":
-        finance_database_alias = 'finance_2025'
-    else:
-        finance_database_alias = 'finance_2024' 
-
 
     year = int(DpYear) % 100
     formatted_year = str(year)+"-"
@@ -1240,10 +1225,7 @@ def travel_history_load_old(request):
     FDivision = request.GET.get('FDivision')
     DpYear= request.GET.get('DpYear') 
 
-    if DpYear == "2023":
-        finance_database_alias = 'finance' 
-    else:
-        finance_database_alias = 'finance_2024' 
+    finance_database_alias = get_finance_db_alias(DpYear) 
 
     year = int(DpYear) % 100
     formatted_year = str(year)+"-"
