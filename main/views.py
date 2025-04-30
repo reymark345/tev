@@ -14,6 +14,8 @@ from django.db.models.functions import TruncMonth
 from django.db.models import Q
 import datetime
 from .forms import LoginForm
+from django.conf import settings
+import requests
 
 
 def index(request):
@@ -28,65 +30,8 @@ def landing(request):
         return redirect("dashboard")
     return render(request, 'landing_page.html')
 
+
 # @csrf_exempt
-# def login(request):
-#     if request.user.is_authenticated:
-#         return redirect("dashboard")
-
-#     if request.method == 'POST':
-#         form = LoginForm(request.POST)
-#         if form.is_valid():
-#             username = form.cleaned_data['username']
-#             password = form.cleaned_data['password']
-#             user = authenticate(request, username=username, password=password)
-#             if user is not None:
-#                 auth_login(request, user)
-#                 request.session['user_id'] = user.id
-#                 request.session['username'] = user.username
-#                 request.session['fullname'] = user.first_name + user.last_name
-#                 return redirect("dashboard")
-#             else:
-#                 messages.error(request, 'Invalid Username or Password.')
-#         else:
-#             for field, errors in form.errors.items():
-#                 print(form.errors.items)
-#                 for error in errors:
-#                     messages.error(request, f"{field.capitalize()}: {error}")
-
-#     else:
-#         form = LoginForm()
-
-#     return render(request, 'login.html', {'form': form})
-
-@csrf_exempt
-def login(request):
-    if request.user.is_authenticated:
-        return redirect("dashboard")
-
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                auth_login(request, user)
-                request.session['user_id'] = user.id
-                request.session['username'] = user.username
-                request.session['fullname'] = user.first_name + user.last_name
-                return redirect("dashboard")
-            else:
-                messages.error(request, 'Invalid Username or Password.')
-        else:
-            messages.error(request, 'Invalid reCAPTCHA.')
-
-    else:
-        form = LoginForm()
-
-    return render(request, 'login.html', {'form': form})
-
-
-
 # def login(request):
 #     if request.user.is_authenticated:
 #         return redirect("dashboard")
@@ -112,6 +57,49 @@ def login(request):
 #         form = LoginForm()
 
 #     return render(request, 'login.html', {'form': form})
+
+@csrf_exempt
+def login(request):
+    if request.user.is_authenticated:
+        return redirect("dashboard")
+
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        recaptcha_token = request.POST.get('g-recaptcha-response')
+
+        recaptcha_response = requests.post(
+            settings.RECAPTCHA_VERIFY_URL,
+            data={
+                'secret': settings.RECAPTCHA_SECRET_KEY,
+                'response': recaptcha_token
+            }
+        )
+        recaptcha_result = recaptcha_response.json()
+
+        if not (recaptcha_result.get('success') and recaptcha_result.get('score', 0) > 0.5):
+            messages.error(request, 'reCAPTCHA validation failed.')
+            return render(request, 'login.html', {'form': form})
+
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                auth_login(request, user)
+                request.session['user_id'] = user.id
+                request.session['username'] = user.username
+                request.session['fullname'] = user.first_name + user.last_name
+                return redirect("dashboard")
+            else:
+                messages.error(request, 'Invalid Username or Password.')
+        else:
+            messages.error(request, 'Form validation failed.')
+
+    else:
+        form = LoginForm()
+
+    return render(request, 'login.html', {'form': form})
+
 
 
 
