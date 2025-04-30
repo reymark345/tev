@@ -21,8 +21,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 GOOGLE_RECAPTCHA_SECRET_KEY = '6LfBfsgqAAAAAKsANK7ROm7OGslrc2e8KyIQsI_t'
-RECAPTCHA_PUBLIC_KEY = '6LfBfsgqAAAAAKsANK7ROm7OGslrc2e8KyIQsI_t'
-RECAPTCHA_PRIVATE_KEY = '6LfBfsgqAAAAAEEHpMdVD6ZyYU92kViCR3u-glX8'
+# RECAPTCHA_PUBLIC_KEY = '6LfBfsgqAAAAAKsANK7ROm7OGslrc2e8KyIQsI_t'
+# RECAPTCHA_PRIVATE_KEY = '6LfBfsgqAAAAAEEHpMdVD6ZyYU92kViCR3u-glX8'
+
+
+RECAPTCHA_SECRET_KEY = '6LfEHykrAAAAABkw_UJlsjYAaa7x9SQV7vJemLF6'  # Captcha_Version3
+RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify'
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 
 SECRET_KEY = 'django-insecure-e&691z)oh*#_&yv(h^3sn^*=gxs09(%(5395)=xe+_im_bk^l&'
 PSGC_TOKEN  = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2R4Y2xvdWQuZHN3ZC5nb3YucGgvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3Mzc3NzA3NjYsImV4cCI6MTgzMjM3ODc2NiwibmJmIjoxNzM3NzcwNzY2LCJqdGkiOiJyS1pNMm90NmJlaHFNaWtzIiwic3ViIjoyMTEsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.q5MOfNtcQC-zcCg2kdsfZwf_gOm6Sw2QuiA5lDvfA6g"
