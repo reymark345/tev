@@ -77,7 +77,7 @@ def login(request):
         recaptcha_result = recaptcha_response.json()
 
         if not (recaptcha_result.get('success') and recaptcha_result.get('score', 0) > 0.5):
-            messages.error(request, 'reCAPTCHA validation failed.')
+            messages.error(request, 'CAPTCHA validation failed, Try again.')
             return render(request, 'login.html', {'form': form})
 
         if form.is_valid():
