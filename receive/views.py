@@ -1132,6 +1132,8 @@ def item_add(request):
     selected_remarks = request.POST.getlist('selectedRemarks[]')
     selected_dates = request.POST.getlist('selectedDate[]')
     g_code = generate_code()
+    enable_expiry = SystemConfiguration.objects.filter().first().is_travel_expire
+    expired_dates = []
 
     if travel_date:
         travel_date = request.POST.get('DateTravel')
@@ -1154,6 +1156,19 @@ def item_add(request):
     duplicate_travel = []
     individual_dates = travel_date.split(',')
     cleaned_dates = ','.join(date.strip() for date in individual_dates)
+
+    if enable_expiry:
+        for date_str in individual_dates:
+            date_object = datetime.strptime(date_str.strip(), '%d-%m-%Y').date()  # Convert to date
+            if (datetime_date.today() - date_object).days > 30:
+                expired_dates.append(date_object.strftime('%B %d, %Y'))  # Use consistent variable name
+
+        if expired_dates:
+            return JsonResponse({'data': 'error', 'message': ', '.join(expired_dates)})
+        else:
+            print("All dates are not expired")
+
+
 
     for date in individual_dates:
         cleaned_date = date.strip()

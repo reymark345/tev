@@ -1289,7 +1289,7 @@
             drawCallback: function (settings) {
                 let myDataTable = $('#tbl-box-a').DataTable();
                 let totalAmount = 0;
-                myDataTable.column(9, { search: 'applied' }).data().each(function (value) {
+                myDataTable.column(4, { search: 'applied' }).data().each(function (value) {
                     totalAmount += parseFloat(value);
                 });
                 let formattedTotalAmount = totalAmount.toLocaleString('en-US', {
