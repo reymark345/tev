@@ -1140,7 +1140,19 @@
                             $("#dateField").prop("disabled", false);
                             $(".rangeTravel").prop("disabled", false);
                             dataTable.ajax.reload();
-                        } else {
+                        }
+                        else if (data.data == 'expired') {
+                            let formatted = data.message.replace(/,\s(?=[A-Z])/g, ' || ');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Expired Date Travel! Cant be added',
+                                html:"Date: Please contact administrator <br><b>"+formatted+"</b>",
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                        else {
                             if (status_val== 0){
                                 dateField.clear();
                                 EmployeeName.val("").trigger('change');
@@ -1150,6 +1162,7 @@
                                 DateTravel.val("");
                                 RangeTravel.val("");
                             }
+
                             let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
                             $("#dateField").prop("disabled", false);
                             $(".rangeTravel").prop("disabled", false);
@@ -1163,6 +1176,8 @@
                                 },
                             })
                         }
+                        console.log(data.message);
+                        console.log("tedsttt");
                     })
                 }
             }

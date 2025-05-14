@@ -25,6 +25,7 @@ urlpatterns = [
     path('chat_staff', views.chat_staff, name='chat-staff'),
     path('chat_data_staff', views.chat_data_staff, name='chat-data-staff'),
     path('expiry_date_update', views.expiry_date_update, name='expiry-date-update'),
+    path('update_days', views.update_days, name='update-days'),
     # path('<str:room_name>/<str:username>/', views.MessageView, name='room'),
 
     # path('chat_data_staff/<str:room_name>/<str:user_name>/', views.chat_data_staff, name='chat-data-staff'),

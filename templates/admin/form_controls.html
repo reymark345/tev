@@ -80,11 +80,29 @@
         </div>
         <div class="col-xl-6 mb-4">
             <div class="card">
-                <h5 class="card-header">Received Document / Received </h5>
+                <h5 class="card-header">Received Document / Received :  Date Restriction </h5>
                 <div class="card-body">
+                    <div class="row">
+                        <div class="col-md mb-md-0 mb-2">
+                            <input
+                            type="number"
+                            id="days_expire"
+                            name="DaysExpire"
+                            class="form-control phone-number-mask"
+                            placeholder="Days"
+                            value="{{ days_expire }}"
+                        />
+                  
+                        </div>
+                        <div class="col-md">
+                            <button type="submit" id="update_days" class="btn btn-primary me-sm-3 me-1">Save</button>
+                        </div>
+                    </div>
+                    <br>
                 <div class="row">
                     <div class="col-md mb-md-0 mb-2">
                     <div class="form-check custom-option custom-option-basic">
+                        
                         <label class="form-check-label custom-option-content" for="expiry_date_en">
                             {% if is_travel_expire %}
                                 <input
@@ -110,7 +128,7 @@
                             <!-- <span class="text-muted">Free</span> -->
                         </span>
                         <span class="custom-option-body">
-                            <small>Enable 30 days Restriction</small>
+                            <small>Enable Dates Restriction</small>
                         </span>
                         </label>
                     </div>
@@ -142,7 +160,7 @@
                             <!-- <span class="text-muted">$ 5.00</span> -->
                         </span>
                         <span class="custom-option-body">
-                            <small>Disable 30 days Restriction</small>
+                            <small>Disable Dates Restriction</small>
                         </span>
                         </label>
                     </div>
@@ -333,6 +351,54 @@
                                 icon: 'success',
                                 title: 'Successfully save!',
                                 text: 'Date actual has been disabled',
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                            dataTable.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error saving!',
+                                text: data.message,
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                    })
+                }
+            });
+        });
+
+        $("#update_days").click(function(){
+            let daysExpireValue = $('#days_expire').val();
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Update it!',
+                customClass: {
+                    confirmButton: 'btn btn-primary me-3',
+                    cancelButton: 'btn btn-label-secondary',
+                },
+                buttonsStyling: false,
+                allowOutsideClick: false,
+            }).then(function (result) {
+                if (result.value) {
+                    $.ajax({
+                        type: 'POST',
+                        url: "{% url 'update-days' %}",
+                        data: {
+                            'days': daysExpireValue
+                        },
+                    }).done(function (data) {
+                        if (data.data == 'success') {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Successfully save!',
+                                text: 'Days has been updated',
                                 customClass: {
                                     confirmButton: 'btn btn-success',
                                 },

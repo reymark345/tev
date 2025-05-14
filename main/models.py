@@ -294,6 +294,7 @@ class SystemConfiguration(models.Model):
     date_actual = models.BooleanField(default=True)
     date_limit = models.BooleanField(default=True)
     is_travel_expire = models.BooleanField(default=False)
+    days_expire = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
         managed = True
