@@ -53,12 +53,16 @@ def form_controls(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
     date_actual = SystemConfiguration.objects.filter().first().date_actual
+    is_travel_expire = SystemConfiguration.objects.filter().first().is_travel_expire
+    days_expire = SystemConfiguration.objects.filter().first().days_expire
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
             'is_actual_date': date_actual,
             'permissions' : role_names,
             'role_details': RoleDetails.objects.filter().order_by('role_name'),
+            'is_travel_expire': is_travel_expire,
+            'days_expire': days_expire,
         }
         return render(request, 'admin/form_controls.html', context)
     else:
@@ -395,6 +399,21 @@ def date_actual_update(request):
     if request.method == 'POST':
         status = request.POST.get('status')
         SystemConfiguration.objects.filter(id =1).update(date_actual=status)
+        return JsonResponse({'data': 'success'})
+    
+@csrf_exempt
+def update_days(request):
+    if request.method == 'POST':
+        days = request.POST.get('days')
+        SystemConfiguration.objects.filter(id =1).update(days_expire=days)
+        return JsonResponse({'data': 'success'})
+    
+
+@csrf_exempt
+def expiry_date_update(request):
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        SystemConfiguration.objects.filter(id =1).update(is_travel_expire=status)
         return JsonResponse({'data': 'success'})
         
 
