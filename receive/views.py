@@ -513,6 +513,7 @@ def checking_load(request):
             WHERE (t1.status_id = 2
                 OR t1.status_id = 7
                 OR t1.status_id = 16
+                OR t1.status_id = 17
                 OR (t1.status_id = 3 AND t1.slashed_out IS NULL))
         """
         params = []
@@ -576,6 +577,7 @@ def checking_load(request):
             WHERE (t1.status_id = 2
                             OR t1.status_id = 7
                             OR t1.status_id = 16
+                            OR t1.status_id = 17
                             OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
             )
             AND (code LIKE %s
@@ -608,6 +610,7 @@ def checking_load(request):
             WHERE (t1.status_id = 2
                     OR t1.status_id = 7
                     OR t1.status_id = 16
+                    OR t1.status_id = 17
                     OR (t1.status_id = 3 AND t1.slashed_out IS NULL)
             )
             AND (code LIKE %s
@@ -963,6 +966,10 @@ def item_update(request):
     sec = request.POST.get('Section')
     contact = request.POST.get('Contact')
 
+    individual_dates = travel_date.split(',')
+    enable_expiry = SystemConfiguration.objects.filter().first().is_travel_expire
+    days_expire = SystemConfiguration.objects.filter().first().days_expire
+    expired_dates = []
 
 
     if travel_date:
@@ -982,6 +989,22 @@ def item_update(request):
 
         formatted_dates_str = ', '.join(formatted_dates)
         travel_date = formatted_dates_str
+
+
+    date_actual_received = TevIncoming.objects.filter(id=id).values('incoming_in').first()
+    date_act = date_actual_received['incoming_in'].date()  # Keep as datetime.date, no .isoformat()
+
+    if enable_expiry:
+        for date_str in individual_dates:
+            date_object = datetime.strptime(date_str.strip(), '%d-%m-%Y').date()  
+            if (date_act - date_object).days >= int(days_expire):
+                expired_dates.append(date_object.strftime('%B %d, %Y'))
+
+        if expired_dates:
+            print("Expired dates found:", expired_dates)
+            return JsonResponse({'data': 'expired', 'message': ', '.join(expired_dates)})
+        else:
+            print("All dates are not expired")
 
     duplicate_travel = []
     individual_dates = travel_date.split(',')
@@ -1158,8 +1181,6 @@ def item_add(request):
     individual_dates = travel_date.split(',')
     cleaned_dates = ','.join(date.strip() for date in individual_dates)
 
-    print(days_expire)
-    print("days_expiretesttt")
 
     if enable_expiry:
         for date_str in individual_dates:

@@ -1166,8 +1166,11 @@ def preview_box_a(request):
             'details':designation_result,
             'emp_list_lname':'',
             'user' : full_name  ,
-            'position' : position
+            'position' : position,
+            'date_now': timezone.now().date().strftime('%m/%d/%Y'),
         }
+        print("testttttt")
+        print(timezone.now().date().strftime('%B %d, %Y').upper())
         
         return render(request, 'transaction/preview_print.html', context)
     else:
