@@ -990,10 +990,14 @@ def item_update(request):
         formatted_dates_str = ', '.join(formatted_dates)
         travel_date = formatted_dates_str
 
+
+    date_actual_received = TevIncoming.objects.filter(id=id).values('incoming_in').first()
+    date_act = date_actual_received['incoming_in'].date()  # Keep as datetime.date, no .isoformat()
+
     if enable_expiry:
         for date_str in individual_dates:
             date_object = datetime.strptime(date_str.strip(), '%d-%m-%Y').date()  
-            if (datetime_date.today() - date_object).days >= int(days_expire):
+            if (date_act - date_object).days >= int(days_expire):
                 expired_dates.append(date_object.strftime('%B %d, %Y'))
 
         if expired_dates:
