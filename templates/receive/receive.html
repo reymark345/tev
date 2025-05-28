@@ -903,16 +903,6 @@
                         $(this).data('checked', false); 
                     }
                 });
-
-                // const selectedYearElement = jQuery(document.querySelector('[name="selected_year"]'));
-                // selectedYearElement.on('change', function () {
-                //     const selectedYear = jQuery(this).val();
-                //     console.log(selectedYear);
-                //     //dataTable.ajax.reload();
-                //     //localStorage.setItem('selected_year', selectedYear); 
-                // });
-    
-
                 $('#check-all').change(function () {
                     var isChecked = $(this).is(':checked');
                     $('#tbl-items tbody input[type="checkbox"][class="dt-checkboxes form-check-input checkbox-items"]').prop('checked', isChecked);
@@ -1150,7 +1140,19 @@
                             $("#dateField").prop("disabled", false);
                             $(".rangeTravel").prop("disabled", false);
                             dataTable.ajax.reload();
-                        } else {
+                        }
+                        else if (data.data == 'expired') {
+                            let formatted = data.message.replace(/,\s(?=[A-Z])/g, ' || ');
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Expired Date Travel! Cant be added',
+                                html:"Date: Please contact administrator <br><b>"+formatted+"</b>",
+                                customClass: {
+                                    confirmButton: 'btn btn-success',
+                                },
+                            })
+                        }
+                        else {
                             if (status_val== 0){
                                 dateField.clear();
                                 EmployeeName.val("").trigger('change');
@@ -1160,6 +1162,7 @@
                                 DateTravel.val("");
                                 RangeTravel.val("");
                             }
+
                             let formattedDates = data.message.map(date => formatDate(date)).join(" | ");
                             $("#dateField").prop("disabled", false);
                             $(".rangeTravel").prop("disabled", false);
@@ -1173,6 +1176,8 @@
                                 },
                             })
                         }
+                        console.log(data.message);
+                        console.log("tedsttt");
                     })
                 }
             }
@@ -1727,4 +1732,7 @@
 
     })
 </script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
 {% endblock footer_scripts %}

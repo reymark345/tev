@@ -1,175 +1,176 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
-            <!-- Content -->
-            <!-- <div class="container-fluid flex-grow-1 container-p-y"> -->
-            <div class="container-fluid flex-grow-1 container-p-y">
-              <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">User Profile /</span> Accomplishments</h4>
 
-              <!-- Header -->
-              <div class="row">
-                <div class="col-12">
-                  <div class="card mb-4">
-                    <div class="user-profile-header-banner">
-                      <img src="{% static 'assets/img/pages/profile-banner.png' %}" alt="Banner image" class="rounded-top" />
-                    </div>
-                    <div class="user-profile-header d-flex flex-column flex-sm-row text-sm-start text-center mb-4">
-                      <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
-                        {% if image_path %}
-                        <img
-                          src="{{image_path}}"
-                          alt="user image"
-                          class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img"
-                        />
-                        {% else %}
-                        <img
-                        src="{% static 'assets/img/avatars/14.png' %}"
-                          alt="user image"
-                          class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img"
-                        />
-                        {% endif %}
-                      </div>
-                      <div class="flex-grow-1 mt-3 mt-sm-5">
-                        <div
-                          class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-4 flex-md-row flex-column gap-4"
-                        >
-                          <div class="user-profile-info">
-                            <h4>{{ request.user.first_name }} {{ request.user.last_name }}</h4>
-                            <ul
-                              class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-2"
-                            >
-                              <li class="list-inline-item"></i>{{position}}</li>
-                            </ul>
-                          </div>
-                          <a href="javascript:void(0)" class="btn btn-success">
-                            <i class="ti ti-user-check me-1"></i>Active
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <!--/ Header -->
+  <!-- Content -->
+  <!-- <div class="container-fluid flex-grow-1 container-p-y"> -->
+  <div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">User Profile /</span> Accomplishments</h4>
 
-              <!--/ Navbar pills -->
-
-              <!-- Navbar pills -->
-              <div class="row">
-                <div class="col-md-12">
-                  <ul class="nav nav-pills flex-column flex-sm-row mb-4">
-                    <li class="nav-item">
-                      <a class="nav-link active" href="{% url 'profile' %}"
-                        ><i class="ti-xs ti ti-user-check me-1"></i> Profile</a
-                      >
-                    </li>
-                   
+    <!-- Header -->
+    <div class="row">
+      <div class="col-12">
+        <div class="card mb-4">
+          <div class="user-profile-header-banner">
+            <img src="{% static 'assets/img/pages/profile-banner.png' %}" alt="Banner image" class="rounded-top" />
+          </div>
+          <div class="user-profile-header d-flex flex-column flex-sm-row text-sm-start text-center mb-4">
+            <div class="flex-shrink-0 mt-n2 mx-sm-0 mx-auto">
+              {% if image_path %}
+              <img
+                src="{{image_path}}"
+                alt="user image"
+                class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img"
+              />
+              {% else %}
+              <img
+              src="{% static 'assets/img/avatars/14.png' %}"
+                alt="user image"
+                class="d-block h-auto ms-0 ms-sm-4 rounded user-profile-img"
+              />
+              {% endif %}
+            </div>
+            <div class="flex-grow-1 mt-3 mt-sm-5">
+              <div
+                class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-4 flex-md-row flex-column gap-4"
+              >
+                <div class="user-profile-info">
+                  <h4>{{ request.user.first_name }} {{ request.user.last_name }}</h4>
+                  <ul
+                    class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-2"
+                  >
+                    <li class="list-inline-item"></i>{{position}}</li>
                   </ul>
                 </div>
+                <a href="javascript:void(0)" class="btn btn-success">
+                  <i class="ti ti-user-check me-1"></i>Active
+                </a>
               </div>
-              <!--/ Navbar pills -->
-
-              <!-- Alerts with Icons -->
-              <div class="row">
-                <div class="col-xl-4 col-lg-5 col-md-5">
-                  <!-- About User -->
-                  <div class="card mb-4">
-                    <div class="card-body">
-                      <small class="card-text text-uppercase">About</small>
-                      <ul class="list-unstyled mb-4 mt-3">
-                        <li class="d-flex align-items-center mb-3">
-                          <i class="ti ti-user"></i><span class="fw-bold mx-2">Full Name:</span> <span>{{ request.user.first_name }} {{ request.user.last_name }}</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-3">
-                          <i class="ti ti-file-description"></i><span class="fw-bold mx-2">Id Number:</span>
-                          <span>{{id_number}}</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-3">
-                          <i class="ti ti-crown"></i><span class="fw-bold mx-2">Position:</span> <span>{{position}}</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-3">
-                          <i class="ti ti-user"></i><span class="fw-bold mx-2">Sex:</span> <span>{{sex}}</span>
-                        </li>
-                        <li class="d-flex align-items-center mb-3">
-                          <i class="ti ti-flag"></i><span class="fw-bold mx-2">Division:</span> <span>{{division_name}}</span>
-                        </li>
-                      </ul>
-                      <small class="card-text text-uppercase">Contacts</small>
-                      <ul class="list-unstyled mb-4 mt-3">
-                        <li class="d-flex align-items-center mb-3">
-                          <i class="ti ti-mail"></i><span class="fw-bold mx-2">Email:</span>
-                          <span>{{ request.user.email }} </span>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              
-                <div class="col-md">
-                  <div class="card">
-                    <h5 class="card-header">Accomplishments</h5>
-                    
-                    <div class="card-body">
-                      <br>
-                      <div class="alert alert-primary d-flex align-items-center" role="alert">
-                        <span class="alert-icon text-primary me-2">
-                          <i class="ti ti-info-circle ti-xs"></i>
-                        </span>
-                        Accomplishment report saving process has been significantly enhanced, ensuring faster and more efficient operations.
-                      </div><br><br>
-              
-                      <div class="row">
-                        <div class="col-5 col-md-5">
-                          <label class="form-label" for="modalEditTaxID">Start Date</label>
-                          <input type="date" class="form-control" name="FStartDate" id ="FStartDate" placeholder="DD-MM-YYYY" autocomplete="off" />
-                        </div>
-                        <div class="col-5 col-md-5">
-                          <label class="form-label" for="modalEditTaxID">End Date</label>
-                          <input type="date" class="form-control" name="FEndDate" id ="FEndDate" placeholder="DD-MM-YYYY" autocomplete="off" />
-                        </div>
-                        <div class="col-2 col-md-2">
-                          <br>
-                          <a href="javascript:void(0)" id="generate-accomplishment" class="btn btn-primary" style="width:140px;">
-                            Generate
-                          </a>
-                        </div>
-                      </div>
-                      <br>
-                      <br>
-                      <br>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            
-              <br>
-              
-              <div class="row">
-                <div class="col-12">
-                  <div class="card" id="card-accomplishment">
-                    <h5 class="card-header">Daily Accomplishment</h5>
-                    <div class="table-responsive text-nowrap">
-                      <table class="table" id="accomplishment-tbl">
-                        <caption class="ms-4">
-                          List of Accomplishment
-                        </caption>
-                        <thead>
-                          <tr>
-                            <th>Date</th>
-                            <th>Received</th>
-                            <th>Reviewed</th>
-                            <th>Payrolled</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-
             </div>
-            <!-- / Content -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <!--/ Header -->
+
+    <!--/ Navbar pills -->
+
+    <!-- Navbar pills -->
+    <div class="row">
+      <div class="col-md-12">
+        <ul class="nav nav-pills flex-column flex-sm-row mb-4">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url 'profile' %}"
+              ><i class="ti-xs ti ti-user-check me-1"></i> Profile</a
+            >
+          </li>
+          
+        </ul>
+      </div>
+    </div>
+    <!--/ Navbar pills -->
+
+    <!-- Alerts with Icons -->
+    <div class="row">
+      <div class="col-xl-4 col-lg-5 col-md-5">
+        <!-- About User -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <small class="card-text text-uppercase">About</small>
+            <ul class="list-unstyled mb-4 mt-3">
+              <li class="d-flex align-items-center mb-3">
+                <i class="ti ti-user"></i><span class="fw-bold mx-2">Full Name:</span> <span>{{ request.user.first_name }} {{ request.user.last_name }}</span>
+              </li>
+              <li class="d-flex align-items-center mb-3">
+                <i class="ti ti-file-description"></i><span class="fw-bold mx-2">Id Number:</span>
+                <span>{{id_number}}</span>
+              </li>
+              <li class="d-flex align-items-center mb-3">
+                <i class="ti ti-crown"></i><span class="fw-bold mx-2">Position:</span> <span>{{position}}</span>
+              </li>
+              <li class="d-flex align-items-center mb-3">
+                <i class="ti ti-user"></i><span class="fw-bold mx-2">Sex:</span> <span>{{sex}}</span>
+              </li>
+              <li class="d-flex align-items-center mb-3">
+                <i class="ti ti-flag"></i><span class="fw-bold mx-2">Division:</span> <span>{{division_name}}</span>
+              </li>
+            </ul>
+            <small class="card-text text-uppercase">Contacts</small>
+            <ul class="list-unstyled mb-4 mt-3">
+              <li class="d-flex align-items-center mb-3">
+                <i class="ti ti-mail"></i><span class="fw-bold mx-2">Email:</span>
+                <span>{{ request.user.email }} </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    
+      <div class="col-md">
+        <div class="card">
+          <h5 class="card-header">Accomplishments</h5>
+          
+          <div class="card-body">
+            <br>
+            <div class="alert alert-primary d-flex align-items-center" role="alert">
+              <span class="alert-icon text-primary me-2">
+                <i class="ti ti-info-circle ti-xs"></i>
+              </span>
+              Accomplishment report saving process has been significantly enhanced, ensuring faster and more efficient operations.
+            </div><br><br>
+    
+            <div class="row">
+              <div class="col-5 col-md-5">
+                <label class="form-label" for="modalEditTaxID">Start Date</label>
+                <input type="date" class="form-control" name="FStartDate" id ="FStartDate" placeholder="DD-MM-YYYY" autocomplete="off" />
+              </div>
+              <div class="col-5 col-md-5">
+                <label class="form-label" for="modalEditTaxID">End Date</label>
+                <input type="date" class="form-control" name="FEndDate" id ="FEndDate" placeholder="DD-MM-YYYY" autocomplete="off" />
+              </div>
+              <div class="col-2 col-md-2">
+                <br>
+                <a href="javascript:void(0)" id="generate-accomplishment" class="btn btn-primary" style="width:140px;">
+                  Generate
+                </a>
+              </div>
+            </div>
+            <br>
+            <br>
+            <br>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <br>
+    
+    <div class="row">
+      <div class="col-12">
+        <div class="card" id="card-accomplishment">
+          <h5 class="card-header">Daily Accomplishment</h5>
+          <div class="table-responsive text-nowrap">
+            <table class="table" id="accomplishment-tbl">
+              <caption class="ms-4">
+                List of Accomplishment
+              </caption>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Received</th>
+                  <th>Reviewed</th>
+                  <th>Payrolled</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+  </div>
+  <!-- / Content -->
 
   {% endblock %}
   {% block footer_scripts %}
@@ -216,4 +217,7 @@
       });
     });
   </script>
+  <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
   {% endblock footer_scripts %}

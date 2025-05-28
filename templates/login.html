@@ -58,6 +58,7 @@
     <script src="{% static 'assets/vendor/js/template-customizer.js' %}"></script>
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{% static 'assets/js/config.js' %}"></script>
+    <script src="https://www.google.com/recaptcha/api.js?render=6LfEHykrAAAAAHcOPWHMuE_6EMLuYX0SorWD3WSN"></script>
   </head>
 
   <body>
@@ -111,31 +112,26 @@
             </ul>
             {% endif %}
 
-            <form id="formAuthentication" class="mb-3" action="{% url 'login' %}" method="POST">
+            <form id="formAuthentication" method="POST" action="{% url 'login' %}">
               {% csrf_token %}
-          
+              
+              <!-- Username -->
               <div class="mb-3">
-                  <label for="email" class="form-label">Username</label>
-                  <input type="text" class="form-control" id="email" name="username" placeholder="Enter your username" autofocus />
+                <label for="email" class="form-label">Username</label>
+                <input type="text" class="form-control" name="username" id="email" required>
               </div>
-          
-              <div class="mb-3 form-password-toggle">
-                  <div class="d-flex justify-content-between">
-                      <label class="form-label" for="password">Password</label>
-                  </div>
-                  <div class="input-group input-group-merge">
-                      <input type="password" id="password" class="form-control" name="password" placeholder="••••••••" />
-                      <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
-                  </div>
-              </div>
-          
-              <!-- reCAPTCHA FIELD -->
+            
+              <!-- Password -->
               <div class="mb-3">
-                  {{ form.captcha }}
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" id="password" required>
               </div>
-          
+            
+              <!-- reCAPTCHA token field (hidden) -->
+              <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
+            
               <button type="submit" class="btn btn-primary d-grid w-100">Sign in</button>
-          </form>
+            </form>
           
 
             {% comment %} <form id="formAuthentication" class="mb-3" action="{% url 'login' %}" method="POST">
@@ -185,6 +181,14 @@
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
+    <script>
+      grecaptcha.ready(function () {
+        grecaptcha.execute('6LfEHykrAAAAAHcOPWHMuE_6EMLuYX0SorWD3WSN', { action: 'login' }).then(function (token) {
+          document.getElementById('g-recaptcha-response').value = token;
+        });
+      });
+    </script>
+
     <script src="{% static 'assets/vendor/libs/jquery/jquery.js' %}"></script>
     <script src="{% static 'assets/vendor/libs/popper/popper.js' %}"></script>
     <script src="{% static 'assets/vendor/js/bootstrap.js' %}"></script>

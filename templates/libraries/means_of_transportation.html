@@ -1,5 +1,4 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
-
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -248,8 +247,6 @@
                 data: form_data,
             }).done(function (data) {
                 dataTable.ajax.reload();
-                console.log("whatif");
-                console.log(data.data);
                 if (data.data == 'success' && ItemID.val()=='0') {
                     toastr.success('Successfully save', 'Success', toast_options);
                     clear_data();
@@ -332,4 +329,7 @@
             }
     })
 </script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
 {% endblock footer_scripts %}

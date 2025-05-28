@@ -1,5 +1,4 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
-
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -686,9 +685,6 @@
                             let fields = data[0].fields
                             let pk = data[0].pk
                             let user = $('#user')
-
-                            console.log(fields.is_staff);
-                            console.log("fieldaaas");
                             ModalFname.val(fields.first_name);
                             ModalLname.val(fields.last_name);
                             ModalUsername.val(fields.username);
@@ -1346,4 +1342,8 @@
         }
     })
 </script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
+
 {% endblock footer_scripts %}

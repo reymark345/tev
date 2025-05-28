@@ -573,7 +573,7 @@
                         {% if 'Admin' in permissions%}
                             <div class="chat-box">
                                 <div class="chat-header" onclick="toggleChat()">
-                                    MackyAi
+                                    OpenAi
                                 </div>
                                 <div class="chat-body">
                                 </div>
@@ -602,7 +602,7 @@
                                         <div class="form">
                                             <form id="message-form">
                                                 <!-- <textarea id="msg" cols="30" name="message" rows="10" placeholder="Enter your messages" required></textarea> -->
-                                                <label class="form-label" for="modalFEmployeeName">Hi, how are you? Ask me MackyAi</label>
+                                                <label class="form-label" for="modalFEmployeeName">Hi, how are you? Ask me OpenAi</label>
                                                 <textarea
                                                 class="form-control"
                                                 id="msg"
@@ -676,7 +676,6 @@
         <!-- Vendors JS -->
         <script src="{% static 'assets/vendor/libs/apex-charts/apexcharts.js' %}"></script>
         <script src="{% static 'assets/vendor/libs/swiper/swiper.js' %}"></script>
-        <script src="{% static 'assets/vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
         <script src="{% static 'assets/vendor/libs/jquery-sticky/jquery-sticky.js' %}"></script>
         <script src="{% static 'assets/vendor/libs/cleavejs/cleave.js' %}"></script>
         <script src="{% static 'assets/vendor/libs/cleavejs/cleave-phone.js' %}"></script>
@@ -685,9 +684,7 @@
         <script src="{% static 'assets/vendor/libs/flatpickr/flatpickr.js' %}"></script>
         <script src="{% static 'assets/vendor/libs/typeahead-js/typeahead.js' %}"></script>
         <script src="{% static 'assets/vendor/libs/tagify/tagify.js' %}"></script>
-        <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
-        <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
-        <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
+
         <script src="{% static 'assets/vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
         <script src="{% static 'assets/js/extended-ui-sweetalert2.js' %}"></script>
         <script src="{% static 'assets/vendor/libs/toastr/toastr.js' %}"></script>
@@ -729,7 +726,7 @@
         <!-- Data tables -->
         <script src="{% static 'assets/js/tables-datatables-advanced.js' %}"></script>
         <script src="{% static 'assets/js/tables-datatables-extensions.js' %}"></script>
-        <script src="{% static 'assets/js/tables-datatables-basic.js' %}"></script>
+ 
 
         <script src="{% static 'assets/vendor/libs/sweetalert2/sweetalert2.js' %}"></script>
         <script src="{% static 'assets/js/extended-ui-sweetalert2.js' %}"></script>
@@ -749,118 +746,6 @@
         <script src="{% static 'assets/js/pages-profile.js' %}"></script>
         <script>
         let socket = null;
-
-        // const selectedYearElement = jQuery(document.querySelector('[name="selected_year"]')); 
-
-        $(document).ready(function(){
-            // const savedYear = localStorage.getItem('selected_year');
-            // if (savedYear) {
-            //     selectedYearElement.val(savedYear).trigger('change'); 
-            //     console.log(`Year ${savedYear} retrieved from localStorage`);
-            // }
-            // selectedYearElement.on('change', function () {
-            //     const selectedYear = jQuery(this).val();
-            //     localStorage.setItem('selected_year', selectedYear); 
-            // });
-
-            // $('#room').change(function(){
-            //     var roomName = $('select[name="room"]').val();
-            //     console.log(roomName);
-            //     $.ajax({
-            //         url: "{% url 'create-room' %}",
-            //         type: "POST",
-            //         data: {
-            //             'room': roomName
-            //         },
-            //         success: function(response) {
-            //             if (socket) {
-            //                 socket.close();
-            //             }
-            //             initializeChat(roomName, '{{ user }}');
-            //         }
-            //     });
-            // });
-
-            // $("#send-message").click(function(){
-            //     const message = $('#msg').val();
-            //     var roomName = $('select[name="room"]').val();
-            //     console.log(roomName);
-            //     console.log(message);
-            //     console.log('{{ user }}');
-            //     if (message && roomName) {
-            //         sendMessage(message, roomName, '{{ user }}');
-            //     }
-            // });
-        }); 
-
-        // function initializeChat(roomName, username) {
-        //     console.log("Initializing chat for room:", roomName);
-        //     console.log(window.location.host);
-
-        //     const websocketProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-
-        //     const wsEndpoint = `${websocketProtocol}://${window.location.host}/ws/notification/${roomName}/`;
-        //     socket = new WebSocket(wsEndpoint);
-
-        //     socket.addEventListener("open", () => {
-        //         console.log("WebSocket connection opened for room:", roomName);
-        //     });
-
-        //     socket.addEventListener("message", (event) => { 
-        //         const messageData = JSON.parse(event.data)['message'];
-        //         var sender = messageData['sender'];
-        //         var message = messageData['message'];
-
-        //         var messageDiv = $('.message');
-                
-        //         if (sender != username) {
-        //             messageDiv.append('<div class="receive"><p>' + message + '<strong> - ' + sender + '</strong></p></div>');
-        //         } else {
-        //             // Sent message, aligned right
-        //             messageDiv.append('<div class="send"><p>' + message + '</p></div>');
-        //         }
-                
-        //         scrollToBottom();
-        //     });
-
-        //     socket.addEventListener("error", (event) => {
-        //         console.error("WebSocket error observed:", event);
-        //     });
-
-        //     socket.addEventListener("close", (event) => {
-        //         console.log("WebSocket connection closed:", event);
-        //     });
-        // }
-
-        // function sendMessage(message, roomName, username) {
-        //     if (socket && socket.readyState === WebSocket.OPEN) {
-        //         socket.send(
-        //             JSON.stringify({
-        //                 'message': message,
-        //                 'room_name': roomName,
-        //                 'sender': username,
-        //             })
-        //         );
-        //         $('#msg').val('');  // Clear the message input field
-        //     }
-        //     else if (socket && socket.readyState === WebSocket.CONNECTING) {
-        //         // Wait until the WebSocket connection is open
-        //         socket.addEventListener('open', function(event) {
-        //             socket.send(
-        //                 JSON.stringify({
-        //                     'message': message,
-        //                     'room_name': roomName,
-        //                     'sender': username,
-        //                 })
-        //             );
-        //             $('#msg').val('');  // Clear the message input field
-        //         });
-        //     } 
-        //     else {
-        //         console.error("WebSocket is not open. Unable to send message.");
-        //     }
-        // }
-
         function scrollToBottom() {
             var chatContainer = document.getElementById("chatContainer");
             chatContainer.scrollTop = chatContainer.scrollHeight;

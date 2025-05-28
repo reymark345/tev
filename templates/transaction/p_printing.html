@@ -1,5 +1,8 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
 <link rel="stylesheet" href="{% static 'custom/custom.css' %}" />
+
+
+
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -239,38 +242,36 @@
                     <div class="col-12">
                     <div class="bs-stepper vertical wizard-modern wizard-modern-vertical mt-2">
                         <div class="bs-stepper-content">
-                        <div class="card-datatable table-responsive pt-0"> 
-                             <!-- <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label> -->
-                             <span id="dv-number" class="badge bg-label-primary"><i></i></span><br><br>
-                             <h5 class="card-action-title mb-0">AMT CERTIFIED <span id="total-amount" class="badge bg-label-primary"></span></h5>
-                        <table id="tbl-box-a" class="table display compact">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Code #</th>
-                                    <th>Accnt. No.</th>
-                                    <th>ID Number</th>
-                                    <th>Name</th>
-                                    <th>Amount</th>
-                                    <th>Purpose</th>
-                                    <th>Assign Charges</th>
-                                    <th>Charges</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>    
-                            <tbody>
-                            </tbody> 
-                            <tfoot>
-                                <br><br>
-                                <div style="width:40%;">
-                                    <label class="form-label" for="modalFEmployeeName"><i>Add Employee</i></label>
-                                    <select id="payroll-name" name="PayrollName" class="form-select payroll-name" data-allow-clear="true" ><option></option></select>
-                                </div>
-                            </tfoot>              
-                        </table>
-                    
+                            <div class="card-datatable table-responsive pt-0"> 
+                                <!-- <label class="form-label" for="modalAddCard"><b>UPDATE TRANSACTION </b></label> -->
+                                <span id="dv-number" class="badge bg-label-primary"><i></i></span><br><br>
+                                <h5 class="card-action-title mb-0">AMT CERTIFIED <span id="total-amount" class="badge bg-label-primary"></span></h5>
+                                <table id="tbl-box-a" class="table display compact">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Code #</th>
+                                            <th>ID Number</th>
+                                            <th>Name</th>
+                                            <th>Amount</th>
+                                            <th>Purpose</th>
+                                            <th>Assign Charges</th>
+                                            <th>Charges</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>    
+                                    <tbody>
+                                    </tbody> 
+                                    <tfoot>
+                                        <br><br>
+                                        <div style="width:40%;">
+                                            <label class="form-label" for="modalFEmployeeName"><i>Add Employee</i></label>
+                                            <select id="payroll-name" name="PayrollName" class="form-select payroll-name" data-allow-clear="true" ><option></option></select>
+                                        </div>
+                                    </tfoot>              
+                                </table>
+                            </div>
                         </div>
-                    </div>
                     </div>
     
                 
@@ -358,6 +359,7 @@
 <!--/ Enable OTP Modal -->
 
 {% endblock %} {% block footer_scripts %}
+
 <script>
     let clicked_id = 0;
     let dv_no_id =0;
@@ -371,6 +373,7 @@
     let chargeId = 0;
     let selectedCb = [];
     $(document).ready(function () {
+        
       const table_box_a = $('#tbl-box-a')
       const table = $('#tbl-items');
 
@@ -1201,7 +1204,6 @@
             columns: [
                 { data: 'id' },
                 { data: 'code' },
-                { data: 'account_no' },
                 { data: 'id_no' },
                 { data: 'name' },
                 { data: 'final_amount', charges: 'multiple_charges' },
@@ -1221,23 +1223,17 @@
                 {
                     targets: 1,
                     render: function(data) {
-                        return data
+                        return '<span class="badge bg-label-warning">' + data + '</span>';
                     },
                 },
                 {
                     targets: 2,
                     render: function(data) {
-                        return (!data && data !== 0) ? '' : '<span class="badge bg-label-warning">' + data + '</span>';
-                    },
-                },
-                {
-                    targets: 3,
-                    render: function(data) {
                         return '<span class="badge bg-label-primary">' + data + '<span>'
                     },
                 },
                 {
-                    targets: 5,
+                    targets: 4,
                     render: function (data, type, row) {
                         let charges = row.multiple_charges;
                         if (charges !== null && charges.includes(",")) {
@@ -1255,13 +1251,13 @@
                     },
                 },
                 {
-                    targets: 6,
+                    targets: 5,
                     render: function (data) {
                         return `<td><input type="text" class="form-control emp-purpose" id="emp-purpose" value="${data}" style="width:300px; margin-right: -50px !important;" ></td>`
                     },
                 },
                 {
-                    targets: 7,
+                    targets: 6,
                     render: function (data) {
                         let charges =  '<select class="form-select emp-charges" id="emp-charges">' +
                         '<option></option>'+
@@ -1293,7 +1289,7 @@
             drawCallback: function (settings) {
                 let myDataTable = $('#tbl-box-a').DataTable();
                 let totalAmount = 0;
-                myDataTable.column(9, { search: 'applied' }).data().each(function (value) {
+                myDataTable.column(4, { search: 'applied' }).data().each(function (value) {
                     totalAmount += parseFloat(value);
                 });
                 let formattedTotalAmount = totalAmount.toLocaleString('en-US', {
@@ -1809,4 +1805,7 @@
         });
     })
 </script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
 {% endblock footer_scripts %}

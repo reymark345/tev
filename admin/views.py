@@ -53,12 +53,16 @@ def form_controls(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
     date_actual = SystemConfiguration.objects.filter().first().date_actual
+    is_travel_expire = SystemConfiguration.objects.filter().first().is_travel_expire
+    days_expire = SystemConfiguration.objects.filter().first().days_expire
     if any(role_name in allowed_roles for role_name in role_names):
         context = {
             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
             'is_actual_date': date_actual,
             'permissions' : role_names,
             'role_details': RoleDetails.objects.filter().order_by('role_name'),
+            'is_travel_expire': is_travel_expire,
+            'days_expire': days_expire,
         }
         return render(request, 'admin/form_controls.html', context)
     else:
@@ -396,6 +400,21 @@ def date_actual_update(request):
         status = request.POST.get('status')
         SystemConfiguration.objects.filter(id =1).update(date_actual=status)
         return JsonResponse({'data': 'success'})
+    
+@csrf_exempt
+def update_days(request):
+    if request.method == 'POST':
+        days = request.POST.get('days')
+        SystemConfiguration.objects.filter(id =1).update(days_expire=days)
+        return JsonResponse({'data': 'success'})
+    
+
+@csrf_exempt
+def expiry_date_update(request):
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        SystemConfiguration.objects.filter(id =1).update(is_travel_expire=status)
+        return JsonResponse({'data': 'success'})
         
 
 #start User function ---------------->
@@ -420,9 +439,6 @@ def user_add(request):
     division = strip_tags(request.POST.get('Division'))
     password = strip_tags(make_password(password))
     user_id = strip_tags(request.session.get('user_id', 0))
-
-    print("testttroleee")
-    print(role_ids)
 
     if '1' in role_ids: 
         superuser = 1
@@ -711,53 +727,7 @@ def CreateRoom(request):
 
         return JsonResponse({'success': True, 'room_name': room, 'username': username})
 
-# chat
-# @csrf_exempt
-# def CreateRoom(request):
 
-#     if request.method == 'POST':
-#         # username = request.POST['username']
-#         username = request.session.get('user_id', 0)
-#         room = request.POST['room']
-
-#         # room = request.POST.get('auth_user_id')
-
-#         try:
-#             get_room = Room.objects.get(room_name=room)
-#             return redirect('room', room_name=room, username=username)
-
-#         except Room.DoesNotExist:
-#             new_room = Room(room_name = room)
-#             new_room.save()
-#             return redirect('room', room_name=room, username=username)
-
-#     return render(request, 'index.html')
-
-# @csrf_exempt
-# def MessageView(request, room_name, username):
-
-#     get_room = Room.objects.get(room_name=room_name)
-
-#     if request.method == 'POST':
-#         message = request.POST['message']
-
-
-#         new_message = Message(room=get_room, sender=username, message=message)
-#         new_message.save()
-
-#     get_messages= Message.objects.filter(room=get_room)
-
-#     print("testt_message")
-#     print(get_messages)
-    
-#     context = {
-#         "messages": get_messages,
-#         "user": username,
-#         "room_name": room_name,
-#     }
-#     return JsonResponse(context) 
-    # return render(request, 'admin/chat_admin.html', context)
-    
 @csrf_exempt
 def MessageView(request, room_name, username):
     get_room = Room.objects.get(room_name=room_name)
@@ -782,4 +752,3 @@ def MessageView(request, room_name, username):
         "room_name": room_name,
     }
     return render(request, 'message.html', context)
-    # return JsonResponse(context)

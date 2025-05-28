@@ -139,6 +139,7 @@
                         <option value="7">For approval</option>
                         <option value="16">Pending</option>
                         <option value="3">Returned</option>
+                        <option value="17">Forfeited</option>
                     </select>
                 </div>
 
@@ -208,7 +209,7 @@
 
 <!-- Enable OTP Modal -->
 <div class="modal fade" id="tevDetails" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-simple modal-enable-otp modal-dialog-centered">
+    <div class="modal-dialog modal-simple modal-enable-otp modal-lg modal-dialog-centered">
         <div class="modal-content p-3 p-md-5">
         <div class="modal-body">
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -255,10 +256,12 @@
             
             <div class="col-12">
                 <br>
-                <button type="submit" id ="approved" class="btn btn-success me-sm-3 me-1">Approve</button>
-                <button type="submit" id ="pending" class="btn btn-warning me-sm-3 me-1">Pending</button>
-                <button type="submit" id ="returned" class="btn btn-danger me-sm-3 me-1">Return</button>
-
+                <div class="d-flex justify-content-center flex-wrap gap-2">
+                    <button type="submit" id="approved" class="btn btn-success">Approve</button>
+                    <button type="submit" id="pending" class="btn btn-warning">Pending</button>
+                    <button type="submit" id="returned" class="btn btn-danger">Return</button>
+                    <button type="submit" id="forfeited" class="btn btn-danger">Forfeited</button>
+                </div>
             </div>
             </form>
         </div>
@@ -591,6 +594,9 @@
                       }
                       else if(data==16){
                         return '<span class="badge bg-label-info">Pending</span>'
+                      }
+                      else if(data==17){
+                        return '<span class="badge bg-label-danger">Forfeited</span>'
                       }
                       else{
                         return '<span class="badge bg-label-success">For payroll</span>'
@@ -1360,6 +1366,48 @@
             }
         });
 
+        $('#forfeited').click(function() {
+            let final_amount = $("#final_amount").val().trim();
+            let selectedIDs = [];
+            let selectedDate = [];
+            let status = 17;
+            let hasError = 0;
+            $('.rows-container .row').each(function() {
+                let selectElement = $(this).find('.select-remarks');
+                let selectElementDate = $(this).find('.select-remarks');
+                let selectedValue = selectElement.val();
+                let selectErrorLabel = selectElement.siblings(".error-label");
+
+                let inputElement = $(this).find('.input-date');
+                let inputValue = inputElement.val();
+                let inputErrorLabel = inputElement.siblings(".error-label-date");
+
+                if (selectedValue !== "") {
+                    selectedIDs.push(selectedValue);
+                    selectElement.removeClass('has-error');
+                    selectErrorLabel.hide();
+                } else {
+                    hasError++;
+                    selectElement.addClass('has-error');
+                    selectErrorLabel.show();
+                }
+                if (inputValue !== "") {
+                    selectedDate.push(inputValue);
+                    inputElement.removeClass('has-error');
+                    inputErrorLabel.hide();
+                } else {
+                    hasError++;
+                    inputElement.addClass('has-error');
+                    inputErrorLabel.show();
+                }
+            });
+            if (selectedIDs.length > 0 && hasError ==0) {
+                tev_details(final_amount,selectedIDs,status,clicked_id,selectedDate);
+            } else if(selectedIDs.length == 0) {
+                toastr.error('Please filled details at least one Remarks', 'Invalid Save!', toast_options);
+            }
+        });
+
         $('#add_remarks').click(function () {     
             var newRow = $('<div class="row mt-2">' +
                 '<div class="col-5">' +
@@ -1456,4 +1504,7 @@
         }
     })
 </script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
 {% endblock footer_scripts %}

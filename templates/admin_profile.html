@@ -1,4 +1,5 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
+
 <style>
   .bs-stepper-header {
     display: flex;
@@ -94,10 +95,10 @@
 
               <!-- Alerts with Icons -->
               <div class="row">
-                <div class="col-xl-4 col-lg-5 col-md-5">
+                <div class="col-xl-4 col-lg-4 col-md-4">
                   <!-- About User -->
                   <div class="card mb-4">
-                    <div class="card-body">
+                    <div class="card-body" style="height: 447px;">
                       <small class="card-text text-uppercase">About</small>
                       <ul class="list-unstyled mb-4 mt-3">
                         <li class="d-flex align-items-center mb-3">
@@ -150,8 +151,19 @@
                           <label class="form-label" for="modalEditTaxID">End Date</label>
                           <input type="date" class="form-control" name="FEndDate" id ="FEndDate" placeholder="DD-MM-YYYY" autocomplete="off" />
                         </div>
+
+                        
+                        <div class="col-5 col-md-5"><br>
+                          <label class="form-label" for="modalFEmployeeName">Employee Name</label>
+                            <select id="accounting-staff" class="select2 form-select" name="AccountingStaff">
+                              <option value="" disabled selected>Select accounting staff</option>
+                                {% for user in staff %}
+                                  <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
                         <div class="col-2 col-md-2">
-                          <br>
+                          <br><br>
                           <a href="javascript:void(0)" id="generate-accomplishment-admin" class="btn btn-primary" style="width:140px;">
                             Generate
                           </a>
@@ -171,46 +183,31 @@
                 <div class="bs-stepper wizard-numbered mt-2">
                   <div class="bs-stepper-header">
                     <div class="line"></div>
-                    {% for user in staff %}
-                    <div class="step" data-target="#account-details-{{ forloop.counter }}">
-                      <button type="button" class="step-trigger">
-                        <span class="bs-stepper-circle">{{ forloop.counter }}</span>
-                        <span class="bs-stepper-label">
-                          <span class="bs-stepper-title">{{ user.first_name }} {{ user.last_name }}</span>
-                          <span class="bs-stepper-subtitle">Accomplishment</span>
-                        </span>
-                      </button>
-                    </div>
-                    <div class="line"></div>
-                    {% endfor %}
               </div>
 
-              <div class="bs-stepper-content">
-                <form onSubmit="return false">
-                  <!-- Account Details -->
-                  {% for user in staff %}
-                    <div id="account-details-{{ forloop.counter }}" class="content">
-                      <div class="table-responsive text-nowrap">
-                        <table class="table" id="accomplishment-tbl-{{ user.last_name }}">
-                          <caption class="ms-4">
-                            List of Accomplishment for {{ user.first_name }} {{ user.last_name }}
-                          </caption>
-                          <thead>
-                            <tr>
-                              <th>Date</th>
-                              <th>Received</th>
-                              <th>Reviewed</th>
-                              <th>Payrolled</th>
-                            </tr>
-                          </thead>
-                          <tbody class="tbody_">
-                            <!-- Accomplishments data should be populated here -->
-                          </tbody>
-                        </table>
-                      </div>
+              <div class="row">
+                <div class="col-12">
+                  <div class="card" id="card-accomplishment">
+                    <h5 class="card-header">Daily Accomplishment</h5>
+                    <div class="table-responsive text-nowrap">
+                      <table class="table" id="accomplishment-tbl">
+                        <caption class="ms-4">
+                          List of Accomplishment
+                        </caption>
+                        <thead>
+                          <tr>
+                            <th>Date</th>
+                            <th>Received</th>
+                            <th>Reviewed</th>
+                            <th>Payrolled</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                      </table>
                     </div>
-                  {% endfor %}
-                </form>
+                  </div>
+                </div>
               </div>
                   </div>
                 </div>
@@ -235,7 +232,7 @@
           <input type="hidden" id="password-id" name="PasswordID" />
 
           <div class="col-sm-12 form-password-toggle">
-              <label class="form-label" for="modalEnableOTPPhone">Password</label><br>
+              <label class="form-label" for="modalEnableOTPPhone">New Password</label><br>
               <div class="input-group">
               <input
                   type="password"
@@ -249,7 +246,7 @@
               </div>
           </div>
           <div class="col-sm-12 form-password-toggle">
-              <label class="form-label" for="modalEnableOTPPhone">Confirm Password</label>
+              <label class="form-label" for="modalEnableOTPPhone">Confirm New Password</label>
               <div class="input-group">
       
               <input
@@ -287,6 +284,9 @@
   <script src="{% static 'assets/vendor/libs/bs-stepper/bs-stepper.js' %}"></script>
   <script src="{% static 'assets/js/form-wizard-numbered.js' %}"></script>
   <script src="{% static 'assets/js/form-wizard-validation.js' %}"></script>
+
+
+  
   
   <script>
     $(document).ready(function() {
@@ -411,37 +411,68 @@
     }
       
       $('#generate-accomplishment-admin').on('click', function() {
-          $.ajax({
-            type: 'POST',
-            url: "{% url 'generate-accomplishment-admin' %}",
-            data: {
-              start_date: FStartDate.val(),
-              end_date: FEndDate.val(),
-              csrfmiddlewaretoken: '{{ csrf_token }}'
-            },
-            success: function(data) {
-              $('table .tbody_').empty();
-              console.log(data);
-              data.forEach(function(userResult) {
-                
-                var tableId = `#accomplishment-tbl-${userResult.user}`;
-                
-                userResult.accomplishments.forEach(function(accomplishment) {
-                  var newRow = `<tr>
-                                  <td>${accomplishment.date}</td>
-                                  <td>${accomplishment.updated_count}</td>
-                                  <td>${accomplishment.reviewed_count}</td>
-                                  <td>${accomplishment.payrolled_count}</td>
-                                </tr>`;
-                  $(tableId + ' tbody').append(newRow);
-                });
-              });
-            },
-            error: function(xhr, status, error) {
-              console.error(xhr.responseText);
-            }
+        const userId = $('#accounting-staff').val();
+        $.ajax({
+          type: 'POST',
+          url: "{% url 'generate-accomplishment-admin' %}",
+          data:{
+            start_date: FStartDate.val(),
+            end_date: FEndDate.val(),
+            user_id: userId,
+          }
+        }).done(function (data) {
+          var tbody = $('#accomplishment-tbl tbody');
+          tbody.empty();
+          console.log(data);
+          console.log("tesrtttt");
+
+          $.each(data, function(index, item) {
+            
+            var row = $('<tr>').append(
+                $('<td>').html('<span class="badge bg-label-primary">' + item.date + '</span>'),
+                $('<td>').text(item.received),
+                $('<td>').text(item.reviewed),
+                $('<td>').text(item.payrolled)
+            );
+            tbody.append(row);
           });
+          toastr.success('Generate Successfully', 'Success', toast_options);
+        });
+
+          // $.ajax({
+          //   type: 'POST',
+          //   url: "{% url 'generate-accomplishment-admin' %}",
+          //   data: {
+          //     start_date: FStartDate.val(),
+          //     end_date: FEndDate.val(),
+          //     user_id: userId,
+          //     csrfmiddlewaretoken: '{{ csrf_token }}'
+          //   },
+          //   success: function(data) {
+          //     $('table .tbody_').empty();
+          //     data.forEach(function(userResult) {
+                
+          //       var tableId = `#accomplishment-tbl-${userResult.user}`;
+                
+          //       userResult.accomplishments.forEach(function(accomplishment) {
+          //         var newRow = `<tr>
+          //                         <td>${accomplishment.date}</td>
+          //                         <td>${accomplishment.updated_count}</td>
+          //                         <td>${accomplishment.reviewed_count}</td>
+          //                         <td>${accomplishment.payrolled_count}</td>
+          //                       </tr>`;
+          //         $(tableId + ' tbody').append(newRow);
+          //       });
+          //     });
+          //   },
+          //   error: function(xhr, status, error) {
+          //     console.error(xhr.responseText);
+          //   }
+          // });
       });
     });
   </script>
+  <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+  <script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
   {% endblock footer_scripts %}

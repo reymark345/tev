@@ -31,6 +31,7 @@ from django.db.models.functions import Cast
 from django.db.utils import OperationalError
 from django.utils.html import strip_tags
 from django.db.models import Sum
+from main.database_selector import get_finance_db_alias
 
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
@@ -153,66 +154,6 @@ def save_payroll(request):
     else:
         return render(request, 'pages/unauthorized.html')  
     
-# @login_required(login_url='login')
-# def box_a(request):
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
-    
-#     # Get the user's roles in a more optimized way
-#     user_id = request.session.get('user_id', 0)
-#     role_names = list(RoleDetails.objects.filter(
-#         id__in=RolePermissions.objects.filter(user_id=user_id).values_list('role_id', flat=True)
-#     ).values_list('role_name', flat=True))
-
-#     # Fetch payee list from both tables
-#     with connections['libraries_isps'].cursor() as cursor:
-#         sql = """
-#             SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table
-#             FROM lib_supplier
-#             UNION ALL
-#             SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table
-#             FROM lib_others_payee
-#         """
-#         cursor.execute(sql) 
-#         lib_isps = cursor.fetchall()
-
-#     print("Results:", lib_isps)  # Improved debug log format
-
-#     # Format payees for frontend usage
-#     payees = [{'id': row[0], 'text': row[1]} for row in lib_isps]
-
-#     if any(role in allowed_roles for role in role_names):
-#         context = {
-#             'employee_list': TevIncoming.objects.order_by('first_name'),
-#             'permissions': role_names,
-#             'dv_number': TevOutgoing.objects.order_by('id'),
-#             'cluster': Cluster.objects.order_by('id'),
-#             'payee': payees,
-#             'division': Division.objects.order_by('id'),
-#             'charges': Charges.objects.order_by('name')
-#         }
-#         return render(request, 'transaction/p_printing.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-    
-
-
-# @login_required(login_url='login')
-# def get_payees(request):
-#     with connections['libraries_isps'].cursor() as cursor:
-#         sql = """
-#             SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table
-#             FROM lib_supplier
-#             UNION ALL
-#             SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table
-#             FROM lib_others_payee
-#         """
-#         cursor.execute(sql)
-#         lib_isps = cursor.fetchall()
-
-#     payees = [{'id': row[0], 'text': row[1]} for row in lib_isps]
-
-#     return JsonResponse({'results': payees})
-
 @login_required(login_url='login')
 def get_payees(request):
     search_term = request.GET.get('term', '').strip()  # Get search term
@@ -270,56 +211,6 @@ def box_a(request):
         return render(request, 'transaction/p_printing.html', context)
     else:
         return render(request, 'pages/unauthorized.html')
-    
-
-# @login_required(login_url='login')
-# def search_payee(request):
-#     query = request.GET.get('q', '').strip()
-#     payee_limit = 50  # Set limit per search result
-
-#     with connections['libraries_isps'].cursor() as cursor:
-#         sql = """
-#             SELECT supplier_id AS payee_id, supplier_name AS payee_name, 'lib_supplier' AS source_table
-#             FROM lib_supplier
-#             WHERE supplier_name LIKE %s
-#             UNION ALL
-#             SELECT others_payee_id AS payee_id, name AS payee_name, 'lib_others_payee' AS source_table
-#             FROM lib_others_payee
-#             WHERE name LIKE %s
-#             LIMIT %s
-#         """
-#         cursor.execute(sql, [f"%{query}%", f"%{query}%", payee_limit])
-#         results = cursor.fetchall()
-
-#         print(results)
-#         print("results")
-
-#     payees = [{'id': row[0], 'text': row[1]} for row in results]
-#     return JsonResponse({'results': payees})
-
-
-# @login_required(login_url='login')
-# def box_a_old(request):
-#     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
-#     user_id = request.session.get('user_id', 0)
-#     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
-#     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
-#     role_names = [entry['role_name'] for entry in role_details]
-
-#     if any(role_name in allowed_roles for role_name in role_names):
-#         context = {
-#             'employee_list' : TevIncoming.objects.filter().order_by('first_name'),
-#             'permissions' : role_names,
-#             'dv_number' : TevOutgoing.objects.filter().order_by('id'),
-#             'cluster' : Cluster.objects.filter().order_by('id'),
-#             'payee' : Division.objects.filter().order_by('id'),
-#             'division' : Division.objects.filter().order_by('id'),
-#             'charges' : Charges.objects.filter().order_by('name')
-
-#         }
-#         return render(request, 'transaction/p_printing.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
     
 @login_required(login_url='login')
 def outgoing_list(request):
@@ -997,8 +888,7 @@ def approval_load(request):
 
     
 @login_required(login_url='login')
-def preview_box_a(request):
-    finance_database_alias = 'finance'    
+def preview_box_a(request):   
     outgoing_id = request.GET.get('id')
     user_id = request.session.get('user_id', 0)
 
@@ -1012,13 +902,7 @@ def preview_box_a(request):
     year = int(year)
     outgoing_id = int(ot_id)
 
-    if year == 2023:
-        finance_database_alias = 'finance' 
-    elif year ==2024:
-        finance_database_alias = 'finance_2024' 
-    else:
-        finance_database_alias = 'finance_2025' 
-
+    finance_database_alias = get_finance_db_alias(year)
     userData = AuthUser.objects.filter(id=user_id)
     full_name = userData[0].first_name + ' ' + userData[0].last_name
     
@@ -1172,9 +1056,10 @@ def preview_box_a(request):
             'details':designation_result,
             'emp_list_lname':'',
             'user' : full_name  ,
-            'position' : position
+            'position' : position,
+            'date_now': timezone.now().date().strftime('%m/%d/%Y'),
         }
-        
+
         return render(request, 'transaction/preview_print.html', context)
     else:
         return render(request, 'error_template.html', {'error_message': "Missing or invalid 'id' parameter"})

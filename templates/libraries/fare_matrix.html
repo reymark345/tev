@@ -1,5 +1,4 @@
 {% extends 'index.html' %} {% block content %} {% load staticfiles %}
-
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
@@ -306,7 +305,10 @@
                 {
                     targets: 0,
                     render: function (data) {
-                        return data
+                        return (
+                            '<span class="badge bg-label-primary">' + data + '</span>'
+                        );
+                        
                     },
                 },
                 {
@@ -688,4 +690,8 @@
         }
     })
 </script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/FormValidation.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/Bootstrap5.min.js' %}"></script>
+<script src="{% static 'assets/vendor/libs/formvalidation/dist/js/plugins/AutoFocus.min.js' %}"></script>
+
 {% endblock footer_scripts %}
