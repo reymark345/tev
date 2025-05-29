@@ -109,105 +109,105 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     #for server to server
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'tris',
-    #     'USER': 'tris',
-    #     'PASSWORD': 'vOHA]ko(5))If-LU',
-    #     'HOST': '172.31.240.135',
-    #     'PORT': '3306',
-    # },
-    # # #for server INFIMOS
-    
-    # 'finance': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2023',
-    #     'USER':'tris',
-    #     'PASSWORD':'vOHA]ko(5))If-LU',
-    #     'HOST':'172.31.240.235',
-    #     'PORT':'3306',
-    # },
-
-    # 'finance_2024': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2024',
-    #     'USER':'tris',
-    #     'PASSWORD':'vOHA]ko(5))If-LU',
-    #     'HOST':'172.31.240.235',
-    #     'PORT':'3306',
-    # },
-
-    # 'finance_2025': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'infimos_2025',
-    #     'USER':'tris',
-    #     'PASSWORD':'vOHA]ko(5))If-LU',
-    #     'HOST':'172.31.240.235',
-    #     'PORT':'3306',
-    # },
-
-    # 'libraries_isps': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'libraries_isps',
-    #     'USER':'tris',
-    #     'PASSWORD':'vOHA]ko(5))If-LU',
-    #     'HOST':'172.31.240.235',
-    #     'PORT':'3306',
-    # },
-    
-
-    ##for server local but live database
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tris',
-        'USER': 'fmdDeveloper',
-        'PASSWORD': 'M@tth3w6fmd-developer',
-        'HOST': '172.31.240.235',
-        'PORT': '3306',   
-    },
-    # for localhost main database
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'tev_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'USER': 'tris',
+        'PASSWORD': 'vOHA]ko(5))If-LU',
+        'HOST': '172.31.240.135',
         'PORT': '3306',
     },
-    #for localhost INFIMOS database
+    # #for server INFIMOS
+    
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2023',
-        'USER':'root',
-        'PASSWORD':'qw1234',
-        'HOST':'localhost',
-        'PORT':'3307',
+        'USER':'tris',
+        'PASSWORD':'vOHA]ko(5))If-LU',
+        'HOST':'172.31.240.235',
+        'PORT':'3306',
     },
+
     'finance_2024': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2024',
-        'USER':'root',
-        'PASSWORD':'qw1234',
-        'HOST':'localhost',
-        'PORT':'3307',
+        'USER':'tris',
+        'PASSWORD':'vOHA]ko(5))If-LU',
+        'HOST':'172.31.240.235',
+        'PORT':'3306',
     },
+
     'finance_2025': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2025',
-        'USER':'root',
-        'PASSWORD':'qw1234',
-        'HOST':'localhost',
-        'PORT':'3307',
+        'USER':'tris',
+        'PASSWORD':'vOHA]ko(5))If-LU',
+        'HOST':'172.31.240.235',
+        'PORT':'3306',
     },
 
     'libraries_isps': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'libraries_isps',
-        'USER':'root',
-        'PASSWORD':'qw1234',
-        'HOST':'localhost',
-        'PORT':'3307',
+        'USER':'tris',
+        'PASSWORD':'vOHA]ko(5))If-LU',
+        'HOST':'172.31.240.235',
+        'PORT':'3306',
     },
+    
+
+    ##for server local but live database
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'tris',
+    #     'USER': 'fmdDeveloper',
+    #     'PASSWORD': 'M@tth3w6fmd-developer',
+    #     'HOST': '172.31.240.235',
+    #     'PORT': '3306',   
+    # },
+    # # for localhost main database
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'tev_db',
+    #     'USER': 'root',
+    #     'PASSWORD': '',
+    #     'HOST': 'localhost',
+    #     'PORT': '3306',
+    # },
+    # #for localhost INFIMOS database
+    # 'finance': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2023',
+    #     'USER':'root',
+    #     'PASSWORD':'qw1234',
+    #     'HOST':'localhost',
+    #     'PORT':'3307',
+    # },
+    # 'finance_2024': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2024',
+    #     'USER':'root',
+    #     'PASSWORD':'qw1234',
+    #     'HOST':'localhost',
+    #     'PORT':'3307',
+    # },
+    # 'finance_2025': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'infimos_2025',
+    #     'USER':'root',
+    #     'PASSWORD':'qw1234',
+    #     'HOST':'localhost',
+    #     'PORT':'3307',
+    # },
+
+    # 'libraries_isps': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'libraries_isps',
+    #     'USER':'root',
+    #     'PASSWORD':'qw1234',
+    #     'HOST':'localhost',
+    #     'PORT':'3307',
+    # },
 
 
 
