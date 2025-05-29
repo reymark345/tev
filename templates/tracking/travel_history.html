@@ -350,7 +350,7 @@
               { data: 'status', b_d_received : 'b_d_received', b_d_forwarded : 'b_d_forwarded'},
               { data: 'amt_budget', status : 'status', j_d_received : 'j_d_received', j_d_forwarded : 'j_d_forwarded'},
               { data: 'amt_journal', status : 'status', j_d_received : 'j_d_received', j_d_forwarded : 'j_d_forwarded'},
-              { data: 'approved_date', status : 'status', a_d_received : 'a_d_received', a_d_forwarded : 'a_d_forwarded'},
+              { data: 'check_issued', status : 'status', a_d_received : 'a_d_received', a_d_forwarded : 'a_d_forwarded'},
               { data: 'amt_check', status : 'status', approved_date : 'approved_date'},
               { data: 'id' },
           ],
@@ -600,9 +600,9 @@
               orderable: false,
               render: function (data, type, row) {
                 var status = row.status; 
-                var approved_date = row.approved_date; 
+                var check_issued = row.check_issued; 
                 if (data){
-                  return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Check Issued - ' + approved_date +'"><i class="ti ti-check"></i></span></center>'
+                  return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Check Issued - ' + check_issued +'"><i class="ti ti-check"></i></span></center>'
                 }
                 else if (status == 15 && status !=16){
                   return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-warning" title="For Receive"><i class="ti ti-check"></i></span></center>'

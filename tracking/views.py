@@ -311,10 +311,12 @@ def status_load(request):
         amt_budget = ''
         amt_check = ''
         approved_date = ''
+        check_issued = ''
 
         finance_query = """
-            SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
+            SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date,  tp.check_issued
             FROM transactions AS ts
+            LEFT JOIN trans_payeename AS tp ON tp.dv_no = ts.dv_no
             LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
         """
         if row['dv_no']:
@@ -328,6 +330,7 @@ def status_load(request):
                 amt_budget = finance_results[0][3]
                 amt_check = finance_results[0][4]
                 approved_date = finance_results[0][5]
+                check_issued = finance_results[0][6]
                 
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
@@ -357,6 +360,11 @@ def status_load(request):
             approved_date = approved_date.strftime('%B %d, %Y')
         else:
             approved_date = None
+
+        if check_issued:
+            check_issued = check_issued.strftime('%B %d, %Y')
+        else:
+            check_issued = None
         
         item = {
             'division': acr,
@@ -393,6 +401,7 @@ def status_load(request):
             'amt_budget': amt_budget,
             'amt_check': amt_check,
             'approved_date': approved_date,
+            'check_issued': check_issued,
             'section': row['section']
         }
         data.append(item)
@@ -684,6 +693,8 @@ def employee_details(request):
             'check_issued_date' : check_issued_date,
             'check_issued_released' : check_issued_released,
         }
+        print(check_issued_date)
+        print("check_issued_date")
         data.append(item)   
 
     total = len(data)    
@@ -1117,10 +1128,17 @@ def travel_history_load(request):
         amt_budget = ''
         amt_check = ''
         approved_date = ''
+        check_issued = ''
 
+        # finance_query = """
+        #     SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
+        #     FROM transactions AS ts
+        #     LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
+        # """
         finance_query = """
-            SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date
+            SELECT ts.dv_no, ts.amt_certified, ts.amt_journal, ts.amt_budget, tc.check_amount, ts.approval_date,  tp.check_issued
             FROM transactions AS ts
+            LEFT JOIN trans_payeename AS tp ON tp.dv_no = ts.dv_no
             LEFT JOIN trans_check AS tc ON tc.dv_no = ts.dv_no WHERE ts.dv_no = %s
         """
         if row['dv_no']:
@@ -1134,6 +1152,7 @@ def travel_history_load(request):
                 amt_budget = finance_results[0][3]
                 amt_check = finance_results[0][4]
                 approved_date = finance_results[0][5]
+                check_issued = finance_results[0][6]
                 
         first_name = row['first_name'] if row['first_name'] else ''
         middle_name = row['middle_name'] if row['middle_name'] else ''
@@ -1162,6 +1181,11 @@ def travel_history_load(request):
             approved_date = approved_date.strftime('%B %d, %Y')
         else:
             approved_date = None
+        
+        if check_issued:
+            check_issued = check_issued.strftime('%B %d, %Y')
+        else:
+            check_issued = None
         
         item = {
             'division': acr,
@@ -1198,6 +1222,7 @@ def travel_history_load(request):
             'amt_budget': amt_budget,
             'amt_check': amt_check,
             'approved_date': approved_date,
+            'check_issued': check_issued,
             'section': row['section']
         }
         data.append(item)

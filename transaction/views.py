@@ -972,7 +972,7 @@ def preview_box_a(request):
                     }
                     data_result.append(data_dict)
         
-        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__acronym','division__chief','division__c_designation','division__approval','division__ap_designation').first()
+        outgoing = TevOutgoing.objects.filter(id=outgoing_id).values('dv_no','box_b_in','division__acronym','division__chief','division__c_designation','division__approval','division__ap_designation','division__section_head','division__sh_designation').first()
         dvno = outgoing['dv_no']
         div_acronym = outgoing['division__acronym']
         te_lname = TevIncoming.objects.filter(id__in=tev_incoming_ids).values(
@@ -1041,7 +1041,9 @@ def preview_box_a(request):
             "chief":outgoing['division__chief'],
             "c_designation":outgoing['division__c_designation'],
             "approval":outgoing['division__approval'],
-            "ap_designation":outgoing['division__ap_designation']
+            "ap_designation":outgoing['division__ap_designation'],
+            "section_head":outgoing['division__section_head'],
+            "sh_designation":outgoing['division__sh_designation']
         }
 
         context = {
