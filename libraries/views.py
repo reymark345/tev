@@ -114,9 +114,13 @@ def division_add(request):
     ap_designation = strip_tags(request.POST.get('APDesignation'))
     approval = strip_tags(request.POST.get('Approval'))
     c_designation = strip_tags(request.POST.get('CDesignation'))
+    section_head = strip_tags(request.POST.get('SectionHead'))
+    sh_designation = strip_tags(request.POST.get('SHDesignation'))
+
+
     user_id = request.session.get('user_id', 0)
     try:
-        division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation,created_by = user_id)
+        division_add = Division(name=division,acronym = acrym, chief = divchief,c_designation=c_designation,approval= approval, ap_designation = ap_designation, section_head = section_head, sh_designation = sh_designation, created_by = user_id)
         division_add.save()
         return JsonResponse({'data': 'success'})
     except IntegrityError as e:
@@ -132,8 +136,10 @@ def division_update(request):
     c_designate = strip_tags(request.POST.get('CDesignation'))
     approval = strip_tags(request.POST.get('Approval'))
     ap_designation = strip_tags(request.POST.get('APDesignation'))
+    section_head = strip_tags(request.POST.get('SectionHead'))
+    sh_designation = strip_tags(request.POST.get('SHDesignation'))
     user_id = request.session.get('user_id', 0)
-    Division.objects.filter(id=id).update(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,created_by = user_id,updated_at =date.datetime.now())
+    Division.objects.filter(id=id).update(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,  section_head = section_head, sh_designation = sh_designation, created_by = user_id,updated_at =date.datetime.now())
     return JsonResponse({'data': 'success'})
     
 def division_edit(request):
@@ -172,6 +178,8 @@ def division_load(request):
             'c_designation': item.c_designation,
             'approval': item.approval,
             'ap_designation': item.ap_designation,
+            'section_head': item.section_head,
+            'sh_designation': item.sh_designation,
             'created_by': full_name,
             'created_at': item.created_at
         }
