@@ -730,33 +730,61 @@ def export_status(request):
     year = request.POST.get('year_') or request.GET.get('year_')
     with connection.cursor() as cursor:
         cursor.execute("""
-            SELECT tev_incoming.id,tev_outgoing.dv_no AS dv_no, tev_incoming.code, tev_incoming.account_no, tev_incoming.id_no,tev_incoming.last_name, tev_incoming.first_name, tev_incoming.middle_name,
-                tev_incoming.date_travel, tev_incoming.division, tev_incoming.section,charges.name, st.name, au.first_name AS incoming_by,rb.first_name AS reviewed_by,
-                tev_incoming.original_amount, tev_incoming.final_amount, payrolled_charges.amount, tev_incoming.incoming_in AS date_actual, tev_incoming.updated_at AS date_entry, tev_incoming.date_reviewed,
-                tev_incoming.review_date_forwarded AS date_reviewed_forwarded, tev_bridge.purpose AS purposes, pb.first_name AS payrolled_by, tev_incoming.date_payrolled
+            SELECT 
+                tev_incoming.id,
+                tev_outgoing.dv_no AS dv_no,
+                tev_incoming.code,
+                tev_incoming.account_no,
+                tev_incoming.id_no,
+                tev_incoming.last_name,
+                tev_incoming.first_name,
+                tev_incoming.middle_name,
+                tev_incoming.date_travel,
+                tev_incoming.division,
+                tev_incoming.section,
+                charges.name,
+                st.name,
+                au.first_name AS incoming_by,
+                rb.first_name AS reviewed_by,
+                tev_incoming.original_amount,
+                tev_incoming.final_amount,
+                payrolled_charges.amount,
+                tev_incoming.incoming_in AS date_actual,
+                tev_incoming.updated_at AS date_entry,
+                tev_incoming.date_reviewed,
+                tev_incoming.review_date_forwarded AS date_reviewed_forwarded,
+                tev_bridge.purpose AS purposes,
+                pb.first_name AS payrolled_by,
+                tev_incoming.date_payrolled,
+                rl.name AS remarks,
+                    rr.date AS date_remarks
             FROM tev_incoming
             INNER JOIN (
-            SELECT MAX(id) AS max_id
-            FROM tev_incoming
-            GROUP BY code
+                SELECT MAX(id) AS max_id
+                FROM tev_incoming
+                GROUP BY code
             ) AS latest_ids
-            ON tev_incoming.id = latest_ids.max_id
+                ON tev_incoming.id = latest_ids.max_id
             LEFT JOIN tev_bridge
-            ON tev_incoming.id = tev_bridge.tev_incoming_id
+                ON tev_bridge.tev_incoming_id = tev_incoming.id
             LEFT JOIN tev_outgoing
-            ON tev_bridge.tev_outgoing_id = tev_outgoing.id
+                ON tev_outgoing.id = tev_bridge.tev_outgoing_id
             LEFT JOIN payrolled_charges
-            ON payrolled_charges.incoming_id = tev_incoming.id
+                ON payrolled_charges.incoming_id = tev_incoming.id
             LEFT JOIN charges
-            ON payrolled_charges.charges_id = charges.id
+                ON charges.id = payrolled_charges.charges_id
             LEFT JOIN auth_user AS au
-            ON au.id = tev_incoming.user_id
+                ON au.id = tev_incoming.user_id
             LEFT JOIN auth_user AS rb
-            ON rb.id = tev_incoming.reviewed_by
+                ON rb.id = tev_incoming.reviewed_by
             LEFT JOIN auth_user AS pb
-            ON pb.id = tev_incoming.payrolled_by
+                ON pb.id = tev_incoming.payrolled_by
             LEFT JOIN status AS st
-            ON st.id = tev_incoming.status_id
+                ON st.id = tev_incoming.status_id
+            LEFT JOIN remarks_r AS rr
+                ON rr.incoming_id = tev_incoming.id
+            LEFT JOIN remarks_lib AS rl
+                ON rl.id = rr.remarks_lib_id
             WHERE tev_incoming.date_travel LIKE %s
             ORDER BY tev_incoming.id DESC;
         """, [f"%{year}%"])
@@ -805,7 +833,8 @@ def export_status(request):
         'PURPOSE',
         'PAYROLLED BY',
         'PAYROLLED DATE',
-
+        'REMARKS',
+        'REMARKS DATE',
     ]
     row_num = 1
     for col_num, column_title in enumerate(columns, 1):
@@ -856,6 +885,8 @@ def export_status(request):
             tris[22],  
             tris[23], 
             tris[24], 
+            tris[25], 
+            tris[26], 
         ]       
         for col_num, cell_value in enumerate(row, 1):
             cell = worksheet.cell(row=row_num, column=col_num)
