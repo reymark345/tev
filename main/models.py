@@ -129,6 +129,8 @@ class Division(models.Model):
     c_designation = models.CharField(max_length=128, blank=True, null=True)
     approval = models.CharField(max_length=128, blank=True, null=True)
     ap_designation = models.CharField(max_length=128, blank=True, null=True)
+    section_head = models.CharField(max_length=128, blank=True, null=True)
+    sh_designation = models.CharField(max_length=128, blank=True, null=True)
     created_by = models.IntegerField()
     created_at = models.DateTimeField(blank=True, null=True, auto_now_add=True)
     updated_at = models.DateTimeField(blank=True, null=True)

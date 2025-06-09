@@ -2,7 +2,7 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
     <!-- Content -->
-    <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="container-fluid flex-grow-1 container-p-y">
         <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Libraries/</span> Offices</h4>
 
         <!-- DataTable with Buttons -->
@@ -17,6 +17,8 @@
                             <th>Designation</th>
                             <th>Approval</th>
                             <th>Approval Designation</th>
+                            <th>Section Head</th>
+                            <th>Section Designation</th>
                             <th>Created by</th>
                             <th>Date added</th>
                             <th>Actions</th>
@@ -112,6 +114,30 @@
                   aria-describedby="chief2"
                 />
             </div>
+            <div class="col-sm-12">
+                <label class="form-label">Section Head<span style="color: red;font-weight: bold;"> *</span></label>
+                
+                <input
+                  type="text"
+                  id="section_head"
+                  class="form-control dt-lib-section-head"
+                  name="SectionHead"
+                  placeholder="Section Head"
+                  aria-describedby="section_head2"
+                />
+            </div>
+            <div class="col-sm-12">
+                <label class="form-label">Section Head Designation <span style="color: red;font-weight: bold;"> *</span></label>
+                
+                <input
+                  type="text"
+                  id="sh_designation"
+                  class="form-control dt-lib-chief"
+                  name="SHDesignation"
+                  placeholder="Designation"
+                  aria-describedby="sh_designation"
+                />
+            </div>
             <div class="col-sm-12 mt-4">
                 <button name="submitButton" class="btn btn-primary data-submit me-sm-3 me-1 additional-record">Submit</button>
                 <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="offcanvas">Cancel</button>
@@ -132,6 +158,8 @@
             CDesignation = jQuery(document.querySelector('[name="CDesignation"]')),
             Approval = jQuery(document.querySelector('[name="Approval"]')),
             APDesignation = jQuery(document.querySelector('[name="APDesignation"]')),
+            SectionHead = jQuery(document.querySelector('[name="SectionHead"]')),
+            SHDesignation = jQuery(document.querySelector('[name="SHDesignation"]')),
             Status = jQuery(document.querySelector('[name="Status"]')),
             offCanvasElement = document.querySelector('#add-new-record');
             
@@ -158,6 +186,8 @@
                 { data: 'c_designation' },
                 { data: 'approval' },
                 { data: 'ap_designation' },
+                { data: 'section_head' },
+                { data: 'sh_designation' },
                 { data: 'created_by' },
                 { data: 'updated_at' },
                 { data: 'id' },
@@ -170,7 +200,7 @@
                     },
                 },
                 {
-                    targets: 7,
+                    targets: -2,
                     render: function (data) {
                         return moment(data).format('LLL')
                     },
@@ -214,6 +244,8 @@
                             CDesignation.val(fields.c_designation);
                             Approval.val(fields.approval);
                             APDesignation.val(fields.ap_designation);
+                            SectionHead.val(fields.section_head);
+                            SHDesignation.val(fields.sh_designation);
                             ItemID.val(pk)
                             offCanvasEl.show()
                         }
@@ -293,6 +325,20 @@
                     },
                 },
                 APDesignation: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Designation',
+                        },
+                    },
+                },
+                SectionHead: {
+                    validators: {
+                        notEmpty: {
+                            message: 'Please Enter Section Head',
+                        },
+                    },
+                },
+                SHDesignation: {
                     validators: {
                         notEmpty: {
                             message: 'Please Enter Designation',
