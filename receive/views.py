@@ -65,7 +65,8 @@ def list(request):
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
     data = []
-    user_name = RolePermissions.objects.filter(role_id=2) 
+    user_name = RolePermissions.objects.filter(Q(role_id=2) | Q(role_id=1))
+    # user_name = RolePermissions.objects.filter(role_id=2) 
     get_id = user_name.values_list('user_id', flat=True)
     date_actual = SystemConfiguration.objects.filter().first().date_actual
     for user_id in get_id:
@@ -224,14 +225,14 @@ def psgc_api(request):
 def checking(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     user_id = request.session.get('user_id', 0)
-
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
     date_actual = SystemConfiguration.objects.filter().first().date_actual
 
     created_user_name = RolePermissions.objects.filter(role_id=2)
-    user_name = RolePermissions.objects.filter(role_id=3) 
+    user_name = RolePermissions.objects.filter(Q(role_id=3) | Q(role_id=1))
+    # user_name = RolePermissions.objects.filter(role_id=3) 
     created_get_id = created_user_name.values_list('user_id', flat=True)
     get_id = user_name.values_list('user_id', flat=True)
     data = []
@@ -1400,11 +1401,8 @@ def out_checking_tev(request):
             else:
                 formatted_dates = formatted_dates_list[0]
 
-            
-
             if trips_data.status_id == 3:  # returned
                 if trips_data.remarks:
-                    # Ensure correct formatting of remarks
                     formatted_remarks = re.sub(r'(\d{1,2}), (\d{4})', r'\1 \2', trips_data.remarks)
                     formatted_incoming_in = trips_data.incoming_in.strftime("%b. %d %Y")
                     message = "Good day, {}!\n\nYour TE claim for the period of {} was found to be a duplicate of another claim submitted on {} and is subject for a memo\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_remarks, formatted_incoming_in)
@@ -1423,6 +1421,12 @@ def out_checking_tev(request):
                 message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
                 send_notification(message, contact_no)
                 trips_data.status_id = 4
+
+            elif trips_data.status_id == 17 and "FORFEITED" in w_remarks_data: #forfeited
+                message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
+                send_notification(message, contact_no)
+                trips_data.status_id = 4
+
             else:
                 trips_data.status_id = 4  # for payroll
                 

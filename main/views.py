@@ -513,59 +513,104 @@ def generate_accomplishment(request):
 @login_required(login_url='login')
 @csrf_exempt
 def generate_accomplishment_admin(request):
-
-    FStartDate = request.POST.get('start_date')
-    FEndDate = request.POST.get('end_date')
-    start_date = parse_date(FStartDate)
-    end_date = parse_date(FEndDate)
-
-    _search = request.GET.get('search[value]')
-    
-    if not start_date or not end_date:
-        return JsonResponse({'error': 'Invalid date format'}, status=400)
-    
-    if start_date > end_date:
-        return JsonResponse({'error': 'Start date must be before end date'}, status=400)
-
-    results = []
-
-    users = AuthUser.objects.filter(is_staff=1)
-
-    for user in users:
-        user_results = {
-            'user': f'{user.last_name.title()}',
-            'accomplishments': []
-        }
-        
+    if request.method == 'POST':
+        FStartDate = request.POST.get('start_date')
+        FEndDate = request.POST.get('end_date')
+        start_date = parse_date(FStartDate)
+        end_date = parse_date(FEndDate)
+        userId = request.POST.get('user_id')
+        if not start_date or not end_date:
+            return JsonResponse({'error': 'Invalid date format'}, status=400)
+        user_id = request.session.get('user_id', 0)
+        if start_date > end_date:
+            return JsonResponse({'error': 'Start date must be before end date'}, status=400)
+        results = []
         for single_date in daterange(start_date, end_date):
             day_start = single_date
             day_end = single_date + timedelta(days=1)
 
-            updated_count = TevIncoming.objects.filter(
-                user_id=user.id,
+            received_count = TevIncoming.objects.filter(
+                user_id=userId,
                 updated_at__range=(day_start, day_end)
             ).count()
+            
 
             reviewed_count = TevIncoming.objects.filter(
-                reviewed_by=user.id,
+                reviewed_by=userId,
                 date_reviewed__range=(day_start, day_end)
             ).count()
 
             payrolled_count = TevIncoming.objects.filter(
-                payrolled_by=user.id,
+                payrolled_by=userId,
                 date_payrolled__range=(day_start, day_end)
             ).count()
 
-            user_results['accomplishments'].append({
+            results.append({
                 'date': single_date.strftime('%B %d, %Y'),
-                'updated_count': updated_count if updated_count > 0 else "-",
-                'reviewed_count': reviewed_count if reviewed_count > 0 else "-",
-                'payrolled_count': payrolled_count if payrolled_count > 0 else "-"
+                'received': received_count,
+                'reviewed': reviewed_count,
+                'payrolled': payrolled_count
             })
-        
-        results.append(user_results)
+        return JsonResponse(results, safe=False)
     
-    return JsonResponse(results, safe=False)
+# @login_required(login_url='login')
+# @csrf_exempt
+# def generate_accomplishment_admin(request):
+
+#     FStartDate = request.POST.get('start_date')
+#     FEndDate = request.POST.get('end_date')
+#     start_date = parse_date(FStartDate)
+#     end_date = parse_date(FEndDate)
+#     userId = request.POST.get('user_id')
+#     _search = request.GET.get('search[value]')
+
+#     print("userId", userId)
+    
+#     if not start_date or not end_date:
+#         return JsonResponse({'error': 'Invalid date format'}, status=400)
+    
+#     if start_date > end_date:
+#         return JsonResponse({'error': 'Start date must be before end date'}, status=400)
+
+#     results = []
+
+#     users = AuthUser.objects.filter(is_staff=1)
+
+#     for user in users:
+#         user_results = {
+#             'user': f'{user.last_name.title()}',
+#             'accomplishments': []
+#         }
+        
+#         for single_date in daterange(start_date, end_date):
+#             day_start = single_date
+#             day_end = single_date + timedelta(days=1)
+
+#             updated_count = TevIncoming.objects.filter(
+#                 user_id=user.id,
+#                 updated_at__range=(day_start, day_end)
+#             ).count()
+
+#             reviewed_count = TevIncoming.objects.filter(
+#                 reviewed_by=user.id,
+#                 date_reviewed__range=(day_start, day_end)
+#             ).count()
+
+#             payrolled_count = TevIncoming.objects.filter(
+#                 payrolled_by=user.id,
+#                 date_payrolled__range=(day_start, day_end)
+#             ).count()
+
+#             user_results['accomplishments'].append({
+#                 'date': single_date.strftime('%B %d, %Y'),
+#                 'updated_count': updated_count if updated_count > 0 else "-",
+#                 'reviewed_count': reviewed_count if reviewed_count > 0 else "-",
+#                 'payrolled_count': payrolled_count if payrolled_count > 0 else "-"
+#             })
+        
+#         results.append(user_results)
+    
+#     return JsonResponse(results, safe=False)
 
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days) + 1):
