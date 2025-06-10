@@ -693,8 +693,6 @@ def employee_details(request):
             'check_issued_date' : check_issued_date,
             'check_issued_released' : check_issued_released,
         }
-        print(check_issued_date)
-        print("check_issued_date")
         data.append(item)   
 
     total = len(data)    
