@@ -1004,8 +1004,6 @@ def item_update(request):
         if expired_dates:
             print("Expired dates found:", expired_dates)
             return JsonResponse({'data': 'expired', 'message': ', '.join(expired_dates)})
-        else:
-            print("All dates are not expired")
 
     duplicate_travel = []
     individual_dates = travel_date.split(',')
@@ -1192,8 +1190,6 @@ def item_add(request):
         if expired_dates:
             print("Expired dates found:", expired_dates)
             return JsonResponse({'data': 'expired', 'message': ', '.join(expired_dates)})
-        else:
-            print("All dates are not expired")
 
 
 
@@ -1420,12 +1416,11 @@ def out_checking_tev(request):
 
                 message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
                 send_notification(message, contact_no)
-                trips_data.status_id = 4
 
-            elif trips_data.status_id == 17 and "FORFEITED" in w_remarks_data: #forfeited
+            elif trips_data.status_id == 17 : #forfeited
                 message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
                 send_notification(message, contact_no)
-                trips_data.status_id = 4
+                trips_data.status_id = 3
 
             else:
                 trips_data.status_id = 4  # for payroll
