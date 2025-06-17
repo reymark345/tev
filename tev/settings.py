@@ -114,7 +114,7 @@ DATABASES = {
         'NAME': 'tris',
         'USER': 'tris',
         'PASSWORD': 'vOHA]ko(5))If-LU',
-        'HOST': '172.31.240.111',
+        'HOST': '172.31.240.135',
         'PORT': '3306',
     },
     # #for server INFIMOS
