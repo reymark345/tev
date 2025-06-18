@@ -29,11 +29,12 @@ from django.utils import timezone
 from django.template.defaultfilters import date
 import decimal
 from main.database_selector import get_finance_db_alias
+from main.decorators import mfa_required
 
 def format_datetime(dt):
     return dt.strftime('%B %d, %Y %I:%M %p') if dt else None
 
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def status(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff", "Budget staff", "Journal staff", "Approval staff", "Administrative"] 
@@ -55,7 +56,7 @@ def status(request):
     else:
         return redirect("travel-history")
 
-@login_required(login_url='login')
+@mfa_required
 def users(request):
     allowed_roles = ["Admin"]    
     user_id = request.session.get('user_id', 0)
@@ -74,7 +75,7 @@ def users(request):
         return redirect("travel-history")
 
         
-@login_required(login_url='login')
+@mfa_required
 def status_load(request):
     total = 0
     data = []
@@ -416,7 +417,7 @@ def status_load(request):
     return JsonResponse(response)
 
 
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def employee_details(request):
     year= request.POST.get('DpYear')
@@ -710,7 +711,7 @@ def employee_details(request):
     }
     return JsonResponse(response)
 
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def travel_history(request):
     user_id = request.session.get('user_id', 0)
@@ -723,6 +724,7 @@ def travel_history(request):
     }
     return render(request, 'tracking/travel_history.html', context)
 
+@mfa_required
 @csrf_exempt
 def export_status(request):
     year = request.POST.get('year_') or request.GET.get('year_')
@@ -895,7 +897,7 @@ def export_status(request):
     workbook.save(response)
     return response
 
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def travel_calendar(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff","Payroll staff","Certified staff", "Administrative", "Claimant"] 
@@ -914,7 +916,7 @@ def travel_calendar(request):
     else:
         return redirect("travel-history")
     
-@login_required(login_url='login')
+@mfa_required
 def travel_history_load(request):
     total = 0
     data = []
@@ -1265,6 +1267,7 @@ def travel_history_load(request):
     }
     return JsonResponse(response)
 
+@mfa_required
 def travel_history_load_old(request):
     total = 0
     data = []

@@ -37,6 +37,10 @@ PSGC_PROVINCE_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/provincesByRegion?reg
 PSGC_CITY_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/municipalityByProvince?province="
 PSGC_BARANGAY_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/barangayByMunicipality?municipality="
 
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Strict'
+CSRF_COOKIE_SECURE = True
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -64,9 +68,15 @@ INSTALLED_APPS = [
     'django_recaptcha',
 ]
 
+CSP_HEADER = "style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; img-src * data:;"
 
-
-
+class ContentSecurityPolicyMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+    def __call__(self, request):
+        response = self.get_response(request)
+        response['Content-Security-Policy'] = CSP_HEADER
+        return response
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -77,6 +87,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+MIDDLEWARE.insert(0, 'tev.settings.ContentSecurityPolicyMiddleware')
 
 ROOT_URLCONF = 'tev.urls'
 
@@ -91,6 +103,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processors.user_info',
             ],
             'libraries':{
                 'staticfiles': 'django.templatetags.static',

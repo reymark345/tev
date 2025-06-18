@@ -127,12 +127,24 @@
                 <input type="password" class="form-control" name="password" id="password" required>
               </div>
             
+              <!-- OTP (hidden, shown by jQuery if needed) -->
+              <div class="mb-3" id="otp-div" style="display:none;">
+                <label for="otp_token" class="form-label">Authenticator Code</label>
+                <input type="text" class="form-control" name="otp_token" id="otp_token">
+              </div>
+            
               <!-- reCAPTCHA token field (hidden) -->
               <input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response">
             
               <button type="submit" class="btn btn-primary d-grid w-100">Sign in</button>
             </form>
-          
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script>
+            // Example: Show OTP field if redirected for MFA (optional, for future use)
+            if(window.location.href.indexOf('mfa') > -1){
+                $('#otp-div').show();
+            }
+            </script>
 
             {% comment %} <form id="formAuthentication" class="mb-3" action="{% url 'login' %}" method="POST">
               <div class="mb-3">

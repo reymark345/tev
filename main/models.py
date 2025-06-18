@@ -44,6 +44,7 @@ class AuthUser(models.Model):
     is_staff = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField()
+    otp_secret = models.CharField(max_length=32, blank=True, null=True, help_text='Secret key for MFA')
 
     class Meta:
         managed = False
@@ -483,10 +484,10 @@ class LibProjectSrc(models.Model):
 
 
 
-        
-        
 
-        
-        
+
+
+
+
 
 

@@ -13,9 +13,13 @@ from datetime import timedelta, date
 from django.db.models.functions import TruncMonth
 from django.db.models import Q
 import datetime
-from .forms import LoginForm
+from .forms import LoginForm, OTPForm
 from django.conf import settings
 import requests
+import pyotp
+import qrcode
+import io
+from main.decorators import mfa_required
 
 
 def index(request):
@@ -31,42 +35,14 @@ def landing(request):
     return render(request, 'landing_page.html')
 
 
-# @csrf_exempt
-# def login(request):
-#     if request.user.is_authenticated:
-#         return redirect("dashboard")
-
-#     if request.method == 'POST':
-#         form = LoginForm(request.POST)
-#         if form.is_valid():
-#             username = form.cleaned_data['username']
-#             password = form.cleaned_data['password']
-#             user = authenticate(request, username=username, password=password)
-#             if user is not None:
-#                 auth_login(request, user)
-#                 request.session['user_id'] = user.id
-#                 request.session['username'] = user.username
-#                 request.session['fullname'] = user.first_name + user.last_name
-#                 return redirect("dashboard")
-#             else:
-#                 messages.error(request, 'Invalid Username or Password.')
-#         else:
-#             messages.error(request, 'Invalid reCAPTCHA.')
-
-#     else:
-#         form = LoginForm()
-
-#     return render(request, 'login.html', {'form': form})
-
 @csrf_exempt
 def login(request):
-    if request.user.is_authenticated:
+    if request.session.get('user_id') and request.session.get('mfa_verified'):
         return redirect("dashboard")
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
         recaptcha_token = request.POST.get('g-recaptcha-response')
-
         recaptcha_response = requests.post(
             settings.RECAPTCHA_VERIFY_URL,
             data={
@@ -75,36 +51,36 @@ def login(request):
             }
         )
         recaptcha_result = recaptcha_response.json()
-
         if not (recaptcha_result.get('success') and recaptcha_result.get('score', 0) > 0.5):
             messages.error(request, 'CAPTCHA validation failed, Try again.')
             return render(request, 'login.html', {'form': form})
-
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
             if user is not None:
-                auth_login(request, user)
                 request.session['user_id'] = user.id
                 request.session['username'] = user.username
                 request.session['fullname'] = user.first_name + user.last_name
-                return redirect("dashboard")
+                request.session['mfa_verified'] = False
+                request.session['pre_2fa_user_id'] = user.id
+                return redirect('mfa-verify')
             else:
                 messages.error(request, 'Invalid Username or Password.')
         else:
             messages.error(request, 'Form validation failed.')
-
     else:
         form = LoginForm()
-
     return render(request, 'login.html', {'form': form})
 
 
 
 
-@login_required(login_url='login')
 def dashboard(request):
+    # Custom session check for MFA
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        return redirect('login')
+
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff" , "Certified staff"] 
     user_id = request.session.get('user_id', 0)
     year = datetime.datetime.now().year
@@ -274,9 +250,11 @@ def dashboard(request):
         return redirect("travel-history")
     
 
-@login_required(login_url='login')
 @csrf_exempt
 def view_stats_year(request):
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        return redirect('login')
+
     if request.method == 'POST':
         year = request.POST.get('year')
 
@@ -373,7 +351,7 @@ def view_stats_year(request):
         for entry in reviewed_monthly_counts:
             month = entry['month'].month
             reviewed_counts[month - 1] = entry['count']
-        
+
         for entry in returned_monthly_counts:
             month = entry['month'].month
             returned_counts[month - 1] = entry['count']
@@ -422,43 +400,43 @@ def view_stats_year(request):
             'box_a': box_a,
             'permissions' : role_names
         })
-    
-@login_required(login_url='login')
-def profile(request):
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff" , "Certified staff"] 
-    user_id = request.session.get('user_id', 0)
 
+@mfa_required
+def profile(request):
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        print('DEBUG: Not authenticated or MFA not verified, redirecting to login')
+        return redirect('login')
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"]
+    user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
-    path = StaffDetails.objects.filter(user_id = user_id).first()
-    division = Division.objects.filter(id = path.division_id).first()
-    tris_staff = AuthUser.objects.filter(is_staff=1).exclude(id__in=[1,2,24])
 
+    path = StaffDetails.objects.filter(user_id=user_id).first()
+    division = Division.objects.filter(id=path.division_id).first() if path else None
+    tris_staff = AuthUser.objects.filter(is_staff=1).exclude(id__in=[1,2,24])
     for user in tris_staff:
         user.first_name = user.first_name.title()
         user.last_name = user.last_name.title()
-
     context = {
         'staff': tris_staff,
-        'id_number': path.id_number, 
-        'position': path.position, 
-        'sex': path.sex,  
-        'division_name': division.name, 
-        'image_path': path.image_path,
-        'permissions' : role_names,
+        'id_number': getattr(path, 'id_number', ''),
+        'position': getattr(path, 'position', ''),
+        'sex': getattr(path, 'sex', ''),
+        'division_name': getattr(division, 'name', ''),
+        'image_path': getattr(path, 'image_path', ''),
+        'permissions': role_names,
     }
-
     if "Admin" in role_names:
-        return render(request, 'admin_profile.html',context) 
-    
+
+        return render(request, 'admin_profile.html', context)
     elif any(role_name in allowed_roles for role_name in role_names):
-        return render(request, 'profile.html',context)
-    
-    elif "Administrative" in role_names or "Claimant" in role_names or "Approval staff" in role_names or "Budget staff" in role_names:
-        return render(request, 'aa_profile.html',context)
+        return render(request, 'profile.html', context)
+    elif ("Administrative" in role_names or "Claimant" in role_names or
+          "Approval staff" in role_names or "Budget staff" in role_names):
+        return render(request, 'aa_profile.html', context)
     else:
-        return redirect("status")
+        return redirect('login')
     
     
 
@@ -467,10 +445,11 @@ def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days) + 1):
         yield start_date + timedelta(n)
 
-
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def generate_accomplishment(request):
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        return redirect('login')
     if request.method == 'POST':
         FStartDate = request.POST.get('start_date')
         FEndDate = request.POST.get('end_date')
@@ -510,9 +489,11 @@ def generate_accomplishment(request):
             })
         return JsonResponse(results, safe=False)
     
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def generate_accomplishment_admin(request):
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        return redirect('login')
     if request.method == 'POST':
         FStartDate = request.POST.get('start_date')
         FEndDate = request.POST.get('end_date')
@@ -553,64 +534,59 @@ def generate_accomplishment_admin(request):
             })
         return JsonResponse(results, safe=False)
     
-# @login_required(login_url='login')
-# @csrf_exempt
-# def generate_accomplishment_admin(request):
+def mfa_setup(request):
+    user = request.user
+    if not hasattr(user, 'otp_secret') or not user.otp_secret:
+        otp_secret = pyotp.random_base32()
+        user.otp_secret = otp_secret
+        user.save()
+    else:
+        otp_secret = user.otp_secret
+    otp_uri = pyotp.totp.TOTP(otp_secret).provisioning_uri(name=user.username, issuer_name="TRIPS")
+    img = qrcode.make(otp_uri)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    image_stream = buf.getvalue()
+    return HttpResponse(image_stream, content_type="image/png")
 
-#     FStartDate = request.POST.get('start_date')
-#     FEndDate = request.POST.get('end_date')
-#     start_date = parse_date(FStartDate)
-#     end_date = parse_date(FEndDate)
-#     userId = request.POST.get('user_id')
-#     _search = request.GET.get('search[value]')
 
-#     print("userId", userId)
-    
-#     if not start_date or not end_date:
-#         return JsonResponse({'error': 'Invalid date format'}, status=400)
-    
-#     if start_date > end_date:
-#         return JsonResponse({'error': 'Start date must be before end date'}, status=400)
+def mfa_verify(request):
+    user_id = request.session.get('pre_2fa_user_id')
+    if not user_id:
+        return redirect('login')
+    user = AuthUser.objects.get(id=user_id)
+    if not user.otp_secret:
+        otp_secret = pyotp.random_base32()
+        user.otp_secret = otp_secret
+        user.save()
+    if request.method == 'POST':
+        form = OTPForm(request.POST)
+        if form.is_valid():
+            otp_token = form.cleaned_data['otp_token']
+            totp = pyotp.TOTP(user.otp_secret)
+            if totp.verify(otp_token):
+                request.session['mfa_verified'] = True
+                if 'pre_2fa_user_id' in request.session:
+                    del request.session['pre_2fa_user_id']
+                return redirect('dashboard')
+            else:
+                messages.error(request, 'Invalid authentication code.')
+        else:
+            messages.error(request, 'Invalid form.')
+    else:
+        form = OTPForm()
+    otp_uri = pyotp.totp.TOTP(user.otp_secret).provisioning_uri(name=user.username, issuer_name="TRIPS")
+    import base64
+    import qrcode
+    import io
+    img = qrcode.make(otp_uri)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    qr_url = 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode('utf-8')
+    return render(request, 'mfa_verify.html', {'form': form, 'qr_url': qr_url})
 
-#     results = []
 
-#     users = AuthUser.objects.filter(is_staff=1)
 
-#     for user in users:
-#         user_results = {
-#             'user': f'{user.last_name.title()}',
-#             'accomplishments': []
-#         }
-        
-#         for single_date in daterange(start_date, end_date):
-#             day_start = single_date
-#             day_end = single_date + timedelta(days=1)
-
-#             updated_count = TevIncoming.objects.filter(
-#                 user_id=user.id,
-#                 updated_at__range=(day_start, day_end)
-#             ).count()
-
-#             reviewed_count = TevIncoming.objects.filter(
-#                 reviewed_by=user.id,
-#                 date_reviewed__range=(day_start, day_end)
-#             ).count()
-
-#             payrolled_count = TevIncoming.objects.filter(
-#                 payrolled_by=user.id,
-#                 date_payrolled__range=(day_start, day_end)
-#             ).count()
-
-#             user_results['accomplishments'].append({
-#                 'date': single_date.strftime('%B %d, %Y'),
-#                 'updated_count': updated_count if updated_count > 0 else "-",
-#                 'reviewed_count': reviewed_count if reviewed_count > 0 else "-",
-#                 'payrolled_count': payrolled_count if payrolled_count > 0 else "-"
-#             })
-        
-#         results.append(user_results)
-    
-#     return JsonResponse(results, safe=False)
 
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days) + 1):

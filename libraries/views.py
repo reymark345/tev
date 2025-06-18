@@ -16,9 +16,12 @@ import datetime as date
 from django.db.models import Q, Max
 import json
 from django.utils.html import strip_tags
+from main.decorators import mfa_required
  
-@login_required(login_url='login')
+@mfa_required 
 def division(request):
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        return redirect('login')
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
@@ -33,10 +36,12 @@ def division(request):
         }
         return render(request, 'libraries/division.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
 
-@login_required(login_url='login')
+@mfa_required
 def charges(request):
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        return redirect('login')
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
@@ -50,11 +55,12 @@ def charges(request):
         }
         return render(request, 'libraries/charges.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
     
-    
-@login_required(login_url='login')
+@mfa_required    
 def remarks(request):
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        return redirect('login')
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
@@ -67,10 +73,12 @@ def remarks(request):
         }
         return render(request, 'libraries/remarks.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
-    
-@login_required(login_url='login')
+        return redirect('login')
+
+@mfa_required    
 def fare_matrix(request):
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        return redirect('login')
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
@@ -85,10 +93,12 @@ def fare_matrix(request):
         }
         return render(request, 'libraries/fare_matrix.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
-    
-@login_required(login_url='login')
+        return redirect('login')
+
+@mfa_required    
 def means_of_transportation(request):
+    if not request.session.get('user_id') or not request.session.get('mfa_verified'):
+        return redirect('login')
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
@@ -101,11 +111,10 @@ def means_of_transportation(request):
         }
         return render(request, 'libraries/means_of_transportation.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
     
 
-
-    
+@mfa_required    
 @csrf_exempt
 def division_add(request):
     division = strip_tags(request.POST.get('Division'))
@@ -126,7 +135,7 @@ def division_add(request):
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
     
-    
+@mfa_required    
 @csrf_exempt
 def division_update(request):
     id = request.POST.get('ItemID')
@@ -141,14 +150,15 @@ def division_update(request):
     user_id = request.session.get('user_id', 0)
     Division.objects.filter(id=id).update(name=division,acronym = acrym, chief = divchief,c_designation=c_designate,approval= approval, ap_designation = ap_designation,  section_head = section_head, sh_designation = sh_designation, created_by = user_id,updated_at =date.datetime.now())
     return JsonResponse({'data': 'success'})
-    
+
+@mfa_required    
 def division_edit(request):
     id = request.GET.get('id')
     items = Division.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
     
-    
+@mfa_required    
 def division_load(request):
     division_data = Division.objects.select_related().filter().order_by('-created_at')
     total = division_data.count()
@@ -195,6 +205,7 @@ def division_load(request):
     }
     return JsonResponse(response)
 
+@mfa_required
 @csrf_exempt
 def charges_add(request):
     charges = strip_tags(request.POST.get('Charges'))
@@ -205,7 +216,8 @@ def charges_add(request):
         return JsonResponse({'data': 'success'})
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
-    
+
+@mfa_required    
 @csrf_exempt
 def charges_update(request):
     id = request.POST.get('ItemID')
@@ -216,14 +228,14 @@ def charges_update(request):
         Charges.objects.filter(id=id).update(name=charges)
         return JsonResponse({'data': 'success'})
     
-    
+@mfa_required    
 def charges_edit(request):
     id = request.GET.get('id')
     items = Charges.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
     
-    
+@mfa_required    
 def charges_load(request):
     charges_data = Charges.objects.select_related().order_by('-created_at')
     total = charges_data.count()
@@ -263,6 +275,7 @@ def charges_load(request):
     }
     return JsonResponse(response)
 
+@mfa_required
 @csrf_exempt
 def remarks_add(request):
     remarks = strip_tags(request.POST.get('Remarks'))
@@ -276,7 +289,8 @@ def remarks_add(request):
             return JsonResponse({'data': 'success'})
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
-    
+
+@mfa_required    
 @csrf_exempt
 def remarks_update(request):
     id = request.POST.get('ItemID')
@@ -286,7 +300,8 @@ def remarks_update(request):
     else:
         RemarksLib.objects.filter(id=id).update(name=remarks)
         return JsonResponse({'data': 'success'})
-    
+
+@mfa_required    
 @csrf_exempt  
 def remarks_edit(request):
     id = request.GET.get('id')
@@ -294,6 +309,7 @@ def remarks_edit(request):
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
+@mfa_required
 @csrf_exempt  
 def fare_matrix_edit(request):
     id = request.GET.get('id')
@@ -301,6 +317,7 @@ def fare_matrix_edit(request):
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
+@mfa_required
 @csrf_exempt  
 def means_of_transportation_edit(request):
     id = request.GET.get('id')
@@ -308,6 +325,7 @@ def means_of_transportation_edit(request):
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
+@mfa_required
 @csrf_exempt
 def remarks_status_edit(request):
     id = request.POST.get('id')
@@ -315,6 +333,7 @@ def remarks_status_edit(request):
     RemarksLib.objects.filter(pk=id).update(status=status_id)
     return JsonResponse({'data': 'success'})
 
+@mfa_required
 def remarks_load(request):
     charges_data = RemarksLib.objects.select_related().order_by('-created_at')
     total = charges_data.count()
@@ -354,7 +373,7 @@ def remarks_load(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 def fare_matrix_load(request):
     _search = request.GET.get('search[value]', '').strip()
     filter_conditions = Q()
@@ -422,7 +441,7 @@ def fare_matrix_load(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 def means_of_transportation_load(request):
 
     _search = request.GET.get('search[value]', '').strip()
@@ -541,6 +560,7 @@ def means_of_transportation_load(request):
 #     except IntegrityError as e:
 #         return JsonResponse({'data': 'error'})
 
+@mfa_required
 @csrf_exempt
 def fare_matrix_add(request):
     def parse_decimal(value):
@@ -604,7 +624,8 @@ def fare_matrix_add(request):
 
     except IntegrityError:
         return JsonResponse({'data': 'error', 'message': 'Database Integrity Error'})
-
+    
+@mfa_required
 @csrf_exempt
 def fare_matrix_update(request):
     def parse_decimal(value):
@@ -665,7 +686,7 @@ def fare_matrix_update(request):
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
     
-
+@mfa_required
 @csrf_exempt
 def means_of_transportation_add(request):
     MotName = strip_tags(request.POST.get('MotName'))
@@ -686,7 +707,8 @@ def means_of_transportation_add(request):
             return JsonResponse({'data': 'success'})
     except IntegrityError as e:
         return JsonResponse({'data': 'error'})
-    
+
+@mfa_required    
 @csrf_exempt
 def means_of_transportation_update(request):
     id = request.POST.get('ItemID')
@@ -710,7 +732,7 @@ def means_of_transportation_update(request):
 
 
 
-
+@mfa_required
 @csrf_exempt
 def get_lib_mun(request):
     if request.method == "GET":
@@ -724,7 +746,8 @@ def get_lib_mun(request):
 
     else:
         return JsonResponse({'message': 'Invalid HTTP method. Only GET is allowed.'}, status=405)
-    
+
+@mfa_required    
 @csrf_exempt
 def get_lib_brgy(request):
     if request.method == "GET":
@@ -738,4 +761,4 @@ def get_lib_brgy(request):
 
     else:
         return JsonResponse({'message': 'Invalid HTTP method. Only GET is allowed.'}, status=405)
- 
+

@@ -17,6 +17,7 @@ urlpatterns = [
     path('libraries/', include('libraries.urls')),
     path('generate_accomplishment', views.generate_accomplishment, name='generate-accomplishment'),
     path('generate_accomplishment_admin', views.generate_accomplishment_admin, name='generate-accomplishment-admin'),
+    path('mfa-verify', views.mfa_verify, name='mfa-verify'),
 
 
     

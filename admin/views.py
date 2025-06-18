@@ -23,12 +23,13 @@ from django.db import connection
 from suds.client import Client
 from django.db.models import Q
 from django.utils.html import strip_tags
+from main.decorators import mfa_required
 
 
 def is_member_of_inventory_staff(user):
     return user.groups.filter(name='inventory_staff').exists()
  
-@login_required(login_url='login')
+@mfa_required
 def users(request):
     allowed_roles = ["Admin"]    
     user_id = request.session.get('user_id', 0)
@@ -43,9 +44,9 @@ def users(request):
         }
         return render(request, 'admin/users.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
 
-@login_required(login_url='login')
+
 def form_controls(request):
     allowed_roles = ["Admin"]    
     user_id = request.session.get('user_id', 0)
@@ -66,9 +67,9 @@ def form_controls(request):
         }
         return render(request, 'admin/form_controls.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
     
-@login_required(login_url='login')
+
 def sms(request):
     allowed_roles = ["Admin"]    
     user_id = request.session.get('user_id', 0)
@@ -85,10 +86,10 @@ def sms(request):
         }
         return render(request, 'admin/sms.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
     
 
-@login_required(login_url='login')
+
 def chat(request):
     allowed_roles = ["Admin"]    
     user_id = request.session.get('user_id', 0)
@@ -119,42 +120,9 @@ def chat(request):
         }
         return render(request, 'admin/chat.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
     
-# @login_required(login_url='login')
-# def chat(request):
-#     allowed_roles = ["Admin"]    
-#     user_id = request.session.get('user_id', 0)
-#     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
-#     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
-#     role_names = [entry['role_name'] for entry in role_details]
-#     date_actual = SystemConfiguration.objects.filter().first().date_actual
-#     path = StaffDetails.objects.filter(user_id = user_id).first()
-#     combined_data = []
 
-#     for auth_user in AuthUser.objects.all():
-#         staff_detail = StaffDetails.objects.filter(user=auth_user).first()
-#         combined_data.append({
-#             'id': auth_user.id,
-#             'first_name': auth_user.first_name.title(),
-#             'last_name': auth_user.last_name.title(),
-#             'image_path': staff_detail.image_path if staff_detail else None
-#         })
-
-#     if any(role_name in allowed_roles for role_name in role_names):
-#         context = {
-#             'users' : AuthUser.objects.filter().exclude(id=1).order_by('first_name').select_related(),
-#             'is_actual_date': date_actual,
-#             'permissions' : role_names,
-#             'image_path': path.image_path,
-#             'role_details': RoleDetails.objects.filter().order_by('role_name'),
-#             'combined_data': combined_data
-#         }
-#         return render(request, 'admin/chat_admin.html', context)
-#     else:
-#         return render(request, 'pages/unauthorized.html')
-    
-@login_required(login_url='login')
 def chat_data(request):
     allowed_roles = ["Admin"]
     user_id = request.session.get('user_id', 0)
@@ -188,7 +156,7 @@ def chat_data(request):
     }
     return JsonResponse({'data': context})
 
-@login_required(login_url='login')
+
 def chat_staff(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"]   
     user_id = request.session.get('user_id', 0)
@@ -218,7 +186,7 @@ def chat_staff(request):
         }
         return render(request, 'admin/chat_staff.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
 
 
 @csrf_exempt
@@ -242,68 +210,7 @@ def chat_data_staff(request):
 
     return render(request, 'index.html')
 
-
-
-
-# @csrf_exempt 
-# def chat_data_staff(request):
-
-#     if request.method == 'POST':
-#         username = request.POST['username']
-#         room = request.POST['room']
-
-#         try:
-#             get_room = Room.objects.get(room_name=room)
-#             return redirect('room', room_name=room, username=username)
-
-#         except Room.DoesNotExist:
-#             new_room = Room(room_name = room)
-#             new_room.save()
-#             return redirect('room', room_name=room, username=username)
-
-
-
-# @csrf_exempt 
-# @login_required(login_url='login')
-# def chat_data_staff(request):
-#     allowed_roles = ["Admin"]
-#     user_id = request.session.get('user_id', 0)
-#     auth_user_id = request.POST.get('auth_user_id')
-#     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
-#     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
-#     role_names = [entry['role_name'] for entry in role_details]
-#     combined_data = []
-#     messages = Chat.objects.filter(Q(to_user=auth_user_id) | Q(from_user=auth_user_id)).values('from_user', 'to_user', 'message', 'seen', 'created_at')
-#     messages_list = list(messages)  
-
-#     try:
-#         auth_user = AuthUser.objects.get(id=auth_user_id)
-#         staff_detail = StaffDetails.objects.filter(user=auth_user).first()
-#         staff_detail_img_path = StaffDetails.objects.filter(user=user_id).first()
-#         combined_data.append({
-#             'id': auth_user.id,
-#             'login_id': user_id,
-#             'first_name': auth_user.first_name.title(),
-#             'last_name': auth_user.last_name.title(),
-#             'image_path': staff_detail.image_path if staff_detail else None,
-#             'position': staff_detail.position if staff_detail else None,
-#             'image_path_user': staff_detail_img_path.image_path if staff_detail else None,
-#         })
-#     except AuthUser.DoesNotExist:
-#         pass
-
-#     context = {
-#         'permissions': role_names,
-#         'messages': messages_list,
-#         'combined_data': combined_data
-#     }
-#     return JsonResponse({'data': context})
-
-
-
-
 @csrf_exempt 
-@login_required(login_url='login')
 def send_chat(request):
     if request.method == 'POST':
         user_id = request.session.get('user_id', 0)
@@ -323,7 +230,7 @@ def send_notification(message, contact_number):
         pass
     
 @csrf_exempt
-@login_required(login_url='login')
+
 def send_sms(request):
     allowed_roles = ["Admin"]    
     user_id = request.session.get('user_id', 0)
@@ -338,6 +245,8 @@ def send_sms(request):
         return JsonResponse({'data': 'success'})
     else:
         return JsonResponse({'data': 'error'})
+
+@mfa_required
 @csrf_exempt
 def adduser(request):
     if request.method == 'POST':
@@ -366,7 +275,8 @@ def adduser(request):
             add_user_details.save()
             
             return JsonResponse({'data': 'success'})
-        
+
+@mfa_required        
 @csrf_exempt
 def updateuser(request):
     if request.method == 'POST':
@@ -393,14 +303,16 @@ def updateuser(request):
             AuthUser.objects.filter(id=user_id_).update(password = make_password(password_),is_superuser = roles,username=username_,first_name=firstname,last_name=lastname, email = email_, is_active = status)
             StaffDetails.objects.filter(user_id=user_id_).update(sex=sex_, address = address_, position = position_, role_id = roles)
             return JsonResponse({'data': 'success'})
-        
+
+@mfa_required        
 @csrf_exempt
 def date_actual_update(request):
     if request.method == 'POST':
         status = request.POST.get('status')
         SystemConfiguration.objects.filter(id =1).update(date_actual=status)
         return JsonResponse({'data': 'success'})
-    
+
+@mfa_required     
 @csrf_exempt
 def update_days(request):
     if request.method == 'POST':
@@ -408,7 +320,7 @@ def update_days(request):
         SystemConfiguration.objects.filter(id =1).update(days_expire=days)
         return JsonResponse({'data': 'success'})
     
-
+@mfa_required
 @csrf_exempt
 def expiry_date_update(request):
     if request.method == 'POST':
@@ -419,7 +331,7 @@ def expiry_date_update(request):
 
 #start User function ---------------->
         
-
+@mfa_required
 @csrf_exempt
 def user_add(request):
     user_name = strip_tags(request.POST.get('Username'))
@@ -485,7 +397,7 @@ def user_add(request):
     
 #End User function ---------------->
 
-
+@mfa_required
 @csrf_exempt
 def user_update(request):
     try:
@@ -510,7 +422,8 @@ def user_update(request):
             return JsonResponse({'data': 'success'})
     except Exception as e:
         return JsonResponse({'data': 'error'})
-
+    
+@mfa_required
 @csrf_exempt
 def user_edit(request):
     id = request.GET.get('id')
@@ -524,7 +437,7 @@ def user_edit(request):
     data = json.dumps(data)
     return HttpResponse(data, content_type="application/json")
 
-
+@mfa_required
 @csrf_exempt
 def role_edit(request):
     try:
@@ -542,7 +455,8 @@ def role_edit(request):
     
     except Exception as e:
         return JsonResponse({'data': 'error'})
-
+    
+@mfa_required
 @csrf_exempt
 def role_update(request):
     id = request.POST.get('role_id')
@@ -557,7 +471,9 @@ def role_update(request):
         role_p_lib.save()
 
     return JsonResponse({'data': 'success'})
-    
+
+
+@mfa_required   
 @csrf_exempt
 def update_password(request):
     try:
@@ -567,7 +483,8 @@ def update_password(request):
         return JsonResponse({'data': 'success'})
     except Exception as e:
         return JsonResponse({'data': 'error'})
-    
+
+@mfa_required    
 @csrf_exempt
 def update_own_password(request):
     try:
@@ -578,7 +495,8 @@ def update_own_password(request):
     except Exception as e:
         return JsonResponse({'data': 'error'})
     
-
+    
+@mfa_required
 def user_load(request):
     _search = request.GET.get('search[value]')
     data = []
@@ -655,6 +573,7 @@ def user_load(request):
     }
     return JsonResponse(response)
 
+@mfa_required
 def logs_load(request):    
     data = []
     user_data = TransactionLogs.objects.all().order_by('-id')
@@ -694,7 +613,7 @@ def logs_load(request):
     return JsonResponse(response)
 
 
-@login_required(login_url='login')
+@mfa_required
 def transaction_logs(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff"] 
     user_id = request.session.get('user_id', 0)
@@ -709,7 +628,7 @@ def transaction_logs(request):
         }
         return render(request, 'admin/logs.html', context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
     
 
 
