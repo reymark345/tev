@@ -45,6 +45,7 @@ class AuthUser(models.Model):
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField()
     otp_secret = models.CharField(max_length=32, blank=True, null=True, help_text='Secret key for MFA')
+    mfa_enabled = models.BooleanField(default=True, help_text='Enable MFA for this user')
 
     class Meta:
         managed = False

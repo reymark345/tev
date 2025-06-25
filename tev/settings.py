@@ -125,9 +125,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tris',
-        'USER': 'tris',
-        'PASSWORD': 'vOHA]ko(5))If-LU',
-        'HOST': '172.31.240.135',
+        'USER': 'crg-tev',
+        'PASSWORD': '_OqHoJpcq]1/9w5x',
+        'HOST': '172.31.240.134',
         'PORT': '3306',
     },
     # #for server INFIMOS
@@ -135,38 +135,39 @@ DATABASES = {
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2023',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
+        'USER':'rnvaldehueza',
+        'PASSWORD':'lM][UmnE4eaV(3kb',
+        'HOST':'172.31.240.134',
         'PORT':'3306',
     },
 
     'finance_2024': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2024',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
+        'USER':'rnvaldehueza',
+        'PASSWORD':'lM][UmnE4eaV(3kb',
+        'HOST':'172.31.240.134',
         'PORT':'3306',
     },
 
     'finance_2025': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2025',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
+        'USER':'rnvaldehueza',
+        'PASSWORD':'lM][UmnE4eaV(3kb',
+        'HOST':'172.31.240.134',
         'PORT':'3306',
     },
 
     'libraries_isps': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'libraries_isps',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
+        'USER':'rnvaldehueza',
+        'PASSWORD':'lM][UmnE4eaV(3kb',
+        'HOST':'172.31.240.134',
         'PORT':'3306',
     },
+
     
 
     ##for server local but live database

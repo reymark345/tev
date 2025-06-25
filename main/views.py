@@ -59,12 +59,16 @@ def login(request):
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
             if user is not None:
+                mfa_status = AuthUser.objects.filter(username=username).values_list('mfa_enabled', flat=True).first()
                 request.session['user_id'] = user.id
                 request.session['username'] = user.username
                 request.session['fullname'] = user.first_name + user.last_name
-                request.session['mfa_verified'] = False
-                request.session['pre_2fa_user_id'] = user.id
-                return redirect('mfa-verify')
+                if mfa_status:
+                    request.session['pre_2fa_user_id'] = user.id
+                    return redirect('mfa-verify')
+                else:
+                    request.session['mfa_verified'] = True
+                    return redirect('dashboard')
             else:
                 messages.error(request, 'Invalid Username or Password.')
         else:
