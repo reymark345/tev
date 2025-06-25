@@ -125,6 +125,30 @@
                           <span>{{ user.email }} </span>
                         </li>
                       </ul>
+                   
+                      <small class="card-text text-uppercase">Multi Factor Authentication</small>
+                      <ul class="list-unstyled mb-4 mt-3">
+                        <li class="d-flex align-items-center mb-3">
+                          <label class="switch switch-success mb-0">
+                            <input type="checkbox" class="switch-input" id="mfa-toggle"
+                                  {% if user.mfa_enabled %}checked{% endif %}
+                                  onchange="document.getElementById('switch-label-mfa').textContent = this.checked ? 'Enabled' : 'Disabled';" />
+                            <span class="switch-toggle-slider">
+                              <span class="switch-on">
+                                <i class="ti ti-check"></i>
+                              </span>
+                              <span class="switch-off">
+                                <i class="ti ti-x"></i>
+                              </span>
+                            </span>
+                            <span class="switch-label ms-2" id="switch-label-mfa">
+                              {% if user.mfa_enabled %}Enabled{% else %}Disabled{% endif %}
+                            </span>
+                          </label>
+                        </li>
+                      </ul>
+
+                      
                     </div>
                   </div>
                 </div>
@@ -438,37 +462,22 @@
           });
           toastr.success('Generate Successfully', 'Success', toast_options);
         });
-
-          // $.ajax({
-          //   type: 'POST',
-          //   url: "{% url 'generate-accomplishment-admin' %}",
-          //   data: {
-          //     start_date: FStartDate.val(),
-          //     end_date: FEndDate.val(),
-          //     user_id: userId,
-          //     csrfmiddlewaretoken: '{{ csrf_token }}'
-          //   },
-          //   success: function(data) {
-          //     $('table .tbody_').empty();
-          //     data.forEach(function(userResult) {
-                
-          //       var tableId = `#accomplishment-tbl-${userResult.user}`;
-                
-          //       userResult.accomplishments.forEach(function(accomplishment) {
-          //         var newRow = `<tr>
-          //                         <td>${accomplishment.date}</td>
-          //                         <td>${accomplishment.updated_count}</td>
-          //                         <td>${accomplishment.reviewed_count}</td>
-          //                         <td>${accomplishment.payrolled_count}</td>
-          //                       </tr>`;
-          //         $(tableId + ' tbody').append(newRow);
-          //       });
-          //     });
-          //   },
-          //   error: function(xhr, status, error) {
-          //     console.error(xhr.responseText);
-          //   }
-          // });
+      });
+      $('#mfa-toggle').on('change', function () {
+          const isEnabled = $(this).is(':checked');
+          $.ajax({
+              type: 'POST',
+              url: "{% url 'mfa-update' %}",
+              data: {
+                  mfa_enabled: isEnabled,
+              },
+              success: function(response) {
+                  toastr.success('MFA status updated.', 'Success', toast_options);
+              },
+              error: function(xhr) {
+                  toastr.error('Failed to update MFA status.', 'Error', toast_options);
+              }
+          });
       });
     });
   </script>

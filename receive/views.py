@@ -86,7 +86,6 @@ def list(request):
             'permissions' : role_names,
             'created_by' :  data
         }
-        print("goods")
         return render(request, 'receive/receive.html' , context)
     else:
         return redirect('login')

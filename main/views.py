@@ -408,9 +408,8 @@ def view_stats_year(request):
 @mfa_required
 def profile(request):
     if not request.session.get('user_id') or not request.session.get('mfa_verified'):
-        print('DEBUG: Not authenticated or MFA not verified, redirecting to login')
         return redirect('login')
-    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"]
+    allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff", "Outgoing staff"]
     user_id = request.session.get('user_id', 0)
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
@@ -432,7 +431,6 @@ def profile(request):
         'permissions': role_names,
     }
     if "Admin" in role_names:
-
         return render(request, 'admin_profile.html', context)
     elif any(role_name in allowed_roles for role_name in role_names):
         return render(request, 'profile.html', context)
@@ -441,9 +439,6 @@ def profile(request):
         return render(request, 'aa_profile.html', context)
     else:
         return redirect('login')
-    
-    
-
     
 def daterange(start_date, end_date):
     for n in range(int((end_date - start_date).days) + 1):
@@ -589,7 +584,14 @@ def mfa_verify(request):
     qr_url = 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode('utf-8')
     return render(request, 'mfa_verify.html', {'form': form, 'qr_url': qr_url})
 
-
+@csrf_exempt
+def mfa_update(request):
+    if request.method == 'POST':
+        mfa_status = request.POST.get('mfa_enabled', 'false').lower() == 'true'  # converts to real boolean
+        end_user = request.session.get('user_id', 0)
+        AuthUser.objects.filter(id=end_user).update(mfa_enabled=mfa_status)
+        return JsonResponse({'status': 'success', 'mfa_enabled': mfa_status})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
 
 def daterange(start_date, end_date):
