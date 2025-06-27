@@ -413,13 +413,14 @@ def user_update(request):
         status = strip_tags(request.POST.get('ModalStatus'))
         staff = 1 if request.POST.get('ModalStaff') == 'true' else 0
 
-        if AuthUser.objects.filter(username=user_name).exclude(id=id):
-            return JsonResponse({'data': 'error', 'message': 'Username Taken'})
+        # if AuthUser.objects.filter(username=user_name).exclude(id=id):
+        #     return JsonResponse({'data': 'error', 'message': 'Username Taken'})
         
-        else:
-            AuthUser.objects.filter(id=id).update(username=user_name,first_name=firstname,last_name=lastname,email=email, is_staff = staff, is_active = status)
-            StaffDetails.objects.filter(user_id=id).update(sex=sex,address=address,position=position)
-            return JsonResponse({'data': 'success'})
+        # else:
+        # AuthUser.objects.filter(id=id).update(username=user_name,first_name=firstname,last_name=lastname,email=email, is_staff = staff, is_active = status)
+        AuthUser.objects.filter(id=id).update(email=email, is_staff = staff, is_active = status)
+        StaffDetails.objects.filter(user_id=id).update(address=address,position=position)
+        return JsonResponse({'data': 'success'})
     except Exception as e:
         return JsonResponse({'data': 'error'})
     

@@ -715,6 +715,8 @@ def employee_details(request):
 @csrf_exempt
 def travel_history(request):
     user_id = request.session.get('user_id', 0)
+    print("testttt")
+    print(user_id) 
     role_permissions = RolePermissions.objects.filter(user_id=user_id).values('role_id')
     role_details = RoleDetails.objects.filter(id__in=role_permissions).values('role_name')
     role_names = [entry['role_name'] for entry in role_details]
@@ -931,6 +933,8 @@ def travel_history_load(request):
     finance_database_alias = get_finance_db_alias(DpYear) 
 
     user_id = request.session.get('user_id', 0)
+
+    # user_details_ = AuthUser.objects.filter(employee_id=user_id).first()
     user_details_ = AuthUser.objects.filter(id=user_id).first()
     first_name_ = user_details_.first_name
     last_name_ = user_details_.last_name

@@ -257,8 +257,15 @@
         <form class="add-new-record pt-0 row g-2" id="item-form">
             <input type="hidden" id="item-id" name="ItemID" />
             <div class="col-sm-12">
-                <label class="form-label" for="employee-name">Employee Name<span style="color: red;font-weight: bold;"> *</span></label>
+                <label class="form-label" for="employee-name">Employee Names<span style="color: red;font-weight: bold;"> *</span></label>
                 <select id="employee-name" name="EmployeeName" class="form-select employee" data-allow-clear="true">
+                    <option></option>
+                </select>
+            </div>
+
+            <div class="col-sm-12">
+                <label class="form-label" for="employee-name-load">Employee Names<span style="color: red;font-weight: bold;"> *</span></label>
+                <select id="employee-name-load" name="EmployeeNameLoad" class="form-select employeeload" data-allow-clear="true">
                     <option></option>
                 </select>
             </div>
@@ -1176,6 +1183,8 @@
                                 },
                             })
                         }
+                        console.log(data.message);
+                        console.log("tedsttt");
                     })
                 }
             }

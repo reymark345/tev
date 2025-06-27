@@ -46,6 +46,7 @@ class AuthUser(models.Model):
     date_joined = models.DateTimeField()
     otp_secret = models.CharField(max_length=32, blank=True, null=True, help_text='Secret key for MFA')
     mfa_enabled = models.BooleanField(default=True, help_text='Enable MFA for this user')
+    employee_id = models.IntegerField(null=True, blank=True)
 
     class Meta:
         managed = False
@@ -275,6 +276,7 @@ class StaffDetails(models.Model):
     image_path = models.CharField(max_length=128, blank=True, null=True)
     added_by = models.CharField(max_length=128, blank=True, null=True)
     middle_initial = models.CharField(max_length=128, blank=True, null=True)
+    division_lbl = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
         managed = True
@@ -485,10 +487,10 @@ class LibProjectSrc(models.Model):
 
 
 
+        
+        
 
-
-
-
-
+        
+        
 
 

@@ -20,6 +20,8 @@ import pyotp
 import qrcode
 import io
 from main.decorators import mfa_required
+from django.contrib.auth.hashers import make_password
+import base64
 
 
 def index(request):
@@ -34,6 +36,48 @@ def landing(request):
         return redirect("dashboard")
     return render(request, 'landing_page.html')
 
+
+# @csrf_exempt
+# def login_old(request):
+#     if request.session.get('user_id') and request.session.get('mfa_verified'):
+#         return redirect("dashboard")
+
+#     if request.method == 'POST':
+#         form = LoginForm(request.POST)
+#         recaptcha_token = request.POST.get('g-recaptcha-response')
+#         recaptcha_response = requests.post(
+#             settings.RECAPTCHA_VERIFY_URL,
+#             data={
+#                 'secret': settings.RECAPTCHA_SECRET_KEY,
+#                 'response': recaptcha_token
+#             }
+#         )
+#         recaptcha_result = recaptcha_response.json()
+#         if not (recaptcha_result.get('success') and recaptcha_result.get('score', 0) > 0.5):
+#             messages.error(request, 'CAPTCHA validation failed, Try again.')
+#             return render(request, 'login.html', {'form': form})
+#         if form.is_valid():
+#             username = form.cleaned_data['username']
+#             password = form.cleaned_data['password']
+#             user = authenticate(request, username=username, password=password)
+#             if user is not None:
+#                 mfa_status = AuthUser.objects.filter(username=username).values_list('mfa_enabled', flat=True).first()
+#                 request.session['user_id'] = user.id
+#                 request.session['username'] = user.username
+#                 request.session['fullname'] = user.first_name + user.last_name
+#                 if mfa_status:
+#                     request.session['pre_2fa_user_id'] = user.id
+#                     return redirect('mfa-verify')
+#                 else:
+#                     request.session['mfa_verified'] = True
+#                     return redirect('dashboard')
+#             else:
+#                 messages.error(request, 'Invalid Username or Password.')
+#         else:
+#             messages.error(request, 'Form validation failed.')
+#     else:
+#         form = LoginForm()
+#     return render(request, 'login.html', {'form': form})
 
 @csrf_exempt
 def login(request):
@@ -57,20 +101,93 @@ def login(request):
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                mfa_status = AuthUser.objects.filter(username=username).values_list('mfa_enabled', flat=True).first()
-                request.session['user_id'] = user.id
-                request.session['username'] = user.username
-                request.session['fullname'] = user.first_name + user.last_name
-                if mfa_status:
-                    request.session['pre_2fa_user_id'] = user.id
-                    return redirect('mfa-verify')
+
+            # API authentication
+            api_url = settings.PORTAL_API_LOGIN_URL
+            api_token = settings.PORTAL_API_LOGIN_URL_TOKEN
+            headers = {
+                "accept": "application/json",
+                "Authorization": f"Bearer {api_token}",
+            }
+            data = {
+                "username": username,
+                "password": password,
+            }
+    
+            api_response = requests.post(api_url, headers=headers, data=data, verify=False)
+            if api_response.status_code == 200:
+                api_json = api_response.json()
+                if api_json.get("status") == "success":
+                    
+                    user_status = AuthUser.objects.filter(username=username).first()
+                    user_data = api_json.get("data", {})
+                    # Set session data
+                    if not user_status:
+                        middle_initial = (user_data.get('middle_name', '')[:1].upper() if user_data.get('middle_name') else '')
+                        auth_user_tbl = AuthUser(
+                            password=make_password(password),
+                            last_login= datetime.datetime.now(),
+                            is_superuser=False,
+                            username=username,
+                            first_name=user_data.get('first_name'),
+                            last_name=user_data.get('last_name'),
+                            email=user_data.get('email'),
+                            is_staff=False,
+                            is_active=True,
+                            date_joined=datetime.datetime.now(),
+                            mfa_enabled=True,
+                            employee_id=user_data.get('employee_id')
+                        )
+                        auth_user_tbl.save()
+                        if hasattr(auth_user_tbl, 'portal_token'):
+                            auth_user_tbl.portal_token = api_json.get('portal_token')
+                        if hasattr(auth_user_tbl, 'cc_token'):
+                            auth_user_tbl.cc_token = api_json.get('cc_token')
+                        auth_user_tbl.save()
+                        
+                        save_staff_tbl = StaffDetails(
+                            id_number=user_data.get('id_number'),
+                            section=user_data.get('section'),
+                            position=user_data.get('position'),
+                            sex=user_data.get('gender'),
+                            address=user_data.get('address'),
+                            middle_initial=middle_initial,
+                            division_lbl=user_data.get('division'),
+                            user_id=auth_user_tbl.id,
+                            image_path=user_data.get('image_path')
+                        )
+                        save_staff_tbl.save()
+                        
+                        role_permissions_tbl = RolePermissions(
+                            created_at=datetime.datetime.now(),
+                            role_id=11,
+                            user_id=auth_user_tbl.id
+                        )
+                        role_permissions_tbl.save()
+                    else : 
+                        AuthUser.objects.filter(id=user_status.id).update(last_login=datetime.datetime.now())
+
+                    user_status_new = AuthUser.objects.filter(username=username).first()
+                    request.session['user_id'] = user_status_new.id
+                    request.session['username'] = user_data.get('username')
+                    request.session['fullname'] = user_data.get('fullname')
+                    request.session['portal_token'] = api_json.get('portal_token')
+                    request.session['cc_token'] = api_json.get('cc_token')
+
+                    test = AuthUser.objects.filter(username=username).first()
+                    mfa_status = test.mfa_enabled if test else False
+                    
+                    if mfa_status:
+                        request.session['pre_2fa_user_id'] = user_status_new.id
+                        return redirect('mfa-verify')
+                    else:
+                        request.session['mfa_verified'] = True
+                        return redirect('dashboard')
                 else:
-                    request.session['mfa_verified'] = True
-                    return redirect('dashboard')
+                    messages.error(request, 'Invalid Username or Password..')
             else:
                 messages.error(request, 'Invalid Username or Password.')
+
         else:
             messages.error(request, 'Form validation failed.')
     else:
@@ -416,7 +533,11 @@ def profile(request):
     role_names = [entry['role_name'] for entry in role_details]
 
     path = StaffDetails.objects.filter(user_id=user_id).first()
-    division = Division.objects.filter(id=path.division_id).first() if path else None
+    
+    # division = Division.objects.filter(id=path.division_id).first() if path else None
+    staff = StaffDetails.objects.filter(user_id=user_id).first() 
+
+
     tris_staff = AuthUser.objects.filter(is_staff=1).exclude(id__in=[1,2,24])
     for user in tris_staff:
         user.first_name = user.first_name.title()
@@ -426,7 +547,7 @@ def profile(request):
         'id_number': getattr(path, 'id_number', ''),
         'position': getattr(path, 'position', ''),
         'sex': getattr(path, 'sex', ''),
-        'division_name': getattr(division, 'name', ''),
+        'division_name': staff.division_lbl if staff and staff.division_lbl else '',
         'image_path': getattr(path, 'image_path', ''),
         'permissions': role_names,
     }
@@ -575,9 +696,6 @@ def mfa_verify(request):
     else:
         form = OTPForm()
     otp_uri = pyotp.totp.TOTP(user.otp_secret).provisioning_uri(name=user.username, issuer_name="TRIPS")
-    import base64
-    import qrcode
-    import io
     img = qrcode.make(otp_uri)
     buf = io.BytesIO()
     img.save(buf, format='PNG')

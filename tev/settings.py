@@ -33,6 +33,8 @@ SECRET_KEY = 'django-insecure-e&691z)oh*#_&yv(h^3sn^*=gxs09(%(5395)=xe+_im_bk^l&
 PSGC_TOKEN  = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2R4Y2xvdWQuZHN3ZC5nb3YucGgvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3Mzc3NzA3NjYsImV4cCI6MTgzMjM3ODc2NiwibmJmIjoxNzM3NzcwNzY2LCJqdGkiOiJyS1pNMm90NmJlaHFNaWtzIiwic3ViIjoyMTEsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.q5MOfNtcQC-zcCg2kdsfZwf_gOm6Sw2QuiA5lDvfA6g"
 PORTAL_TOKEN  = "Token 7a8203defd27f14ca23dacd19ed898dd3ff38ef6"
 PORTAL_API_URL  = "https://caraga-portal.dswd.gov.ph/api/employee/list/load"
+PORTAL_API_LOGIN_URL  = "https://caraga-connect-api-staging.dswd.gov.ph/api/v1/staff/portal/login"
+PORTAL_API_LOGIN_URL_TOKEN  = "479|holmmVH93qdHLaUtgHB4HD51M52mqjW0lI5NgnLqqi82YYNYYUWvhfk9eFExEg4jUaDweGh9aPU08LQKGlNqucFGFRLORu3dJalZ"
 PSGC_PROVINCE_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/provincesByRegion?region=160000000"
 PSGC_CITY_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/municipalityByProvince?province="
 PSGC_BARANGAY_URL  = "https://dxcloud.dswd.gov.ph/api/psgc/barangayByMunicipality?municipality="
@@ -41,8 +43,7 @@ CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Strict'
 CSRF_COOKIE_SECURE = True
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -125,9 +126,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'tris',
-        'USER': 'tris',
-        'PASSWORD': 'vOHA]ko(5))If-LU',
-        'HOST': '172.31.240.135',
+        'USER': 'crg-tev',
+        'PASSWORD': '_OqHoJpcq]1/9w5x',
+        'HOST': '172.31.240.134',
         'PORT': '3306',
     },
     # #for server INFIMOS
@@ -135,38 +136,39 @@ DATABASES = {
     'finance': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2023',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
+        'USER':'rnvaldehueza',
+        'PASSWORD':'lM][UmnE4eaV(3kb',
+        'HOST':'172.31.240.134',
         'PORT':'3306',
     },
 
     'finance_2024': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2024',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
+        'USER':'rnvaldehueza',
+        'PASSWORD':'lM][UmnE4eaV(3kb',
+        'HOST':'172.31.240.134',
         'PORT':'3306',
     },
 
     'finance_2025': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'infimos_2025',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
+        'USER':'rnvaldehueza',
+        'PASSWORD':'lM][UmnE4eaV(3kb',
+        'HOST':'172.31.240.134',
         'PORT':'3306',
     },
 
     'libraries_isps': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'libraries_isps',
-        'USER':'tris',
-        'PASSWORD':'vOHA]ko(5))If-LU',
-        'HOST':'172.31.240.235',
+        'USER':'rnvaldehueza',
+        'PASSWORD':'lM][UmnE4eaV(3kb',
+        'HOST':'172.31.240.134',
         'PORT':'3306',
     },
+
     
 
     ##for server local but live database

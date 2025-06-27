@@ -166,7 +166,7 @@
         </div>
         <form id="update-form" class="row g-3" onsubmit="return false">
         <input type="hidden" id="modal-id" name="ModalID" />
-        <div class="col-12 col-md-6">
+        {% comment %} <div class="col-12 col-md-6">
             <label class="form-label" for="modalEditUserFirstName">First Name</label>
             <input
             type="text"
@@ -195,7 +195,7 @@
             class="form-control"
             placeholder="john.doe.007"
             />
-        </div>
+        </div> {% endcomment %}
 
         <div class="col-12 col-md-6">
             <label class="form-label" for="modalEditUserStatus">Status</label>
@@ -211,7 +211,7 @@
             </select>
         </div>
 
-        <div class="col-12 col-md-6">
+        {% comment %} <div class="col-12 col-md-6">
             <label class="form-label">Sex </label>
             <select
             id="modalsex"
@@ -223,7 +223,7 @@
             <option value="Male">Male</option>
             <option value="Female">Female</option>
             </select>
-        </div>
+        </div> {% endcomment %}
 
         
         <div class="col-12 col-md-6">
@@ -273,7 +273,7 @@
             </select>
         </div>
 
-        <div class="col-12">
+        {% comment %} <div class="col-12">
             <label class="switch">
             <input type="checkbox" class="switch-input" />
             <span class="switch-toggle-slider">
@@ -282,7 +282,7 @@
             </span>
             <span class="switch-label">Change Password?</span>
             </label>
-        </div>
+        </div> {% endcomment %}
 
         <div class="col-12 text-center">
             <button type="submit" class="btn btn-primary me-sm-3 me-1">Submit</button>
@@ -657,22 +657,14 @@
                   searchable: false,
                   render: function (data) {
                       return (
-                          //'<a href="javascript:;" data-id="' + data + '" class="item-edit text-body"><i class="text-primary ti ti-pencil"></i></a>'+
-
-                          '<a href="javascript:;" data-id="' + data + '" class="modal-edit text-body" ><i class="text-primary ti ti-pencil"></i></a>'+
-
-                          '<a href="javascript:;" data-id="' + data + '" class="modal-roles text-body"><i class="text-primary ti ti-settings"></i></a>'
+                        '<a href="javascript:;" data-id="' + data + '" class="modal-edit text-body" ><i class="text-primary ti ti-pencil"></i></a>'+
+                        '<a href="javascript:;" data-id="' + data + '" class="modal-roles text-body"><i class="text-primary ti ti-settings"></i></a>'
                       )
                   },
               },
             ],
             dom: '<"card-header flex-column flex-md-row"<"head-label text-center"><"dt-action-buttons text-end pt-3 pt-md-0"B>><"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6 d-flex justify-content-center justify-content-md-end"f>>t<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-            buttons: [
-                {
-                    text: '<i class="ti ti-plus me-sm-1"></i> <span class="d-none d-sm-inline-block">Add New Record</span>',
-                    className: 'create-new btn btn-primary',
-                },
-            ],
+            buttons: [],
             drawCallback: function (settings) {
                 $('.modal-edit').on('click', function () {
                     let id = $(this).data('id');
