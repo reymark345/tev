@@ -4,6 +4,7 @@ __pycache__
 *.pyc
 venv
 CACHE
+tev/settings.py
 .env
 env
 # databases/
