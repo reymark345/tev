@@ -4,8 +4,13 @@ from main.models import (TevOutgoing,TevIncoming)
 from .serializers import ItemSerializer, ItemSerializerStatus
 from django.db import connections
 from django.utils import timezone
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from main.global_token import GlobalTokenAuthentication
+
 
 @api_view(['GET'])
+@authentication_classes([GlobalTokenAuthentication])
 def getStatus(request, id_number):
     main_query = """
     SELECT 
