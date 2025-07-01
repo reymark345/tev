@@ -155,8 +155,20 @@ def getStatus(request, id_number):
         dict(zip(columns, row)) for row in rows
     ]
 
+    first_dv_no = mapped_data[0].get('dv_no')
     current_year = timezone.now().year
-    finance_db = f'finance_{current_year}'
+    current_century = current_year // 100 * 100
+
+    year_prefix = int(first_dv_no[:2])
+    approx_year = current_century + year_prefix
+
+    if approx_year > current_year + 5:  
+        approx_year -= 100 
+
+    year = approx_year
+
+    finance_db = f'finance_{year}'
+
     for data in mapped_data:
         dv_no = data.get('dv_no')
 
