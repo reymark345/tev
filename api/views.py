@@ -51,7 +51,8 @@ def getStatus(request, id_number):
         CONCAT_WS(' ', rb.first_name, rb.last_name) AS reviewed_by,
         ti.date_reviewed,
         ti.review_date_forwarded,
-        CONCAT_WS(' ', rf.first_name, rf.last_name) AS review_forwarded_by
+        CONCAT_WS(' ', rf.first_name, rf.last_name) AS review_forwarded_by,
+        s_t.name AS status
     FROM 
         tev_incoming AS ti 
     LEFT JOIN 
@@ -94,6 +95,8 @@ def getStatus(request, id_number):
         auth_user AS a_r ON a_r.id = t_o.a_r_user_id
     LEFT JOIN 
         auth_user AS a_f ON a_f.id = t_o.a_out_user_id
+    LEFT JOIN 
+        status AS s_t ON s_t.id = ti.status_id
     WHERE 
         ti.id_no = %s
     GROUP BY 
@@ -132,7 +135,8 @@ def getStatus(request, id_number):
         t_o.a_out_user_id,
         t_o.out_by,
         ch.name, 
-        cl.name
+        cl.name,
+        s_t.name
     ORDER BY 
         ti.id DESC
     """
