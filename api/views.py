@@ -4,8 +4,13 @@ from main.models import (TevOutgoing,TevIncoming)
 from .serializers import ItemSerializer, ItemSerializerStatus
 from django.db import connections
 from django.utils import timezone
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from main.global_token import GlobalTokenAuthentication
+
 
 @api_view(['GET'])
+@authentication_classes([GlobalTokenAuthentication])
 def getStatus(request, id_number):
     main_query = """
     SELECT 
@@ -51,7 +56,8 @@ def getStatus(request, id_number):
         CONCAT_WS(' ', rb.first_name, rb.last_name) AS reviewed_by,
         ti.date_reviewed,
         ti.review_date_forwarded,
-        CONCAT_WS(' ', rf.first_name, rf.last_name) AS review_forwarded_by
+        CONCAT_WS(' ', rf.first_name, rf.last_name) AS review_forwarded_by,
+        s_t.name AS status
     FROM 
         tev_incoming AS ti 
     LEFT JOIN 
@@ -94,6 +100,8 @@ def getStatus(request, id_number):
         auth_user AS a_r ON a_r.id = t_o.a_r_user_id
     LEFT JOIN 
         auth_user AS a_f ON a_f.id = t_o.a_out_user_id
+    LEFT JOIN 
+        status AS s_t ON s_t.id = ti.status_id
     WHERE 
         ti.id_no = %s
     GROUP BY 
@@ -132,7 +140,8 @@ def getStatus(request, id_number):
         t_o.a_out_user_id,
         t_o.out_by,
         ch.name, 
-        cl.name
+        cl.name,
+        s_t.name
     ORDER BY 
         ti.id DESC
     """
@@ -146,8 +155,20 @@ def getStatus(request, id_number):
         dict(zip(columns, row)) for row in rows
     ]
 
+    first_dv_no = mapped_data[0].get('dv_no')
     current_year = timezone.now().year
-    finance_db = f'finance_{current_year}'
+    current_century = current_year // 100 * 100
+
+    year_prefix = int(first_dv_no[:2])
+    approx_year = current_century + year_prefix
+
+    if approx_year > current_year + 5:  
+        approx_year -= 100 
+
+    year = approx_year
+
+    finance_db = f'finance_{year}'
+
     for data in mapped_data:
         dv_no = data.get('dv_no')
 

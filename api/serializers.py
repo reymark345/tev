@@ -12,6 +12,7 @@ class ItemSerializerStatus(serializers.Serializer):
     original_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     final_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
     status_id = serializers.IntegerField()
+    status = serializers.CharField(max_length=100)
     purposes = serializers.CharField()
     incoming_in = serializers.DateTimeField()
     incoming_out = serializers.DateTimeField()

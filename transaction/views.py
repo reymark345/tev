@@ -32,6 +32,7 @@ from django.db.utils import OperationalError
 from django.utils.html import strip_tags
 from django.db.models import Sum
 from main.database_selector import get_finance_db_alias
+from main.decorators import mfa_required
 
 def generate_code():
     trans_code = SystemConfiguration.objects.values_list(
@@ -63,7 +64,7 @@ def get_finance_connection(year):
         return 'testttt'
     
 
-@login_required(login_url='login')
+@mfa_required
 def list(request):
     user_id = request.session.get('user_id', 0)
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
@@ -82,7 +83,7 @@ def list(request):
         return render(request, 'pages/unauthorized.html')
     
     
-@login_required(login_url='login')
+@mfa_required
 def list_payroll(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff","Payroll staff", "Certified staff"] 
     user_id = request.session.get('user_id', 0)
@@ -102,7 +103,7 @@ def list_payroll(request):
         return render(request, 'pages/unauthorized.html')
     
 
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def assign_payroll(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
@@ -119,7 +120,7 @@ def assign_payroll(request):
         return render(request, 'pages/unauthorized.html')    
          
     
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def save_payroll(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
@@ -154,7 +155,7 @@ def save_payroll(request):
     else:
         return render(request, 'pages/unauthorized.html')  
     
-@login_required(login_url='login')
+@mfa_required
 def get_payees(request):
     search_term = request.GET.get('term', '').strip()  # Get search term
 
@@ -176,7 +177,7 @@ def get_payees(request):
     
     return JsonResponse({'results': payees})
 
-@login_required(login_url='login')
+@mfa_required
 def box_a(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff", "Payroll staff", "Certified staff"] 
     user_id = request.session.get('user_id', 0)
@@ -212,7 +213,7 @@ def box_a(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-@login_required(login_url='login')
+@mfa_required
 def outgoing_list(request):
     allowed_roles = ["Admin","Outgoing staff"] 
     user_id = request.session.get('user_id', 0)
@@ -233,7 +234,7 @@ def outgoing_list(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-@login_required(login_url='login')
+@mfa_required
 def budget_list(request):
     allowed_roles = ["Admin","Budget staff"] 
     user_id = request.session.get('user_id', 0)
@@ -256,7 +257,7 @@ def budget_list(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-@login_required(login_url='login')
+@mfa_required
 def journal_list(request):
     allowed_roles = ["Admin","Journal staff","Certified staff"] 
     user_id = request.session.get('user_id', 0)
@@ -277,7 +278,7 @@ def journal_list(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-@login_required(login_url='login')
+@mfa_required
 def approval_list(request):
     allowed_roles = ["Admin","Approval staff"] 
     user_id = request.session.get('user_id', 0)
@@ -540,6 +541,7 @@ def budget_load(request):
     }
     return JsonResponse(response)
 
+@mfa_required
 @csrf_exempt
 def journal_load(request):
     adv_filter = request.GET.get('FAdvancedFilter')
@@ -780,7 +782,7 @@ def journal_load(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 @csrf_exempt
 def approval_load(request):
     adv_filter = request.GET.get('FAdvancedFilter')
@@ -887,7 +889,7 @@ def approval_load(request):
     return JsonResponse(response)
 
     
-@login_required(login_url='login')
+@mfa_required
 def preview_box_a(request):   
     outgoing_id = request.GET.get('id')
     user_id = request.session.get('user_id', 0)
@@ -1068,7 +1070,7 @@ def preview_box_a(request):
     
 
 
-@login_required(login_url='login')
+@mfa_required
 def rd_preview_print(request):
     data = TevIncoming.objects.filter(status=16).order_by('last_name')
     data_result = []
@@ -1115,7 +1117,7 @@ def rd_preview_print(request):
     
     return render(request, 'receive/rd_preview_print.html', context)
 
-@login_required(login_url='login')
+@mfa_required
 def checking(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     
@@ -1132,7 +1134,7 @@ def checking(request):
     else:
         return render(request, 'pages/unauthorized.html')
     
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def employee_dv(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
@@ -1227,7 +1229,7 @@ def employee_dv(request):
     return JsonResponse(response)
 
 
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def employee_journal(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
@@ -1326,7 +1328,7 @@ def employee_journal(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 @csrf_exempt
 def multiple_charges_details(request):
     pp_id = request.POST.get('payroll_id')
@@ -1360,6 +1362,7 @@ def multiple_charges_details(request):
     }
     return JsonResponse(response)
 
+@mfa_required
 def payroll_load(request):  
 
     FIdNumber= request.GET.get('FIdNumber')
@@ -1504,7 +1507,7 @@ def payroll_load(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 def payroll_list_load(request):
     _search = request.GET.get('search[value]')
     _order_dir = request.GET.get('order[0][dir]')
@@ -1687,7 +1690,7 @@ def payroll_list_load(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 @csrf_exempt
 def box_load(request):
     adv_filter = request.GET.get('FAdvancedFilter')
@@ -1791,7 +1794,7 @@ def box_load(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 def box_emp_load(request):  
     item_data = (TevOutgoing.objects.filter().select_related().distinct().order_by('-id').reverse())
     total = item_data.count()
@@ -1848,19 +1851,20 @@ def box_emp_load(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 def item_edit(request):
     id = request.GET.get('id')
     items = TevIncoming.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
+@mfa_required
 @csrf_exempt
 def update_status(request):
     return JsonResponse({'data': 'success'})
 
 
-
+@mfa_required
 @csrf_exempt
 def dv_number_lib(request):
     dv_list = TevOutgoing.objects.values_list('dv_no', flat=True)
@@ -1918,7 +1922,7 @@ def update_box_list(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 @csrf_exempt
 def add_multiple_charges(request):
     if request.method == 'POST':
@@ -1937,6 +1941,7 @@ def add_multiple_charges(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
+@mfa_required
 @csrf_exempt
 def update_multiple_charges(request):
     if request.method == 'POST':
@@ -1975,7 +1980,7 @@ def update_multiple_charges(request):
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
 
-    
+@mfa_required    
 @csrf_exempt
 def check_charges(request):
     if request.method == 'POST':
@@ -1991,7 +1996,7 @@ def check_charges(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
  
-
+@mfa_required
 @csrf_exempt
 def payroll_add_charges(request):
     if request.method == 'POST':
@@ -2032,7 +2037,7 @@ def payroll_add_charges(request):
     return JsonResponse({'data': 'Invalid request method'}, status=400)
 
     
-    
+@mfa_required   
 @csrf_exempt
 def remove_charges(request):
     if request.method == 'POST':
@@ -2049,7 +2054,7 @@ def remove_charges(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
-
+@mfa_required
 @csrf_exempt
 def update_purpose(request):
     if request.method == 'POST':
@@ -2062,7 +2067,8 @@ def update_purpose(request):
             return JsonResponse({'status': 'error', 'message': str(e)})
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
-    
+
+@mfa_required   
 @csrf_exempt
 def transmittal_details(request):
     data_result = []
@@ -2162,7 +2168,7 @@ def transmittal_details(request):
     response = {'data': data_result}
     return render(request, 'transaction/preview_transmittal.html', response)
 
-
+@mfa_required
 @csrf_exempt
 def add_dv(request):
     if request.method == 'POST':
@@ -2248,7 +2254,8 @@ def add_dv(request):
 
     else:
         return JsonResponse({'data': 'error', 'message': 'Invalid request method'})
-
+    
+@mfa_required
 @csrf_exempt
 def add_emp_dv(request):
     if request.method == 'POST':
@@ -2295,7 +2302,7 @@ def add_emp_dv(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
-
+@mfa_required
 @csrf_exempt
 def add_emp_journal(request):
     if request.method == 'POST':
@@ -2342,7 +2349,7 @@ def add_emp_journal(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
   
-
+@mfa_required
 @csrf_exempt
 def retrieve_employee(request):
     dv_no_id = request.POST.get('dv_no_id')
@@ -2392,6 +2399,7 @@ def retrieve_employee(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+@mfa_required
 @csrf_exempt
 def delete_box_list(request):
     if request.method == 'POST':
@@ -2435,7 +2443,7 @@ def delete_box_list(request):
 
 
 
-
+@mfa_required
 @csrf_exempt
 def update_amt(request):
     incoming_id = request.POST.get('emp_id')
@@ -2474,7 +2482,7 @@ def update_amt(request):
     response = {'data': 'success'}
     return JsonResponse(response)
 
-
+@mfa_required
 @csrf_exempt
 def out_box_a(request):
     out_list = request.POST.getlist('out_list[]')
@@ -2503,6 +2511,7 @@ def out_box_a(request):
                 TevOutgoing.objects.filter(id=item_id).update(status_id=6,box_b_out=date_time.datetime.now(), out_by = user_id)
             return JsonResponse({'data': 'success'})
 
+@mfa_required
 @csrf_exempt
 def receive_otg(request):
     missing_items = []
@@ -2527,6 +2536,7 @@ def receive_otg(request):
             TevOutgoing.objects.filter(id=item_id).update(status_id=8,otg_d_received=date_time.datetime.now(), otg_r_user_id = user_id)
         return JsonResponse({'data': 'success'})
 
+@mfa_required
 @csrf_exempt
 def forward_otg(request):
     missing_items = []
@@ -2547,7 +2557,7 @@ def forward_otg(request):
             TevOutgoing.objects.filter(id=item_id).update(status_id=9,otg_out_user_id = user_id,otg_d_forwarded=date_time.datetime.now())
         return JsonResponse({'data': 'success'})
 
-
+@mfa_required
 @csrf_exempt
 def receive_budget(request):
     missing_items = []
@@ -2571,7 +2581,8 @@ def receive_budget(request):
         for item_id  in out_list:
             TevOutgoing.objects.filter(id=item_id).update(status_id=10,b_d_received=date_time.datetime.now(), b_r_user_id = user_id)
         return JsonResponse({'data': 'success'})
-    
+
+@mfa_required  
 @csrf_exempt
 def forward_budget(request):
     try:
@@ -2595,6 +2606,7 @@ def forward_budget(request):
     except Exception as e:
         return JsonResponse({'data': 'error', 'message': str(e)})
 
+@mfa_required
 @csrf_exempt
 def receive_journal(request):
     missing_items = []
@@ -2641,7 +2653,7 @@ def receive_journal(request):
             return JsonResponse({'data': 'invalid', 'message': 'The Budget forwarded date must be beyond the Journal date.','dv_no':', '.join(dv_list)})
     return JsonResponse({'data': 'success'})
 
-
+@mfa_required
 @csrf_exempt
 def forward_journal(request):
     missing_items = []
@@ -2707,7 +2719,7 @@ def forward_journal(request):
 
 
 
-
+@mfa_required
 @csrf_exempt
 def receive_approval(request):
     missing_items = []
@@ -2732,7 +2744,7 @@ def receive_approval(request):
             TevOutgoing.objects.filter(id=item_id).update(status_id=14,a_d_received=date_time.datetime.now(), a_r_user_id = user_id)
         return JsonResponse({'data': 'success'})
      
-
+@mfa_required
 @csrf_exempt
 def forward_approval(request):
     missing_items = []
@@ -2753,7 +2765,7 @@ def forward_approval(request):
             TevOutgoing.objects.filter(id=item_id).update(status_id=15,a_out_user_id = user_id,a_d_forwarded=date_time.datetime.now())
         return JsonResponse({'data': 'success'})
 
-
+@mfa_required
 @csrf_exempt
 def tev_details(request):
     tev_id = request.POST.get('tev_id')
@@ -2763,7 +2775,7 @@ def tev_details(request):
     }
     return JsonResponse(data)
 
-
+@mfa_required
 @csrf_exempt
 def tevemployee(request):
     tev_id = request.POST.get('tev_id')
@@ -2774,6 +2786,7 @@ def tevemployee(request):
     else:
         return JsonResponse({'data': None})
 
+@mfa_required
 @csrf_exempt
 def addtev(request):
     
@@ -2787,7 +2800,7 @@ def addtev(request):
 
     return JsonResponse({'data': 'success'})
 
-
+@mfa_required
 @csrf_exempt
 def add_existing_record(request):
     fname = request.POST.get('FFirstName')
@@ -2859,7 +2872,7 @@ def add_existing_record(request):
 
 
 
-
+@mfa_required
 @csrf_exempt
 def addtevdetails(request):
     amount = request.POST.get('final_amount')
@@ -2874,6 +2887,7 @@ def addtevdetails(request):
 
     return JsonResponse({'data': 'success'})
 
+@mfa_required
 @csrf_exempt
 def get_project_src(request):
     data = []

@@ -454,6 +454,9 @@
                   if(data==16){
                     return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top"  title="Pending"><i class="ti ti-check"></i></span></center>'
                   }
+                  if(data==17){
+                    return '<center><span class="badge badge-center rounded-pill bg-danger" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top"  title="Forfeited"><i class="ti ti-x"></i></span></center>'
+                  }
                   if(data==7){
                     tooltip = 'Approved';
                     return '<center><span class="badge badge-center rounded-pill bg-info" data-bs-html="true" data-bs-custom-class="tooltip-info" data-bs-toggle="tooltip" data-bs-placement="top" title="Approved - ' + date_reviewed +'"><i class="ti ti-check"></i></span></center>'
@@ -478,10 +481,10 @@
                   var date_payrolled = row.date_payrolled; 
                   var payrolled_out = row.box_b_out; 
 
-                  if (data >= 5 && data < 6 && data !=16 ){
+                  if (data >= 5 && data < 6 && data !=16 && data !=17){
                     return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Payroll"><i class="ti ti-check"></i></span></center>'
                   }
-                  if (data >= 6 && data !=7 && data !=16 ){
+                  if (data >= 6 && data !=7 && data !=16 && data !=17){
                     return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded - ' + payrolled_out +'"><i class="ti ti-check"></i></span></center>'
                   }
                   if (data == 4 ){
@@ -499,13 +502,13 @@
                   var outgoing_received = row.otg_d_received; 
                   var outgoing_forwarded = row.otg_d_forwarded; 
 
-                  if (data >= 6  && data < 8 && data != 7 && data != 16){
+                  if (data >= 6  && data < 8 && data != 7 && data != 16 && data != 17){
                     return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
                   }
-                  else if (data == 8 && data !=16 ){
+                  else if (data == 8 && data !=16 && data != 17 ){
                     return  '<center><span class="badge badge-center rounded-pill bg-primary" data-bs-html="true" data-bs-custom-class="tooltip-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received - ' + outgoing_received +'"><i class="ti ti-check"></i></span></center>'
                   }
-                  else if (data >= 9 && data !=16){
+                  else if (data >= 9 && data !=16 && data != 17){
                     return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded - ' + outgoing_forwarded +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else{
@@ -521,13 +524,13 @@
                   var b_d_received = row.b_d_received; 
                   var b_d_forwarded = row.b_d_forwarded; 
                   
-                  if (status >= 9  && status < 10 && status !=16){
+                  if (status >= 9  && status < 10 && status !=16 && status != 17){
                     return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
                   }
-                  else if (status == 10 && status !=16 ){
+                  else if (status == 10 && status !=16 && status != 17){
                     return  '<center><span class="badge badge-center rounded-pill bg-primary" data-bs-html="true" data-bs-custom-class="tooltip-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received - ' + b_d_received +'"><i class="ti ti-check"></i></span></center>'
                   }
-                  else if (status >= 11 && status !=16){
+                  else if (status >= 11 && status !=16 && status != 17){
                     return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded - ' + b_d_forwarded +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else{
@@ -545,13 +548,13 @@
                   var j_d_received = row.j_d_received; 
                   var j_d_forwarded = row.j_d_forwarded; 
 
-                  if (status >= 11  && status < 12 && status !=16){
+                  if (status >= 11  && status < 12 && status !=16 && status != 17){
                     return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
                   }
-                  else if (status == 12 && status !=16){
+                  else if (status == 12 && status !=16 && status != 17){
                     return  '<center><span class="badge badge-center rounded-pill bg-primary" data-bs-html="true" data-bs-custom-class="tooltip-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received - ' + j_d_received +'"><i class="ti ti-check"></i></span></center>'
                   }
-                  else if (status >= 13 && status !=16){
+                  else if (status >= 13 && status !=16 && status != 17){
                     return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded - ' + j_d_forwarded +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else{
@@ -566,7 +569,7 @@
               render: function (data, type, row) {
                   var status = row.status; 
                   var journal_forwarded = row.j_d_forwarded; 
-                  if (status >= 13  && status <= 15 && status !=16){
+                  if (status >= 13  && status <= 15 && status !=16 && status != 17){
                     return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded - ' + journal_forwarded +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else{
@@ -583,13 +586,13 @@
                   var status = row.status; 
                   var approval_received = row.a_d_received; 
                   var approval_forwarded = row.a_d_forwarded; 
-                  if (status >= 13  && status < 14 && status !=16){
+                  if (status >= 13  && status < 14 && status !=16 && status != 17){
                     return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs- ="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="For Receive"><i class="ti ti-check"></i></span></center>'
                   }
-                  else if (status == 14 && status !=16 ){
+                  else if (status == 14 && status !=16 && status != 17 ){
                     return  '<center><span class="badge badge-center rounded-pill bg-primary" data-bs-html="true" data-bs-custom-class="tooltip-primary" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Received - ' + approval_received +'"><i class="ti ti-check"></i></span></center>'
                   }
-                  else if (status >= 15 && status !=16){
+                  else if (status >= 15 && status !=16 && status != 17){
                     return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Forwarded - ' + approval_forwarded +'"><i class="ti ti-check"></i></span></center>'
                   }
                   else{
@@ -607,7 +610,7 @@
                 if (data){
                   return '<center><span class="badge badge-center rounded-pill bg-success" data-bs-html="true" data-bs-custom-class="tooltip-success" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-success" title="Check Issued - ' + check_issued +'"><i class="ti ti-check"></i></span></center>'
                 }
-                else if (status == 15 && status !=16){
+                else if (status == 15 && status !=16 && status != 17){
                   return '<center><span class="badge badge-center rounded-pill bg-warning" data-bs-html="true" data-bs-custom-class="tooltip-warning" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-custom-class="tooltip-warning" title="For Receive"><i class="ti ti-check"></i></span></center>'
                 }
                 else{
@@ -1029,23 +1032,23 @@
                         $('.main-container').append(check_issued_status);
                       }
 
-                      if (l_status >=13 && l_status !=16){
+                      if (l_status >=13 && l_status !=16 && l_status !=17){
                         
                         $('.main-container').append(approval_status);
                         $('.main-container').append(certified_status);
                       }
-                      if (l_status >=11 && l_status !=16){
+                      if (l_status >=11 && l_status !=16 && l_status !=17){
                         $('.main-container').append(journal_status);
                       }
-                      if (l_status >=9 && l_status !=16 ){
+                      if (l_status >=9 && l_status !=16 && l_status !=17 ){
                         $('.main-container').append(obligate_status);
                       }
 
-                      if (l_status >=6 && l_status !=7 && l_status !=16 ){
+                      if (l_status >=6 && l_status !=7 && l_status !=16 && l_status !=17 ){
                         $('.main-container').append(outgoing_status);
                       }
 
-                      if (l_status >=4 && l_status !=7 && l_status !=16 ){
+                      if (l_status >=4 && l_status !=7 && l_status !=16 && l_status !=17 ){
                         $('.main-container').append(payroll_status);
                       }
                       data.data.forEach(function (item, index) {
@@ -1098,6 +1101,12 @@
                         else if (status ==16){
                           receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
                           review_statusColumn = `<td><span class="badge bg-label-warning">Pending</span></td>`;
+                          rv_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                          rv_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
+                        }
+                        else if (status ==17){
+                          receive_statusColumn = `<td><span class="badge bg-label-success">Forwarded</span></td>`;
+                          review_statusColumn = `<td><span class="badge bg-label-danger">Forfeited</span></td>`;
                           rv_date_forwarded = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                           rv_forwarded_by = `<td><span class="badge bg-label-primary">Not Applicable</span></td>`;
                         }

@@ -1,10 +1,10 @@
 .idea
 media
 __pycache__
-settings.py
 *.pyc
 venv
 CACHE
+tev/settings.py
 .env
 env
 # databases/
