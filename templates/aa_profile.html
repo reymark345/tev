@@ -33,7 +33,7 @@
               class="d-flex align-items-md-end align-items-sm-start align-items-center justify-content-md-between justify-content-start mx-4 flex-md-row flex-column gap-4"
             >
               <div class="user-profile-info">
-                <h4>{{ request.user.first_name }} {{ request.user.last_name }}</h4>
+                <h4>{{ first_name }} {{ last_name }}</h4>
                 <ul
                   class="list-inline mb-0 d-flex align-items-center flex-wrap justify-content-sm-start justify-content-center gap-2"
                 >
@@ -54,7 +54,7 @@
   <!--/ Navbar pills -->
 
   <!-- Navbar pills -->
-  <div class="row">
+  <!--<div class="row">
     <div class="col-md-12">
       <ul class="nav nav-pills flex-column flex-sm-row mb-4">
         <button type="submit" id="change-ps" class="btn btn-primary">
@@ -62,7 +62,7 @@
         </button>
       </ul>
     </div>
-  </div>
+  </div>-->
   <!--/ Navbar pills -->
 
   <!-- Alerts with Icons -->
@@ -74,7 +74,7 @@
           <small class="card-text text-uppercase">About</small>
           <ul class="list-unstyled mb-4 mt-3">
             <li class="d-flex align-items-center mb-3">
-              <i class="ti ti-user"></i><span class="fw-bold mx-2">Full Name:</span> <span>{{ request.user.first_name }} {{ request.user.last_name }}</span>
+              <i class="ti ti-user"></i><span class="fw-bold mx-2">Full Name:</span> <span>{{ first_name }} {{ last_name }}</span>
             </li>
             <li class="d-flex align-items-center mb-3">
               <i class="ti ti-file-description"></i><span class="fw-bold mx-2">Id Number:</span>
@@ -94,7 +94,28 @@
           <ul class="list-unstyled mb-4 mt-3">
             <li class="d-flex align-items-center mb-3">
               <i class="ti ti-mail"></i><span class="fw-bold mx-2">Email:</span>
-              <span>{{ request.user.email }} </span>
+              <span>{{ user.email }} </span>
+            </li>
+          </ul>
+          <small class="card-text text-uppercase">Multi Factor Authentication</small>
+          <ul class="list-unstyled mb-4 mt-3">
+            <li class="d-flex align-items-center mb-3">
+              <label class="switch switch-success mb-0">
+                <input type="checkbox" class="switch-input" id="mfa-toggle"
+                      {% if user.mfa_enabled %}checked{% endif %}
+                      onchange="document.getElementById('switch-label-mfa').textContent = this.checked ? 'Enabled' : 'Disabled';" />
+                <span class="switch-toggle-slider">
+                  <span class="switch-on">
+                    <i class="ti ti-check"></i>
+                  </span>
+                  <span class="switch-off">
+                    <i class="ti ti-x"></i>
+                  </span>
+                </span>
+                <span class="switch-label ms-2" id="switch-label-mfa">
+                  {% if user.mfa_enabled %}Enabled{% else %}Disabled{% endif %}
+                </span>
+              </label>
             </li>
           </ul>
         </div>
@@ -284,6 +305,22 @@
       ModalPassword.val('');
       ModalConfirmPassword.val('');
     }
+    $('#mfa-toggle').on('change', function () {
+        const isEnabled = $(this).is(':checked');
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'mfa-update' %}",
+            data: {
+                mfa_enabled: isEnabled,
+            },
+            success: function(response) {
+                toastr.success('MFA status updated.', 'Success', toast_options);
+            },
+            error: function(xhr) {
+                toastr.error('Failed to update MFA status.', 'Error', toast_options);
+            }
+        });
+    });
 
     });
   </script>

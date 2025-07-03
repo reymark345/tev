@@ -80,7 +80,7 @@
           <p class="text-muted">Filter data by filling the details below</p>
           </div>
           <form id="advanced-filter-list" class="row g-3" onsubmit="return false">
-              <div class="col-12 col-md-12">
+              {% comment %} <div class="col-12 col-md-12">
                   <label class="form-label" for="modalFEmployeeName">Employee Name</label>
                       <select id="f-employee-name" class="select2 form-select" name="FEmployeeName" multiple>
                           <option></option>
@@ -95,7 +95,7 @@
                   class="form-control"
                   placeholder="16-0000"
                   />
-              </div>
+              </div> {% endcomment %}
               <div class="col-12 col-md-6">
                   <label class="form-label" for="modalEditUserLastName">Transaction Code</label>
                   <input
@@ -107,10 +107,10 @@
                   />
               </div>
   
-              <div class="col-12 col-md-6">
+              {% comment %} <div class="col-12 col-md-6">
                   <label class="form-label" for="modalEditTaxID">Date Travel</label>
                   <input type="text" class="form-control" name="FDateTravel" placeholder="DD-MM-YYYY" id="dateField" autocomplete="off"/>
-              </div>
+              </div> {% endcomment %}
   
               <div class="col-12 col-md-6">
                   <label class="form-label">DV Number</label>
@@ -134,7 +134,7 @@
                 </div>
               </div>
 
-              <div class="col-12 col-md-6">
+              <div class="col-12 col-md-12">
                 <label class="form-label" for="modalFStatus">Status</label>
                 <select id="f-status" name="FStatus" class="form-select">
                     <option></option>
@@ -151,7 +151,7 @@
                 </select>
               </div>
 
-              <div class="col-12 col-md-6">
+              {% comment %} <div class="col-12 col-md-6">
                 <label class="form-label" for="modalDivision">Offices</label>
                 <select id="f-division" name="FDivision" class="form-select">
                     <option></option>
@@ -159,7 +159,7 @@
                       <option value="{{ row.name }}">{{ row.name }}</option>
                     {% endfor %}
                 </select>
-              </div>
+              </div> {% endcomment %}
                   <input
                   type="hidden"
                   id="f-first-name"
@@ -1349,7 +1349,6 @@
         NDVNumber.val('');
         FStatus.val('').trigger('change');
         FDivision.val('').trigger('change');
-        dateField.clear();
         FEmployeeName.val('').trigger('change');
         FStartDate.val('');
         FEndDate.val('');

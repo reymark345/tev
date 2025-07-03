@@ -445,12 +445,12 @@
                                     </a>
                                 </li> {% endcomment %}
                                 
-                                <li class="menu-item {% if url_name == 'sms' %}active{% endif %}">
+                                {% comment %} <li class="menu-item {% if url_name == 'sms' %}active{% endif %}">
                                     <a href="{% url 'sms' %}" class="menu-link">
                                         <i class="menu-icon tf-icons ti ti-lock"></i>
                                         <div data-i18n="SMS">SMS</div>
                                     </a>
-                                </li>
+                                </li> {% endcomment %}
 
                             </ul>
                         {% endif %}
@@ -520,7 +520,7 @@
                                                         </div>
                                                     </div>
                                                     <div class="flex-grow-1">
-                                                        <span class="fw-semibold d-block">{{ request.user.first_name }} {{ request.user.last_name }}</span>
+                                                        <span class="fw-semibold d-block">{{ first_name }} {{ last_name }}</span>
                                                         <small class="text-muted">{{ role_permission }}</small>
                                                     </div>
                                                 </div>

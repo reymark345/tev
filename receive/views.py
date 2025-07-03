@@ -35,6 +35,7 @@ from django.conf import settings
 import platform
 import re
 import urllib3
+from main.decorators import mfa_required
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -57,7 +58,7 @@ def generate_code():
 
 
 
-@login_required(login_url='login')
+@mfa_required
 def list(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     user_id = request.session.get('user_id', 0)
@@ -87,9 +88,9 @@ def list(request):
         }
         return render(request, 'receive/receive.html' , context)
     else:
-        return render(request, 'pages/unauthorized.html')
+        return redirect('login')
     
-@login_required(login_url='login')
+@mfa_required
 def travel_list(request):
     
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
@@ -120,7 +121,8 @@ def travel_list(request):
         return render(request, 'receive/travel_user.html' , context)
     else:
         return render(request, 'pages/unauthorized.html')
-    
+
+@mfa_required  
 @csrf_exempt
 def api(request):
     url = settings.PORTAL_API_URL
@@ -145,7 +147,7 @@ def api(request):
 #     response = requests.get(url, headers=headers)
 #     data = response.json()
 #     return JsonResponse({'data': data})
-
+@mfa_required
 @csrf_exempt
 def psgc_api(request):
     province_url = settings.PSGC_PROVINCE_URL
@@ -221,7 +223,7 @@ def psgc_api(request):
     except requests.exceptions.RequestException as e:
         return JsonResponse({"error": str(e)}, status=500)
     
-@login_required(login_url='login')
+@mfa_required
 def checking(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     user_id = request.session.get('user_id', 0)
@@ -271,13 +273,13 @@ def checking(request):
         return render(request, 'pages/unauthorized.html')
     
     
-@login_required(login_url='login')
+@mfa_required
 @csrf_exempt
 def search_list(request):
     allowed_roles = ["Admin", "Incoming staff", "Validating staff"] 
     return JsonResponse({'data': "success"})
 
-
+@mfa_required
 def item_load(request):
     _search = request.GET.get('search[value]', '').strip()
     FAdvancedFilter = request.GET.get('FAdvancedFilter')
@@ -386,6 +388,7 @@ def item_load(request):
     }
     return JsonResponse(response)
 
+@mfa_required
 def travel_loadss(request):    
     data = []
     user_data = TransactionLogs.objects.all().order_by('-id')
@@ -424,7 +427,7 @@ def travel_loadss(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 def travel_load(request):
     user_id = request.session.get('user_id', 0)
     results = TravelList.objects.all().order_by('-id')
@@ -474,7 +477,7 @@ def travel_load(request):
     }
     return JsonResponse(response)
 
-
+@mfa_required
 def checking_load(request):
     _search = request.GET.get('search[value]')
     FIdNumber= request.GET.get('FIdNumber')
@@ -685,7 +688,7 @@ def checking_load(request):
     return JsonResponse(response)
 
 
-
+@mfa_required
 def read_excel_file(excel_file):
     workbook = load_workbook(excel_file, data_only=True)
     worksheet = workbook.active
@@ -721,6 +724,7 @@ def read_excel_file(excel_file):
     else:
         return excel_data
 
+@mfa_required
 @csrf_exempt
 def upload_tev(request):
     user_id = request.session.get('user_id', 0)
@@ -881,13 +885,15 @@ def upload_tev(request):
 
     else:
         return JsonResponse({'data': 'error'})
-
+    
+@mfa_required
 def item_edit(request):
     id = request.GET.get('id')
     items = TevIncoming.objects.get(pk=id)
     data = serialize("json", [items])
     return HttpResponse(data, content_type="application/json")
 
+@mfa_required
 def preview_received(request):
 
     id = request.GET.get('id')
@@ -948,7 +954,8 @@ def preview_received(request):
         return JsonResponse(data)
     else:
         return JsonResponse({'error': 'No data found for the given ID'}, status=404)
-
+    
+@mfa_required
 @csrf_exempt
 def item_update(request):
     id = request.POST.get('ItemID')
@@ -1004,8 +1011,6 @@ def item_update(request):
         if expired_dates:
             print("Expired dates found:", expired_dates)
             return JsonResponse({'data': 'expired', 'message': ', '.join(expired_dates)})
-        else:
-            print("All dates are not expired")
 
     duplicate_travel = []
     individual_dates = travel_date.split(',')
@@ -1060,7 +1065,7 @@ def item_update(request):
             remarks_lib.save()
         return JsonResponse({'data': 'success'})
     
-
+@mfa_required
 @csrf_exempt
 def item_rod_update(request):
 
@@ -1109,7 +1114,8 @@ def item_rod_update(request):
     else:
         TevIncoming.objects.filter(id=id).update(first_name=name,middle_name = middle,last_name = lname, id_no = id_no, account_no = acc_no,date_travel = travel_date, incoming_in = date_received, remarks = None, division = div, section = sec, original_amount = orig_amnt)
         return JsonResponse({'data': 'success'})
-
+    
+@mfa_required
 @csrf_exempt
 def item_returned(request):
     id = request.POST.get('ItemID')
@@ -1137,7 +1143,7 @@ def item_returned(request):
     return JsonResponse({'data': 'success'})
 
 
-
+@mfa_required
 @csrf_exempt
 def item_add(request):
     amount = request.POST.get('OriginalAmount')
@@ -1192,8 +1198,6 @@ def item_add(request):
         if expired_dates:
             print("Expired dates found:", expired_dates)
             return JsonResponse({'data': 'expired', 'message': ', '.join(expired_dates)})
-        else:
-            print("All dates are not expired")
 
 
 
@@ -1325,7 +1329,8 @@ def item_add(request):
             system_config.save()
 
         return JsonResponse({'data': 'success', 'g_code': g_code})
-
+    
+@mfa_required
 @csrf_exempt
 def out_pending_tev(request):
     user_id = request.session.get('user_id', 0) 
@@ -1334,7 +1339,7 @@ def out_pending_tev(request):
         tev_update = TevIncoming.objects.filter(id=item_id).update(status=2,incoming_out=date_time.datetime.now(), forwarded_by = user_id)
     return JsonResponse({'data': 'success'})
 
-
+@mfa_required
 @csrf_exempt
 def add_existing_record(request):
     out_list = request.POST.getlist('out_list[]')
@@ -1344,7 +1349,7 @@ def add_existing_record(request):
     
     return JsonResponse({'data': 'success'})
 
-
+@mfa_required
 def send_notification(message, contact_number):
     url = 'https://wiserv.dswd.gov.ph/soap/?wsdl'
     try:
@@ -1365,7 +1370,7 @@ def convert_date_string(date_str):
     return ', '.join(formatted_dates)
 
 
-
+@mfa_required
 @csrf_exempt
 def out_checking_tev(request):
 
@@ -1420,12 +1425,11 @@ def out_checking_tev(request):
 
                 message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
                 send_notification(message, contact_no)
-                trips_data.status_id = 4
 
-            elif trips_data.status_id == 17 and "FORFEITED" in w_remarks_data: #forfeited
+            elif trips_data.status_id == 17 : #forfeited
                 message = "Good day, {}!\n\nYour TE claim for the period of {} has been forfeited due to late submission.\n\n- The DSWD Caraga TRIPS Team.".format(trips_data.first_name.title(), formatted_dates)
                 send_notification(message, contact_no)
-                trips_data.status_id = 4
+                trips_data.status_id = 3
 
             else:
                 trips_data.status_id = 4  # for payroll
@@ -1437,6 +1441,7 @@ def out_checking_tev(request):
 
     return JsonResponse({'data': 'success'})
 
+@mfa_required
 @csrf_exempt
 def tev_details(request):
     
@@ -1448,7 +1453,7 @@ def tev_details(request):
     }
     return JsonResponse(data)
 
-
+@mfa_required
 def review_details(request):
     tev_id = request.POST.get('tev_id')
     with connection.cursor() as cursor:
@@ -1507,7 +1512,7 @@ def review_details(request):
         return JsonResponse({'error': 'No data found for the given ID'}, status=404)
 
 
-
+@mfa_required
 @csrf_exempt
 def tevemployee(request):
     tev_id = request.POST.get('tev_id')
@@ -1517,7 +1522,8 @@ def tevemployee(request):
         return JsonResponse({'data': data})
     else:
         return JsonResponse({'data': None})
-
+    
+@mfa_required
 @csrf_exempt
 def addtev(request):
     
@@ -1529,7 +1535,7 @@ def addtev(request):
     tev_add.save()
     return JsonResponse({'data': 'success'})
 
-
+@mfa_required
 @csrf_exempt
 def updatetevdetails(request):
     user_id = request.session.get('user_id', 0)
@@ -1552,6 +1558,7 @@ def updatetevdetails(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
+@mfa_required    
 @csrf_exempt
 def updatetevamount(request):
     user_id = request.session.get('user_id', 0)
@@ -1573,7 +1580,7 @@ def updatetevamount(request):
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
     
-
+@mfa_required
 @csrf_exempt
 def delete_entry(request):
     item_id = request.POST.get('item_id')
@@ -1623,7 +1630,8 @@ def delete_entry(request):
         print("Exception occurred:", str(e))
         transaction.rollback()
         return JsonResponse({'error': str(e)}, status=500)
-    
+
+@mfa_required    
 @csrf_exempt
 def addtevdetails(request):
     return JsonResponse({'data': 'success'})
